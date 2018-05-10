@@ -102,7 +102,6 @@ private:
 
 };
 
-std::ostream& operator<<(std::ostream &os, const Item* item);
-std::ostream& operator<<(std::ostream &os, const Alternative* alt);
+std::ostream& operator<<(std::ostream &os, const Alternative& alt);
 std::ostream& operator<<(std::ostream &os, const Instance& instance);
 

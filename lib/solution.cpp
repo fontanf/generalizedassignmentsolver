@@ -61,6 +61,16 @@ void Solution::set(ItemIdx j, AgentIdx i)
     x_[j] = i;
 }
 
+bool Solution::feasible() const
+{
+    if (k_ != instance().item_number())
+        return false;
+    for (AgentIdx i=0; i<instance().agent_number(); ++i)
+        if (remaining_capacity(i) < 0)
+            return false;
+    return true;
+}
+
 void Solution::clear()
 {
     k_     = 0;

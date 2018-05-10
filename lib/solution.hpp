@@ -18,6 +18,7 @@ public:
     inline Weight remaining_capacity(AgentIdx i) const { return instance().capacity(i) - weight(i); }
     inline Profit profit()              const { return p_; }
     inline ItemIdx item_number()        const { return k_; }
+    bool feasible() const;
 
     const std::vector<AgentIdx>& data()  const { return x_; }
     const std::vector<Weight>& weights() const { return w_; }
