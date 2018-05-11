@@ -16,7 +16,7 @@
 #include <boost/filesystem/fstream.hpp>
 #include <boost/program_options.hpp>
 
-#include "external/benchtools/info.hpp"
+#include "info.hpp"
 
 typedef int_fast64_t Profit;
 typedef int_fast64_t Weight;
@@ -82,6 +82,10 @@ public:
     Profit t() const { return t_ * item_number(); }
 
     Profit check(boost::filesystem::path cert_file);
+
+    std::string print_lb(Profit lb) const;
+    std::string print_ub(Profit ub) const;
+    std::string print_opt(Profit opt) const;
 
 private:
 

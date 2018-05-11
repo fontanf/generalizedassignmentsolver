@@ -1,5 +1,4 @@
-#include "subinstance.hpp"
-#include "solution.hpp"
+#include "gap/lib/subinstance.hpp"
 
 SubInstance::SubInstance(const Instance& ins): instance_(ins)
 {
@@ -103,3 +102,4 @@ std::ostream& operator<<(std::ostream& os, const SubInstance& sub)
     }
     return os;
 }
+

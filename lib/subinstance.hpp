@@ -1,7 +1,7 @@
 #pragma once
 
-#include "instance.hpp"
-#include "solution.hpp"
+#include "gap/lib/instance.hpp"
+#include "gap/lib/solution.hpp"
 
 class SubInstance
 {

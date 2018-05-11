@@ -3,36 +3,24 @@ cc_library(
         hdrs = [
                 "instance.hpp",
                 "solution.hpp",
+                "subinstance.hpp",
         ],
-        srcs = ["instance.cpp", "solution.cpp"],
+        srcs = [
+                "instance.cpp",
+                "solution.cpp",
+                "subinstance.cpp",
+        ],
+        deps = [
+                "@benchtools//:info",
+        ],
         visibility = ["//visibility:public"],
-        deps = [],
+        include_prefix = "gap/lib/",
 )
 
 cc_library(
         name = "hpp",
-        hdrs = ["instance.hpp", "solution.hpp"],
+        hdrs = ["instance.hpp", "solution.hpp", "subinstance.hpp"],
         visibility = ["//visibility:public"],
-)
-
-cc_test(
-        name = "test",
-        srcs = ["test.cpp"],
-        deps = [
-                ":cpp",
-                "//lb_greedy:libgreedy",
-                "@googletest//:gtest_main",
-        ],
-        data = [
-                "@KnapsackPisingerInstances//:data",
-        ],
-        linkopts = [
-                "-lboost_system",
-                "-lboost_filesystem",
-                "-lboost_program_options",
-                "-lboost_regex",
-        ],
-        timeout = "long",
 )
 
 cc_library(

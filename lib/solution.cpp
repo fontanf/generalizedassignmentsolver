@@ -1,4 +1,4 @@
-#include "solution.hpp"
+#include "gap/lib/solution.hpp"
 
 Solution::Solution(const Instance& instance): instance_(instance),
     x_(std::vector<AgentIdx>(instance.item_number(), -1)),

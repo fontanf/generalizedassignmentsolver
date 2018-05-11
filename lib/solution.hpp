@@ -1,6 +1,6 @@
 #pragma once
 
-#include "instance.hpp"
+#include "gap/lib/instance.hpp"
 
 class Solution
 {

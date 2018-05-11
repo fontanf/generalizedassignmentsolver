@@ -1,6 +1,6 @@
-#include "instance.hpp"
+#include "gap/lib/instance.hpp"
 
-#include "solution.hpp"
+#include "gap/lib/solution.hpp"
 
 Instance::Instance(const std::vector<Item>& items, const std::vector<Weight>& c):
     name_(""), format_(""), items_(items), c_(c) { }
@@ -163,5 +163,28 @@ std::ostream& operator<<(std::ostream& os, const Instance& ins)
         os << std::endl;
     }
     return os;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+std::string Instance::print_lb(Profit lb) const
+{
+    return (optimal_solution() == NULL)?
+        "LB " + std::to_string(lb):
+        "LB " + std::to_string(lb) + " GAP " + std::to_string(optimum() - lb);
+}
+
+std::string Instance::print_ub(Profit ub) const
+{
+    return (optimal_solution() == NULL)?
+        "UB " + std::to_string(ub):
+        "UB " + std::to_string(ub) + " GAP " + std::to_string(ub - optimum());
+}
+
+std::string Instance::print_opt(Profit opt) const
+{
+    return (optimal_solution() != NULL && optimum() != opt)?
+        "OPT " + std::to_string(opt) + " ERROR!":
+        "OPT " + std::to_string(opt);
 }
 
