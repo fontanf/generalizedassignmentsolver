@@ -2,6 +2,9 @@
 
 #include "gap/lib/instance.hpp"
 
+namespace gap
+{
+
 class Solution
 {
 
@@ -48,3 +51,4 @@ private:
 
 std::ostream& operator<<(std::ostream& os, const Solution& solution);
 
+}

@@ -18,6 +18,9 @@
 
 #include "info.hpp"
 
+namespace gap
+{
+
 typedef int_fast64_t Profit;
 typedef int_fast64_t Weight;
 typedef int_fast64_t ItemIdx;
@@ -109,3 +112,4 @@ private:
 std::ostream& operator<<(std::ostream &os, const Alternative& alt);
 std::ostream& operator<<(std::ostream &os, const Instance& instance);
 
+}

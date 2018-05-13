@@ -2,6 +2,8 @@
 
 #include "gap/lib/solution.hpp"
 
+using namespace gap;
+
 Instance::Instance(const std::vector<Item>& items, const std::vector<Weight>& c):
     name_(""), format_(""), items_(items), c_(c) { }
 
@@ -148,7 +150,7 @@ std::ostream& operator<<(std::ostream& os, const Alternative& alt)
     return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const Instance& ins)
+std::ostream& gap::operator<<(std::ostream& os, const Instance& ins)
 {
     os <<  "N " << ins.item_number();
     os << " C";

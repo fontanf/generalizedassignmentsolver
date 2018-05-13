@@ -10,31 +10,35 @@ cc_library(
                 "solution.cpp",
                 "subinstance.cpp",
         ],
-        deps = [
-                "@benchtools//:info",
-        ],
+        deps = ["@benchtools//:info"],
         visibility = ["//visibility:public"],
         include_prefix = "gap/lib/",
 )
 
 cc_library(
         name = "hpp",
-        hdrs = ["instance.hpp", "solution.hpp", "subinstance.hpp"],
+        hdrs = [
+                "instance.hpp",
+                "solution.hpp",
+                "subinstance.hpp",
+        ],
         visibility = ["//visibility:public"],
+        include_prefix = "gap/lib/",
 )
 
 cc_library(
         name = "tester",
         hdrs = ["tester.hpp"],
         srcs = ["tester.cpp"],
-        visibility = ["//visibility:public"],
-        linkopts = [
-                "-lboost_system",
-                "-lboost_filesystem",
-        ],
         deps = [
                 ":cpp", 
                 "@googletest//:gtest_main",
         ],
+        linkopts = [
+                "-lboost_system",
+                "-lboost_filesystem",
+        ],
+        visibility = ["//visibility:public"],
+        include_prefix = "gap/lib/",
 )
 

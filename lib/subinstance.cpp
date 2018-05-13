@@ -1,5 +1,7 @@
 #include "gap/lib/subinstance.hpp"
 
+using namespace gap;
+
 SubInstance::SubInstance(const Instance& ins): instance_(ins)
 {
     reduced_solution_ = new Solution(ins);
@@ -83,7 +85,7 @@ bool SubInstance::check_sol(const Solution& sol) const
     return true;
 }
 
-std::ostream& operator<<(std::ostream& os, const SubInstance& sub)
+std::ostream& gap::operator<<(std::ostream& os, const SubInstance& sub)
 {
     const Instance& ins = sub.instance();
     os <<  "N " << ins.item_number();
