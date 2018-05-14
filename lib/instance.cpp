@@ -42,6 +42,7 @@ void Instance::read_beasley(boost::filesystem::path filepath)
     boost::filesystem::fstream file(filepath, std::ios_base::in);
     ItemIdx n;
     AgentIdx m;
+    objective_ = -1;
     file >> m >> n;
 
     AltIdx alt_idx = 0;
@@ -144,7 +145,7 @@ Profit Instance::optimum() const
     return optimal_solution()->profit();
 }
 
-std::ostream& operator<<(std::ostream& os, const Alternative& alt)
+std::ostream& gap::operator<<(std::ostream& os, const Alternative& alt)
 {
     os << "(" << alt.i << " " << alt.w << " " << alt.p << " " << alt.efficiency() << ")";
     return os;
