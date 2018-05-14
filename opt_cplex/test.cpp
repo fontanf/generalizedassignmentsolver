@@ -2,10 +2,7 @@
 
 TEST(Cplex, DataTests)
 {
-    boost::filesystem::path p = boost::filesystem::current_path();
-    p /= boost::filesystem::path("opt_cplex");
-    p /= boost::filesystem::path("main");
-
-    test(p.string(), "sopt");
+    auto p = boost::filesystem::current_path() / "opt_cplex" / "main";
+    gap::test(p.string(), "sopt");
 }
 
