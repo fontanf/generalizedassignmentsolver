@@ -11,6 +11,11 @@ cc_library(
                 "subinstance.cpp",
         ],
         deps = ["@benchtools//:info"],
+        linkopts = [
+                "-lboost_system",
+                "-lboost_filesystem",
+                "-lboost_program_options",
+        ],
         visibility = ["//visibility:public"],
         include_prefix = "gap/lib/",
 )
@@ -33,10 +38,6 @@ cc_library(
         deps = [
                 ":cpp", 
                 "@googletest//:gtest_main",
-        ],
-        linkopts = [
-                "-lboost_system",
-                "-lboost_filesystem",
         ],
         visibility = ["//visibility:public"],
         include_prefix = "gap/lib/",

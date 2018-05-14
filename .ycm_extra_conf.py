@@ -96,6 +96,8 @@ def FlagsForFile( filename, **kwargs ):
     '-I', './bazel-gap/external/benchtools/',
     '-I', './bazel-gap/external/knapsack/',
     '-isystem', '/opt/gurobi701/linux64/include/',
+    '-isystem', '/opt/ibm/ILOG/CPLEX_Studio126/cplex/include/',
+    '-isystem', '/opt/ibm/ILOG/CPLEX_Studio126/concert/include/',
     '-isystem', '../BoostParts',
     '-isystem', '/System/Library/Frameworks/Python.framework/Headers',
     '-isystem', '../llvm/include',
