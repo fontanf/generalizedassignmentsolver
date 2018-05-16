@@ -5,12 +5,16 @@ using namespace gap;
 SubInstance::SubInstance(const Instance& ins): instance_(ins)
 {
     reduced_solution_ = new Solution(ins);
+    alternatives_ = std::vector<int>(ins.alternative_number(), 0);
+    alternative_number_ = std::vector<ItemIdx>(ins.agent_number(), 0);
 }
 
 SubInstance& SubInstance::operator=(const SubInstance sub)
 {
     if (this != &sub) {
-        *reduced_solution_ = *sub.reduced_solution_;
+        *reduced_solution_  = *sub.reduced_solution_;
+        alternatives_       = sub.alternatives_;
+        alternative_number_ = sub.alternative_number_;
     }
     return *this;
 }
@@ -20,70 +24,20 @@ SubInstance::~SubInstance()
     delete reduced_solution();
 }
 
+void SubInstance::set(ItemIdx j, AgentIdx i)
+{
+    reduced_solution_->set(j, i);
+    const Item& it = instance().item(j);
+    for (AltIdx k: it.alt)
+        alternatives_[k] = -1;
+}
+
+void SubInstance::remove(AltIdx k)
+{
+    alternatives_[k] = -1;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
-
-bool SubInstance::check_opt(Profit v) const
-{
-    if (instance().optimal_solution() != NULL
-            && !sol_red_opt_
-            && v != instance().optimum()) {
-        std::cout << "V " << v << " != OPT " << instance().optimum() << std::endl;
-        return false;
-    }
-    return true;
-}
-
-bool SubInstance::check_sopt(const Solution& sol) const
-{
-    if (!sol.feasible()) {
-        std::cout << "NOT FEASIBLE" << std::endl;
-        return false;
-    }
-    if (instance().optimal_solution() != NULL
-                && !sol_red_opt_
-                && sol.profit() != instance().optimum()) {
-        std::cout << "V " << sol.profit() << " != OPT " << instance().optimum() << std::endl;
-        return false;
-    }
-    return true;
-}
-
-bool SubInstance::check_ub(Profit p) const
-{
-    if (instance().optimal_solution() != NULL
-            && !sol_red_opt_
-            && p < instance().optimum()) {
-        std::cout << "U " << p << " < OPT " << instance().optimum() << std::endl;
-        return false;
-    }
-    return true;
-}
-
-bool SubInstance::check_lb(Profit v) const
-{
-    if (instance().optimal_solution() != NULL
-            && !sol_red_opt_
-            && v > instance().optimum()) {
-        std::cout << "V " << v << " > OPT " << instance().optimum() << std::endl;
-        return false;
-    }
-    return true;
-}
-
-bool SubInstance::check_sol(const Solution& sol) const
-{
-    if (!sol.feasible()) {
-        std::cout << "NOT FEASIBLE" << std::endl;
-        return false;
-    }
-    if (instance().optimal_solution() != NULL
-            && !sol_red_opt_
-            && sol.profit() > instance().optimum()) {
-        std::cout << "V " << sol.profit() << " > OPT " << instance().optimum() << std::endl;
-        return false;
-    }
-    return true;
-}
 
 std::ostream& gap::operator<<(std::ostream& os, const SubInstance& sub)
 {

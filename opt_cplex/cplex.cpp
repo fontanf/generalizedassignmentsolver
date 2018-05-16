@@ -9,8 +9,6 @@ typedef IloArray<IloNumArray>    NumMatrix;
 
 using namespace gap;
 
-#define INDEX(j,i) (j)*(ins.agent_number()) + (i)
-
 Solution gap::sopt_cplex(const Instance& ins, Info* info)
 {
     (void)info;
