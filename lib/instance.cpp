@@ -4,8 +4,48 @@
 
 using namespace gap;
 
-Instance::Instance(const std::vector<Item>& items, const std::vector<Weight>& c):
-    name_(""), format_(""), items_(items), c_(c) { }
+Instance::Instance(ItemIdx n, AgentIdx m, int obj)
+{
+    items_.reserve(n);
+    c_.resize(m);
+    assert(obj == 1 || obj == -1);
+    objective_ = obj;
+}
+
+ItemIdx Instance::add_item(Label l)
+{
+    ItemIdx j = items_.size();
+    AltIdx k = alternatives_.size();
+    items_.push_back(Item(j, l));
+    for (AgentIdx i=0; i<agent_number(); ++i) {
+        alternatives_.push_back(Alternative(k, j, i));
+        items_[j].alt.push_back(k);
+        k++;
+    }
+    return j;
+}
+
+void Instance::add_items(ItemIdx n)
+{
+    for (ItemPos j=0; j<n; ++j)
+        add_item();
+}
+
+void Instance::set_alternative(ItemIdx j, AgentIdx i, Weight w, Profit p)
+{
+    alternatives_[items_[j].alt[i]].w = w;
+    alternatives_[items_[j].alt[i]].p = p;
+}
+
+void Instance::set_weight(ItemIdx j, AgentIdx i, Weight w)
+{
+    alternatives_[items_[j].alt[i]].w = w;
+}
+
+void Instance::set_profit(ItemIdx j, AgentIdx i, Profit p)
+{
+    alternatives_[items_[j].alt[i]].p = p;
+}
 
 Instance::Instance(boost::filesystem::path filepath)
 {
@@ -45,16 +85,8 @@ void Instance::read_beasley(boost::filesystem::path filepath)
     objective_ = -1;
     file >> m >> n;
 
-    AltIdx alt_idx = 0;
-    for (ItemPos j=0; j<n; ++j) {
-        items_.push_back(Item(j));
-        for (AgentIdx i=0; i<m; ++i) {
-            alternatives_.push_back(Alternative(alt_idx, j, i));
-            items_.back().alt.push_back(alt_idx);
-            alt_idx++;
-        }
-    }
-
+    items_.reserve(n);
+    add_items(n);
     for (AgentIdx i=0; i<m; ++i)
         for (ItemPos j=0; j<n; ++j)
             file >> alternatives_[items_[j].alt[i]].p;
@@ -76,20 +108,12 @@ void Instance::read_standard(boost::filesystem::path filepath)
     AgentIdx m;
     file >> objective_ >> m >> n;
 
-    AltIdx alt_idx = 0;
-    for (ItemPos j=0; j<n; ++j) {
-        items_.push_back(Item(j));
-        for (AgentIdx i=0; i<m; ++i) {
-            alternatives_.push_back(Alternative(alt_idx, j, i));
-            items_.back().alt.push_back(alt_idx);
-            alt_idx++;
-        }
-    }
-
     c_.resize(m);
     for (AgentIdx i=0; i<m; ++i)
         file >> c_[i];
 
+    items_.reserve(n);
+    add_items(n);
     for (ItemPos j=0; j<n; ++j)
         for (AgentIdx i=0; i<m; ++i)
             file >> alternatives_[items_[j].alt[i]].w >> alternatives_[items_[j].alt[i]].p;

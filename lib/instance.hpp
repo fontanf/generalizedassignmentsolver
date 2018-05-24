@@ -30,10 +30,9 @@ typedef int_fast64_t AgentPos;
 typedef int_fast64_t AltIdx;
 typedef int_fast64_t AltPos;
 typedef int_fast64_t StateIdx;
+typedef int_fast64_t Label;
 
 class Solution;
-
-struct Item;
 
 struct Alternative
 {
@@ -49,6 +48,7 @@ struct Alternative
 struct Item
 {
     Item(ItemIdx j): j(j) {  }
+    Item(ItemIdx j, Label l): j(j), l(l) {  }
     Item(const Item& item) {
         j   = item.j;
         alt = item.alt;
@@ -56,6 +56,7 @@ struct Item
 
     ItemIdx j;
     std::vector<AltIdx> alt;
+    Label l = -1;
 };
 
 class Instance
@@ -63,7 +64,16 @@ class Instance
 
 public:
 
-    Instance(const std::vector<Item>& items, const std::vector<Weight>& c);
+    Instance(ItemIdx n, AgentIdx m, int obj);
+
+    void add_items(ItemIdx n);
+    ItemIdx add_item(Label l);
+    ItemIdx add_item() { return add_item(-1); }
+    void set_alternative(ItemIdx j, AgentIdx i, Weight w, Profit p);
+    void set_weight(ItemIdx j, AgentIdx i, Weight w);
+    void set_profit(ItemIdx j, AgentIdx i, Profit p);
+    void set_capacity(AgentIdx i, Weight c) { c_[i] = c; }
+
     Instance(boost::filesystem::path filename);
     ~Instance() { };
 

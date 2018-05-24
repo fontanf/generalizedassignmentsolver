@@ -51,7 +51,7 @@ std::ostream& gap::operator<<(std::ostream& os, const SubInstance& sub)
     for (ItemPos j=0; j<ins.item_number(); ++j) {
         os << j << ":" << std::flush;
         for (AltIdx k: ins.item(j).alt)
-            os << "; " << ins.alternative(k);
+            os << " " << ins.alternative(k);
         if (ins.optimal_solution() != NULL)
             os << " O " << ins.optimal_solution()->agent(j);
         os << std::endl;
