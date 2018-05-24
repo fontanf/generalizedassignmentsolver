@@ -23,3 +23,17 @@ cc_binary(
         ],
 )
 
+cc_test(
+        name = "test",
+        srcs = ["test.cpp"],
+        deps = [
+                "//lib:tester",
+                ":liblagrangian",
+                "//opt_cplex:libcplex",
+        ],
+        data = [
+                ":main",
+                "//data_tests:data",
+        ],
+        timeout = "moderate",
+)
