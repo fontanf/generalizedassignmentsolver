@@ -36,9 +36,19 @@ cc_library(
         hdrs = ["tester.hpp"],
         srcs = ["tester.cpp"],
         deps = [
-                ":cpp", 
+                ":cpp",
+                ":libgenerator",
                 "@googletest//:gtest_main",
         ],
+        visibility = ["//visibility:public"],
+        include_prefix = "gap/lib/",
+)
+
+cc_library(
+        name = "libgenerator",
+        hdrs = ["generator.hpp"],
+        srcs = ["generator.cpp"],
+        deps = ["//lib:cpp"],
         visibility = ["//visibility:public"],
         include_prefix = "gap/lib/",
 )
