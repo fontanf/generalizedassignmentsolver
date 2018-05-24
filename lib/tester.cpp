@@ -2,6 +2,7 @@
 
 #include "gap/lib/instance.hpp"
 #include "gap/lib/solution.hpp"
+#include "gap/lib/generator.hpp"
 
 #include <thread>
 
@@ -87,3 +88,41 @@ void gap::test(std::string exec, std::string test)
         }
     }
 }
+
+void gap::test_gen(
+        std::vector<std::string> types,
+        std::vector<AgentIdx> ms,
+        std::vector<ItemIdx> ns,
+        std::vector<int> seeds,
+        int obj,
+        std::vector<Profit (*)(Instance&)> fs,
+        int test)
+{
+    for (std::string type: types) {
+        for (AgentIdx m: ms) {
+            for (ItemIdx n: ns) {
+                for (int h: seeds) {
+                    std::cout << type << " " << m << " " << n << " " << h << " -" << std::flush;
+                    Instance ins = generate(type, m, n, obj, h);
+                    Profit opt = -1;
+                    for (auto f: fs) {
+                        Instance ins_tmp = ins;
+                        Profit val = f(ins_tmp);
+                        std::cout << " " << val << std::flush;
+                        if (opt == -1)
+                            opt = val;
+                        if (test == 0) {
+                            EXPECT_EQ(val, opt);
+                        } else if (test == 1) {
+                            EXPECT_GE(val, opt);
+                        } else if (test == -1) {
+                            EXPECT_LE(val, opt);
+                        }
+                    }
+                    std::cout << std::endl;
+                }
+            }
+        }
+    }
+}
+
