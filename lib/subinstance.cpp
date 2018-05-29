@@ -6,15 +6,26 @@ SubInstance::SubInstance(const Instance& ins): instance_(ins)
 {
     reduced_solution_ = new Solution(ins);
     alternatives_ = std::vector<int>(ins.alternative_number(), 0);
-    alternative_number_ = std::vector<ItemIdx>(ins.agent_number(), 0);
+    agent_alternative_number_ = std::vector<ItemIdx>(ins.agent_number(), ins.item_number());
+    item_alternative_number_ = std::vector<ItemIdx>(ins.item_number(), ins.agent_number());
+}
+
+SubInstance::SubInstance(const SubInstance& sub): instance_(sub.instance_)
+{
+    reduced_solution_ = new Solution(sub.instance());
+    *reduced_solution_ = *sub.reduced_solution_;
+    alternatives_ = sub.alternatives_;
+    agent_alternative_number_ = sub.agent_alternative_number_;
+    item_alternative_number_ = sub.item_alternative_number_;
 }
 
 SubInstance& SubInstance::operator=(const SubInstance sub)
 {
     if (this != &sub) {
-        *reduced_solution_  = *sub.reduced_solution_;
-        alternatives_       = sub.alternatives_;
-        alternative_number_ = sub.alternative_number_;
+        *reduced_solution_ = *sub.reduced_solution_;
+        alternatives_ = sub.alternatives_;
+        agent_alternative_number_ = sub.agent_alternative_number_;
+        item_alternative_number_ = sub.item_alternative_number_;
     }
     return *this;
 }
@@ -24,18 +35,27 @@ SubInstance::~SubInstance()
     delete reduced_solution();
 }
 
+//#define DBG(x)
+#define DBG(x) x
+
 void SubInstance::set(ItemIdx j, AgentIdx i)
 {
+    DBG(std::cout << "SET " << j << " " << i << std::endl;)
     reduced_solution_->set(j, i);
-    const Item& it = instance().item(j);
-    for (AltIdx k: it.alt)
-        alternatives_[k] = -1;
+    for (AgentIdx i=0; i<instance().agent_number(); ++i)
+        remove(j, i);
 }
 
-void SubInstance::remove(AltIdx k)
+void SubInstance::remove(ItemIdx j, AgentIdx i)
 {
+    DBG(std::cout << "REMOVE " << j << " " << i << std::endl;)
+    AltIdx k = instance().alternative_index(j, i);
     alternatives_[k] = -1;
+    agent_alternative_number_[i]--;
+    item_alternative_number_[j]--;
 }
+
+#undef DBG
 
 ////////////////////////////////////////////////////////////////////////////////
 

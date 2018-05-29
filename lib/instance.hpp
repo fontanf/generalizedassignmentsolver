@@ -82,6 +82,7 @@ public:
 
     const Item& item(ItemPos j) const { return items_[j]; }
     const Alternative& alternative(AltPos k) const { return alternatives_[k]; } 
+    AltIdx alternative_index(ItemIdx j, AgentIdx i) const { return items_[j].alt[i]; } 
     const Alternative& alternative(ItemIdx j, AgentIdx i) const { return alternatives_[items_[j].alt[i]]; } 
 
     ItemPos item_number()       const { return items_.size(); }
