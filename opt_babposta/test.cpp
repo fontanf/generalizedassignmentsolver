@@ -69,3 +69,15 @@ TEST(LR, DataPisingerSmall3)
         1,
         {tested_functions()});
 }
+
+TEST(LR, DataPisingerMedium)
+{
+    test_gen(
+        {"c", "d"},
+        {5, 10},
+        {20, 30},
+        {0},
+        1,
+        {tested_functions()});
+}
+
