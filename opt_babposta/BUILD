@@ -19,11 +19,15 @@ cc_binary(
 cc_test(
         name = "test",
         srcs = ["test.cpp"],
-        deps = ["//lib:tester"],
+        deps = [
+                "//lib:tester",
+                ":libbabposta",
+                "//opt_cplex:libcplex",
+        ],
         data = [
                 ":main",
                 "//data_tests:data",
         ],
-        timeout = "short",
+        timeout = "moderate",
 )
 

@@ -36,6 +36,9 @@ public:
 
 private:
 
+    void remove_big_alt();
+    void remove_big_alt(AgentIdx i);
+
     const Instance& instance_;
 
     Solution* reduced_solution_;

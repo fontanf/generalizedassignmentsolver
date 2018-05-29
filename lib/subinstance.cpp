@@ -8,6 +8,7 @@ SubInstance::SubInstance(const Instance& ins): instance_(ins)
     alternatives_ = std::vector<int>(ins.alternative_number(), 0);
     agent_alternative_number_ = std::vector<ItemIdx>(ins.agent_number(), ins.item_number());
     item_alternative_number_ = std::vector<ItemIdx>(ins.item_number(), ins.agent_number());
+    remove_big_alt();
 }
 
 SubInstance::SubInstance(const SubInstance& sub): instance_(sub.instance_)
@@ -35,8 +36,8 @@ SubInstance::~SubInstance()
     delete reduced_solution();
 }
 
-//#define DBG(x)
-#define DBG(x) x
+#define DBG(x)
+//#define DBG(x) x
 
 void SubInstance::set(ItemIdx j, AgentIdx i)
 {
@@ -44,12 +45,15 @@ void SubInstance::set(ItemIdx j, AgentIdx i)
     reduced_solution_->set(j, i);
     for (AgentIdx i=0; i<instance().agent_number(); ++i)
         remove(j, i);
+    remove_big_alt(i);
 }
 
 void SubInstance::remove(ItemIdx j, AgentIdx i)
 {
     DBG(std::cout << "REMOVE " << j << " " << i << std::endl;)
     AltIdx k = instance().alternative_index(j, i);
+    if (alternatives_[k] == -1)
+        return;
     alternatives_[k] = -1;
     agent_alternative_number_[i]--;
     item_alternative_number_[j]--;
@@ -77,5 +81,22 @@ std::ostream& gap::operator<<(std::ostream& os, const SubInstance& sub)
         os << std::endl;
     }
     return os;
+}
+
+void SubInstance::remove_big_alt()
+{
+    for (AgentIdx i=0; i<instance().agent_number(); ++i)
+        remove_big_alt(i);
+}
+
+void SubInstance::remove_big_alt(AgentIdx i)
+{
+    for (ItemIdx j=0; j<instance().item_number(); ++j) {
+        AltIdx k = instance().alternative_index(j, i);
+        if (reduced(k))
+            continue;
+        if (instance().alternative(k).w > capacity(i))
+            remove(j, i);
+    }
 }
 

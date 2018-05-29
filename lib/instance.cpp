@@ -184,9 +184,9 @@ std::ostream& gap::operator<<(std::ostream& os, const Instance& ins)
     os << std::endl;
 
     for (ItemPos j=0; j<ins.item_number(); ++j) {
-        os << j << ":" << std::flush;
+        os << j << ": " << std::flush;
         for (AltIdx k: ins.item(j).alt)
-            os << "; " << ins.alternative(k);
+            os << ins.alternative(k) << "; " << std::flush;
         os << std::endl;
     }
     return os;

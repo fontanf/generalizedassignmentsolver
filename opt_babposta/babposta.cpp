@@ -2,10 +2,8 @@
 
 #include "gap/ub_lagrangian/lagrangian.hpp"
 
-#include "knapsack/opt_minknap/minknap.hpp"
-
-//#define DBG(x)
-#define DBG(x) x
+#define DBG(x)
+//#define DBG(x) x
 
 using namespace gap;
 
@@ -15,55 +13,58 @@ std::vector<std::vector<Profit>> compute_reduced_costs(SubInstance& sub, LagOut&
     const Instance& ins = sub.instance();
     std::vector<std::vector<Profit>> costs(ins.item_number(), std::vector<Profit>(ins.agent_number(), -1));
 
-    std::vector<ItemIdx> idx;
-    idx.reserve(ins.item_number());
-    for (ItemIdx j=0; j<ins.item_number(); ++j) {
-        if (sub.reduced_solution()->agent(j) >= 0)
-            continue;
-        idx.push_back(j);
-    }
     for (AgentIdx i=0; i<ins.agent_number(); ++i) {
+
+        std::vector<ItemIdx> idx(ins.item_number());
+        ItemIdx jj = 0;
+        for (ItemIdx j=0; j<ins.item_number(); ++j) {
+            if (sub.reduced(j, i) == -1) {
+                idx[j] = -1;
+            } else {
+                idx[j] = jj;
+                jj++;
+            }
+        }
+
         DBG(std::cout << "AGENT " << i << std::endl;)
         Weight  c = sub.capacity(i);
 
         DBG(std::cout << "COMPUTE F" << std::endl;)
-        std::vector<std::vector<Profit>> f(idx.size(), std::vector<Profit>(c+1, 0));
+        ItemIdx n = sub.agent_alternative_number(i);
+        //std::cout << "N " << n << std::endl;
+        std::vector<std::vector<Profit>> f(n+1, std::vector<Profit>(c+1, 0));
         for (ItemIdx j=0; j<ins.item_number(); ++j) {
-            if (sub.reduced_solution()->agent(j) >= 0)
+            AltIdx k = ins.alternative_index(j, i);
+            if (sub.reduced(k) == -1)
                 continue;
             Weight wj = ins.alternative(j, i).w;
             Profit pj = ins.alternative(j, i).p - lagout.mult[j];
-            ItemIdx jj = idx[j];
-            if (idx[jj] == 0) {
-                for (Weight w=0; w<=c; ++w) {
-                    f[jj][w] = 0;
-                    if (w >= wj && pj > 0)
-                        f[jj][w] = pj;
-                }
-            } else {
-                for (Weight w=0; w<=c; ++w) {
-                    f[jj][w] = f[jj-1][w];
-                    if (w >= wj) {
-                        Profit v = f[jj-1][w-wj] + pj;
-                        if (f[jj][w] < v)
-                            f[jj][w] = v;
-                    }
+            ItemIdx jj = idx[j]+1;
+            //std::cout << "JJ " << jj << " J " << j << std::endl;
+            for (Weight w=0; w<=c; ++w) {
+                f[jj][w] = f[jj-1][w];
+                if (w >= wj) {
+                    Profit v = f[jj-1][w-wj] + pj;
+                    if (f[jj][w] < v)
+                        f[jj][w] = v;
                 }
             }
         }
-        Profit zi = f[idx.back()][c];
+        Profit zi = f[n][c];
+        DBG(std::cout << "ZI " << zi << std::endl;)
         DBG(
-        for (ItemIdx j=0; j<ins.item_number(); ++j) {
+        for (ItemIdx jj=0; jj<=n; ++jj) {
             for (Weight w=0; w<=c; ++w)
-                std::cout << f[j][w] << " " << std::flush;
+                std::cout << f[jj][w] << " " << std::flush;
             std::cout << std::endl;
         }
         )
 
         DBG(std::cout << "COMPUTE G" << std::endl;)
-        std::vector<std::vector<Profit>> g(idx.size()+1, std::vector<Profit>(c+1, 0));
+        std::vector<std::vector<Profit>> g(n+1, std::vector<Profit>(c+1, 0));
         for (ItemIdx j=ins.item_number()-1; j>=0; --j) {
-            if (sub.reduced_solution()->agent(j) >= 0)
+            AltIdx k = ins.alternative_index(j, i);
+            if (sub.reduced(k) == -1)
                 continue;
             Weight wj = ins.alternative(j, i).w;
             Profit pj = ins.alternative(j, i).p - lagout.mult[j];
@@ -86,27 +87,32 @@ std::vector<std::vector<Profit>> compute_reduced_costs(SubInstance& sub, LagOut&
             }
         }
         DBG(
-        for (ItemIdx j=ins.item_number()-1; j>=0; --j) {
+        for (ItemIdx jj=n; jj>=0; --jj) {
             for (Weight w=0; w<=c; ++w)
-                std::cout << g[j][w] << " " << std::flush;
+                std::cout << g[jj][w] << " " << std::flush;
             std::cout << std::endl;
         }
         )
 
         DBG(std::cout << "COMPUTE COSTS" << std::endl;)
         for (ItemIdx j=0; j<ins.item_number(); ++j) {
-            if (sub.reduced_solution()->agent(j) >= 0)
+            AltIdx k = ins.alternative_index(j, i);
+            if (sub.reduced(k) == -1)
                 continue;
             ItemIdx jj = idx[j];
             Profit u = 0;
             if (lagout.xji[j][i] == 0) {
-                Weight wj = ins.alternative(j, i).w;
-                for (Weight w=0; w<=c-wj; ++w) {
-                    Profit p = f[jj][w] + g[jj+1][w+wj];
-                    if (u < p)
-                        u = p;
+                Weight wj = ins.alternative(k).w;
+                if (wj > sub.capacity(i)) {
+                    u = 0;
+                } else {
+                    for (Weight w=0; w<=c-wj; ++w) {
+                        Profit p = f[jj][w] + g[jj+1][w+wj];
+                        if (u < p)
+                            u = p;
+                    }
+                    u += ins.alternative(k).p - lagout.mult[j];
                 }
-                u += ins.alternative(j, i).p - lagout.mult[j];
             } else {
                 for (Weight w=0; w<=c; ++w) {
                     Profit p = f[jj][w] + g[jj+1][w];
@@ -115,6 +121,12 @@ std::vector<std::vector<Profit>> compute_reduced_costs(SubInstance& sub, LagOut&
                 }
             }
             costs[j][i] = zi - u;
+            //if (costs[j][i] < 0) {
+                //std::cout << "I " << i << " J " << j << std::endl;
+                //std::cout << ins.alternative(k) << std::endl;
+                //std::cout << " ZI " << zi << " U " << u << std::endl;
+                //assert(false);
+            //}
             assert(costs[j][i] >= 0);
         }
     }
@@ -141,11 +153,16 @@ bool fix_variable(SubInstance& sub, Profit z, LagOut& lagout, std::vector<std::v
         for (AgentIdx i=0; i<ins.agent_number(); ++i) {
             if (sub.reduced(j, i) == -1)
                 continue;
-            if (lagout.xji[j][i] == 1) {
+            if (lagout.xji[j][i] == 1)
                 csum[j] += costs[j][i];
-            }
         }
     }
+
+    DBG(
+    for (ItemIdx j=0; j<ins.item_number(); ++j)
+        std::cout << csum[j] << " " << std::flush;
+    std::cout << std::endl;
+    )
 
     DBG(std::cout << "1" << std::endl;)
     for (AgentIdx i=0; i<ins.agent_number(); ++i) {
@@ -154,6 +171,7 @@ bool fix_variable(SubInstance& sub, Profit z, LagOut& lagout, std::vector<std::v
                 continue;
             // If xij == 0
             // If xij were to take value 1, then all xkj, k != i would take value 0
+            //std::cout << "U " << lagout.u << " C " << costs[j][i] << " CSUM " << csum[j] << " Z " << z << std::endl;
             if (lagout.xji[j][i] == 0) {
                 if (lagout.u - costs[j][i] - csum[j] < z)
                     sub.remove(j, i);
@@ -161,16 +179,21 @@ bool fix_variable(SubInstance& sub, Profit z, LagOut& lagout, std::vector<std::v
             // If xij were to take value 0, then at least one xkj has to take value 1
             } else {
                 if (lagout.xj[j] == 1) { // xij is the only xkj with value 1
-                    Profit cmin = -1;
-                    for (AgentIdx ii=0; ii<ins.agent_number(); ++ii) {
-                        if (ii == i || (sub.reduced(j, i) == -1))
-                            continue;
-                        if (cmin == -1 || cmin < costs[j][ii])
-                            cmin = costs[j][ii];
-                    }
-                    assert(cmin != -1);
-                    if (lagout.u - costs[j][i] - cmin < z)
+                    if (sub.item_alternative_number(j) == 1) {
                         sub.set(j, i);
+                    } else {
+                        Profit cmin = -1;
+                        for (AgentIdx ii=0; ii<ins.agent_number(); ++ii) {
+                            if (ii == i || sub.reduced(j, ii) == -1)
+                                continue;
+                            if (cmin == -1 || cmin > costs[j][ii])
+                                cmin = costs[j][ii];
+                        }
+                        //std::cout << "CMIN " << cmin << std::endl;
+                        assert(cmin != -1);
+                        if (lagout.u - costs[j][i] - cmin < z)
+                            sub.set(j, i);
+                    }
                 }
             }
         }
@@ -181,8 +204,6 @@ bool fix_variable(SubInstance& sub, Profit z, LagOut& lagout, std::vector<std::v
     for (ItemIdx j=0; j<ins.item_number(); ++j) {
         if (sub.item_alternative_number(j) != 1)
             continue;
-        std::cout << j << " " << lagout.xj[j] << std::endl;
-        assert(lagout.xj[j] <= 1);
         for (AgentIdx i=0; i<ins.agent_number(); ++i) {
             if (sub.reduced(j, i) == -1)
                 continue;
@@ -289,6 +310,10 @@ void sopt_babposta_rec(SubInstance& sub, Profit z, Solution& sol_best, StateIdx&
             mult_max = lagout.mult[jj];
         }
     }
+    if (j == -1) {
+        DBG(std::cout << "BABPOSTAREC... END J = -1" << std::endl;)
+        return;
+    }
     DBG(std::cout << "BRANCH ON " << j << std::endl;)
 
     for (AgentIdx i=0; i<ins.agent_number(); ++i) {
@@ -317,6 +342,7 @@ void sopt_babposta_rec(SubInstance& sub, Profit z, Solution& sol_best, StateIdx&
 Solution gap::sopt_babposta(const Instance& ins, Info* info)
 {
     DBG(std::cout << "BABPOSTA..." << std::endl;)
+    DBG(std::cout << ins << std::endl;)
 
     if (ins.agent_number() == 1) {
         Solution sol(ins);
