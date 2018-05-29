@@ -43,10 +43,10 @@ int main(int argc, char *argv[])
 
     double t = info.elapsed_time();
     info.pt.put("Solution.Time", t);
-    info.pt.put("Solution.UB", out.bound);
+    info.pt.put("Solution.UB", out.u);
     if (Info::verbose(&info)) {
         std::cout << "---" << std::endl;
-        std::cout << instance.print_ub(out.bound) << std::endl;
+        std::cout << instance.print_ub(out.u) << std::endl;
         std::cout << "TIME " << t << std::endl;
     }
 

@@ -7,12 +7,15 @@ using namespace gap;
 
 Profit opt_cplex_test(Instance &ins)
 {
-    return sopt_cplex(ins, NULL).profit();
+    Solution sol = sopt_cplex(ins, NULL);
+    return (sol.item_number() == ins.item_number())? sol.profit(): -1;
 }
 
 Profit ub_lagrangian_test(Instance& ins)
 {
-    return ub_lagrangian(ins).bound;
+    Info info;
+    info.verbose(true);
+    return ub_lagrangian(ins, &info).u;
 }
 
 std::vector<Profit (*)(Instance&)> tested_functions()
