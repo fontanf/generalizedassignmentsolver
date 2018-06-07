@@ -19,11 +19,19 @@ Solution::Solution(const Solution& solution):
 Solution& Solution::operator=(const Solution& solution)
 {
     if (this != &solution) {
-        k_ = solution.item_number();
-        p_ = solution.profit();
-        w_ = solution.weights();
-        w_tot_ = solution.weight();
-        x_ = solution.data();
+        if (&solution.instance() == &instance()) {
+            k_ = solution.item_number();
+            p_ = solution.profit();
+            w_ = solution.weights();
+            w_tot_ = solution.weight();
+            x_ = solution.data();
+        } else {
+            assert(solution.instance().item_number() == instance().item_number());
+            assert(solution.instance().agent_number() == instance().agent_number());
+            clear();
+            for (ItemIdx j=0; j<instance().item_number(); ++j)
+                set(j, solution.agent(j));
+        }
     }
     return *this;
 }

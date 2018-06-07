@@ -78,7 +78,7 @@ public:
     ~Instance() { };
 
     int objective() const { return objective_; }
-    void toggle_objective();
+    Instance adjust() const;
 
     const Item& item(ItemPos j) const { return items_[j]; }
     const Alternative& alternative(AltPos k) const { return alternatives_[k]; } 
@@ -93,8 +93,6 @@ public:
     const Solution* optimal_solution() const { return sol_opt_; }
     Profit optimum() const;
 
-    Profit t() const { return t_ * item_number(); }
-
     Profit check(boost::filesystem::path cert_file);
 
     std::string print_lb(Profit lb) const;
@@ -107,15 +105,11 @@ private:
     void read_standard(boost::filesystem::path filename);
     void read_standard_solution(boost::filesystem::path filename);
 
-    std::string name_;
-    std::string format_;
-
     std::vector<Item> items_;
     std::vector<Alternative> alternatives_;
     std::vector<Weight> c_;
 
     int objective_ = -1;
-    Profit t_ = 0;
     Solution* sol_opt_ = NULL; // Optimal solution
 
 };

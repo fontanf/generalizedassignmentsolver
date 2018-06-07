@@ -61,39 +61,39 @@ Instance::Instance(boost::filesystem::path filepath)
     }
 
     boost::filesystem::fstream file(FORMAT, std::ios_base::in);
-    std::getline(file, format_);
-    if        (format_ == "gap_beasley") {
+    std::string format;
+    std::getline(file, format);
+    if        (format == "gap_beasley") {
         read_beasley(filepath);
-    } else if (format_ == "gap_standard") {
+    } else if (format == "gap_standard") {
         read_standard(filepath);
         boost::filesystem::path sol = filepath;
         sol += ".sol";
         if (boost::filesystem::exists(sol))
             read_standard_solution(sol);
     } else {
-        std::cout << format_ << ": Unknown instance format." << std::endl;
+        std::cout << format << ": Unknown instance format." << std::endl;
         assert(false);
     }
 }
 
 void Instance::read_beasley(boost::filesystem::path filepath)
 {
-    name_ = filepath.stem().string();
     boost::filesystem::fstream file(filepath, std::ios_base::in);
     ItemIdx n;
     AgentIdx m;
     objective_ = -1;
     file >> m >> n;
 
+    c_.resize(m);
     items_.reserve(n);
     add_items(n);
     for (AgentIdx i=0; i<m; ++i)
         for (ItemPos j=0; j<n; ++j)
-            file >> alternatives_[items_[j].alt[i]].p;
+            file >> alternatives_[alternative_index(j, i)].p;
     for (AgentIdx i=0; i<m; ++i)
         for (ItemPos j=0; j<n; ++j)
-            file >> alternatives_[items_[j].alt[i]].w;
-    c_.resize(m);
+            file >> alternatives_[alternative_index(j, i)].w;
     for (AgentIdx i=0; i<m; ++i)
         file >> c_[i];
 
@@ -102,7 +102,6 @@ void Instance::read_beasley(boost::filesystem::path filepath)
 
 void Instance::read_standard(boost::filesystem::path filepath)
 {
-    name_ = filepath.stem().string();
     boost::filesystem::fstream file(filepath, std::ios_base::in);
     ItemIdx  n;
     AgentIdx m;
@@ -133,17 +132,30 @@ void Instance::read_standard_solution(boost::filesystem::path filepath)
     }
 }
 
-void Instance::toggle_objective()
+Instance Instance::adjust() const
 {
-    if (t_ == 0)
-        for (AltPos k=0; k<=alternative_number(); ++k)
-            if (alternative(k).p > t_)
-                t_ = alternative(k).p;
+    Instance ins(item_number(), agent_number(), 1);
+    ins.add_items(item_number());
+    for (AgentIdx i=0; i<ins.agent_number(); ++i)
+        ins.set_capacity(i, capacity(i));
 
-    for (AltPos k=0; k<=alternative_number(); ++k)
-        alternatives_[k].p = t_ - alternatives_[k].p;
+    Profit t = 0;
+    if (objective() == -1)
+        for (AltPos k=0; k<alternative_number(); ++k)
+            if (alternative(k).p > t)
+                t = alternative(k).p;
 
-    objective_ *= -1;
+    std::cout << "T " << t << std::endl;
+
+    for (ItemPos j=0; j<item_number(); ++j) {
+        for (AgentIdx i=0; i<ins.agent_number(); ++i) {
+            AltIdx k = alternative_index(j, i);
+            Profit p = (objective() == -1)? t-alternative(k).p: alternative(k).p;
+            p *= 100000;
+            ins.set_alternative(j, i, alternative(k).w, p);
+        }
+    }
+    return ins;
 }
 
 Profit Instance::check(boost::filesystem::path cert_file)
