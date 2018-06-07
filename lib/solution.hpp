@@ -15,12 +15,12 @@ public:
     Solution& operator=(const Solution& solution);
     ~Solution() { };
 
-    inline const Instance& instance()   const { return instance_; }
-    inline Weight weight()              const { return w_tot_; }
-    inline Weight weight(AgentIdx i)    const { return w_[i]; }
+    inline const Instance& instance() const { return instance_; }
+    inline Weight weight() const { return w_tot_; }
+    inline Weight weight(AgentIdx i) const { return w_[i]; }
     inline Weight remaining_capacity(AgentIdx i) const { return instance().capacity(i) - weight(i); }
-    inline Profit profit()              const { return p_; }
-    inline ItemIdx item_number()        const { return k_; }
+    inline Value value() const { return v_; }
+    inline ItemIdx item_number() const { return k_; }
     bool feasible() const;
 
     const std::vector<AgentIdx>& data()  const { return x_; }
@@ -42,8 +42,8 @@ private:
 
     const Instance& instance_;
     ItemIdx k_ = 0;
-    Profit  p_ = 0;
-    Weight  w_tot_ = 0;
+    Value v_ = 0;
+    Weight w_tot_ = 0;
     std::vector<AgentIdx> x_;
     std::vector<Weight> w_;
 

@@ -20,7 +20,7 @@ void test_gen(
         std::vector<ItemIdx> ns,
         std::vector<int> seeds,
         int obj,
-        std::vector<Profit (*)(Instance&)> fs,
+        std::vector<Value (*)(Instance&)> fs,
         int test = 0);
 
 }

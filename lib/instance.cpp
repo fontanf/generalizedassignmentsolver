@@ -31,10 +31,10 @@ void Instance::add_items(ItemIdx n)
         add_item();
 }
 
-void Instance::set_alternative(ItemIdx j, AgentIdx i, Weight w, Profit p)
+void Instance::set_alternative(ItemIdx j, AgentIdx i, Weight w, Value v)
 {
     alternatives_[items_[j].alt[i]].w = w;
-    alternatives_[items_[j].alt[i]].p = p;
+    alternatives_[items_[j].alt[i]].v = v;
 }
 
 void Instance::set_weight(ItemIdx j, AgentIdx i, Weight w)
@@ -42,9 +42,9 @@ void Instance::set_weight(ItemIdx j, AgentIdx i, Weight w)
     alternatives_[items_[j].alt[i]].w = w;
 }
 
-void Instance::set_profit(ItemIdx j, AgentIdx i, Profit p)
+void Instance::set_value(ItemIdx j, AgentIdx i, Value v)
 {
-    alternatives_[items_[j].alt[i]].p = p;
+    alternatives_[items_[j].alt[i]].v = v;
 }
 
 Instance::Instance(boost::filesystem::path filepath)
@@ -90,7 +90,7 @@ void Instance::read_beasley(boost::filesystem::path filepath)
     add_items(n);
     for (AgentIdx i=0; i<m; ++i)
         for (ItemPos j=0; j<n; ++j)
-            file >> alternatives_[alternative_index(j, i)].p;
+            file >> alternatives_[alternative_index(j, i)].v;
     for (AgentIdx i=0; i<m; ++i)
         for (ItemPos j=0; j<n; ++j)
             file >> alternatives_[alternative_index(j, i)].w;
@@ -139,18 +139,18 @@ Instance Instance::adjust() const
     for (AgentIdx i=0; i<ins.agent_number(); ++i)
         ins.set_capacity(i, capacity(i));
 
-    Profit t = 0;
+    Value t = 0;
     if (objective() == -1)
         for (AltPos k=0; k<alternative_number(); ++k)
-            if (alternative(k).p > t)
-                t = alternative(k).p;
+            if (alternative(k).v > t)
+                t = alternative(k).v;
 
     std::cout << "T " << t << std::endl;
 
     for (ItemPos j=0; j<item_number(); ++j) {
         for (AgentIdx i=0; i<ins.agent_number(); ++i) {
             AltIdx k = alternative_index(j, i);
-            Profit p = (objective() == -1)? t-alternative(k).p: alternative(k).p;
+            Value p = (objective() == -1)? t-alternative(k).v: alternative(k).v;
             p *= 100000;
             ins.set_alternative(j, i, alternative(k).w, p);
         }
@@ -158,7 +158,7 @@ Instance Instance::adjust() const
     return ins;
 }
 
-Profit Instance::check(boost::filesystem::path cert_file)
+Value Instance::check(boost::filesystem::path cert_file)
 {
     if (!boost::filesystem::exists(cert_file))
         return -1;
@@ -173,17 +173,17 @@ Profit Instance::check(boost::filesystem::path cert_file)
     }
     if (!sol.check_capacity())
         return -1;
-    return sol.profit();
+    return sol.value();
 }
 
-Profit Instance::optimum() const
+Value Instance::optimum() const
 {
-    return optimal_solution()->profit();
+    return optimal_solution()->value();
 }
 
 std::ostream& gap::operator<<(std::ostream& os, const Alternative& alt)
 {
-    os << "(" << alt.i << " " << alt.w << " " << alt.p << " " << alt.efficiency() << ")";
+    os << "(" << alt.i << " " << alt.w << " " << alt.v << " " << alt.efficiency() << ")";
     return os;
 }
 
@@ -206,21 +206,21 @@ std::ostream& gap::operator<<(std::ostream& os, const Instance& ins)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-std::string Instance::print_lb(Profit lb) const
+std::string Instance::print_lb(Value lb) const
 {
     return (optimal_solution() == NULL)?
         "LB " + std::to_string(lb):
         "LB " + std::to_string(lb) + " GAP " + std::to_string(optimum() - lb);
 }
 
-std::string Instance::print_ub(Profit ub) const
+std::string Instance::print_ub(Value ub) const
 {
     return (optimal_solution() == NULL)?
         "UB " + std::to_string(ub):
         "UB " + std::to_string(ub) + " GAP " + std::to_string(ub - optimum());
 }
 
-std::string Instance::print_opt(Profit opt) const
+std::string Instance::print_opt(Value opt) const
 {
     return (optimal_solution() != NULL && optimum() != opt)?
         "OPT " + std::to_string(opt) + " ERROR!":

@@ -17,7 +17,7 @@ void executeProgram(std::string cmd)
 void check_sopt(std::string prog, boost::filesystem::path input)
 {
     Instance instance(input);
-    Profit opt = instance.optimum();
+    Value opt = instance.optimum();
 
     std::string output_file = "output_file.ini";
     std::string cert_file   = "cert_file.txt";
@@ -38,7 +38,7 @@ void check_sopt(std::string prog, boost::filesystem::path input)
 
     boost::property_tree::ptree pt;
     boost::property_tree::ini_parser::read_ini(output_file, pt);
-    EXPECT_EQ(pt.get<Profit>("Solution.OPT"), opt);
+    EXPECT_EQ(pt.get<Value>("Solution.OPT"), opt);
     EXPECT_EQ(instance.check(cert_file),      opt);
 
     boost::filesystem::remove(output_file);
@@ -48,7 +48,7 @@ void check_sopt(std::string prog, boost::filesystem::path input)
 void check_opt(std::string prog, boost::filesystem::path input)
 {
     Instance instance(input);
-    Profit opt = instance.optimum();
+    Value opt = instance.optimum();
 
     std::string output_file = "output_file.ini";
     std::string cmd = prog
@@ -63,7 +63,7 @@ void check_opt(std::string prog, boost::filesystem::path input)
 
     boost::property_tree::ptree pt;
     boost::property_tree::ini_parser::read_ini(output_file, pt);
-    EXPECT_EQ(pt.get<Profit>("Solution.OPT"), opt);
+    EXPECT_EQ(pt.get<Value>("Solution.OPT"), opt);
 
     boost::filesystem::remove(output_file);
 }
@@ -95,7 +95,7 @@ void gap::test_gen(
         std::vector<ItemIdx> ns,
         std::vector<int> seeds,
         int obj,
-        std::vector<Profit (*)(Instance&)> fs,
+        std::vector<Value (*)(Instance&)> fs,
         int test)
 {
     for (std::string type: types) {
@@ -104,10 +104,10 @@ void gap::test_gen(
                 for (int h: seeds) {
                     std::cout << type << " " << m << " " << n << " " << h << " -" << std::flush;
                     Instance ins = generate(type, m, n, obj, h);
-                    Profit opt = -1;
+                    Value opt = -1;
                     for (auto f: fs) {
                         Instance ins_tmp = ins;
-                        Profit val = f(ins_tmp);
+                        Value val = f(ins_tmp);
                         std::cout << " " << val << std::flush;
                         if (opt == -1)
                             opt = val;

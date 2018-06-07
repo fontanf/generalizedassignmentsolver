@@ -21,7 +21,7 @@
 namespace gap
 {
 
-typedef int_fast64_t Profit;
+typedef int_fast64_t Value;
 typedef int_fast64_t Weight;
 typedef int_fast64_t ItemIdx;
 typedef int_fast64_t ItemPos;
@@ -37,12 +37,12 @@ class Solution;
 struct Alternative
 {
     Alternative(AltIdx idx, ItemIdx j, AgentIdx i): idx(idx), j(j), i(i) {  }
-    double efficiency() const { return (double)p/(double)w; }
-    AltIdx   idx;
-    ItemIdx  j;
+    double efficiency() const { return (double)v/(double)w; }
+    AltIdx idx;
+    ItemIdx j;
     AgentIdx i;
-    Weight   w;
-    Profit   p;
+    Weight w;
+    Value v;
 };
 
 struct Item
@@ -69,9 +69,9 @@ public:
     void add_items(ItemIdx n);
     ItemIdx add_item(Label l);
     ItemIdx add_item() { return add_item(-1); }
-    void set_alternative(ItemIdx j, AgentIdx i, Weight w, Profit p);
+    void set_alternative(ItemIdx j, AgentIdx i, Weight w, Value p);
     void set_weight(ItemIdx j, AgentIdx i, Weight w);
-    void set_profit(ItemIdx j, AgentIdx i, Profit p);
+    void set_value(ItemIdx j, AgentIdx i, Value p);
     void set_capacity(AgentIdx i, Weight c) { c_[i] = c; }
 
     Instance(boost::filesystem::path filename);
@@ -91,13 +91,13 @@ public:
     AltIdx alternative_number() const { return alternatives_.size(); }
 
     const Solution* optimal_solution() const { return sol_opt_; }
-    Profit optimum() const;
+    Value optimum() const;
 
-    Profit check(boost::filesystem::path cert_file);
+    Value check(boost::filesystem::path cert_file);
 
-    std::string print_lb(Profit lb) const;
-    std::string print_ub(Profit ub) const;
-    std::string print_opt(Profit opt) const;
+    std::string print_lb(Value lb) const;
+    std::string print_ub(Value ub) const;
+    std::string print_opt(Value opt) const;
 
 private:
 

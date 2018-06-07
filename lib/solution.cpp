@@ -10,7 +10,7 @@ Solution::Solution(const Instance& instance): instance_(instance),
 Solution::Solution(const Solution& solution):
     instance_(solution.instance()),
     k_(solution.item_number()),
-    p_(solution.profit()),
+    p_(solution.value()),
     w_tot_(solution.weight()),
     x_(solution.data()),
     w_(solution.weights())
@@ -21,7 +21,7 @@ Solution& Solution::operator=(const Solution& solution)
     if (this != &solution) {
         if (&solution.instance() == &instance()) {
             k_ = solution.item_number();
-            p_ = solution.profit();
+            p_ = solution.value();
             w_ = solution.weights();
             w_tot_ = solution.weight();
             x_ = solution.data();
@@ -54,7 +54,7 @@ void Solution::set(ItemIdx j, AgentIdx i)
 
     if (i_old != -1) {
         const Alternative& a_old = ins.alternative(j, i_old);
-        p_        -= a_old.p;
+        v_        -= a_old.v;
         w_[i_old] -= a_old.w;
         w_tot_    -= a_old.w;
         k_--;
@@ -62,7 +62,7 @@ void Solution::set(ItemIdx j, AgentIdx i)
 
     if (i != -1) {
         const Alternative& a = ins.alternative(j, i);
-        p_     += a.p;
+        v_     += a.v;
         w_[i]  += a.w;
         w_tot_ += a.w;
         k_++;
@@ -83,8 +83,8 @@ bool Solution::feasible() const
 
 void Solution::clear()
 {
-    k_     = 0;
-    p_     = 0;
+    k_ = 0;
+    v_ = 0;
     w_tot_ = 0;
     std::fill(x_.begin(), x_.end(), -1);
     std::fill(w_.begin(), w_.end(), 0);
@@ -113,8 +113,8 @@ bool Solution::update(const Solution& sol)
     if (sol.item_number() != instance().item_number())
         return false;
     if (
-               (instance().objective() ==  1 && sol.profit() <= profit())
-            || (instance().objective() == -1 && sol.profit() >= profit()))
+               (instance().objective() ==  1 && sol.value() <= value())
+            || (instance().objective() == -1 && sol.value() >= value()))
         return false;
     *this = sol;
     return true;

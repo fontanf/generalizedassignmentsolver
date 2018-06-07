@@ -26,7 +26,7 @@ Instance generate_c(ItemIdx n, AgentIdx m, int obj, int seed)
         ins.add_item();
         for (AgentIdx i=0; i<m; ++i) {
             Weight w = distribution_c(generator);
-            Profit p = distribution_p(generator);
+            Value p = distribution_p(generator);
             ins.set_alternative(j, i, w, p);
             wsum[i] += w;
         }
@@ -48,11 +48,11 @@ Instance generate_d(ItemIdx n, AgentIdx m, int obj, int seed)
         for (AgentIdx i=0; i<m; ++i) {
             Weight w = distribution_c(generator);
             Weight e = distribution_e(generator);
-            Profit p;
+            Value p;
             if (obj == 1) {
-                p = std::max((Profit)1, 11 + w + e);
+                p = std::max((Value)1, 11 + w + e);
             } else {
-                p = std::max((Profit)1, 111 - w + e);
+                p = std::max((Value)1, 111 - w + e);
             }
             ins.set_alternative(j, i, w, p);
             wsum[i] += w;
@@ -87,8 +87,8 @@ Instance gap::generate(const GenParams& p)
         ins.add_item();
         Weight wmax = 0;
         Weight wj = dist_r(generator);
-        Profit pj = dist_r(generator);
-        Profit bjp = 0;
+        Value pj = dist_r(generator);
+        Value bjp = 0;
         if (p.bp == 1) {
             bjp =  dist_b(generator);
         } else if (p.bp == -1) {
@@ -101,19 +101,19 @@ Instance gap::generate(const GenParams& p)
             bjw = -dist_b(generator);
         }
         for (AgentIdx i=0; i<p.m; ++i) {
-            Profit epij = 0;
+            Value epij = 0;
             if (p.ep == 1) {
                 epij =  dist_e(generator);
             } else if (p.ep == -1) {
                 epij = -dist_e(generator);
             }
-            Profit ewij = 0;
+            Value ewij = 0;
             if (p.ew == 1) {
                 ewij =  dist_e(generator);
             } else if (p.ew == -1) {
                 ewij = -dist_e(generator);
             }
-            Profit pij = pj + bjp * i + epij;
+            Value pij = pj + bjp * i + epij;
             Weight wij = wj + bjw * i + ewij;
             if (wmax < wij)
                 wmax = wij;

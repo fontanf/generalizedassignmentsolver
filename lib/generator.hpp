@@ -11,7 +11,7 @@ struct GenParams
 {
     AgentIdx m = 5;
     ItemIdx n = 25;
-    Profit r = 100;
+    Value r = 100;
     int bp = 0;
     int bw = 0;
     int ep = 0;
