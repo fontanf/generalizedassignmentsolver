@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
     info.verbose(vm.count("verbose"));
 
     SubInstance sub(instance);
-    LagOut out = ub_lagrangian(sub, &info);
+    LagOut out = ub_lagrangian(sub, 100, 2, NULL, &info);
 
     double t = info.elapsed_time();
     info.pt.put("Solution.Time", t);
