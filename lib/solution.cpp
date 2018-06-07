@@ -10,7 +10,7 @@ Solution::Solution(const Instance& instance): instance_(instance),
 Solution::Solution(const Solution& solution):
     instance_(solution.instance()),
     k_(solution.item_number()),
-    p_(solution.value()),
+    v_(solution.value()),
     w_tot_(solution.weight()),
     x_(solution.data()),
     w_(solution.weights())
@@ -21,7 +21,7 @@ Solution& Solution::operator=(const Solution& solution)
     if (this != &solution) {
         if (&solution.instance() == &instance()) {
             k_ = solution.item_number();
-            p_ = solution.value();
+            v_ = solution.value();
             w_ = solution.weights();
             w_tot_ = solution.weight();
             x_ = solution.data();
