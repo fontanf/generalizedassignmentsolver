@@ -38,11 +38,11 @@ int main(int argc, char *argv[])
     Solution sopt = sopt_babposta(instance, &info);
 
     double t = info.elapsed_time();
-    info.pt.put("Solution.OPT", sopt.profit());
+    info.pt.put("Solution.OPT", sopt.value());
     info.pt.put("Solution.Time", t);
     if (Info::verbose(&info)) {
         std::cout << "---" << std::endl;
-        std::cout << "OPT " << sopt.profit() << std::endl;
+        std::cout << "OPT " << sopt.value() << std::endl;
         std::cout << "TIME " << t << std::endl;
     }
 

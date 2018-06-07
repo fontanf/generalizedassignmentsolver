@@ -13,23 +13,23 @@ TEST(Babalt, TestInstances)
     test(p.string() + " -v", "sopt");
 }
 
-Profit opt_cplex_test(Instance &ins)
+Value opt_cplex_test(Instance &ins)
 {
     Solution sol = sopt_cplex(ins, NULL);
     //std::cout << "SOL " << std::endl;
     //std::cout << sol << std::endl;
-    return (sol.item_number() == ins.item_number())? sol.profit(): -1;
+    return (sol.item_number() == ins.item_number())? sol.value(): -1;
 }
 
-Profit opt_babposta_test(Instance& ins)
+Value opt_babposta_test(Instance& ins)
 {
     Info info;
     info.verbose(true);
     Solution sol = sopt_babposta(ins, &info);
-    return (sol.item_number() == ins.item_number())? sol.profit(): -1;
+    return (sol.item_number() == ins.item_number())? sol.value(): -1;
 }
 
-std::vector<Profit (*)(Instance&)> tested_functions()
+std::vector<Value (*)(Instance&)> tested_functions()
 {
     return {
         opt_cplex_test,
@@ -42,9 +42,20 @@ TEST(LR, DataPisingerSmall)
     test_gen(
         {"c", "d"},
         {2, 3, 4},
-        {1, 2, 3, 4, 5, 6, 7, 8},
+        {1, 2, 3, 4},
         {0, 1, 2, 3, 4, 5, 6, 7},
         1,
+        {tested_functions()});
+}
+
+TEST(LR, DataPisingerSmallMin)
+{
+    test_gen(
+        {"c", "d"},
+        {2, 3, 4},
+        {1, 2, 3, 4},
+        {0, 1, 2, 3, 4, 5, 6, 7},
+        -1,
         {tested_functions()});
 }
 
@@ -53,31 +64,53 @@ TEST(LR, DataPisingerSmall2)
     test_gen(
         {"c", "d"},
         {2, 3, 4},
-        {9, 10, 11, 12},
-        {0, 1, 2, 3},
+        {5, 6},
+        {0, 1, 2, 3, 4, 5, 6, 7},
         1,
         {tested_functions()});
 }
 
-TEST(LR, DataPisingerSmall3)
+TEST(LR, DataPisingerSmallMin2)
 {
     test_gen(
         {"c", "d"},
         {2, 3, 4},
-        {13, 14, 15, 16},
-        {0, 1},
-        1,
+        {5, 6},
+        {0, 1, 2, 3, 4, 5, 6, 7},
+        -1,
         {tested_functions()});
 }
 
-TEST(LR, DataPisingerMedium)
-{
-    test_gen(
-        {"c", "d"},
-        {5, 10},
-        {20, 30},
-        {0},
-        1,
-        {tested_functions()});
-}
+//TEST(LR, DataPisingerSmall2)
+//{
+    //test_gen(
+        //{"c", "d"},
+        //{2, 3, 4},
+        //{9, 10, 11, 12},
+        //{0, 1, 2, 3},
+        //1,
+        //{tested_functions()});
+//}
+
+//TEST(LR, DataPisingerSmall3)
+//{
+    //test_gen(
+        //{"c", "d"},
+        //{2, 3, 4},
+        //{13, 14, 15, 16},
+        //{0, 1},
+        //1,
+        //{tested_functions()});
+//}
+
+//TEST(LR, DataPisingerMedium)
+//{
+    //test_gen(
+        //{"c", "d"},
+        //{5, 10},
+        //{20, 30},
+        //{0},
+        //1,
+        //{tested_functions()});
+//}
 
