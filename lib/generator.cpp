@@ -75,3 +75,55 @@ Instance gap::generate(std::string type, AgentIdx m, ItemIdx n, int obj, int see
     }
 }
 
+Instance gap::generate(const GenParams& p)
+{
+    Instance ins(p.n, p.m, 1);
+    std::default_random_engine generator(p.seed);
+    std::uniform_int_distribution<int> dist_r(p.r,2*p.r);
+    std::uniform_int_distribution<int> dist_b(0,p.r/p.m);
+    std::uniform_int_distribution<int> dist_e(0,p.r/10);
+    Weight wsum = 0;
+    for (ItemIdx j=0; j<p.n; ++j) {
+        ins.add_item();
+        Weight wmax = 0;
+        Weight wj = dist_r(generator);
+        Profit pj = dist_r(generator);
+        Profit bjp = 0;
+        if (p.bp == 1) {
+            bjp =  dist_b(generator);
+        } else if (p.bp == -1) {
+            bjp = -dist_b(generator);
+        }
+        Weight bjw = 0;
+        if (p.bw == 1) {
+            bjw =  dist_b(generator);
+        } else if (p.bw == -1) {
+            bjw = -dist_b(generator);
+        }
+        for (AgentIdx i=0; i<p.m; ++i) {
+            Profit epij = 0;
+            if (p.ep == 1) {
+                epij =  dist_e(generator);
+            } else if (p.ep == -1) {
+                epij = -dist_e(generator);
+            }
+            Profit ewij = 0;
+            if (p.ew == 1) {
+                ewij =  dist_e(generator);
+            } else if (p.ew == -1) {
+                ewij = -dist_e(generator);
+            }
+            Profit pij = pj + bjp * i + epij;
+            Weight wij = wj + bjw * i + ewij;
+            if (wmax < wij)
+                wmax = wij;
+            ins.set_alternative(j, i, wij, pij);
+        }
+        wsum += wmax;
+    }
+    Weight c = (wsum * p.h) / (p.m * p.hmax) + 1;
+    for (AgentIdx i=0; i<p.m; ++i)
+        ins.set_capacity(i, c);
+    return ins;
+}
+
