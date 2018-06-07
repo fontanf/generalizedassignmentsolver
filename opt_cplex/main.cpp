@@ -40,10 +40,10 @@ int main(int argc, char *argv[])
 
     double t = info.elapsed_time();
     info.pt.put("Solution.Time", t);
-    info.pt.put("Solution.OPT", sol.profit());
+    info.pt.put("Solution.OPT", sol.value());
     if (Info::verbose(&info)) {
         std::cout << "---" << std::endl;
-        std::cout << ins.print_opt(sol.profit()) << std::endl;
+        std::cout << ins.print_opt(sol.value()) << std::endl;
         std::cout << "TIME " << t << std::endl;
     }
 

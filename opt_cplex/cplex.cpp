@@ -27,7 +27,7 @@ Solution gap::sopt_cplex(const Instance& ins, Info* info)
         IloExpr expr(env);
         for (ItemIdx j=0; j<ins.item_number(); j++)
             for (AgentIdx i=0; i<ins.agent_number(); i++)
-                expr += x[j][i] * ins.alternative(j, i).p;
+                expr += x[j][i] * ins.alternative(j, i).v;
         IloObjective obj = (ins.objective() == 1)?
             IloMaximize(env, expr):
             IloMinimize(env, expr);
@@ -67,6 +67,7 @@ Solution gap::sopt_cplex(const Instance& ins, Info* info)
     }
     env.end();
 
-    assert(solution.profit() == ins.optimum());
+    assert(solution.value() == ins.optimum());
     return solution;
 }
+
