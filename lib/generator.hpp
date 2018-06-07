@@ -19,7 +19,10 @@ struct GenParams
     int h = 100;
     int hmax = 100;
     int seed = 1;
+
 };
+
+std::ostream& operator<<(std::ostream &os, const GenParams& p);
 
 const GenParams P0W0E0{5, 25, 100, 0,  0, 0, 0, 75, 100, 1};
 const GenParams P0W1E0{5, 25, 100, 0,  1, 0, 0, 75, 100, 1};

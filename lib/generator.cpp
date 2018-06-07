@@ -127,3 +127,12 @@ Instance gap::generate(const GenParams& p)
     return ins;
 }
 
+std::ostream& gap::operator<<(std::ostream &os, const GenParams& p)
+{
+    os << "M " << p.m << " N " << p.n << " R " << p.r
+        << " BP " << p.bp << " BW " << p.bp << " EP " << p.ep << " EW " << p.ew
+        << " SEED " << p.seed
+        << " H " << p.h << " HMAX " << p.hmax;
+    return os;
+}
+
