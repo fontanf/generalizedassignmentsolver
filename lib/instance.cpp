@@ -115,7 +115,7 @@ void Instance::read_standard(boost::filesystem::path filepath)
     add_items(n);
     for (ItemPos j=0; j<n; ++j)
         for (AgentIdx i=0; i<m; ++i)
-            file >> alternatives_[items_[j].alt[i]].w >> alternatives_[items_[j].alt[i]].p;
+            file >> alternatives_[items_[j].alt[i]].w >> alternatives_[items_[j].alt[i]].v;
 
     file.close();
 }
