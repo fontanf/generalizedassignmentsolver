@@ -1,3 +1,4 @@
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository", "new_git_repository")
 new_git_repository(
     name = "googletest",
     build_file_content = """
@@ -25,17 +26,12 @@ cc_library(
 git_repository(
     name = "knapsack",
     remote = "https://github.com/fontanf/knapsack.git",
-    commit = "cc4274062add53fac683495b8b795ad65d248a69",
+    commit = "f6399dc14d063d728019ed3be1593c7d2a6f50f8",
 )
-
-#local_repository(
-    #name = "knapsack",
-    #path = "/home/fontanf/Dev/knapsack",
-#)
 
 git_repository(
     name = "benchtools",
     remote = "https://github.com/fontanf/benchtools.git",
-    commit = "4dffad9d44c2e1300055a50c5a8b231ee5a8ddae",
+    commit = "8a78dd897d84118bb2bb1bdc4c8ae66194ca2e2e",
 )
 

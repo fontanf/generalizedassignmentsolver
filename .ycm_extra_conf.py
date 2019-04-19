@@ -83,33 +83,17 @@ def FlagsForFile( filename, **kwargs ):
   # CHANGE THIS LIST OF FLAGS. YES, THIS IS THE DROID YOU HAVE BEEN LOOKING FOR.
 
   flags = [
+    "-fopenmp",
     '-Wall',
     '-Wextra',
     '-Werror',
-    # You 100% do NOT need -DUSE_CLANG_COMPLETER in your flags; only the YCM
-    # source code needs it.
     '-DUSE_CLANG_COMPLETER',
-    '-I', '.',
-    '-I', './ClangCompleter',
     '-I', '../',
-    '-I', './bazel-gap/external/',
-    '-I', './bazel-gap/external/benchtools/',
-    '-I', './bazel-gap/external/knapsack/',
-    '-isystem', '/opt/gurobi701/linux64/include/',
-    '-isystem', '/opt/ibm/ILOG/CPLEX_Studio126/cplex/include/',
-    '-isystem', '/opt/ibm/ILOG/CPLEX_Studio126/concert/include/',
-    '-isystem', '../BoostParts',
-    '-isystem', '/System/Library/Frameworks/Python.framework/Headers',
-    '-isystem', '../llvm/include',
-    '-isystem', '../llvm/tools/clang/include',
-    '-isystem', './tests/gmock/gtest',
-    '-isystem', './tests/gmock/gtest/include',
-    '-isystem', './tests/gmock',
-    '-isystem', './tests/gmock/include',
-    '-isystem', '/usr/include',
-    '-isystem', '/usr/local/include',
-    '-isystem', '/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../include/c++/v1',
-    '-isystem', '/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include',
+    '-I', './bazel-knapsack/external/benchtools/',
+    '-I', './bazel-knapsack/external/knapsack/',
+    '-I', './bazel-knapsack/external/googletest/',
+    '-I', './bazel-knapsack/external/',
+    '-I', '/usr/lib/gcc/x86_64-linux-gnu/7.3.0/include/',
   ]
 
   data = kwargs['client_data']

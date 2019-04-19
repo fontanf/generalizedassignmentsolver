@@ -36,12 +36,8 @@ SubInstance::~SubInstance()
     delete reduced_solution();
 }
 
-#define DBG(x)
-//#define DBG(x) x
-
 void SubInstance::set(ItemIdx j, AgentIdx i)
 {
-    DBG(std::cout << "SET " << j << " " << i << std::endl;)
     reduced_solution_->set(j, i);
     for (AgentIdx i=0; i<instance().agent_number(); ++i)
         remove(j, i);
@@ -50,7 +46,6 @@ void SubInstance::set(ItemIdx j, AgentIdx i)
 
 void SubInstance::remove(ItemIdx j, AgentIdx i)
 {
-    DBG(std::cout << "REMOVE " << j << " " << i << std::endl;)
     AltIdx k = instance().alternative_index(j, i);
     if (alternatives_[k] == -1)
         return;
@@ -58,8 +53,6 @@ void SubInstance::remove(ItemIdx j, AgentIdx i)
     agent_alternative_number_[i]--;
     item_alternative_number_[j]--;
 }
-
-#undef DBG
 
 ////////////////////////////////////////////////////////////////////////////////
 

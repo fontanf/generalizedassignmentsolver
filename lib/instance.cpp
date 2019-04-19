@@ -12,13 +12,13 @@ Instance::Instance(ItemIdx n, AgentIdx m, int obj)
     objective_ = obj;
 }
 
-ItemIdx Instance::add_item(Label l)
+ItemIdx Instance::add_item()
 {
     ItemIdx j = items_.size();
     AltIdx k = alternatives_.size();
-    items_.push_back(Item(j, l));
+    items_.push_back({.j = j});
     for (AgentIdx i=0; i<agent_number(); ++i) {
-        alternatives_.push_back(Alternative(k, j, i));
+        alternatives_.push_back({.k = k, .j = j, .i = i});
         items_[j].alt.push_back(k);
         k++;
     }
@@ -47,28 +47,18 @@ void Instance::set_value(ItemIdx j, AgentIdx i, Value v)
     alternatives_[items_[j].alt[i]].v = v;
 }
 
-Instance::Instance(boost::filesystem::path filepath)
+Instance::Instance(std::string filepath, std::string format)
 {
     if (!boost::filesystem::exists(filepath)) {
         std::cout << filepath << ": file not found." << std::endl;
         assert(false);
     }
 
-    boost::filesystem::path FORMAT = filepath.parent_path() / "FORMAT.txt";
-    if (!boost::filesystem::exists(FORMAT)) {
-        std::cout << FORMAT << ": file not found." << std::endl;
-        assert(false);
-    }
-
-    boost::filesystem::fstream file(FORMAT, std::ios_base::in);
-    std::string format;
-    std::getline(file, format);
     if        (format == "gap_beasley") {
         read_beasley(filepath);
     } else if (format == "gap_standard") {
         read_standard(filepath);
-        boost::filesystem::path sol = filepath;
-        sol += ".sol";
+        std::string sol = filepath + ".sol";
         if (boost::filesystem::exists(sol))
             read_standard_solution(sol);
     } else {
@@ -77,7 +67,7 @@ Instance::Instance(boost::filesystem::path filepath)
     }
 }
 
-void Instance::read_beasley(boost::filesystem::path filepath)
+void Instance::read_beasley(std::string filepath)
 {
     boost::filesystem::fstream file(filepath, std::ios_base::in);
     ItemIdx n;
@@ -100,7 +90,7 @@ void Instance::read_beasley(boost::filesystem::path filepath)
     file.close();
 }
 
-void Instance::read_standard(boost::filesystem::path filepath)
+void Instance::read_standard(std::string filepath)
 {
     boost::filesystem::fstream file(filepath, std::ios_base::in);
     ItemIdx  n;
@@ -120,7 +110,7 @@ void Instance::read_standard(boost::filesystem::path filepath)
     file.close();
 }
 
-void Instance::read_standard_solution(boost::filesystem::path filepath)
+void Instance::read_standard_solution(std::string filepath)
 {
     sol_opt_ = new Solution(*this);
     boost::filesystem::ifstream file(filepath, std::ios_base::in);
@@ -158,7 +148,7 @@ Instance Instance::adjust() const
     return ins;
 }
 
-Value Instance::check(boost::filesystem::path cert_file)
+Value Instance::check(std::string cert_file)
 {
     if (!boost::filesystem::exists(cert_file))
         return -1;
@@ -202,28 +192,5 @@ std::ostream& gap::operator<<(std::ostream& os, const Instance& ins)
         os << std::endl;
     }
     return os;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-std::string Instance::print_lb(Value lb) const
-{
-    return (optimal_solution() == NULL)?
-        "LB " + std::to_string(lb):
-        "LB " + std::to_string(lb) + " GAP " + std::to_string(optimum() - lb);
-}
-
-std::string Instance::print_ub(Value ub) const
-{
-    return (optimal_solution() == NULL)?
-        "UB " + std::to_string(ub):
-        "UB " + std::to_string(ub) + " GAP " + std::to_string(ub - optimum());
-}
-
-std::string Instance::print_opt(Value opt) const
-{
-    return (optimal_solution() != NULL && optimum() != opt)?
-        "OPT " + std::to_string(opt) + " ERROR!":
-        "OPT " + std::to_string(opt);
 }
 
