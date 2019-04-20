@@ -4,12 +4,15 @@
 
 using namespace gap;
 
-Instance::Instance(ItemIdx n, AgentIdx m, int obj)
+Instance::Instance(AgentIdx m, ItemIdx n)
 {
     items_.reserve(n);
     c_.resize(m);
-    assert(obj == 1 || obj == -1);
-    objective_ = obj;
+}
+
+void Instance::set_optimal_solution(Solution& sol)
+{
+    sol_opt_ = std::unique_ptr<Solution>(new Solution(sol));
 }
 
 ItemIdx Instance::add_item()
@@ -122,30 +125,12 @@ void Instance::read_standard_solution(std::string filepath)
     }
 }
 
-Instance Instance::adjust() const
+Instance::Instance(const Instance& ins)
 {
-    Instance ins(item_number(), agent_number(), 1);
-    ins.add_items(item_number());
-    for (AgentIdx i=0; i<ins.agent_number(); ++i)
-        ins.set_capacity(i, capacity(i));
-
-    Value t = 0;
-    if (objective() == -1)
-        for (AltPos k=0; k<alternative_number(); ++k)
-            if (alternative(k).v > t)
-                t = alternative(k).v;
-
-    std::cout << "T " << t << std::endl;
-
-    for (ItemPos j=0; j<item_number(); ++j) {
-        for (AgentIdx i=0; i<ins.agent_number(); ++i) {
-            AltIdx k = alternative_index(j, i);
-            Value p = (objective() == -1)? t-alternative(k).v: alternative(k).v;
-            p *= 100000;
-            ins.set_alternative(j, i, alternative(k).w, p);
-        }
-    }
-    return ins;
+    items_ = ins.items_;
+    alternatives_ = ins.alternatives_;
+    c_ = ins.c_;
+    sol_opt_ = (ins.sol_opt_ == NULL)? NULL: std::unique_ptr<Solution>(new Solution(*ins.sol_opt_));
 }
 
 Value Instance::check(std::string cert_file)

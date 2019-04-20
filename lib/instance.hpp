@@ -30,6 +30,7 @@ typedef int64_t AgentPos;
 typedef int64_t AltIdx;
 typedef int64_t AltPos;
 typedef int64_t StateIdx;
+typedef int64_t Cpt;
 
 class Solution;
 
@@ -55,7 +56,7 @@ class Instance
 
 public:
 
-    Instance(ItemIdx n, AgentIdx m, int obj);
+    Instance(AgentIdx m, ItemIdx n=0);
 
     void add_items(ItemIdx n);
     ItemIdx add_item();
@@ -63,12 +64,14 @@ public:
     void set_weight(ItemIdx j, AgentIdx i, Weight w);
     void set_value(ItemIdx j, AgentIdx i, Value p);
     void set_capacity(AgentIdx i, Weight c) { c_[i] = c; }
+    void set_optimal_solution(Solution& sol);
 
     Instance(std::string filename, std::string format);
     ~Instance() { };
 
+    Instance(const Instance& ins);
+
     int objective() const { return objective_; }
-    Instance adjust() const;
 
     const Item& item(ItemPos j) const { return items_[j]; }
     const Alternative& alternative(AltPos k) const { return alternatives_[k]; }
@@ -81,7 +84,7 @@ public:
     Weight capacity(AgentIdx i) const { return c_[i]; }
 
     Value check(std::string filepath);
-    const Solution* optimal_solution() const { return sol_opt_; }
+    const Solution* optimal_solution() const { return sol_opt_.get(); }
     Value optimum() const;
 
 private:
@@ -94,8 +97,7 @@ private:
     std::vector<Alternative> alternatives_;
     std::vector<Weight> c_;
 
-    int objective_ = -1;
-    Solution* sol_opt_ = NULL; // Optimal solution
+    std::unique_ptr<Solution> sol_opt_;
 
 };
 

@@ -1,4 +1,4 @@
-#include "gap/ub_lagbundle/lagbundle.hpp"
+#include "gap/lb_lagbundle/lagbundle.hpp"
 
 #include "knapsack/opt_minknap/minknap.hpp"
 
@@ -6,7 +6,7 @@
 
 using namespace gap;
 
-LagOut gap::ub_lagrangian(const SubInstance& sub,
+LagOut gap::lb_lagrangian(const SubInstance& sub,
         StateIdx it_total, StateIdx a, std::vector<Value>* mult_init, Info* info)
 {
     (void)info;

@@ -7,7 +7,7 @@ cc_library(
                 "@knapsack//opt_minknap:minknap",
         ],
         visibility = ["//visibility:public"],
-        include_prefix = "gap/ub_lagbundle/",
+        include_prefix = "gap/lb_lagbundle/",
 )
 
 cc_test(
@@ -16,9 +16,6 @@ cc_test(
         deps = [
                 "//lib:tester",
                 ":lagbundle",
-        ],
-        data = [
-                "//data_tests:data",
         ],
         timeout = "moderate",
 )

@@ -20,7 +20,7 @@ struct LagOut
     std::vector<Value> zi;
 };
 
-LagOut ub_lagrangian(const SubInstance& sub,
+LagOut lb_lagrangian(const SubInstance& sub,
         StateIdx it_total = 100, StateIdx x = 2, std::vector<Value>* mult_init = NULL, Info* info = NULL);
 
 }

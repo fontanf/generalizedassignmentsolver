@@ -4,23 +4,14 @@
 
 #include <random>
 
-#include <boost/iostreams/filtering_stream.hpp>
-#include <boost/iostreams/filter/zlib.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
-#include <boost/iostreams/filter/bzip2.hpp>
-#include <boost/iostreams/copy.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/serialization/vector.hpp>
-
 using namespace gap;
 
-Instance generate_c(ItemIdx n, AgentIdx m, int obj, int seed)
+Instance generate_c(ItemIdx n, AgentIdx m, int seed)
 {
-    Instance ins(n, m, obj);
+    Instance ins(m, n);
     std::default_random_engine generator(seed);
-    std::uniform_int_distribution<int> distribution_c(5,25);
-    std::uniform_int_distribution<int> distribution_p(10,50);
+    std::uniform_int_distribution<int> distribution_c(5, 25);
+    std::uniform_int_distribution<int> distribution_p(10, 50);
     std::vector<Weight> wsum(m, 0);
     for (ItemIdx j=0; j<n; ++j) {
         ins.add_item();
@@ -36,9 +27,9 @@ Instance generate_c(ItemIdx n, AgentIdx m, int obj, int seed)
     return ins;
 }
 
-Instance generate_d(ItemIdx n, AgentIdx m, int obj, int seed)
+Instance generate_d(AgentIdx m, ItemIdx n, int seed)
 {
-    Instance ins(n, m, obj);
+    Instance ins(m, n);
     std::default_random_engine generator(seed);
     std::uniform_int_distribution<int> distribution_c(1,100);
     std::uniform_int_distribution<int> distribution_e(-10,+10);
@@ -48,12 +39,7 @@ Instance generate_d(ItemIdx n, AgentIdx m, int obj, int seed)
         for (AgentIdx i=0; i<m; ++i) {
             Weight w = distribution_c(generator);
             Weight e = distribution_e(generator);
-            Value p;
-            if (obj == 1) {
-                p = std::max((Value)1, 11 + w + e);
-            } else {
-                p = std::max((Value)1, 111 - w + e);
-            }
+            Value p = std::max((Value)1, 11 + w + e);
             ins.set_alternative(j, i, w, p);
             wsum[i] += w;
         }
@@ -63,25 +49,25 @@ Instance generate_d(ItemIdx n, AgentIdx m, int obj, int seed)
     return ins;
 }
 
-Instance gap::generate(std::string type, AgentIdx m, ItemIdx n, int obj, int seed)
+Instance gap::generate(std::string type, AgentIdx m, ItemIdx n, int seed)
 {
     if (type == "c") {
-        return generate_c(n, m, obj, seed);
+        return generate_c(m, n, seed);
     } else if (type == "d") {
-        return generate_d(n, m, obj, seed);
+        return generate_d(m, n, seed);
     } else {
         assert(false);
-        return generate_c(n, m, obj, seed);
+        return generate_c(m, n, seed);
     }
 }
 
 Instance gap::generate(const GenParams& p)
 {
-    Instance ins(p.n, p.m, 1);
+    Instance ins(p.m, p.n);
     std::default_random_engine generator(p.seed);
-    std::uniform_int_distribution<int> dist_r(p.r,2*p.r);
-    std::uniform_int_distribution<int> dist_b(0,p.r/p.m);
-    std::uniform_int_distribution<int> dist_e(0,p.r/10);
+    std::uniform_int_distribution<int> dist_r(p.r, 2 * p.r);
+    std::uniform_int_distribution<int> dist_b(0, p.r / p.m);
+    std::uniform_int_distribution<int> dist_e(0, p.r / 10);
     Weight wsum = 0;
     for (ItemIdx j=0; j<p.n; ++j) {
         ins.add_item();
