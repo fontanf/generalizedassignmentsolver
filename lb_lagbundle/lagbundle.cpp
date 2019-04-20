@@ -11,7 +11,6 @@ LagOut gap::lb_lagrangian(const SubInstance& sub,
 {
     (void)info;
     const Instance& ins = sub.instance();
-    assert(ins.objective() == 1);
     LagOut out(ins);
     std::vector<Value> multipliers_curr(ins.item_number(), 0);
     if (mult_init != NULL)

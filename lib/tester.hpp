@@ -7,6 +7,7 @@
 namespace gap
 {
 
+Instance test_instance(Cpt i);
 enum TestType { OPT, LB, UB };
 enum InstacesType { TEST };
 

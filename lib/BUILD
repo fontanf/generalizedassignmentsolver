@@ -53,3 +53,12 @@ cc_library(
         include_prefix = "gap/lib/",
 )
 
+cc_binary(
+        name = "test_main",
+        srcs = ["test_main.cpp"],
+        deps = [
+                "//opt_milp:milp",
+                ":tester",
+        ],
+)
+

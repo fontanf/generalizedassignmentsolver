@@ -28,7 +28,8 @@ public:
 
     bool check_capacity() const;
 
-    void set(const ItemIdx j, AgentIdx i);
+    void set(ItemIdx j, AgentIdx i);
+    void set(AltIdx k);
     AgentIdx agent(ItemIdx j) const;
     void clear();
 
@@ -36,7 +37,7 @@ public:
 
     void write_cert(std::string file);
 
-    std::string print_bin() const;
+    std::string to_string() const;
 
 private:
 

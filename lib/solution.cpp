@@ -71,6 +71,11 @@ void Solution::set(ItemIdx j, AgentIdx i)
     x_[j] = i;
 }
 
+void Solution::set(AltIdx k)
+{
+    set(instance().alternative(k).j, instance().alternative(k).i);
+}
+
 bool Solution::feasible() const
 {
     if (k_ != instance().item_number())
@@ -108,18 +113,6 @@ std::ostream& gap::operator<<(std::ostream& os, const Solution& solution)
     return os;
 }
 
-bool Solution::update(const Solution& sol)
-{
-    if (sol.item_number() != instance().item_number())
-        return false;
-    if (
-               (instance().objective() ==  1 && sol.value() <= value())
-            || (instance().objective() == -1 && sol.value() >= value()))
-        return false;
-    *this = sol;
-    return true;
-}
-
 bool Solution::check_capacity() const
 {
     for (AgentIdx i=0; i<instance().agent_number(); ++i)
@@ -128,10 +121,17 @@ bool Solution::check_capacity() const
     return true;
 }
 
-std::string Solution::print_bin() const
+std::string Solution::to_string() const
 {
-    std::string s = "";
-    for (ItemPos i=0; i<instance().item_number(); ++i)
-        s += std::to_string(agent(i));
+    std::string s = "v " + std::to_string(value()) + "\n";
+    for (AgentIdx i=0; i<instance().agent_number(); ++i) {
+        s += "agent " + std::to_string(i) + ":";
+        for (ItemPos j=0; j<instance().item_number(); ++j)
+            if (agent(j) == i)
+                s += " " + std::to_string(j);
+        if (i != instance().agent_number() - 1)
+            s += "\n";
+    }
     return s;
 }
+

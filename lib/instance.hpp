@@ -67,11 +67,9 @@ public:
     void set_optimal_solution(Solution& sol);
 
     Instance(std::string filename, std::string format);
-    ~Instance() { };
+    ~Instance();
 
     Instance(const Instance& ins);
-
-    int objective() const { return objective_; }
 
     const Item& item(ItemPos j) const { return items_[j]; }
     const Alternative& alternative(AltPos k) const { return alternatives_[k]; }
@@ -103,6 +101,8 @@ private:
 
 std::ostream& operator<<(std::ostream &os, const Alternative& alt);
 std::ostream& operator<<(std::ostream &os, const Instance& instance);
+
+Solution algorithm_end(const Solution& sol, Info& info);
 
 }
 

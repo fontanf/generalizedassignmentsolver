@@ -59,8 +59,8 @@ void SubInstance::remove(ItemIdx j, AgentIdx i)
 std::ostream& gap::operator<<(std::ostream& os, const SubInstance& sub)
 {
     const Instance& ins = sub.instance();
-    os <<  "N " << ins.item_number();
-    os << " C";
+    os << "m " << ins.agent_number() << " n " << ins.item_number() << std::endl;
+    os << " c";
     for (AgentIdx i=0; i<ins.agent_number(); ++i)
         os << " " << sub.capacity(i);
     os << std::endl;

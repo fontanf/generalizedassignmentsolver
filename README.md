@@ -16,5 +16,5 @@ Algorithm implementations for the Generalized Assignment Problem.
 
 ## Exact algorithm
 
-- MILP :x:
+- MILP solved with CBC :heavy_check_mark:
 

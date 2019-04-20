@@ -75,7 +75,6 @@ void Instance::read_beasley(std::string filepath)
     boost::filesystem::fstream file(filepath, std::ios_base::in);
     ItemIdx n;
     AgentIdx m;
-    objective_ = -1;
     file >> m >> n;
 
     c_.resize(m);
@@ -98,7 +97,7 @@ void Instance::read_standard(std::string filepath)
     boost::filesystem::fstream file(filepath, std::ios_base::in);
     ItemIdx  n;
     AgentIdx m;
-    file >> objective_ >> m >> n;
+    file >> m >> n;
 
     c_.resize(m);
     for (AgentIdx i=0; i<m; ++i)
@@ -115,7 +114,7 @@ void Instance::read_standard(std::string filepath)
 
 void Instance::read_standard_solution(std::string filepath)
 {
-    sol_opt_ = new Solution(*this);
+    sol_opt_ = std::unique_ptr<Solution>(new Solution(*this));
     boost::filesystem::ifstream file(filepath, std::ios_base::in);
 
     int x = 0;
@@ -156,6 +155,11 @@ Value Instance::optimum() const
     return optimal_solution()->value();
 }
 
+Instance::~Instance()
+{
+
+}
+
 std::ostream& gap::operator<<(std::ostream& os, const Alternative& alt)
 {
     os << "(" << alt.i << " " << alt.w << " " << alt.v << " " << alt.efficiency() << ")";
@@ -164,8 +168,8 @@ std::ostream& gap::operator<<(std::ostream& os, const Alternative& alt)
 
 std::ostream& gap::operator<<(std::ostream& os, const Instance& ins)
 {
-    os <<  "N " << ins.item_number();
-    os << " C";
+    os << "m " << ins.agent_number() << " n " << ins.item_number() << std::endl;
+    os << "c";
     for (AgentIdx i=0; i<ins.agent_number(); ++i)
         os << " " << ins.capacity(i);
     os << std::endl;
@@ -177,5 +181,16 @@ std::ostream& gap::operator<<(std::ostream& os, const Instance& ins)
         os << std::endl;
     }
     return os;
+}
+
+Solution gap::algorithm_end(const Solution& sol, Info& info)
+{
+    double t = info.elapsed_time();
+    PUT(info, "Solution.Value", sol.value());
+    PUT(info, "Solution.Time", t);
+    VER(info, "---" << std::endl
+            << "Value: " << sol.value() << std::endl
+            << "Time (s): " << t << std::endl);
+    return sol;
 }
 
