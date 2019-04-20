@@ -54,6 +54,14 @@ cc_library(
 )
 
 cc_binary(
+        name = "main",
+        srcs = ["main.cpp"],
+        deps = [
+                "//opt_milp:milp",
+        ],
+)
+
+cc_binary(
         name = "test_main",
         srcs = ["test_main.cpp"],
         deps = [

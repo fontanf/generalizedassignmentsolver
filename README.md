@@ -4,6 +4,21 @@ WORK IN PROGRESS
 
 Algorithm implementations for the Generalized Assignment Problem.
 
+Compile:
+```
+bazel build --cxxopt='-std=c++14' --compilation_mode=opt -- //...
+```
+
+Solve:
+```
+./bazel-bin/lib/main -v -a milp -i data/a05100 -o out.ini -c sol.txt
+```
+
+Unit tests:
+```
+bazel test --cxxopt='-std=c++14' --compilation_mode=opt -- //...
+```
+
 ## Lower bounds
 
 - Lagrangian relaxation solved with volume method :x:
