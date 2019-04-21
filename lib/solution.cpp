@@ -48,7 +48,7 @@ AgentIdx Solution::agent(ItemIdx j) const
 
 void Solution::set(ItemIdx j, AgentIdx i)
 {
-    const Instance ins = instance();
+    const Instance& ins = instance();
     assert(i >= -1 || i < ins.agent_number());
     assert(j >= 0 && j < ins.item_number());
 
@@ -143,7 +143,7 @@ void Solution::update(const Solution& sol, Value lb, const std::stringstream& s,
     if (!is_complete() || sol.value() < value()) {
         info.output->sol_number++;
         *this = sol;
-        double t = info.elapsed_time();
+        double t = std::round(info.elapsed_time());
         std::string sol_str = "Solution" + std::to_string(info.output->sol_number);
         PUT(info, sol_str + ".Value", sol.value());
         PUT(info, sol_str + ".Time", t);
@@ -173,7 +173,7 @@ void gap::init_display(Solution& sol, Value lb, Info& info)
     VER(info, "");
     VER(info, std::endl);
 
-    double t = info.elapsed_time();
+    double t = std::round(info.elapsed_time());
     VER(info, std::left << std::setw(10) << t);
     VER(info, std::left << std::setw(12) << sol.value());
     VER(info, std::left << std::setw(12) << lb);
