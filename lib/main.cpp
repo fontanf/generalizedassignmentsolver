@@ -1,5 +1,5 @@
 #include "gap/opt_milp/milp.hpp"
-#include "gap/ub_mbastar/mbastar.hpp"
+#include "gap/ub_random/random.hpp"
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
@@ -64,14 +64,8 @@ int main(int argc, char *argv[])
 
     if (algorithm == "milp") {
         sol = sopt_milp(ins, info);
-    } else if (algorithm == "mbastar") {
-        sol_mbastar({
-                .ins = ins,
-                .growth_factor = 1.5,
-                .criterion_id = 4,
-                .sol_best = sol,
-                .info = info,
-                });
+    } else if (algorithm == "random") {
+        sol = sol_random(ins, info);
     }
 
     info.write_ini(outputfile);

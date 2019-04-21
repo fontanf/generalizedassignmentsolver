@@ -14,6 +14,7 @@ Solution::Solution(const Solution& solution):
     n_(solution.n_),
     v_(solution.v_),
     w_tot_(solution.w_tot_),
+    wf_(solution.wf_),
     x_(solution.x_),
     w_(solution.w_)
 { }
@@ -26,6 +27,7 @@ Solution& Solution::operator=(const Solution& solution)
             v_ = solution.v_;
             w_ = solution.w_;
             w_tot_ = solution.w_tot_;
+            wf_ = solution.wf_;
             x_ = solution.x_;
         } else {
             assert(solution.instance().item_number() == instance().item_number());
@@ -56,6 +58,12 @@ void Solution::set(ItemIdx j, AgentIdx i)
 
     if (i_old != -1) {
         const Alternative& a_old = ins.alternative(j, i_old);
+        if (w_[i_old] <= ins.capacity(i_old)) {
+        } else if (w_[i_old] - a_old.w >= ins.capacity(i_old)) {
+            wf_ -= a_old.w;
+        } else {
+            wf_ -= w_[i_old] - ins.capacity(i_old);
+        }
         v_        -= a_old.v;
         w_[i_old] -= a_old.w;
         w_tot_    -= a_old.w;
@@ -64,6 +72,12 @@ void Solution::set(ItemIdx j, AgentIdx i)
 
     if (i != -1) {
         const Alternative& a = ins.alternative(j, i);
+        if (w_[i] >= ins.capacity(i)) {
+            wf_ += a.w;
+        } else if (w_[i] + a.w <= ins.capacity(i)) {
+        } else {
+            wf_ += w_[i] + a.w - ins.capacity(i);
+        }
         v_     += a.v;
         w_[i]  += a.w;
         w_tot_ += a.w;
@@ -76,16 +90,6 @@ void Solution::set(ItemIdx j, AgentIdx i)
 void Solution::set(AltIdx k)
 {
     set(instance().alternative(k).j, instance().alternative(k).i);
-}
-
-bool Solution::feasible() const
-{
-    if (n_ != instance().item_number())
-        return false;
-    for (AgentIdx i=0; i<instance().agent_number(); ++i)
-        if (remaining_capacity(i) < 0)
-            return false;
-    return true;
 }
 
 void Solution::clear()
@@ -109,7 +113,10 @@ void Solution::write_cert(std::string file)
 
 std::ostream& gap::operator<<(std::ostream& os, const Solution& sol)
 {
-    os << "v " << sol.value() << std::endl;
+    os <<  "n " << sol.instance().item_number()
+        << " v " << sol.value()
+        << " wf " << sol.feasible()
+        << std::endl;
     for (AgentIdx i=0; i<sol.instance().agent_number(); ++i) {
         os << "agent " << i << " (" << sol.remaining_capacity(i) << "/" << sol.instance().capacity(i) <<  "):";
         for (ItemPos j=0; j<sol.instance().item_number(); ++j)

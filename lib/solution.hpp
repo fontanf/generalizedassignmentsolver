@@ -22,7 +22,7 @@ public:
     inline Value value() const { return v_; }
     inline ItemIdx item_number() const { return n_; }
     inline bool is_complete() const { return n_ == instance().item_number(); }
-    bool feasible() const;
+    Weight feasible() const { return wf_; };
 
     const std::vector<AgentIdx>& data()  const { return x_; }
     const std::vector<Weight>& weights() const { return w_; }
@@ -43,6 +43,7 @@ private:
     ItemIdx n_ = 0;
     Value v_ = 0;
     Weight w_tot_ = 0;
+    Weight wf_ = 0;
     std::vector<AgentIdx> x_;
     std::vector<Weight> w_;
 
