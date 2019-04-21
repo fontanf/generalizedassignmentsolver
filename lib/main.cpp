@@ -1,4 +1,5 @@
 #include "gap/opt_milp/milp.hpp"
+#include "gap/ub_mbastar/mbastar.hpp"
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
@@ -52,7 +53,7 @@ int main(int argc, char *argv[])
     }
 
     Instance ins(instancefile, format);
-    Solution sopt(ins);
+    Solution sol(ins);
 
     Info info = Info()
         .set_verbose(vm.count("verbose"))
@@ -62,11 +63,19 @@ int main(int argc, char *argv[])
         .set_outputfile(outputfile);
 
     if (algorithm == "milp") {
-        sopt = sopt_milp(ins, info);
+        sol = sopt_milp(ins, info);
+    } else if (algorithm == "mbastar") {
+        sol_mbastar({
+                .ins = ins,
+                .growth_factor = 1.5,
+                .criterion_id = 4,
+                .sol_best = sol,
+                .info = info,
+                });
     }
 
     info.write_ini(outputfile);
-    sopt.write_cert(certfile);
+    sol.write_cert(certfile);
     return 0;
 }
 

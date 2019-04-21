@@ -38,16 +38,20 @@ void Instance::set_alternative(ItemIdx j, AgentIdx i, Weight w, Value v)
 {
     alternatives_[items_[j].alt[i]].w = w;
     alternatives_[items_[j].alt[i]].v = v;
+    items_[j].w += w;
+    items_[j].v += v;
 }
 
 void Instance::set_weight(ItemIdx j, AgentIdx i, Weight w)
 {
     alternatives_[items_[j].alt[i]].w = w;
+    items_[j].w += w;
 }
 
 void Instance::set_value(ItemIdx j, AgentIdx i, Value v)
 {
     alternatives_[items_[j].alt[i]].v = v;
+    items_[j].v += v;
 }
 
 Instance::Instance(std::string filepath, std::string format)

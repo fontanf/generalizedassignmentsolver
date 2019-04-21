@@ -42,13 +42,15 @@ struct Alternative
     Weight w;
     Value v;
 
-    double efficiency() const { return (double)v/(double)w; }
+    double efficiency() const { return v * w; }
 };
 
 struct Item
 {
     ItemIdx j;
     std::vector<AltIdx> alt;
+    Weight w; // total weight
+    Value  v; // total value
 };
 
 class Instance

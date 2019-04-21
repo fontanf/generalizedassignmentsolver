@@ -1,5 +1,7 @@
 #include "gap/lib/solution.hpp"
 
+#include <iomanip>
+
 using namespace gap;
 
 Solution::Solution(const Instance& instance): instance_(instance),
@@ -8,23 +10,23 @@ Solution::Solution(const Instance& instance): instance_(instance),
 { }
 
 Solution::Solution(const Solution& solution):
-    instance_(solution.instance()),
-    k_(solution.item_number()),
-    v_(solution.value()),
-    w_tot_(solution.weight()),
-    x_(solution.data()),
-    w_(solution.weights())
+    instance_(solution.instance_),
+    n_(solution.n_),
+    v_(solution.v_),
+    w_tot_(solution.w_tot_),
+    x_(solution.x_),
+    w_(solution.w_)
 { }
 
 Solution& Solution::operator=(const Solution& solution)
 {
     if (this != &solution) {
         if (&solution.instance() == &instance()) {
-            k_ = solution.item_number();
-            v_ = solution.value();
-            w_ = solution.weights();
-            w_tot_ = solution.weight();
-            x_ = solution.data();
+            n_ = solution.n_;
+            v_ = solution.v_;
+            w_ = solution.w_;
+            w_tot_ = solution.w_tot_;
+            x_ = solution.x_;
         } else {
             assert(solution.instance().item_number() == instance().item_number());
             assert(solution.instance().agent_number() == instance().agent_number());
@@ -57,7 +59,7 @@ void Solution::set(ItemIdx j, AgentIdx i)
         v_        -= a_old.v;
         w_[i_old] -= a_old.w;
         w_tot_    -= a_old.w;
-        k_--;
+        n_--;
     }
 
     if (i != -1) {
@@ -65,7 +67,7 @@ void Solution::set(ItemIdx j, AgentIdx i)
         v_     += a.v;
         w_[i]  += a.w;
         w_tot_ += a.w;
-        k_++;
+        n_++;
     }
 
     x_[j] = i;
@@ -78,7 +80,7 @@ void Solution::set(AltIdx k)
 
 bool Solution::feasible() const
 {
-    if (k_ != instance().item_number())
+    if (n_ != instance().item_number())
         return false;
     for (AgentIdx i=0; i<instance().agent_number(); ++i)
         if (remaining_capacity(i) < 0)
@@ -88,7 +90,7 @@ bool Solution::feasible() const
 
 void Solution::clear()
 {
-    k_ = 0;
+    n_ = 0;
     v_ = 0;
     w_tot_ = 0;
     std::fill(x_.begin(), x_.end(), -1);
@@ -105,11 +107,17 @@ void Solution::write_cert(std::string file)
     }
 }
 
-std::ostream& gap::operator<<(std::ostream& os, const Solution& solution)
+std::ostream& gap::operator<<(std::ostream& os, const Solution& sol)
 {
-    const Instance& instance = solution.instance();
-    for (ItemPos i=0; i<instance.item_number(); ++i)
-        os << solution.data()[i] << std::endl;
+    os << "v " << sol.value() << std::endl;
+    for (AgentIdx i=0; i<sol.instance().agent_number(); ++i) {
+        os << "agent " << i << " (" << sol.remaining_capacity(i) << "/" << sol.instance().capacity(i) <<  "):";
+        for (ItemPos j=0; j<sol.instance().item_number(); ++j)
+            if (sol.agent(j) == i)
+                os << " " << j;
+        if (i != sol.instance().agent_number() - 1)
+            os << std::endl;
+    }
     return os;
 }
 
@@ -121,17 +129,60 @@ bool Solution::check_capacity() const
     return true;
 }
 
-std::string Solution::to_string() const
+void Solution::update(const Solution& sol, Info& info, const std::stringstream& algorithm)
 {
-    std::string s = "v " + std::to_string(value()) + "\n";
-    for (AgentIdx i=0; i<instance().agent_number(); ++i) {
-        s += "agent " + std::to_string(i) + ":";
-        for (ItemPos j=0; j<instance().item_number(); ++j)
-            if (agent(j) == i)
-                s += " " + std::to_string(j);
-        if (i != instance().agent_number() - 1)
-            s += "\n";
+    info.output->mutex_sol.lock();
+
+    if (!is_complete() || sol.value() < value()) {
+        info.output->sol_number++;
+        *this = sol;
+        double t = info.elapsed_time();
+        std::string sol_str = "Solution" + std::to_string(info.output->sol_number);
+        PUT(info, sol_str + ".Value", sol.value());
+        PUT(info, sol_str + ".Time", t);
+        PUT(info, sol_str + ".Algorithm", algorithm.str());
+
+        VER(info, std::left << std::setw(6) << info.output->sol_number);
+        VER(info, std::left << std::setw(22) << algorithm.str());
+        VER(info, std::left << std::setw(12) << sol.value());
+        VER(info, t << std::endl);
+
+        if (!info.output->onlywriteattheend) {
+            info.write_ini();
+            write_cert(info.output->certfile);
+        }
     }
-    return s;
+
+    info.output->mutex_sol.unlock();
+}
+
+/*********************************** Compare **********************************/
+
+double SolutionCompare::value(const Solution& s)
+{
+    switch(id) {
+    case 0:
+        return s.value();
+    case 1:
+        return s.value() * s.weight();
+    case 2:
+        if (s.item_number() == 0)
+            return 0;
+        return (double)s.value() / s.item_number();
+    case 3:
+        if (s.item_number() == 0)
+            return 0;
+        return (double)s.value() / s.item_number() * (double)s.weight() / s.item_number();
+    case 4:
+        if (s.item_number() == 0)
+            return 0;
+        return (double)s.value() / s.item_number() * (double)s.weight();
+    }
+    return 0;
+}
+
+bool SolutionCompare::operator()(const Solution& s1, const Solution& s2)
+{
+    return value(s1) < value(s2);
 }
 

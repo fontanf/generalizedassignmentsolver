@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
         Instance ins = test_instance(i);
         std::cout << ins << std::endl;
         Solution sol = sopt_milp(ins);
-        std::cout << sol.to_string() << std::endl;
+        std::cout << sol << std::endl;
     }
 
 }

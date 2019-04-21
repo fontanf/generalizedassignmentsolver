@@ -20,7 +20,8 @@ public:
     inline Weight weight(AgentIdx i) const { return w_[i]; }
     inline Weight remaining_capacity(AgentIdx i) const { return instance().capacity(i) - weight(i); }
     inline Value value() const { return v_; }
-    inline ItemIdx item_number() const { return k_; }
+    inline ItemIdx item_number() const { return n_; }
+    inline bool is_complete() const { return n_ == instance().item_number(); }
     bool feasible() const;
 
     const std::vector<AgentIdx>& data()  const { return x_; }
@@ -33,16 +34,13 @@ public:
     AgentIdx agent(ItemIdx j) const;
     void clear();
 
-    bool update(const Solution& sol);
-
+    void update(const Solution& sol, Info& info, const std::stringstream& algorithm);
     void write_cert(std::string file);
-
-    std::string to_string() const;
 
 private:
 
     const Instance& instance_;
-    ItemIdx k_ = 0;
+    ItemIdx n_ = 0;
     Value v_ = 0;
     Weight w_tot_ = 0;
     std::vector<AgentIdx> x_;
@@ -51,5 +49,13 @@ private:
 };
 
 std::ostream& operator<<(std::ostream& os, const Solution& solution);
+
+struct SolutionCompare
+{
+    SolutionCompare(int comparator_id): id(comparator_id) {  }
+    double value(const Solution& s);
+    bool operator()(const Solution& s1, const Solution& s2);
+    int id;
+};
 
 }

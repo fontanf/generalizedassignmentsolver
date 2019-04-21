@@ -58,6 +58,7 @@ cc_binary(
         srcs = ["main.cpp"],
         deps = [
                 "//opt_milp:milp",
+                "//ub_mbastar:mbastar",
         ],
 )
 
