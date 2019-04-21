@@ -1,5 +1,6 @@
 #include "gap/opt_milp/milp.hpp"
 #include "gap/ub_random/random.hpp"
+#include "gap/ub_lssimple/lssimple.hpp"
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
@@ -20,6 +21,7 @@ int main(int argc, char *argv[])
     std::string certfile = "";
     std::string logfile = "";
     int loglevelmax = 999;
+    double time_limit = std::numeric_limits<double>::infinity();
 
     po::options_description desc("Allowed options");
     desc.add_options()
@@ -29,6 +31,7 @@ int main(int argc, char *argv[])
         ("format,f", po::value<std::string>(&format), "set input file format (default: knapsack_standard)")
         ("output,o", po::value<std::string>(&outputfile), "set output file")
         ("cert,c", po::value<std::string>(&certfile), "set certificate file")
+        (",t", po::value<double>(&time_limit), "Time limit in seconds\n  ex: 3600")
         ("verbose,v", "")
         ("log,l", po::value<std::string>(&logfile), "set log file")
         ("loglevelmax", po::value<int>(&loglevelmax), "set log max level")
@@ -60,12 +63,15 @@ int main(int argc, char *argv[])
         .set_logfile(logfile)
         .set_log2stderr(vm.count("log2stderr"))
         .set_loglevelmax(loglevelmax)
+        .set_timelimit(time_limit)
         .set_outputfile(outputfile);
 
     if (algorithm == "milp") {
         sol = sopt_milp(ins, info);
     } else if (algorithm == "random") {
         sol = sol_random(ins, info);
+    } else if (algorithm == "lssimple") {
+        sol = sol_lssimple(ins, info);
     }
 
     info.write_ini(outputfile);

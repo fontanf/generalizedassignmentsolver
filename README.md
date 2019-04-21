@@ -28,8 +28,7 @@ bazel test --cxxopt='-std=c++14' --compilation_mode=opt -- //...
 ## Upper bounds
 
 - Random initial solution :heavy_check_mark:
-- Simple hill climbing :x:
-- Steepest ascent hill climbing :x:
+- Simple hill climbing :heavy_check_mark:
 
 ## Exact algorithms
 

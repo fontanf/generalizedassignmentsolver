@@ -136,7 +136,7 @@ bool Solution::check_capacity() const
     return true;
 }
 
-void Solution::update(const Solution& sol, Info& info, const std::stringstream& algorithm)
+void Solution::update(const Solution& sol, Value lb, const std::stringstream& s, Info& info)
 {
     info.output->mutex_sol.lock();
 
@@ -147,12 +147,13 @@ void Solution::update(const Solution& sol, Info& info, const std::stringstream& 
         std::string sol_str = "Solution" + std::to_string(info.output->sol_number);
         PUT(info, sol_str + ".Value", sol.value());
         PUT(info, sol_str + ".Time", t);
-        PUT(info, sol_str + ".Algorithm", algorithm.str());
+        PUT(info, sol_str + ".Algorithm", s.str());
 
-        VER(info, std::left << std::setw(6) << info.output->sol_number);
-        VER(info, std::left << std::setw(22) << algorithm.str());
+        VER(info, std::left << std::setw(10) << t);
         VER(info, std::left << std::setw(12) << sol.value());
-        VER(info, t << std::endl);
+        VER(info, std::left << std::setw(12) << lb);
+        VER(info, std::left << std::setw(10) << sol.value() - lb);
+        VER(info, s.str() << std::endl);
 
         if (!info.output->onlywriteattheend) {
             info.write_ini();
@@ -161,6 +162,23 @@ void Solution::update(const Solution& sol, Info& info, const std::stringstream& 
     }
 
     info.output->mutex_sol.unlock();
+}
+
+void gap::init_display(Solution& sol, Value lb, Info& info)
+{
+    VER(info, std::left << std::setw(10) << "T (s)");
+    VER(info, std::left << std::setw(12) << "UB");
+    VER(info, std::left << std::setw(12) << "LB");
+    VER(info, std::left << std::setw(10) << "GAP");
+    VER(info, "");
+    VER(info, std::endl);
+
+    double t = info.elapsed_time();
+    VER(info, std::left << std::setw(10) << t);
+    VER(info, std::left << std::setw(12) << sol.value());
+    VER(info, std::left << std::setw(12) << lb);
+    VER(info, std::left << std::setw(10) << sol.value() - lb);
+    VER(info, "" << std::endl);
 }
 
 /*********************************** Compare **********************************/

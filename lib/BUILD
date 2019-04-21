@@ -59,6 +59,7 @@ cc_binary(
         deps = [
                 "//opt_milp:milp",
                 "//ub_random:random",
+                "//ub_lssimple:lssimple",
         ],
 )
 

@@ -34,7 +34,7 @@ public:
     AgentIdx agent(ItemIdx j) const;
     void clear();
 
-    void update(const Solution& sol, Info& info, const std::stringstream& algorithm);
+    void update(const Solution& sol, Value lb, const std::stringstream& s, Info& info);
     void write_cert(std::string file);
 
 private:
@@ -48,6 +48,8 @@ private:
     std::vector<Weight> w_;
 
 };
+
+void init_display(Solution& sol, Value lb, Info& info);
 
 std::ostream& operator<<(std::ostream& os, const Solution& solution);
 
