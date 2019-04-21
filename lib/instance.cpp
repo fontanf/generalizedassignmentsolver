@@ -40,18 +40,10 @@ void Instance::set_alternative(ItemIdx j, AgentIdx i, Weight w, Value v)
     alternatives_[items_[j].alt[i]].v = v;
     items_[j].w += w;
     items_[j].v += v;
-}
-
-void Instance::set_weight(ItemIdx j, AgentIdx i, Weight w)
-{
-    alternatives_[items_[j].alt[i]].w = w;
-    items_[j].w += w;
-}
-
-void Instance::set_value(ItemIdx j, AgentIdx i, Value v)
-{
-    alternatives_[items_[j].alt[i]].v = v;
-    items_[j].v += v;
+    if (items_[j].i_best == -1 || items_[j].v_min > v) {
+        items_[j].i_best = i;
+        items_[j].v_min = v;
+    }
 }
 
 Instance::Instance(std::string filepath, std::string format)
@@ -90,6 +82,9 @@ void Instance::read_beasley(std::string filepath)
     for (AgentIdx i=0; i<m; ++i)
         for (ItemPos j=0; j<n; ++j)
             file >> alternatives_[alternative_index(j, i)].w;
+    for (AgentIdx i=0; i<m; ++i)
+        for (ItemPos j=0; j<n; ++j)
+            set_alternative(j, i, alternatives_[alternative_index(j, i)].w, alternatives_[alternative_index(j, i)].v);
     for (AgentIdx i=0; i<m; ++i)
         file >> c_[i];
 

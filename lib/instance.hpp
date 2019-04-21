@@ -50,7 +50,9 @@ struct Item
     ItemIdx j;
     std::vector<AltIdx> alt;
     Weight w; // total weight
-    Value  v; // total value
+    Value v; // total value
+    Value v_min = -1; // minimum value
+    AgentIdx i_best = -1; // lowest value agent
 };
 
 class Instance
@@ -63,8 +65,6 @@ public:
     void add_items(ItemIdx n);
     ItemIdx add_item();
     void set_alternative(ItemIdx j, AgentIdx i, Weight w, Value p);
-    void set_weight(ItemIdx j, AgentIdx i, Weight w);
-    void set_value(ItemIdx j, AgentIdx i, Value p);
     void set_capacity(AgentIdx i, Weight c) { c_[i] = c; }
     void set_optimal_solution(Solution& sol);
 
