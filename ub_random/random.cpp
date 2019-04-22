@@ -41,7 +41,7 @@ Solution gap::sol_random(const Instance& ins, Info info)
     for (int s=0;; ++s) {
         Solution sol(ins);
         for (ItemIdx j=0; j<ins.item_number(); ++j) {
-            if (s == 0) {
+            if (s == 3) {
                 AgentIdx i_min = 0;
                 for (AgentIdx i=1; i<ins.agent_number(); ++i)
                     if (ins.alternative(j, i_min).w > ins.alternative(j, i).w)

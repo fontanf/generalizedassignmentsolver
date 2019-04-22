@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
         .set_outputfile(outputfile);
 
     if (algorithm == "milp") {
-        sol = sopt_milp(ins, info);
+        sopt_milp(ins, sol, info);
     } else if (algorithm == "random") {
         sol = sol_random(ins, info);
     } else if (algorithm == "lssimple") {

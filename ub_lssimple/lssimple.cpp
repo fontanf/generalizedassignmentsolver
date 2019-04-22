@@ -88,72 +88,51 @@ bool move_swap3(Solution& sol,
     return true;
 }
 
-bool move_milp2(const Instance& ins, Solution& sol,
-        std::default_random_engine& gen, std::uniform_int_distribution<>& dis,
+bool move_gap(const Instance& ins, Solution& sol, AgentIdx m, ItemIdx n,
+        std::vector<ItemIdx>& items, std::vector<AgentIdx>& agents,
         Info& info)
 {
     (void)info;
-    AgentIdx i1 = dis(gen);
-    AgentIdx i2 = i1;
-    while (i2 == i1)
-        i2 = dis(gen);
-    Instance ins_tmp(2);
-    ins_tmp.set_capacity(0, ins.capacity(i1));
-    ins_tmp.set_capacity(1, ins.capacity(i2));
+    std::random_shuffle(items.begin(), items.end());
+    std::random_shuffle(agents.begin(), agents.end());
+    std::vector<Weight> c(m, 0);
+    for (AgentIdx i=0; i<m; ++i)
+        c[i] = ins.capacity(agents[i]);
+    Instance ins_tmp(m, n);
+    std::vector<AgentIdx> sol_vec;
     Value v = 0;
     std::vector<ItemIdx> pos;
-    for (ItemIdx j=0; j<ins.item_number(); ++j) {
-        if (sol.agent(j) == i1 || sol.agent(j) == i2) {
-            v += ins.alternative(j, sol.agent(j)).v;
-            ItemIdx j_tmp = ins_tmp.add_item();
-            ins_tmp.set_alternative(j_tmp, 0, ins.alternative(j, i1).w, ins.alternative(j, i1).v);
-            ins_tmp.set_alternative(j_tmp, 1, ins.alternative(j, i2).w, ins.alternative(j, i2).v);
-            pos.push_back(j);
+    for (ItemIdx j: items) {
+        AgentIdx i = -1;
+        for (AgentPos i_pos=0; i_pos<m; ++i_pos) {
+            if (agents[i_pos] == sol.agent(j)) {
+                i = i_pos;
+                break;
+            }
         }
-    }
-    Solution sol_tmp = sopt_milp(ins_tmp);
-    for (ItemIdx j=0; j<(ItemIdx)pos.size(); ++j) {
-        if (sol.agent(pos[j]) == i1 && sol_tmp.agent(j) == 1)
-            sol.set(pos[j], i2);
-        if (sol.agent(pos[j]) == i2 && sol_tmp.agent(j) == 0)
-            sol.set(pos[j], i1);
-    }
-    return (sol_tmp.value() < v);
-}
-
-bool move_milp3(const Instance& ins, Solution& sol,
-        std::default_random_engine& gen, std::uniform_int_distribution<>& dis,
-        Info& info)
-{
-    (void)info;
-    AgentIdx i[3];
-    i[0] = dis(gen);
-    i[1] = i[0];
-    i[2] = i[0];
-    while (i[1] == i[0])
-        i[1] = dis(gen);
-    while (i[2] == i[0] || i[2] == i[1])
-        i[2] = dis(gen);
-    Instance ins_tmp(3);
-    ins_tmp.set_capacity(0, ins.capacity(i[0]));
-    ins_tmp.set_capacity(1, ins.capacity(i[1]));
-    ins_tmp.set_capacity(2, ins.capacity(i[2]));
-    Value v = 0;
-    std::vector<ItemIdx> pos;
-    for (ItemIdx j=0; j<ins.item_number(); ++j) {
-        if (sol.agent(j) == i[0] || sol.agent(j) == i[1] || sol.agent(j) == i[2]) {
-            v += ins.alternative(j, sol.agent(j)).v;
-            ItemIdx j_tmp = ins_tmp.add_item();
-            ins_tmp.set_alternative(j_tmp, 0, ins.alternative(j, i[0]).w, ins.alternative(j, i[0]).v);
-            ins_tmp.set_alternative(j_tmp, 1, ins.alternative(j, i[1]).w, ins.alternative(j, i[1]).v);
-            ins_tmp.set_alternative(j_tmp, 2, ins.alternative(j, i[2]).w, ins.alternative(j, i[2]).v);
-            pos.push_back(j);
+        if (i == -1)
+            continue;
+        if (ins_tmp.item_number() == n) {
+            c[i] -= ins.alternative(j, sol.agent(j)).w;
+            continue;
         }
+        v += ins.alternative(j, sol.agent(j)).v;
+        ItemIdx j_tmp = ins_tmp.add_item();
+        sol_vec.push_back(i);
+        for (AgentPos i_pos=0; i_pos<m; ++i_pos)
+            ins_tmp.set_alternative(j_tmp, i_pos,
+                    ins.alternative(j, agents[i_pos]).w,
+                    ins.alternative(j, agents[i_pos]).v);
+        pos.push_back(j);
     }
-    Solution sol_tmp = sopt_milp(ins_tmp);
-    for (ItemIdx j=0; j<(ItemIdx)pos.size(); ++j) {
-        sol.set(pos[j], i[sol_tmp.agent(j)]);
-    }
+    for (AgentPos i_pos=0; i_pos<m; ++i_pos)
+        ins_tmp.set_capacity(i_pos, c[i_pos]);
+    Solution sol_tmp(ins_tmp);
+    for (ItemIdx j=0; j<(ItemIdx)pos.size(); ++j)
+        sol_tmp.set(j, sol_vec[j]);
+    sopt_milp(ins_tmp, sol_tmp);
+    for (ItemIdx j=0; j<(ItemIdx)pos.size(); ++j)
+        sol.set(pos[j], agents[sol_tmp.agent(j)]);
     return (sol_tmp.value() < v);
 }
 
@@ -165,12 +144,18 @@ Solution gap::sol_lssimple(const Instance& ins, Solution& sol, Info info)
     for (ItemIdx j=0; j<ins.item_number(); ++j)
         lb += ins.item(j).v_min;
 
+    std::vector<ItemIdx> items(ins.item_number(), 0);
+    std::vector<AgentIdx> agents(ins.agent_number(), 0);
+    std::iota(items.begin(), items.end(), 0);
+    std::iota(agents.begin(), agents.end(), 0);
+
     Solution sol_best = sol;
     init_display(sol_best, lb, info);
     std::default_random_engine gen(0);
     std::uniform_int_distribution<> dis_j(0, ins.item_number() - 1);
     std::uniform_int_distribution<> dis_i(0, ins.agent_number() - 1);
-    for (Cpt it=0, it_without_improvment=0; info.check_time(); ++it, ++it_without_improvment) {
+    std::uniform_int_distribution<> dis_m(2, std::min(ins.agent_number() - 1, (AgentIdx)5));
+    for (Cpt it=1, it_without_improvment=0; info.check_time(); ++it, ++it_without_improvment) {
         if (move_shift(sol, gen, dis_j, dis_i, info))
             it_without_improvment = 0;
         if (move_swap(sol, gen, dis_j, info))
@@ -178,14 +163,20 @@ Solution gap::sol_lssimple(const Instance& ins, Solution& sol, Info info)
         if ((it + 1) % 10 == 0)
             if (move_swap3(sol, gen, dis_j, info))
                 it_without_improvment = 0;
-        if ((it + 1) % 100000 == 0)
-            if (move_milp2(ins, sol, gen, dis_i, info))
+        if ((it > 100000 && it % 10000 == 0) || (it > 1000000 && it % 1000 == 0))
+            if (move_gap(ins, sol, 2, ins.item_number(), items, agents, info))
                 it_without_improvment = 0;
-        if ((it + 1) % 10000000 == 0)
-            if (move_milp3(ins, sol, gen, dis_i, info))
+        if ((it > 1000000 && it % 100000 == 0) || (it > 10000000 && it % 10000 == 0))
+            if (move_gap(ins, sol, 3, ins.item_number(), items, agents, info))
+                it_without_improvment = 0;
+        if ((it > 10000000 && it % 1000000 == 0) || (it > 100000000 && it % 100000 == 0))
+            if (move_gap(ins, sol, 4, 1024, items, agents, info))
+                it_without_improvment = 0;
+        if ((it > 100000000 && it % 10000000 == 0) || (it > 1000000000 && it % 1000000 == 0))
+            if (move_gap(ins, sol, 5, 512, items, agents, info))
                 it_without_improvment = 0;
 
-        if ((it + 1) % 1000000 == 0 && sol_best.value() > sol.value()) {
+        if (it % 100000 == 0 && sol_best.value() > sol.value()) {
             it_without_improvment = 0;
             std::stringstream ss;
             ss << "it " << it;

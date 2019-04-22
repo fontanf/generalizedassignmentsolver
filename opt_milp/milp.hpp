@@ -6,7 +6,7 @@
 namespace gap
 {
 
-Solution sopt_milp(const Instance& ins, Info info = Info());
+Solution sopt_milp(const Instance& ins, Solution& sol, Info info = Info());
 
 }
 

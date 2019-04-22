@@ -13,8 +13,8 @@ int main(int argc, char *argv[])
     for (int i=0; i<=9; ++i) {
         Instance ins = test_instance(i);
         std::cout << ins << std::endl;
-        Solution sol = sopt_milp(ins);
-        std::cout << sol << std::endl;
+        //Solution sol = sopt_milp(ins);
+        //std::cout << sol << std::endl;
     }
 
 }
