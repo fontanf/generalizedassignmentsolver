@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
     } else if (algorithm == "random") {
         sol = sol_random(ins, info);
     } else if (algorithm == "lssimple") {
-        sol = sol_lssimple(ins, info);
+        sol_lssimple(ins, sol, info);
     }
 
     info.write_ini(outputfile);

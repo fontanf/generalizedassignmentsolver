@@ -49,6 +49,8 @@ Solution gap::sopt_milp(const Instance& ins, Info info)
     std::vector<double> colLower(numberColumns, 0);
     std::vector<double> colUpper(numberColumns, 1);
     OsiCbcSolverInterface solver1;
+    solver1.getModelPtr()->setLogLevel(0);
+    solver1.messageHandler()->setLogLevel(0);
     // load problem
     solver1.loadProblem(matrix, colLower.data(), colUpper.data(),
               objective.data(), rowLower.data(), rowUpper.data());
@@ -63,7 +65,7 @@ Solution gap::sopt_milp(const Instance& ins, Info info)
     CbcModel model(solver1);
 
     // reduce printout
-    model.setLogLevel(1);
+    model.setLogLevel(0);
     model.solver()->setHintParam(OsiDoReducePrint, true, OsiHintTry);
     // Do complete search
     model.branchAndBound();
@@ -75,6 +77,5 @@ Solution gap::sopt_milp(const Instance& ins, Info info)
     for (AltIdx k=0; k<ins.alternative_number(); ++k)
         if (solution[k] > 0.5)
             sol.set(k);
-
     return algorithm_end(sol, info);
 }
