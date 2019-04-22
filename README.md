@@ -27,11 +27,11 @@ bazel test --cxxopt='-std=c++14' --compilation_mode=opt -- //...
 
 ## Upper bounds
 
-- Random initial solution :heavy_check_mark:
-- Simple hill climbing :heavy_check_mark:
+- Random initial solution `-a random` :heavy_check_mark:
+- Simple hill climbing `-a lssimple` :heavy_check_mark:
 
 ## Exact algorithms
 
-- MILP solved with CBC :heavy_check_mark:
+- MILP solved with CBC `-a milp` :heavy_check_mark:
 - Branch-and-price :x:
 

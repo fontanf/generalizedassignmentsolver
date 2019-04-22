@@ -18,10 +18,10 @@ Solution gap::sol_lssimple(const Instance& ins, Info info)
     Solution sol_best = sol;
     init_display(sol_best, lb, info);
     std::default_random_engine gen(0);
-    double t = 0;
     std::uniform_int_distribution<> dis_j(0, ins.item_number() - 1);
     std::uniform_int_distribution<> dis_i(0, ins.agent_number() - 1);
-    for (Cpt it=0; info.check_time(); ++it) {
+    for (Cpt it=0, it_without_improvment=0; info.check_time(); ++it, ++it_without_improvment) {
+
         // Shift
         ItemIdx j = dis_j(gen);
         AgentIdx i_old = sol.agent(j);
@@ -50,12 +50,16 @@ Solution gap::sol_lssimple(const Instance& ins, Info info)
             sol.set(j2, i2);
         }
 
-        if (info.elapsed_time() > t + 10 && sol_best.value() > sol.value()) {
-            t = info.elapsed_time();
+        if (it % 1000000 == 0 && sol_best.value() > sol.value()) {
+            it_without_improvment = 0;
             std::stringstream ss;
-            ss << "it " << it << " (ub)";
+            ss << "it " << it;
             sol_best.update(sol, lb, ss, info);
         }
+
+        if (it_without_improvment > 4 * ins.item_number() * ins.item_number()
+                && sol_best.value() <= sol.value())
+            break;
     }
     return algorithm_end(sol, info);
 }

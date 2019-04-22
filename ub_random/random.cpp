@@ -36,7 +36,7 @@ bool improve(const Instance& ins, Solution& sol, std::vector<ItemIdx>& vec, Info
 
 Solution gap::sol_random(const Instance& ins, Info info)
 {
-    std::default_random_engine gen(2);
+    std::default_random_engine gen(0);
     std::uniform_int_distribution<> dis(0, ins.agent_number() - 1);
     for (int s=0;; ++s) {
         Solution sol(ins);
