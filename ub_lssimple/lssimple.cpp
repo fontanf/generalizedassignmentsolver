@@ -148,8 +148,12 @@ Solution gap::sol_lssimple(const Instance& ins, Solution& sol, Info info)
                 n = (k % 5) + 2;
             } else if (k <= 20000) {
                 n = (k % 6) + 2;
-            } else {
+            } else if (k <= 100000) {
                 n = (k % 7) + 2;
+            } else if (k <= 5000000) {
+                n = (k % 8) + 2;
+            } else {
+                n = (k % 9) + 2;
             }
             if (n > ins.agent_number())
                 n = ins.agent_number();
