@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
     if (algorithm == "milp") {
         sopt_milp(ins, sol, info);
     } else if (algorithm == "random") {
-        sol = sol_random(ins, info);
+        sol = sol_random(ins, 0, info);
     } else if (algorithm == "lssimple") {
         sol_lssimple(ins, sol, info);
     }

@@ -6,7 +6,7 @@
 namespace gap
 {
 
-Solution sol_random(const Instance& ins, Info info = Info());
+Solution sol_random(const Instance& ins, Cpt seed = 0, Info info = Info());
 
 }
 

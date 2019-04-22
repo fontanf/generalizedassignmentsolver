@@ -7,35 +7,35 @@
 
 using namespace gap;
 
-Solution gap::sol_random(const Instance& ins, Info info)
+Solution gap::sol_random(const Instance& ins, Cpt seed, Info info)
 {
-    std::default_random_engine gen(0);
+    std::default_random_engine gen(seed);
     std::uniform_int_distribution<> dis(0, ins.agent_number() - 1);
     Solution sol(ins);
     for (ItemIdx j=0; j<ins.item_number(); ++j)
         sol.set(j, dis(gen));
 
     while (sol.feasible() > 0) {
-        Weight wf = sol.feasible();
+        Weight wf_min = sol.feasible();
         ItemIdx j_best = -1;
         ItemIdx i_best = -1;
-        Value vshift_min = sol.value();
         for (ItemIdx j=0; j<ins.item_number(); ++j) {
             AgentIdx i_old = sol.agent(j);
             for (AgentIdx i=0; i<ins.agent_number(); ++i) {
                 if (i == i_old)
                     continue;
                 sol.set(j, i);
-                if (sol.feasible() < wf && (j_best == -1 || vshift_min > sol.value())) {
+                if (wf_min > sol.feasible()) {
                     j_best = j;
                     i_best = i;
-                    vshift_min = sol.value();
+                    wf_min = sol.feasible();
                 }
             }
             sol.set(j, i_old);
         }
+
         if (j_best == -1)
-            return sol_random(ins);
+            return sol_random(ins, seed + 1);
         sol.set(j_best, i_best);
     }
 
