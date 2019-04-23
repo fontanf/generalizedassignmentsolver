@@ -9,59 +9,6 @@
 
 using namespace gap;
 
-bool shift_swap(const Instance& ins, Solution& sol, Info& info)
-{
-    (void)info;
-    ItemIdx j_best = -1;
-    ItemIdx i_best = -1;
-    Value vshift_min = sol.value();
-    for (ItemIdx j=0; j<ins.item_number(); ++j) {
-        AgentIdx i_old = sol.agent(j);
-        for (AgentIdx i=0; i<ins.agent_number(); ++i) {
-            if (i == i_old)
-                continue;
-            sol.set(j, i);
-            if (sol.feasible() == 0 && vshift_min > sol.value()) {
-                j_best = j;
-                i_best = i;
-                vshift_min = sol.value();
-            }
-        }
-        sol.set(j, i_old);
-    }
-
-    ItemIdx j1_best = -1;
-    ItemIdx j2_best = -1;
-    Value vswap_min = sol.value();
-    for (ItemIdx j1=0; j1<ins.item_number(); ++j1) {
-        AgentIdx i1 = sol.agent(j1);
-        for (ItemIdx j2=j1+1; j2<ins.item_number(); ++j2) {
-            AgentIdx i2 = sol.agent(j2);
-            sol.set(j1, i2);
-            sol.set(j2, i1);
-            if (sol.feasible() == 0 && vswap_min > sol.value()) {
-                j1_best = j1;
-                j2_best = j2;
-                vswap_min = sol.value();
-            }
-            sol.set(j2, i2);
-        }
-        sol.set(j1, i1);
-    }
-
-    if (j_best == -1 && j2_best == -1) { // No improvment
-        return false;
-    } else if (j1_best == -1 || (j_best != -1 && vshift_min < vswap_min)) {
-        sol.set(j_best, i_best);
-    } else {
-        AgentIdx i1 = sol.agent(j1_best);
-        AgentIdx i2 = sol.agent(j2_best);
-        sol.set(j1_best, i2);
-        sol.set(j2_best, i1);
-    }
-    return true;
-}
-
 bool move_gap(const Instance& ins, Solution& sol, AgentIdx m, ItemIdx n,
         std::vector<ItemIdx>& items, std::vector<AgentIdx>& agents,
         Info& info)
@@ -110,7 +57,7 @@ bool move_gap(const Instance& ins, Solution& sol, AgentIdx m, ItemIdx n,
             .ins = ins_tmp,
             .sol = sol_tmp,
             .stop_at_first_improvment = true,
-            .info = Info().set_timelimit((double)m / 2),
+            .info = Info().set_timelimit(10),
             });
     if (v <= sol_tmp.value())
         return false;
@@ -134,48 +81,24 @@ Solution gap::sol_lssimple(const Instance& ins, Solution& sol, Info info)
 
     Solution sol_best = sol;
     init_display(sol_best, lb, info);
-    for (Cpt it=0; info.check_time(); ++it) {
-        while (shift_swap(ins, sol, info)) {  }
-        std::stringstream ss;
-        ss << "it " << it << " shift-swap";
-        sol_best.update(sol, lb, ss, info);
-
-        bool b = false;
-        for (ItemIdx k=0; ; ++k) {
-            AgentIdx m = 2;
-            if (k <= 10) {
-                m = 2;
-            } else if (k <= 50) {
-                m = (k % 2) + 2;
-            } else if (k <= 200) {
-                m = (k % 3) + 2;
-            } else if (k <= 1000) {
-                m = (k % 4) + 2;
-            } else if (k <= 5000) {
-                m = (k % 5) + 2;
-            } else if (k <= 20000) {
-                m = (k % 6) + 2;
-            } else if (k <= 100000) {
-                m = (k % 7) + 2;
-            } else if (k <= 5000000) {
-                m = (k % 8) + 2;
-            } else {
-                m = (k % 9) + 2;
-            }
-            if (m > ins.agent_number())
-                m = ins.agent_number();
-            ItemIdx n = ins.item_number();
-            //ItemIdx n = std::max((ItemIdx)32, ins.item_number() / (m - 1));
-            if (move_gap(ins, sol, m, n, items, agents, info)) {
-                std::stringstream ss;
-                ss << "it " << it << " gap " << m;
-                sol_best.update(sol, lb, ss, info);
-                b = true;
-                break;
+    for (Cpt it=0, k=0, m_max=2; info.check_time(); ++it, ++k) {
+        if (k > ins.agent_number()) {
+            m_max++;
+            std::cout << m_max << std::endl;
+            k = 0;
+        }
+        for (AgentIdx m=2; m<=m_max; ++m) {
+            for (AgentIdx l=0; l<=(m_max-m+1); ++l) {
+                if (move_gap(ins, sol, m, ins.item_number(), items, agents, info)) {
+                    std::stringstream ss;
+                    ss << "it " << it << " gap m " << m << " n " << ins.item_number();
+                    sol_best.update(sol, lb, ss, info);
+                    k = 0;
+                    goto end;
+                }
             }
         }
-        if (b)
-            continue;
+end:;
     }
     return algorithm_end(sol, info);
 }
