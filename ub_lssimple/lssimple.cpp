@@ -106,7 +106,12 @@ bool move_gap(const Instance& ins, Solution& sol, AgentIdx m, ItemIdx n,
     Solution sol_tmp(ins_tmp);
     for (ItemIdx j=0; j<(ItemIdx)pos.size(); ++j)
         sol_tmp.set(j, sol_vec[j]);
-    sopt_milp(ins_tmp, sol_tmp, Info().set_timelimit(m));
+    sopt_milp({
+            .ins = ins_tmp,
+            .sol = sol_tmp,
+            .stop_at_first_improvment = true,
+            .info = Info().set_timelimit((double)m / 2),
+            });
     if (v <= sol_tmp.value())
         return false;
     for (ItemIdx j=0; j<(ItemIdx)pos.size(); ++j)
@@ -160,6 +165,7 @@ Solution gap::sol_lssimple(const Instance& ins, Solution& sol, Info info)
             if (m > ins.agent_number())
                 m = ins.agent_number();
             ItemIdx n = ins.item_number();
+            //ItemIdx n = std::max((ItemIdx)32, ins.item_number() / (m - 1));
             if (move_gap(ins, sol, m, n, items, agents, info)) {
                 std::stringstream ss;
                 ss << "it " << it << " gap " << m;

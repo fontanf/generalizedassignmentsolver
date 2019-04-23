@@ -6,7 +6,15 @@
 namespace gap
 {
 
-Solution sopt_milp(const Instance& ins, Solution& sol, Info info = Info());
+struct MilpData
+{
+    const Instance& ins;
+    Solution& sol;
+    bool stop_at_first_improvment = false;
+    Info info = Info();
+};
+
+Solution sopt_milp(MilpData d);
 
 }
 

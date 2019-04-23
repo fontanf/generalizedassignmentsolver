@@ -5,14 +5,14 @@
 
 using namespace gap;
 
-Solution gap::sopt_milp(const Instance& ins, Solution& sol, Info info)
+Solution gap::sopt_milp(MilpData d)
 {
-    VER(info, "*** milp ***" << std::endl);
+    VER(d.info, "*** milp ***" << std::endl);
 
-    int loglevel = (info.output->verbose)? 1: 0;
-    int numberRows = ins.agent_number() + ins.item_number();
-    int numberColumns = ins.alternative_number();
-    int numberElements = 2 * ins.alternative_number();
+    int loglevel = (d.info.output->verbose)? 1: 0;
+    int numberRows = d.ins.agent_number() + d.ins.item_number();
+    int numberColumns = d.ins.alternative_number();
+    int numberElements = 2 * d.ins.alternative_number();
 
     // Matrix data - column ordered
     std::vector<CoinBigIndex> start(numberColumns + 1);
@@ -22,10 +22,10 @@ Solution gap::sopt_milp(const Instance& ins, Solution& sol, Info info)
 
     std::vector<int> rows(numberElements);
     std::vector<double> elements(numberElements);
-    for (AltIdx k=0; k<ins.alternative_number(); ++k) {
-            rows[2 * k] = ins.alternative(k).i;
-        elements[2 * k] = ins.alternative(k).w;
-            rows[2 * k + 1] = ins.agent_number() + ins.alternative(k).j;
+    for (AltIdx k=0; k<d.ins.alternative_number(); ++k) {
+            rows[2 * k] = d.ins.alternative(k).i;
+        elements[2 * k] = d.ins.alternative(k).w;
+            rows[2 * k + 1] = d.ins.agent_number() + d.ins.alternative(k).j;
         elements[2 * k + 1] = 1;
     }
 
@@ -35,17 +35,17 @@ Solution gap::sopt_milp(const Instance& ins, Solution& sol, Info info)
     // Rim data
     std::vector<double> objective(numberColumns);
     for (AltIdx k=0; k<numberColumns; ++k)
-        objective[k] = ins.alternative(k).v;
+        objective[k] = d.ins.alternative(k).v;
 
     std::vector<double> rowLower(numberRows);
     std::vector<double> rowUpper(numberRows);
-    for (AgentIdx i=0; i<ins.agent_number(); ++i) {
+    for (AgentIdx i=0; i<d.ins.agent_number(); ++i) {
         rowLower[i] = 0;
-        rowUpper[i] = ins.capacity(i);
+        rowUpper[i] = d.ins.capacity(i);
     }
-    for (ItemIdx j=0; j<ins.item_number(); ++j) {
-        rowLower[ins.agent_number() + j] = 1;
-        rowUpper[ins.agent_number() + j] = 1;
+    for (ItemIdx j=0; j<d.ins.item_number(); ++j) {
+        rowLower[d.ins.agent_number() + j] = 1;
+        rowUpper[d.ins.agent_number() + j] = 1;
     }
     std::vector<double> colLower(numberColumns, 0);
     std::vector<double> colUpper(numberColumns, 1);
@@ -60,7 +60,7 @@ Solution gap::sopt_milp(const Instance& ins, Solution& sol, Info info)
               objective.data(), rowLower.data(), rowUpper.data());
 
     // Mark integer
-    for (AltIdx k=0; k<ins.alternative_number(); ++k)
+    for (AltIdx k=0; k<d.ins.alternative_number(); ++k)
         solver1.setInteger(k);
 
     // Solve
@@ -68,16 +68,17 @@ Solution gap::sopt_milp(const Instance& ins, Solution& sol, Info info)
 
     // Pass data and solver to CbcModel
     CbcModel model(solver1);
-    model.setMaximumSeconds(info.timelimit);
+    model.setMaximumSeconds(d.info.timelimit);
 
     // Add initial solution
-    std::vector<double> sol_init(ins.alternative_number(), 0);
-    if (sol.is_complete() && sol.feasible() >= 0) {
-        for (AltIdx k=0; k<ins.alternative_number(); ++k)
-            if (sol.agent(ins.alternative(k).j) == ins.alternative(k).i)
+    std::vector<double> sol_init(d.ins.alternative_number(), 0);
+    if (d.sol.is_complete() && d.sol.feasible() >= 0) {
+        for (AltIdx k=0; k<d.ins.alternative_number(); ++k)
+            if (d.sol.agent(d.ins.alternative(k).j) == d.ins.alternative(k).i)
                 sol_init[k] = 1;
-        model.setBestSolution(sol_init.data(), ins.alternative_number(), sol.value());
+        model.setBestSolution(sol_init.data(), d.ins.alternative_number(), d.sol.value());
     }
+    model.setMaximumSolutions(1);
 
     // Reduce printout
     model.setLogLevel(loglevel);
@@ -88,11 +89,11 @@ Solution gap::sopt_milp(const Instance& ins, Solution& sol, Info info)
 
     // Get solution
     const double *solution = model.solver()->getColSolution();
-    for (AltIdx k=0; k<ins.alternative_number(); ++k)
+    for (AltIdx k=0; k<d.ins.alternative_number(); ++k)
         if (solution[k] > 0.5)
-            sol.set(k);
-    if (sol.feasible() > 0 || !sol.is_complete())
-        sol = Solution(ins);
-    return algorithm_end(sol, info);
+            d.sol.set(k);
+    if (d.sol.feasible() > 0 || !d.sol.is_complete())
+        d.sol = Solution(d.ins);
+    return algorithm_end(d.sol, d.info);
 }
 
