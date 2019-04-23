@@ -106,10 +106,12 @@ bool move_gap(const Instance& ins, Solution& sol, AgentIdx m, ItemIdx n,
     Solution sol_tmp(ins_tmp);
     for (ItemIdx j=0; j<(ItemIdx)pos.size(); ++j)
         sol_tmp.set(j, sol_vec[j]);
-    sopt_milp(ins_tmp, sol_tmp);
+    sopt_milp(ins_tmp, sol_tmp, Info().set_timelimit(m));
+    if (v <= sol_tmp.value())
+        return false;
     for (ItemIdx j=0; j<(ItemIdx)pos.size(); ++j)
         sol.set(pos[j], agents[sol_tmp.agent(j)]);
-    return (sol_tmp.value() < v);
+    return true;
 }
 
 Solution gap::sol_lssimple(const Instance& ins, Solution& sol, Info info)
@@ -135,31 +137,32 @@ Solution gap::sol_lssimple(const Instance& ins, Solution& sol, Info info)
 
         bool b = false;
         for (ItemIdx k=0; ; ++k) {
-            ItemIdx n = 2;
+            AgentIdx m = 2;
             if (k <= 10) {
-                n = 2;
+                m = 2;
             } else if (k <= 50) {
-                n = (k % 2) + 2;
+                m = (k % 2) + 2;
             } else if (k <= 200) {
-                n = (k % 3) + 2;
+                m = (k % 3) + 2;
             } else if (k <= 1000) {
-                n = (k % 4) + 2;
+                m = (k % 4) + 2;
             } else if (k <= 5000) {
-                n = (k % 5) + 2;
+                m = (k % 5) + 2;
             } else if (k <= 20000) {
-                n = (k % 6) + 2;
+                m = (k % 6) + 2;
             } else if (k <= 100000) {
-                n = (k % 7) + 2;
+                m = (k % 7) + 2;
             } else if (k <= 5000000) {
-                n = (k % 8) + 2;
+                m = (k % 8) + 2;
             } else {
-                n = (k % 9) + 2;
+                m = (k % 9) + 2;
             }
-            if (n > ins.agent_number())
-                n = ins.agent_number();
-            if (move_gap(ins, sol, n, ins.item_number(), items, agents, info)) {
+            if (m > ins.agent_number())
+                m = ins.agent_number();
+            ItemIdx n = ins.item_number();
+            if (move_gap(ins, sol, m, n, items, agents, info)) {
                 std::stringstream ss;
-                ss << "it " << it << " gap " << n;
+                ss << "it " << it << " gap " << m;
                 sol_best.update(sol, lb, ss, info);
                 b = true;
                 break;
