@@ -17,7 +17,6 @@ bool move_gap(const Instance& ins, Solution& sol, AgentIdx m, ItemIdx n,
         std::default_random_engine& gen,
         Info& info)
 {
-    (void)info;
     if (n != ins.item_number())
         std::shuffle(items.begin(), items.end(), gen);
     if (m != ins.agent_number())
@@ -61,7 +60,7 @@ bool move_gap(const Instance& ins, Solution& sol, AgentIdx m, ItemIdx n,
             .ins = ins_tmp,
             .sol = sol_tmp,
             .stop_at_first_improvment = true,
-            .info = Info().set_timelimit(10),
+            .info = Info().set_timelimit(std::max(1., info.elapsed_time() / 50)),
             });
     if (v <= sol_tmp.value())
         return false;
