@@ -1,0 +1,17 @@
+#!/bin/bash
+
+bazel build --cxxopt='-std=c++14' --compilation_mode=opt -- //lib:main
+algo="lssimple"
+t=120;
+
+for i in data/*; do
+    echo "${i}"
+    ./bazel-bin/lib/main \
+        -v \
+        -a "${algo}" \
+        -t "${t}" \
+        -i "${i}" \
+        -c "solutions_${algo}_${t}/${i#data/}_solution.txt" \
+        -o "solutions_${algo}_${t}/${i#data/}_output.ini"
+done
+

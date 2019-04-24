@@ -54,6 +54,13 @@ int main(int argc, char *argv[])
         std::cerr << instancefile << ": file not found." << std::endl;
         return 1;
     }
+    for (std::string file: {certfile, outputfile}) {
+        if (file == "")
+            continue;
+        boost::filesystem::path p(file);
+        if (p.parent_path() != "")
+            boost::filesystem::create_directories(p.parent_path());
+    }
 
     Instance ins(instancefile, format);
     Solution sol(ins);
@@ -64,6 +71,7 @@ int main(int argc, char *argv[])
         .set_log2stderr(vm.count("log2stderr"))
         .set_loglevelmax(loglevelmax)
         .set_timelimit(time_limit)
+        .set_onlywriteattheend(true)
         .set_outputfile(outputfile);
 
     if (algorithm == "milp") {

@@ -219,7 +219,7 @@ Solution gap::sol_lssimple(const Instance& ins, Solution& sol, Info info)
         }
         for (AgentIdx m=2; m<=m_max; ++m) {
             for (AgentIdx l=0; l<=(m_max-m+1); ++l) {
-                if (move_gap(ins, sol, m, ins.item_number(), items, agents, gen, info)) {
+                if (move_gap(ins, sol, std::min(m, ins.agent_number()), ins.item_number(), items, agents, gen, info)) {
                     std::stringstream ss;
                     ss << "it " << it << " gap m " << m << " n " << ins.item_number();
                     sol_best.update(sol, lb, ss, info);

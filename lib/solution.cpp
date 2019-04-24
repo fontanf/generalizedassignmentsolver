@@ -106,7 +106,7 @@ void Solution::write_cert(std::string file)
     if (file != "") {
         std::ofstream cert;
         cert.open(file);
-        cert << *this;
+        std::copy(x_.begin(), x_.end(), std::ostream_iterator<AgentIdx>(cert, " "));
         cert.close();
     }
 }
@@ -147,7 +147,6 @@ void Solution::update(const Solution& sol, Value lb, const std::stringstream& s,
         std::string sol_str = "Solution" + std::to_string(info.output->sol_number);
         PUT(info, sol_str + ".Value", sol.value());
         PUT(info, sol_str + ".Time", t);
-        PUT(info, sol_str + ".Algorithm", s.str());
 
         VER(info, std::left << std::setw(10) << t);
         VER(info, std::left << std::setw(12) << sol.value());
