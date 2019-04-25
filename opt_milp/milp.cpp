@@ -87,6 +87,9 @@ Solution gap::sopt_milp(MilpData d)
     // Do complete search
     model.branchAndBound();
 
+    if (d.sol.value() <= model.getObjValue() + 0.5)
+        return algorithm_end(d.sol, d.info);
+
     // Get solution
     const double *solution = model.solver()->getColSolution();
     for (AltIdx k=0; k<d.ins.alternative_number(); ++k)
