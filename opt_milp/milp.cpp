@@ -78,7 +78,8 @@ Solution gap::sopt_milp(MilpData d)
                 sol_init[k] = 1;
         model.setBestSolution(sol_init.data(), d.ins.alternative_number(), d.sol.value());
     }
-    model.setMaximumSolutions(1);
+    if (d.stop_at_first_improvment)
+        model.setMaximumSolutions(1);
 
     // Reduce printout
     model.setLogLevel(loglevel);
@@ -87,7 +88,7 @@ Solution gap::sopt_milp(MilpData d)
     // Do complete search
     model.branchAndBound();
 
-    if (d.sol.value() <= model.getObjValue() + 0.5)
+    if (d.sol.is_complete() && d.sol.feasible() >= 0 && d.sol.value() <= model.getObjValue() + 0.5)
         return algorithm_end(d.sol, d.info);
 
     // Get solution
