@@ -36,6 +36,7 @@ public:
 
     void update(const Solution& sol, Value lb, const std::stringstream& s, Info& info);
     void write_cert(std::string file);
+    std::string to_string(AgentIdx i);
 
 private:
 

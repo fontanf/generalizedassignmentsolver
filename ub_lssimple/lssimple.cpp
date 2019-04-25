@@ -64,15 +64,20 @@ bool move_gap(const Instance& ins, Solution& sol, AgentIdx m, ItemIdx n,
             });
     if (v <= sol_tmp.value())
         return false;
+
+    //for (ItemIdx j=0; j<(ItemIdx)pos.size(); ++j)
+        //if (sol.agent(pos[j]) != agents[sol_tmp.agent(j)])
+            //std::cout << "item " << items[j] << " prev " << sol.agent(pos[j]) << " new " << agents[sol_tmp.agent(j)] << std::endl;
+
     for (ItemIdx j=0; j<(ItemIdx)pos.size(); ++j)
         sol.set(pos[j], agents[sol_tmp.agent(j)]);
     return true;
 }
 
-Solution gap::sol_lssimple(const Instance& ins, Solution& sol, Info info)
+Solution gap::sol_lssimple(const Instance& ins, Solution& sol, std::default_random_engine& gen, Info info)
 {
     if (!sol.is_complete() || sol.feasible() > 0)
-        sol = sol_random(ins);
+        sol = sol_random(ins, gen);
     Value lb = 0;
     for (ItemIdx j=0; j<ins.item_number(); ++j)
         lb += ins.item(j).v_min;
@@ -84,7 +89,6 @@ Solution gap::sol_lssimple(const Instance& ins, Solution& sol, Info info)
     Solution sol_best = sol;
     init_display(sol_best, lb, info);
 
-    std::default_random_engine gen(0);
     for (Cpt it=0, k=0, m_max=2; info.check_time(); ++it, ++k) {
         if (k > ins.agent_number()) {
             m_max++;

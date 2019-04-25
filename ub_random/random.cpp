@@ -7,9 +7,8 @@
 
 using namespace gap;
 
-Solution gap::sol_random(const Instance& ins, Cpt seed, Info info)
+Solution gap::sol_random(const Instance& ins, std::default_random_engine& gen, Info info)
 {
-    std::default_random_engine gen(seed);
     std::uniform_int_distribution<> dis(0, ins.agent_number() - 1);
     Solution sol(ins);
     for (ItemIdx j=0; j<ins.item_number(); ++j)
@@ -35,7 +34,7 @@ Solution gap::sol_random(const Instance& ins, Cpt seed, Info info)
         }
 
         if (j_best == -1)
-            return sol_random(ins, seed + 1);
+            return sol_random(ins, gen);
         sol.set(j_best, i_best);
     }
 

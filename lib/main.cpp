@@ -21,6 +21,7 @@ int main(int argc, char *argv[])
     std::string certfile = "";
     std::string logfile = "";
     int loglevelmax = 999;
+    int seed = 0;
     double time_limit = std::numeric_limits<double>::infinity();
 
     po::options_description desc("Allowed options");
@@ -31,7 +32,8 @@ int main(int argc, char *argv[])
         ("format,f", po::value<std::string>(&format), "set input file format (default: knapsack_standard)")
         ("output,o", po::value<std::string>(&outputfile), "set output file")
         ("cert,c", po::value<std::string>(&certfile), "set certificate file")
-        (",t", po::value<double>(&time_limit), "Time limit in seconds\n  ex: 3600")
+        ("time-limit,t", po::value<double>(&time_limit), "Time limit in seconds\n  ex: 3600")
+        ("seed,s", po::value<int>(&seed), "seed")
         ("verbose,v", "")
         ("log,l", po::value<std::string>(&logfile), "set log file")
         ("loglevelmax", po::value<int>(&loglevelmax), "set log max level")
@@ -74,6 +76,7 @@ int main(int argc, char *argv[])
         .set_onlywriteattheend(true)
         .set_outputfile(outputfile);
 
+    std::default_random_engine gen(seed);
     if (algorithm == "milp") {
         sopt_milp({
                 .ins = ins,
@@ -82,9 +85,9 @@ int main(int argc, char *argv[])
                 .info = info,
                 });
     } else if (algorithm == "random") {
-        sol = sol_random(ins, 0, info);
+        sol = sol_random(ins, gen, info);
     } else if (algorithm == "lssimple") {
-        sol_lssimple(ins, sol, info);
+        sol_lssimple(ins, sol, gen, info);
     }
 
     info.write_ini(outputfile);

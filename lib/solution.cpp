@@ -180,6 +180,15 @@ void gap::init_display(Solution& sol, Value lb, Info& info)
     VER(info, "" << std::endl);
 }
 
+std::string Solution::to_string(AgentIdx i)
+{
+    std::string s = "agent " + std::to_string(i) + ":";
+    for (ItemIdx j=0; j<instance().item_number(); ++j)
+        if (agent(j) == i)
+            s += " " + std::to_string(j);
+    return s;
+}
+
 /*********************************** Compare **********************************/
 
 double SolutionCompare::value(const Solution& s)

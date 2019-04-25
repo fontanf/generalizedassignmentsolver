@@ -6,7 +6,7 @@
 namespace gap
 {
 
-Solution sol_lssimple(const Instance& ins, Solution& sol, Info info = Info());
+Solution sol_lssimple(const Instance& ins, Solution& sol, std::default_random_engine& gen, Info info = Info());
 
 }
 
