@@ -31,6 +31,7 @@ typedef int64_t AltIdx;
 typedef int64_t AltPos;
 typedef int64_t StateIdx;
 typedef int64_t Cpt;
+typedef int64_t Seed;
 
 class Solution;
 
@@ -86,6 +87,9 @@ public:
     Value check(std::string filepath);
     const Solution* optimal_solution() const { return sol_opt_.get(); }
     Value optimum() const;
+
+    void plot(std::string filename);
+    void write(std::string filename);
 
 private:
 

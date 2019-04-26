@@ -6,119 +6,60 @@
 
 using namespace gap;
 
-Instance generate_c(ItemIdx n, AgentIdx m, int seed)
+std::ostream& gap::operator<<(std::ostream& os, const GenerateData& data)
 {
-    Instance ins(m, n);
-    std::default_random_engine generator(seed);
-    std::uniform_int_distribution<int> distribution_c(5, 25);
-    std::uniform_int_distribution<int> distribution_p(10, 50);
-    std::vector<Weight> wsum(m, 0);
-    for (ItemIdx j=0; j<n; ++j) {
-        ins.add_item();
-        for (AgentIdx i=0; i<m; ++i) {
-            Weight w = distribution_c(generator);
-            Value p = distribution_p(generator);
-            ins.set_alternative(j, i, w, p);
-            wsum[i] += w;
-        }
-    }
-    for (AgentIdx i=0; i<m; ++i)
-        ins.set_capacity(i, (8*wsum[i]) / (10*m));
-    return ins;
-}
-
-Instance generate_d(AgentIdx m, ItemIdx n, int seed)
-{
-    Instance ins(m, n);
-    std::default_random_engine generator(seed);
-    std::uniform_int_distribution<int> distribution_c(1,100);
-    std::uniform_int_distribution<int> distribution_e(-10,+10);
-    std::vector<Weight> wsum(m, 0);
-    for (ItemIdx j=0; j<n; ++j) {
-        ins.add_item();
-        for (AgentIdx i=0; i<m; ++i) {
-            Weight w = distribution_c(generator);
-            Weight e = distribution_e(generator);
-            Value p = std::max((Value)1, 11 + w + e);
-            ins.set_alternative(j, i, w, p);
-            wsum[i] += w;
-        }
-    }
-    for (AgentIdx i=0; i<m; ++i)
-        ins.set_capacity(i, (8*wsum[i]) / (10*m));
-    return ins;
-}
-
-Instance gap::generate(std::string type, AgentIdx m, ItemIdx n, int seed)
-{
-    if (type == "c") {
-        return generate_c(m, n, seed);
-    } else if (type == "d") {
-        return generate_d(m, n, seed);
-    } else {
-        assert(false);
-        return generate_c(m, n, seed);
-    }
-}
-
-Instance gap::generate(const GenParams& p)
-{
-    Instance ins(p.m, p.n);
-    std::default_random_engine generator(p.seed);
-    std::uniform_int_distribution<int> dist_r(p.r, 2 * p.r);
-    std::uniform_int_distribution<int> dist_b(0, p.r / p.m);
-    std::uniform_int_distribution<int> dist_e(0, p.r / 10);
-    Weight wsum = 0;
-    for (ItemIdx j=0; j<p.n; ++j) {
-        ins.add_item();
-        Weight wmax = 0;
-        Weight wj = dist_r(generator);
-        Value pj = dist_r(generator);
-        Value bjp = 0;
-        if (p.bp == 1) {
-            bjp =  dist_b(generator);
-        } else if (p.bp == -1) {
-            bjp = -dist_b(generator);
-        }
-        Weight bjw = 0;
-        if (p.bw == 1) {
-            bjw =  dist_b(generator);
-        } else if (p.bw == -1) {
-            bjw = -dist_b(generator);
-        }
-        for (AgentIdx i=0; i<p.m; ++i) {
-            Value epij = 0;
-            if (p.ep == 1) {
-                epij =  dist_e(generator);
-            } else if (p.ep == -1) {
-                epij = -dist_e(generator);
-            }
-            Value ewij = 0;
-            if (p.ew == 1) {
-                ewij =  dist_e(generator);
-            } else if (p.ew == -1) {
-                ewij = -dist_e(generator);
-            }
-            Value pij = pj + bjp * i + epij;
-            Weight wij = wj + bjw * i + ewij;
-            if (wmax < wij)
-                wmax = wij;
-            ins.set_alternative(j, i, wij, pij);
-        }
-        wsum += wmax;
-    }
-    Weight c = (wsum * p.h) / (p.m * p.hmax) + 1;
-    for (AgentIdx i=0; i<p.m; ++i)
-        ins.set_capacity(i, c);
-    return ins;
-}
-
-std::ostream& gap::operator<<(std::ostream &os, const GenParams& p)
-{
-    os << "M " << p.m << " N " << p.n << " R " << p.r
-        << " BP " << p.bp << " BW " << p.bp << " EP " << p.ep << " EW " << p.ew
-        << " SEED " << p.seed
-        << " H " << p.h << " HMAX " << p.hmax;
+    os << "n " << data.n << " m " << data.m << " t " << data.t;
+    if (data.t == "f")
+        os << " r " << data.r;
+    if (data.s != 0)
+        os << " s " << data.s;
     return os;
+}
+
+std::pair<Weight, Value> item(GenerateData& data)
+{
+    Weight w = -1;
+    Value p = -1;
+    if (data.t == "a" || data.t == "b" || data.t == "c") {
+        std::uniform_int_distribution<Weight> d1(5, 25);
+        std::uniform_int_distribution<Weight> d2(10, 50);
+        w = d1(data.g);
+        p = d2(data.g);
+    } else if (data.t == "d") {
+        std::uniform_int_distribution<Weight> d1(1, 100);
+        std::uniform_int_distribution<Weight> d2(-10, 10);
+        w = d1(data.g);
+        p = 111 - w + d2(data.g);
+    } else if (data.t == "e") { // TODO
+    } else if (data.t == "f") {
+        std::normal_distribution<double> d(0, data.r / 10);
+        w = std::min(data.r, std::max((Weight)1, data.r / 2 + (Weight)d(data.g)));
+        p = data.r + 1 - std::min(data.r, std::max((Value)1,  w + (Value)d(data.g)));
+    } else {
+        exit(1);
+    }
+    return {w, p};
+}
+
+Instance gap::generate(GenerateData data)
+{
+    Instance ins(data.m, data.n);
+
+    std::vector<Weight> wsum(data.m, 0);
+    Weight wmax = 0;
+    for (ItemIdx j=0; j<data.n; ++j) {
+        ins.add_item();
+        for (AgentIdx i=0; i<data.m; ++i) {
+            auto wp = item(data);
+            ins.set_alternative(j, i, wp.first, wp.second);
+            wsum[i] += wp.first;
+            wmax = std::max(wmax, wp.first);
+        }
+    }
+    // TODO capacity for types a b c d e
+    if (data.t == "f")
+        for (AgentIdx i=0; i<data.m; ++i)
+            ins.set_capacity(i, std::max(wmax, wsum[i] / data.m));
+    return ins;
 }
 

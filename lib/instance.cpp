@@ -193,3 +193,33 @@ Solution gap::algorithm_end(const Solution& sol, Info& info)
     return sol;
 }
 
+void Instance::plot(std::string filename)
+{
+    std::ofstream file(filename);
+    file << "w v" << std::endl;
+    for (ItemIdx j=0; j<item_number(); ++j)
+        for (AgentIdx i=0; i<agent_number(); ++i)
+            file << alternative(j, i).w << " " << alternative(j, i).v << std::endl;
+    file.close();
+}
+
+void Instance::write(std::string filename)
+{
+    std::ofstream file(filename);
+    file << agent_number() << " " << item_number() << std::endl;
+    for (AgentIdx i=0; i<agent_number(); ++i) {
+        for (ItemIdx j=0; j<item_number(); ++j)
+            file << alternative(j, i).v << " ";
+        file << std::endl;
+    }
+    for (AgentIdx i=0; i<agent_number(); ++i) {
+        for (ItemIdx j=0; j<item_number(); ++j)
+            file << alternative(j, i).w << " ";
+        file << std::endl;
+    }
+    for (AgentIdx i=0; i<agent_number(); ++i)
+        file << capacity(i) << " ";
+    file << std::endl;
+    file.close();
+}
+

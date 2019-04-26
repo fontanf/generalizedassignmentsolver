@@ -37,7 +37,7 @@ cc_library(
         srcs = ["tester.cpp"],
         deps = [
                 ":cpp",
-                ":libgenerator",
+                ":generator",
                 "@googletest//:gtest_main",
         ],
         visibility = ["//visibility:public"],
@@ -45,7 +45,7 @@ cc_library(
 )
 
 cc_library(
-        name = "libgenerator",
+        name = "generator",
         hdrs = ["generator.hpp"],
         srcs = ["generator.cpp"],
         deps = ["//lib:cpp"],
@@ -70,5 +70,11 @@ cc_binary(
                 "//opt_milp:milp",
                 ":tester",
         ],
+)
+
+cc_binary(
+        name = "generator_main",
+        srcs = ["generator_main.cpp"],
+        deps = [":generator"],
 )
 
