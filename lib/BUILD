@@ -78,3 +78,9 @@ cc_binary(
         deps = [":generator"],
 )
 
+cc_binary(
+        name = "geninst",
+        srcs = ["geninst.cpp"],
+        deps = [":generator"],
+)
+
