@@ -1,0 +1,20 @@
+#!/bin/bash
+
+algo="milp"
+n=1000;
+t="g"
+
+bazel build --cxxopt='-std=c++14' --compilation_mode=opt -- //...
+for m in $(seq 1 ${n}); do
+    echo -n "${m},"
+    #./bazel-bin/lib/generator_main -n ${n} -m ${m} -t ${t} -r 100 -s ${m} -o ../gap-solver/instances/ins.txt > /dev/null
+    #../gap-solver/solve ../gap-solver/instances/ins.txt -1 100 -1 5
+
+    ./bazel-bin/lib/generator_main -n ${n} -m ${m} -t ${t} -r 100 -s ${m} -o ins.txt > /dev/null
+    ./bazel-bin/lib/main \
+        -a "${algo}" \
+        -o "out.ini" \
+        -i "ins.txt"
+    sed -nr "/^\[Solution\]/ { :l /^Time[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" "out.ini"
+done
+

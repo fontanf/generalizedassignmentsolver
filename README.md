@@ -27,6 +27,7 @@ bazel build --cxxopt='-std=c++14' --compilation_mode=opt -- //lib:generator_main
 
 Examples:
 - `-n 100 -m 10 -t f -r 100`
+- `-n 100 -m 10 -t g -r 100`
 
 Instances can be visualized with gnuplot:
 ```
