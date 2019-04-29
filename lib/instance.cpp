@@ -48,27 +48,19 @@ void Instance::set_alternative(ItemIdx j, AgentIdx i, Weight w, Value v)
 
 Instance::Instance(std::string filepath, std::string format)
 {
-    if (!boost::filesystem::exists(filepath)) {
-        std::cout << filepath << ": file not found." << std::endl;
-        assert(false);
-    }
-
     if        (format == "gap_beasley") {
         read_beasley(filepath);
     } else if (format == "gap_standard") {
         read_standard(filepath);
-        std::string sol = filepath + ".sol";
-        if (boost::filesystem::exists(sol))
-            read_standard_solution(sol);
     } else {
         std::cout << format << ": Unknown instance format." << std::endl;
-        assert(false);
+        exit(1);
     }
 }
 
 void Instance::read_beasley(std::string filepath)
 {
-    boost::filesystem::fstream file(filepath, std::ios_base::in);
+    std::ifstream file(filepath, std::ios_base::in);
     ItemIdx n;
     AgentIdx m;
     file >> m >> n;
@@ -93,7 +85,7 @@ void Instance::read_beasley(std::string filepath)
 
 void Instance::read_standard(std::string filepath)
 {
-    boost::filesystem::fstream file(filepath, std::ios_base::in);
+    std::ifstream file(filepath, std::ios_base::in);
     ItemIdx  n;
     AgentIdx m;
     file >> m >> n;
@@ -114,7 +106,7 @@ void Instance::read_standard(std::string filepath)
 void Instance::read_standard_solution(std::string filepath)
 {
     sol_opt_ = std::unique_ptr<Solution>(new Solution(*this));
-    boost::filesystem::ifstream file(filepath, std::ios_base::in);
+    std::ifstream file(filepath, std::ios_base::in);
 
     int x = 0;
     for (ItemPos j=0; j<item_number(); ++j) {
@@ -133,9 +125,7 @@ Instance::Instance(const Instance& ins)
 
 Value Instance::check(std::string cert_file)
 {
-    if (!boost::filesystem::exists(cert_file))
-        return -1;
-    boost::filesystem::ifstream file(cert_file, std::ios_base::in);
+    std::ifstream file(cert_file, std::ios_base::in);
     Solution sol(*this);
     AgentIdx i;
     for (ItemPos j=0; j<item_number(); ++j) {

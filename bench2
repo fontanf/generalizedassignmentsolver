@@ -1,30 +1,20 @@
 #!/bin/bash
 
-algo="lssimple"
-t="180"
-data=(
-        "f101001" "f101002" "f101003" "f101004" "f101005"
-        "f102001" "f102002" "f102003" "f102004" "f102005"
-        "f202001" "f202002" "f202003" "f202004" "f202005"
-        "f105001" "f105002" "f105003" "f105004" "f105005"
-        "f205001" "f205002" "f205003" "f205004" "f205005"
-        "f505001" "f505002" "f505003" "f505004" "f505005"
-        "f1010001" "f1010002" "f1010003" "f1010004" "f1010005"
-        "f2010001" "f2010002" "f2010003" "f2010004" "f2010005"
-        "f5010001" "f5010002" "f5010003" "f5010004" "f5010005"
-        "f10020001" "f10020002" "f10020003" "f10020004" "f10020005"
-)
+algo="milp"
+t="$1"
+m="$2"
+n="$3"
+r="$4"
 
 bazel build --cxxopt='-std=c++14' --compilation_mode=opt -- //...
-for i in "${data[@]}"; do
-    echo "${i}"
-    ../gap-solver/solve "../gap-solver/instances/f/${i}" -1 100 -1 5
-
-    #./bazel-bin/lib/generator_main -n ${n} -m ${m} -t ${t} -r 100 -s ${m} -o ins.txt > /dev/null
-    #./bazel-bin/lib/main \
-        #-a "${algo}" \
-        #-o "out.ini" \
-        #-i "ins.txt"
-    #sed -nr "/^\[Solution\]/ { :l /^Time[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" "out.ini"
+for s in {1..5}; do
+    echo -n "${t}${m}${n}${r}${s},"
+    ./bazel-bin/lib/generator_main -n ${n} -m ${m} -t ${t} -r ${r} -s ${s} -o "ins.txt" > /dev/null
+    ./bazel-bin/lib/main \
+        -a "${algo}" \
+        -o "out.ini" \
+        -i "ins.txt"
+    sed -nr "/^\[Solution\]/ { :l /^Time[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" "out.ini"
+    #../gap-solver/solve "ins.txt" -1 100 -1 5
 done
 

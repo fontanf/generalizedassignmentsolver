@@ -4,7 +4,8 @@ using namespace gap;
 
 int main(int argc, char *argv[])
 {
-    namespace po = boost::program_options;
+    (void)argc;
+    (void)argv;
 
     std::vector<std::pair<AgentIdx, ItemIdx>> vec = {
         {10, 100},
@@ -14,16 +15,22 @@ int main(int argc, char *argv[])
     };
 
     GenerateData data;
-    data.r = 100;
     for (std::string t: {"f", "g"}) {
         data.t = t;
-        for (auto nm: vec) {
-            data.m = nm.first;
-            data.n = nm.second;
-            for (Seed s=1; s<=5; ++s) {
-                data.s = s;
-                Instance ins = generate(data);
-                ins.write(t + std::to_string(nm.first) + std::to_string(nm.second) + std::to_string(s));
+        for (Weight r: {100, 1000, 10000}) {
+            data.r = r;
+            for (auto nm: vec) {
+                data.m = nm.first;
+                data.n = nm.second;
+                for (Seed s=1; s<=5; ++s) {
+                    data.s = s;
+                    Instance ins = generate(data);
+                    ins.write(t
+                            + std::to_string(nm.first)
+                            + std::to_string(nm.second)
+                            + std::to_string(r)
+                            + std::to_string(s));
+                }
             }
         }
     }
