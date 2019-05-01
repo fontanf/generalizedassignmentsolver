@@ -52,8 +52,9 @@ gnuplot> set yrange[0:]; set xrange[0:]; plot 'ins.plot' u 1:2
 ## Upper bounds
 
 - Random initial solution `-a random` :heavy_check_mark:
-- Hill climbing, shift-swap neighborhood, first improvment `-a ls_shiftswap_first`
-- Hill climbing, shift-swap neighborhood, best improvment `-a ls_shiftswap_best`
+- Hill climbing, shift-swap neighborhood, first improvment `-a ls_shiftswap_first` :heavy_check_mark:
+- Hill climbing, shift-swap neighborhood, best improvment `-a ls_shiftswap_best` :heavy_check_mark:
+- Tabu search, shift-swap neighborhood `-a ts_shiftswap`
 - Variable Depth Neighborhood Search `-a vdns_simple` :heavy_check_mark:
 
 ## Exact algorithms
