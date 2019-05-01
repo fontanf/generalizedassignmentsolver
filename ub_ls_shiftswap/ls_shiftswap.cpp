@@ -8,7 +8,7 @@
 
 using namespace gap;
 
-bool gap::shift_swap_first(Solution& sol, std::vector<std::pair<ItemIdx, ItemIdx>>& alt,
+bool gap::shiftswap_first(Solution& sol, std::vector<std::pair<ItemIdx, ItemIdx>>& alt,
         std::default_random_engine& gen, Info& info)
 {
     std::shuffle(alt.begin(), alt.end(), gen);
@@ -61,13 +61,13 @@ Solution gap::sol_ls_shiftswap_first(const Instance& ins, Solution& sol, std::de
             alt[k++] = {j, j2};
     }
     init_display(sol, 0, info);
-    while (shift_swap_first(sol, alt, gen, info));
+    while (shiftswap_first(sol, alt, gen, info));
     return algorithm_end(sol, info);
 }
 
 /******************************************************************************/
 
-bool gap::shift_swap_best(const Instance& ins, Solution& sol, Info& info)
+bool gap::shiftswap_best(const Instance& ins, Solution& sol, Info& info)
 {
     Value v_best = sol.value();
 
@@ -131,7 +131,98 @@ Solution gap::sol_ls_shiftswap_best(const Instance& ins, Solution& sol, std::def
     if (!sol.is_complete() || sol.feasible() > 0)
         sol = sol_random(ins, gen);
     init_display(sol, 0, info);
-    while (shift_swap_best(ins, sol, info));
+    while (shiftswap_best(ins, sol, info));
     return algorithm_end(sol, info);
+}
+
+/******************************************************************************/
+
+bool gap::doubleshift_best(const Instance& ins, Solution& sol, Info& info)
+{
+    Value v_best = sol.value();
+
+    ItemIdx j1_best = -1;
+    ItemIdx j2_best = -1;
+    AgentIdx i2_best = -1;
+    for (ItemIdx j1=0; j1<ins.item_number(); ++j1) {
+        AgentIdx i1_old = sol.agent(j1);
+        for (ItemIdx j2=j1+1; j2<ins.item_number(); ++j2) {
+            AgentIdx i2_old = sol.agent(j2);
+            if (i2_old == i1_old)
+                continue;
+            sol.set(j1, i2_old);
+            for (AgentIdx i2=0; i2<ins.agent_number(); ++i2) {
+                if (i2 == i2_old)
+                    continue;
+                sol.set(j2, i2);
+                if (sol.feasible() == 0 && v_best > sol.value()) {
+                    v_best = sol.value();
+                    j1_best = j1;
+                    j2_best = j2;
+                    i2_best = i2;
+                }
+            }
+            sol.set(j2, i2_old);
+        }
+        sol.set(j1, i1_old);
+    }
+
+    if (j1_best == -1)
+        return false;
+
+    sol.set(j1_best, sol.agent(j2_best));
+    sol.set(j2_best, i2_best);
+    std::stringstream ss;
+    ss << "doubleshift j1 " << j1_best << " j2 " << j2_best << " i2 " << i2_best;
+    sol.update(sol, 0, ss, info);
+    return true;
+}
+
+bool gap::tripleswap_best(const Instance& ins, Solution& sol, Info& info)
+{
+    Value v_best = sol.value();
+
+    ItemIdx j1_best = -1;
+    ItemIdx j2_best = -1;
+    ItemIdx j3_best = -1;
+    for (ItemIdx j1=0; j1<ins.item_number(); ++j1) {
+        AgentIdx i1 = sol.agent(j1);
+        for (ItemIdx j2=j1+1; j2<ins.item_number(); ++j2) {
+            AgentIdx i2 = sol.agent(j2);
+            if (i1 == i2)
+                continue;
+            sol.set(j1, i2);
+            for (ItemIdx j3=j2+1; j3<ins.item_number(); ++j3) {
+                AgentIdx i3 = sol.agent(j3);
+                if (i3 == i1 || i3 == i2)
+                    continue;
+                sol.set(j2, i3);
+                sol.set(j3, i1);
+                if (sol.feasible() == 0 && v_best > sol.value()) {
+                    v_best = sol.value();
+                    j1_best = j1;
+                    j2_best = j2;
+                    j3_best = j3;
+                }
+                sol.set(j3, i3);
+            }
+            sol.set(j2, i2);
+        }
+        sol.set(j1, i1);
+    }
+
+    if (j1_best == -1)
+        return false;
+
+    std::stringstream ss;
+    AgentIdx i1 = sol.agent(j1_best);
+    AgentIdx i2 = sol.agent(j2_best);
+    AgentIdx i3 = sol.agent(j3_best);
+    sol.set(j1_best, i2);
+    sol.set(j2_best, i3);
+    sol.set(j3_best, i1);
+    ss << "swap j1 " << j1_best << " j2 " << j2_best << " j3 " << j3_best;
+    sol.update(sol, 0, ss, info);
+    return true;
 }
 
