@@ -140,7 +140,7 @@ void Solution::update(const Solution& sol, Value lb, const std::stringstream& s,
 {
     info.output->mutex_sol.lock();
 
-    if (!is_complete() || sol.value() < value()) {
+    if (!is_complete() || sol.value() < value() || this == &sol) {
         info.output->sol_number++;
         *this = sol;
         double t = std::round(info.elapsed_time());
