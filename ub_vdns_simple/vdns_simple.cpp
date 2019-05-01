@@ -76,11 +76,14 @@ bool move_gap_first(const Instance& ins, Solution& sol,
         std::default_random_engine& gen,
         Info& info)
 {
-        std::shuffle(agents.begin(), agents.end(), gen);
-        for (std::vector<AgentIdx>& ag: agents)
-            if (move_gap(ins, sol, ag.size(), ins.item_number(), items, ag, info))
-                return true;
-        return false;
+    std::shuffle(agents.begin(), agents.end(), gen);
+    for (std::vector<AgentIdx>& ag: agents) {
+        if (move_gap(ins, sol, ag.size(), ins.item_number(), items, ag, info))
+            return true;
+        if (!info.check_time())
+            return false;
+    }
+    return false;
 }
 
 Solution gap::sol_vdns_simple(const Instance& ins, Solution& sol, std::default_random_engine& gen, Info info)
@@ -96,7 +99,8 @@ Solution gap::sol_vdns_simple(const Instance& ins, Solution& sol, std::default_r
     Solution sol_best = sol;
     init_display(sol_best, lb, info);
 
-    for (AgentIdx m=2; m<=ins.agent_number(); ++m) {
+    for (AgentIdx m=2; m<=ins.agent_number() && info.check_time(); ++m) {
+
         std::vector<std::vector<AgentIdx>> agents;
         std::vector<AgentIdx> vec(m);
         std::iota(vec.begin(), vec.end(), 0);

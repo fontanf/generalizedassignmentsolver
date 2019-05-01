@@ -92,6 +92,8 @@ int main(int argc, char *argv[])
         sol_ls_shiftswap_first(ins, sol, gen, info);
     } else if (algorithm == "ls_shiftswap_best") {
         sol_ls_shiftswap_best(ins, sol, gen, info);
+    } else if (algorithm == "tabu_shiftswap") {
+        sol_ts_shiftswap(ins, sol, gen, info);
     } else if (algorithm == "vdns_simple") {
         sol_vdns_simple(ins, sol, gen, info);
     /*
