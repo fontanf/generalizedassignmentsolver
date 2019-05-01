@@ -1,4 +1,4 @@
-#include "gap/ub_localsearch/localsearch.hpp"
+#include "gap/ub_ls_shiftswap/ls_shiftswap.hpp"
 #include "gap/ub_random/random.hpp"
 
 #include <set>
@@ -46,7 +46,7 @@ bool gap::shift_swap_first(Solution& sol, std::vector<std::pair<ItemIdx, ItemIdx
     return false;
 }
 
-Solution gap::sol_localsearch_first(const Instance& ins, Solution& sol, std::default_random_engine& gen, Info info)
+Solution gap::sol_ls_shiftswap_first(const Instance& ins, Solution& sol, std::default_random_engine& gen, Info info)
 {
     if (!sol.is_complete() || sol.feasible() > 0)
         sol = sol_random(ins, gen);
@@ -126,7 +126,7 @@ bool gap::shift_swap_best(const Instance& ins, Solution& sol, Info& info)
     return true;
 }
 
-Solution gap::sol_localsearch_best(const Instance& ins, Solution& sol, std::default_random_engine& gen, Info info)
+Solution gap::sol_ls_shiftswap_best(const Instance& ins, Solution& sol, std::default_random_engine& gen, Info info)
 {
     if (!sol.is_complete() || sol.feasible() > 0)
         sol = sol_random(ins, gen);

@@ -1,4 +1,4 @@
-#include "gap/ub_lssimple/lssimple.hpp"
+#include "gap/ub_vdns_simple/vdns_simple.hpp"
 #include "gap/ub_random/random.hpp"
 #include "gap/opt_milp/milp.hpp"
 
@@ -74,7 +74,7 @@ bool move_gap(const Instance& ins, Solution& sol, AgentIdx m, ItemIdx n,
     return true;
 }
 
-Solution gap::sol_lssimple(const Instance& ins, Solution& sol, std::default_random_engine& gen, Info info)
+Solution gap::sol_vdns_simple(const Instance& ins, Solution& sol, std::default_random_engine& gen, Info info)
 {
     if (!sol.is_complete() || sol.feasible() > 0)
         sol = sol_random(ins, gen);

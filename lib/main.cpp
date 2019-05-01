@@ -1,6 +1,8 @@
 #include "gap/opt_milp/milp.hpp"
 #include "gap/ub_random/random.hpp"
-#include "gap/ub_lssimple/lssimple.hpp"
+#include "gap/ub_ls_shiftswap/ls_shiftswap.hpp"
+#include "gap/ub_vdns_simple/vdns_simple.hpp"
+#include "gap/ub_mbastar/mbastar.hpp"
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
@@ -86,8 +88,28 @@ int main(int argc, char *argv[])
                 });
     } else if (algorithm == "random") {
         sol = sol_random(ins, gen, info);
-    } else if (algorithm == "lssimple") {
-        sol_lssimple(ins, sol, gen, info);
+    } else if (algorithm == "ls_shiftswap_first") {
+        sol_ls_shiftswap_first(ins, sol, gen, info);
+    } else if (algorithm == "ls_shiftswap_best") {
+        sol_ls_shiftswap_best(ins, sol, gen, info);
+    } else if (algorithm == "vdns_simple") {
+        sol_vdns_simple(ins, sol, gen, info);
+    } else if (algorithm == "mbastar1") {
+        sol_mbastar_1({
+                .ins = ins,
+                .growth_factor = 1.5,
+                .criterion_id = 3,
+                .sol_best = sol,
+                .gen = gen,
+                .info = info});
+    } else if (algorithm == "mbastar2") {
+        sol_mbastar_2({
+                .ins = ins,
+                .growth_factor = 1.5,
+                .criterion_id = 3,
+                .sol_best = sol,
+                .gen = gen,
+                .info = info});
     }
 
     info.write_ini(outputfile);

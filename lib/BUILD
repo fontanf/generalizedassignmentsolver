@@ -59,7 +59,9 @@ cc_binary(
         deps = [
                 "//opt_milp:milp",
                 "//ub_random:random",
-                "//ub_lssimple:lssimple",
+                "//ub_ls_shiftswap:ls_shiftswap",
+                "//ub_vdns_simple:vdns_simple",
+                "//ub_mbastar:mbastar",
         ],
 )
 

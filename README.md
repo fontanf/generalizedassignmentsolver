@@ -52,7 +52,9 @@ gnuplot> set yrange[0:]; set xrange[0:]; plot 'ins.plot' u 1:2
 ## Upper bounds
 
 - Random initial solution `-a random` :heavy_check_mark:
-- Simple hill climbing `-a lssimple` :heavy_check_mark:
+- Hill climbing, shift-swap neighborhood, first improvment `-a ls_shiftswap_first`
+- Hill climbing, shift-swap neighborhood, best improvment `-a ls_shiftswap_best`
+- Variable Depth Neighborhood Search `-a vdns_simple` :heavy_check_mark:
 
 ## Exact algorithms
 
@@ -61,8 +63,11 @@ gnuplot> set yrange[0:]; set xrange[0:]; plot 'ins.plot' u 1:2
 
 ## Results
 
-`lssimple` does not compete with state of the art meta-heuristics like the ones presented in "A path relinking approach with ejection chains for the generalized assignment problem" (Yagiura, 2006) or "Variable-fixing then subgradient optimization guided very large scale neighborhood search for the generalized assignment problem" (Haddadi, 2018) in terms of solution quality on a long run. However:
+`vdns_simple` does not compete with state of the art meta-heuristics like the ones presented in "A path relinking approach with ejection chains for the generalized assignment problem" (Yagiura, 2006) or "Variable-fixing then subgradient optimization guided very large scale neighborhood search for the generalized assignment problem" (Haddadi, 2018) in terms of solution quality on a long run. However:
 - on a short time run (2 minutes, Processor Intel® Core™ i5-8500 CPU @ 3.00GHz × 6), it provides good solutions (less than 1% gap from optimal for most instances of the literature, between 1% and 2% for some hard instances)
 - it is very simple and the implementation is very short
 - it is available and free (MIT License)
+
+### Shift-swap neighborhood: first improvment vs best improvment
+
 
