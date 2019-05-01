@@ -13,14 +13,10 @@
 using namespace gap;
 
 bool move_gap(const Instance& ins, Solution& sol, AgentIdx m, ItemIdx n,
-        std::vector<ItemIdx>& items, std::vector<AgentIdx>& agents,
-        std::default_random_engine& gen,
+        const std::vector<ItemIdx>& items, const std::vector<AgentIdx>& agents,
         Info& info)
 {
-    if (n != ins.item_number())
-        std::shuffle(items.begin(), items.end(), gen);
-    if (m != ins.agent_number())
-        std::shuffle(agents.begin(), agents.end(), gen);
+    (void)info;
     std::vector<Weight> c(m, 0);
     for (AgentIdx i=0; i<m; ++i)
         c[i] = ins.capacity(agents[i]);
@@ -60,7 +56,7 @@ bool move_gap(const Instance& ins, Solution& sol, AgentIdx m, ItemIdx n,
             .ins = ins_tmp,
             .sol = sol_tmp,
             .stop_at_first_improvment = true,
-            .info = Info().set_timelimit(std::max(1., info.elapsed_time() / 50)),
+            .info = Info(),
             });
     if (v <= sol_tmp.value())
         return false;
@@ -74,6 +70,19 @@ bool move_gap(const Instance& ins, Solution& sol, AgentIdx m, ItemIdx n,
     return true;
 }
 
+bool move_gap_first(const Instance& ins, Solution& sol,
+        const std::vector<ItemIdx>& items,
+        std::vector<std::vector<AgentIdx>>& agents,
+        std::default_random_engine& gen,
+        Info& info)
+{
+        std::shuffle(agents.begin(), agents.end(), gen);
+        for (std::vector<AgentIdx>& ag: agents)
+            if (move_gap(ins, sol, ag.size(), ins.item_number(), items, ag, info))
+                return true;
+        return false;
+}
+
 Solution gap::sol_vdns_simple(const Instance& ins, Solution& sol, std::default_random_engine& gen, Info info)
 {
     if (!sol.is_complete() || sol.feasible() > 0)
@@ -83,29 +92,34 @@ Solution gap::sol_vdns_simple(const Instance& ins, Solution& sol, std::default_r
         lb += ins.item(j).v_min;
 
     std::vector<ItemIdx> items(ins.item_number(), 0);
-    std::vector<AgentIdx> agents(ins.agent_number(), 0);
     std::iota(items.begin(), items.end(), 0);
-    std::iota(agents.begin(), agents.end(), 0);
     Solution sol_best = sol;
     init_display(sol_best, lb, info);
 
-    for (Cpt it=0, k=0, m_max=2; info.check_time(); ++it, ++k) {
-        if (k > ins.agent_number()) {
-            m_max++;
-            k = 0;
-        }
-        for (AgentIdx m=2; m<=m_max; ++m) {
-            for (AgentIdx l=0; l<=(m_max-m+1); ++l) {
-                if (move_gap(ins, sol, std::min(m, ins.agent_number()), ins.item_number(), items, agents, gen, info)) {
-                    std::stringstream ss;
-                    ss << "it " << it << " gap m " << m << " n " << ins.item_number();
-                    sol_best.update(sol, lb, ss, info);
-                    k = 0;
-                    goto end;
-                }
+    for (AgentIdx m=2; m<=ins.agent_number(); ++m) {
+        std::vector<std::vector<AgentIdx>> agents;
+        std::vector<AgentIdx> vec(m);
+        std::iota(vec.begin(), vec.end(), 0);
+        while (vec[0] <= ins.agent_number() - m) {
+            while (vec.back() < ins.agent_number()) {
+                agents.push_back(vec);
+                vec.back()++;
             }
+            AgentIdx i = m - 1;
+            while (i >= 0 && vec[i] >= ins.agent_number() - m + i)
+                i--;
+            if (i == -1)
+                break;
+            vec[i]++;
+            for (AgentIdx i2=i+1; i2<m; ++i2)
+                vec[i2] = vec[i2 - 1] + 1;
         }
-end:;
+
+        while (move_gap_first(ins, sol, items, agents, gen, info)) {
+            std::stringstream ss;
+            ss << " gap m " << m << " n " << ins.item_number();
+            sol_best.update(sol, lb, ss, info);
+        }
     }
     return algorithm_end(sol, info);
 }
