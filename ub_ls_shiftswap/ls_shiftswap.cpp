@@ -8,7 +8,8 @@
 
 using namespace gap;
 
-bool gap::shiftswap_first(Solution& sol, std::vector<std::pair<ItemIdx, ItemIdx>>& alt,
+bool lsfirst_shiftswap_move(Solution& sol,
+        std::vector<std::pair<ItemIdx, ItemIdx>>& alt,
         std::default_random_engine& gen, Info& info)
 {
     std::shuffle(alt.begin(), alt.end(), gen);
@@ -50,10 +51,11 @@ bool gap::shiftswap_first(Solution& sol, std::vector<std::pair<ItemIdx, ItemIdx>
     return false;
 }
 
-Solution gap::sol_ls_shiftswap_first(const Instance& ins, Solution& sol, std::default_random_engine& gen, Info info)
+Solution gap::sol_lsfirst_shiftswap(const Instance& ins, Solution& sol, std::default_random_engine& gen, Info info)
 {
     if (!sol.is_complete() || sol.feasible() > 0)
         sol = sol_random(ins, gen);
+    init_display(sol, 0, info);
 
     Cpt k = 0;
     std::vector<std::pair<ItemIdx, ItemIdx>> alt(
@@ -64,14 +66,14 @@ Solution gap::sol_ls_shiftswap_first(const Instance& ins, Solution& sol, std::de
         for (ItemIdx j2=j+1; j2<ins.item_number(); ++j2)
             alt[k++] = {j, j2};
     }
-    init_display(sol, 0, info);
-    while (shiftswap_first(sol, alt, gen, info));
+
+    while (lsfirst_shiftswap_move(sol, alt, gen, info));
     return algorithm_end(sol, info);
 }
 
 /******************************************************************************/
 
-bool gap::shiftswap_best(const Instance& ins, Solution& sol, Info& info)
+bool lsbest_shiftswap_move(const Instance& ins, Solution& sol, Info& info)
 {
     Value v_best = sol.value();
 
@@ -132,12 +134,12 @@ bool gap::shiftswap_best(const Instance& ins, Solution& sol, Info& info)
     return true;
 }
 
-Solution gap::sol_ls_shiftswap_best(const Instance& ins, Solution& sol, std::default_random_engine& gen, Info info)
+Solution gap::sol_lsbest_shiftswap(const Instance& ins, Solution& sol, std::default_random_engine& gen, Info info)
 {
     if (!sol.is_complete() || sol.feasible() > 0)
         sol = sol_random(ins, gen);
     init_display(sol, 0, info);
-    while (shiftswap_best(ins, sol, info));
+    while (lsbest_shiftswap_move(ins, sol, info));
     return algorithm_end(sol, info);
 }
 
@@ -234,7 +236,7 @@ bool gap::tripleswap_best(const Instance& ins, Solution& sol, Info& info)
 
 /******************************************************************************/
 
-void tabu_shiftswap(const Instance& ins, Solution& sol,
+void ts_shiftswap_move(const Instance& ins, Solution& sol,
         std::vector<std::vector<Cpt>>& tabu, Cpt tabu_size, Cpt it)
 {
     Value v_best = -1;
@@ -314,7 +316,7 @@ Solution gap::sol_ts_shiftswap(const Instance& ins, Solution& sol, std::default_
     std::vector<std::vector<Cpt>> tabu(ins.item_number(), std::vector<Cpt>(ins.agent_number(), - tabu_size - 1));
 
     for (Cpt it=0; info.check_time(); ++it) {
-        tabu_shiftswap(ins, sol, tabu, tabu_size, it);
+        ts_shiftswap_move(ins, sol, tabu, tabu_size, it);
         if (sol_best.value() > sol.value()) {
             std::stringstream ss;
             ss << "it " << it;
@@ -322,5 +324,27 @@ Solution gap::sol_ts_shiftswap(const Instance& ins, Solution& sol, std::default_
         }
     }
     return algorithm_end(sol, info);
+}
+
+/******************************************************************************/
+
+Solution gap::sol_sa_shiftswap(const Instance& ins, Solution& sol, std::default_random_engine& gen, Info info)
+{
+    (void)ins;
+    (void)sol;
+    (void)gen;
+    (void)info;
+    return Solution(ins);
+}
+
+/******************************************************************************/
+
+Solution gap::sol_pr_shiftswap(const Instance& ins, Solution& sol, std::default_random_engine& gen, Info info)
+{
+    (void)ins;
+    (void)sol;
+    (void)gen;
+    (void)info;
+    return Solution(ins);
 }
 

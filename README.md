@@ -29,13 +29,6 @@ Examples:
 - `-n 100 -m 10 -t f -r 100`
 - `-n 100 -m 10 -t g -r 100`
 
-Instances of interest:
-- t: f, g
-- n: 100, 200, 500, 1000
-- m: 5, 10, 20, 50, 100 (m not greater than n / 10)
-- r: 100, 1000, 10000
-- s: 1, 2, 3, 4, 5
-
 Instances can be visualized with gnuplot:
 ```
 ./bazel-bin/lib/generator_main -n 200 -m 20 -t f -r 100 -o ./ins.txt -p ./ins.plot
@@ -51,10 +44,15 @@ gnuplot> set yrange[0:]; set xrange[0:]; plot 'ins.plot' u 1:2
 
 ## Upper bounds
 
+Classical meta-heuristics based on shift-swap neighborhood:
+- Hill climbing, first improvment `-a lsfirst_shiftswap` :heavy_check_mark:
+- Hill climbing, best improvment `-a lsbest_shiftswap` :heavy_check_mark:
+- Tabu search `-a ts_shiftswap` :heavy_check_mark:
+- Simulated annealing `-a sa_shiftswap` :x:
+- Path relinking `-a pr_shiftswap` :x:
+
+Others:
 - Random initial solution `-a random` :heavy_check_mark:
-- Hill climbing, shift-swap neighborhood, first improvment `-a ls_shiftswap_first` :heavy_check_mark:
-- Hill climbing, shift-swap neighborhood, best improvment `-a ls_shiftswap_best` :heavy_check_mark:
-- Tabu search, shift-swap neighborhood `-a ts_shiftswap` :heavy_check_mark:
 - Variable Depth Neighborhood Search `-a vdns_simple` :heavy_check_mark:
 
 ## Exact algorithms
@@ -68,7 +66,4 @@ gnuplot> set yrange[0:]; set xrange[0:]; plot 'ins.plot' u 1:2
 - on a short time run (2 minutes, Processor Intel® Core™ i5-8500 CPU @ 3.00GHz × 6), it provides good solutions (less than 1% gap from optimal for most instances of the literature, between 1% and 2% for some hard instances)
 - it is very simple and the implementation is very short
 - it is available and free (MIT License)
-
-### Shift-swap neighborhood: first improvment vs best improvment
-
 
