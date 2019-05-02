@@ -45,8 +45,8 @@ gnuplot> set yrange[0:]; set xrange[0:]; plot 'ins.plot' u 1:2
 ## Upper bounds
 
 Classical meta-heuristics based on shift-swap neighborhood:
-- Hill climbing, first improvment `-a ls_shiftswap_first` :heavy_check_mark:
-- Hill climbing, best improvment `-a ls_shiftswap_best` :heavy_check_mark:
+- Hill climbing, first improvment `-a lsfirst_shiftswap` :heavy_check_mark:
+- Hill climbing, best improvment `-a lsbest_shiftswap` :heavy_check_mark:
 - Tabu search `-a ts_shiftswap` :heavy_check_mark:
 - Simulated annealing `-a sa_shiftswap` :x:
 - Path relinking `-a pr_shiftswap` :x:
