@@ -61,7 +61,6 @@ cc_binary(
                 "//ub_random:random",
                 "//ub_ls_shiftswap:ls_shiftswap",
                 "//ub_vdns_simple:vdns_simple",
-                "//ub_mbastar:mbastar",
         ],
 )
 
