@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
     } else if (algorithm == "random") {
         sol = sol_random(ins, gen, info);
     } else if (algorithm == "lsfirst_shiftswap") {
-        sol_lsfirst_shiftswap(ins, sol, gen, info);
+        sol = sol_lsfirst_shiftswap(ins, gen, 10, info);
     } else if (algorithm == "lsbest_shiftswap") {
         sol_lsbest_shiftswap(ins, sol, gen, info);
     } else if (algorithm == "ts_shiftswap") {

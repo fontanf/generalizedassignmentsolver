@@ -8,62 +8,66 @@
 
 using namespace gap;
 
-Solution gap::sol_lsfirst_shiftswap(const Instance& ins, Solution& sol, std::default_random_engine& gen, Info info)
+Solution gap::sol_lsfirst_shiftswap(const Instance& ins, std::default_random_engine& gen, double alpha, Info info)
 {
-    if (!sol.is_complete() || sol.feasible() > 0)
-        sol = sol_random(ins, gen);
-    init_display(sol, 0, info);
-
     AgentIdx m = ins.agent_number();
     ItemIdx n = ins.item_number();
     std::uniform_int_distribution<Cpt> dis_ss(1, n * m + (n * (n + 1)) / 2);
     std::uniform_int_distribution<ItemIdx> dis_j(0, n - 1);
     std::uniform_int_distribution<ItemIdx> dis_j2(0, n - 2);
+    std::uniform_int_distribution<AgentIdx> dis_i(0, m - 1);
     std::uniform_int_distribution<AgentIdx> dis_i1(0, m - 2);
     std::uniform_int_distribution<AgentIdx> dis_i2(0, m - 3);
+
+    Solution sol_best(ins);
+    Solution sol_curr(ins);
+    for (ItemIdx j=0; j<ins.item_number(); ++j)
+        sol_curr.set(j, dis_i(gen));
 
     Cpt it_max = 2 * (n * m + (n * (n + 1)) / 2);
     Cpt it_without_change = 0;
 
     while (it_without_change < it_max) {
-        Value v = sol.value();
+        Value v = sol_curr.value() + alpha * sol_curr.feasible();
         Cpt p = dis_ss(gen);
         if (p <= m * n) { // shift
             ItemIdx j = dis_j(gen);
             AgentIdx i = dis_i1(gen);
-            AgentIdx i_old = sol.agent(j);
+            AgentIdx i_old = sol_curr.agent(j);
             if (i >= i_old)
                 i++;
-            sol.set(j, i);
-            if (sol.feasible() > 0 || v < sol.value()) {
-                sol.set(j, i_old);
+            sol_curr.set(j, i);
+            double v_curr = sol_curr.value() + alpha * sol_curr.feasible();
+            if (v < v_curr) {
+                sol_curr.set(j, i_old);
             }
         } else { // swap
             ItemIdx j1 = dis_j(gen);
             ItemIdx j2 = dis_j2(gen);
             if (j2 >= j1)
                 j2++;
-            AgentIdx i1 = sol.agent(j1);
-            AgentIdx i2 = sol.agent(j2);
-            sol.set(j1, i2);
-            sol.set(j2, i1);
-            if (sol.feasible() > 0 || v < sol.value()) {
-                sol.set(j1, i1);
-                sol.set(j2, i2);
+            AgentIdx i1 = sol_curr.agent(j1);
+            AgentIdx i2 = sol_curr.agent(j2);
+            sol_curr.set(j1, i2);
+            sol_curr.set(j2, i1);
+            double v_curr = sol_curr.value() + alpha * sol_curr.feasible();
+            if (v < v_curr) {
+                sol_curr.set(j1, i1);
+                sol_curr.set(j2, i2);
             }
         }
 
         // Update it_without_change
-        if (sol.value() < v) {
+        if (sol_curr.feasible() == 0 && (!sol_best.is_complete() || sol_best.value() > sol_curr.value())) {
             std::stringstream ss;
-            sol.update(sol, 0, ss, info);
+            sol_best.update(sol_curr, 0, ss, info);
             it_without_change = 0;
         } else {
             it_without_change++;
         }
     }
 
-    return algorithm_end(sol, info);
+    return algorithm_end(sol_best, info);
 }
 
 /******************************************************************************/

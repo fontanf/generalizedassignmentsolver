@@ -6,7 +6,7 @@
 namespace gap
 {
 
-Solution sol_lsfirst_shiftswap(const Instance& ins, Solution& sol, std::default_random_engine& gen, Info info = Info());
+Solution sol_lsfirst_shiftswap(const Instance& ins, std::default_random_engine& gen, double alpha, Info info = Info());
 Solution sol_lsbest_shiftswap(const Instance& ins, Solution& sol, std::default_random_engine& gen, Info info = Info());
 Solution sol_ts_shiftswap(const Instance& ins, Solution& sol, std::default_random_engine& gen, Info info = Info());
 Solution sol_sa_shiftswap(const Instance& ins, Solution& sol, std::default_random_engine& gen, Info info = Info());
