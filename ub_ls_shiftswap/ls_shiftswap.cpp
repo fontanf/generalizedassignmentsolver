@@ -8,66 +8,62 @@
 
 using namespace gap;
 
-bool lsfirst_shiftswap_move(Solution& sol,
-        std::vector<std::pair<ItemIdx, ItemIdx>>& alt,
-        std::default_random_engine& gen, Info& info)
-{
-    std::shuffle(alt.begin(), alt.end(), gen);
-    Value v = sol.value();
-    for (std::pair<ItemIdx, ItemIdx> p: alt) {
-        if (p.second < 0) { // shift
-            ItemIdx j = p.first;
-            AgentIdx i_old = sol.agent(j);
-            AgentIdx i = - p.second - 1;
-            if (i == i_old)
-                continue;
-            sol.set(j, i);
-            if (sol.feasible() == 0 && v > sol.value()) {
-                std::stringstream ss;
-                ss << "shift j " << j << " i " << i;
-                sol.update(sol, 0, ss, info);
-                return true;
-            }
-            sol.set(j, i_old);
-        } else { // swap
-            ItemIdx j1 = p.first;
-            ItemIdx j2 = p.second;
-            AgentIdx i1 = sol.agent(j1);
-            AgentIdx i2 = sol.agent(j2);
-            if (i1 == i2)
-                continue;
-            sol.set(j1, i2);
-            sol.set(j2, i1);
-            if (sol.feasible() == 0 && v > sol.value()) {
-                std::stringstream ss;
-                ss << "swap j1 " << j1 << " j2 " << j2;
-                sol.update(sol, 0, ss, info);
-                return true;
-            }
-            sol.set(j1, i1);
-            sol.set(j2, i2);
-        }
-    }
-    return false;
-}
-
 Solution gap::sol_lsfirst_shiftswap(const Instance& ins, Solution& sol, std::default_random_engine& gen, Info info)
 {
     if (!sol.is_complete() || sol.feasible() > 0)
         sol = sol_random(ins, gen);
     init_display(sol, 0, info);
 
-    Cpt k = 0;
-    std::vector<std::pair<ItemIdx, ItemIdx>> alt(
-            ins.item_number() * (ins.item_number() + 1) / 2 + ins.item_number() * ins.agent_number());
-    for (ItemIdx j=0; j<ins.item_number(); ++j) {
-        for (AgentIdx i=0; i<ins.agent_number(); ++i)
-            alt[k++] = {j, - i - 1};
-        for (ItemIdx j2=j+1; j2<ins.item_number(); ++j2)
-            alt[k++] = {j, j2};
+    AgentIdx m = ins.agent_number();
+    ItemIdx n = ins.item_number();
+    std::uniform_int_distribution<Cpt> dis_ss(1, n * m + (n * (n + 1)) / 2);
+    std::uniform_int_distribution<ItemIdx> dis_j(0, n - 1);
+    std::uniform_int_distribution<ItemIdx> dis_j2(0, n - 2);
+    std::uniform_int_distribution<AgentIdx> dis_i1(0, m - 2);
+    std::uniform_int_distribution<AgentIdx> dis_i2(0, m - 3);
+    std::uniform_real_distribution<double> dis(0, 1);
+
+    Cpt it_max = 2 * (n * m + (n * (n + 1)) / 2);
+    Cpt it_without_change = 0;
+
+    while (it_without_change < it_max) {
+        Value v = sol.value();
+        Cpt p = dis_ss(gen);
+        if (p <= m * n) { // shift
+            ItemIdx j = dis_j(gen);
+            AgentIdx i = dis_i1(gen);
+            AgentIdx i_old = sol.agent(j);
+            if (i >= i_old)
+                i++;
+            sol.set(j, i);
+            if (sol.feasible() > 0 || v < sol.value()) {
+                sol.set(j, i_old);
+            }
+        } else { // swap
+            ItemIdx j1 = dis_j(gen);
+            ItemIdx j2 = dis_j2(gen);
+            if (j2 >= j1)
+                j2++;
+            AgentIdx i1 = sol.agent(j1);
+            AgentIdx i2 = sol.agent(j2);
+            sol.set(j1, i2);
+            sol.set(j2, i1);
+            if (sol.feasible() > 0 || v < sol.value()) {
+                sol.set(j1, i1);
+                sol.set(j2, i2);
+            }
+        }
+
+        // Update it_without_change
+        if (sol.value() < v) {
+            std::stringstream ss;
+            sol.update(sol, 0, ss, info);
+            it_without_change = 0;
+        } else {
+            it_without_change++;
+        }
     }
 
-    while (lsfirst_shiftswap_move(sol, alt, gen, info));
     return algorithm_end(sol, info);
 }
 
@@ -330,11 +326,82 @@ Solution gap::sol_ts_shiftswap(const Instance& ins, Solution& sol, std::default_
 
 Solution gap::sol_sa_shiftswap(const Instance& ins, Solution& sol, std::default_random_engine& gen, Info info)
 {
-    (void)ins;
-    (void)sol;
-    (void)gen;
-    (void)info;
-    return Solution(ins);
+    if (!sol.is_complete() || sol.feasible() > 0)
+        sol = sol_random(ins, gen);
+    Solution sol_best = sol;
+    init_display(sol_best, 0, info);
+
+    AgentIdx m = ins.agent_number();
+    ItemIdx n = ins.item_number();
+    std::uniform_int_distribution<Cpt> dis_ss(1, n * m + (n * (n + 1)) / 2);
+    std::uniform_int_distribution<ItemIdx> dis_j(0, n - 1);
+    std::uniform_int_distribution<ItemIdx> dis_j2(0, n - 2);
+    std::uniform_int_distribution<AgentIdx> dis_i1(0, m - 2);
+    std::uniform_int_distribution<AgentIdx> dis_i2(0, m - 3);
+    std::uniform_real_distribution<double> dis(0, 1);
+
+    double t0 = 0;
+    for (ItemIdx j=0; j<ins.item_number(); ++j)
+        for (AgentIdx i=0; i<ins.agent_number(); ++i)
+            if (t0 < ins.alternative(j, i).v)
+                t0 = ins.alternative(j, i).v;
+
+    double alpha = 0.99;
+    Cpt l = 100000;
+
+    Cpt it_max = 2 * (n * m + (n * (n + 1)) / 2);
+    Cpt it_without_change = 0;
+
+    for (double t=t0; info.check_time(); t*=alpha) {
+        for (Cpt it=0; it<l; ++it) {
+            Value v = sol.value();
+            Cpt p = dis_ss(gen);
+            if (p <= m * n) { // shift
+                ItemIdx j = dis_j(gen);
+                AgentIdx i = dis_i1(gen);
+                AgentIdx i_old = sol.agent(j);
+                if (i >= i_old)
+                    i++;
+                sol.set(j, i);
+                if (sol.feasible() > 0
+                        || (v < sol.value() &&
+                            dis(gen) > exp((double)(v - sol.value()) / t))) {
+                    sol.set(j, i_old);
+                }
+            } else { // swap
+                ItemIdx j1 = dis_j(gen);
+                ItemIdx j2 = dis_j2(gen);
+                if (j2 >= j1)
+                    j2++;
+                AgentIdx i1 = sol.agent(j1);
+                AgentIdx i2 = sol.agent(j2);
+                sol.set(j1, i2);
+                sol.set(j2, i1);
+                if (sol.feasible() > 0
+                        || (v < sol.value() &&
+                            dis(gen) > exp((double)(v - sol.value()) / t))) {
+                    sol.set(j1, i1);
+                    sol.set(j2, i2);
+                }
+            }
+
+            // Update it_without_change
+            if (sol.value() == v) {
+                it_without_change++;
+                if (it_without_change > it_max)
+                    return algorithm_end(sol_best, info);
+            } else {
+                it_without_change = 0;
+            }
+
+            // Update best solution
+            if (sol_best.value() > sol.value()) {
+                std::stringstream ss;
+                sol_best.update(sol, 0, ss, info);
+            }
+        }
+    }
+    return algorithm_end(sol_best, info);
 }
 
 /******************************************************************************/
