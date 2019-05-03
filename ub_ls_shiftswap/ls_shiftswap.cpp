@@ -21,7 +21,6 @@ Solution gap::sol_lsfirst_shiftswap(const Instance& ins, Solution& sol, std::def
     std::uniform_int_distribution<ItemIdx> dis_j2(0, n - 2);
     std::uniform_int_distribution<AgentIdx> dis_i1(0, m - 2);
     std::uniform_int_distribution<AgentIdx> dis_i2(0, m - 3);
-    std::uniform_real_distribution<double> dis(0, 1);
 
     Cpt it_max = 2 * (n * m + (n * (n + 1)) / 2);
     Cpt it_without_change = 0;
@@ -341,6 +340,7 @@ Solution gap::sol_ts_shiftswap(const Instance& ins, Solution& sol, std::default_
         // Update best solution
         if (sol_best.value() > sol.value()) {
             std::stringstream ss;
+            ss << "it " << it;
             sol_best.update(sol, 0, ss, info);
         }
     }
@@ -425,6 +425,7 @@ Solution gap::sol_sa_shiftswap(const Instance& ins, Solution& sol, std::default_
             // Update best solution
             if (sol_best.value() > sol.value()) {
                 std::stringstream ss;
+                ss << "t " << t;
                 sol_best.update(sol, 0, ss, info);
             }
 

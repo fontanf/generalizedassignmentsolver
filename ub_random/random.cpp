@@ -14,30 +14,48 @@ Solution gap::sol_random(const Instance& ins, std::default_random_engine& gen, I
     for (ItemIdx j=0; j<ins.item_number(); ++j)
         sol.set(j, dis(gen));
 
-    while (sol.feasible() > 0) {
-        Weight wf_min = sol.feasible();
-        ItemIdx j_best = -1;
-        ItemIdx i_best = -1;
-        for (ItemIdx j=0; j<ins.item_number(); ++j) {
-            AgentIdx i_old = sol.agent(j);
-            for (AgentIdx i=0; i<ins.agent_number(); ++i) {
-                if (i == i_old)
-                    continue;
-                sol.set(j, i);
-                if (wf_min > sol.feasible()) {
-                    j_best = j;
-                    i_best = i;
-                    wf_min = sol.feasible();
-                }
-            }
-            sol.set(j, i_old);
-        }
+    AgentIdx m = ins.agent_number();
+    ItemIdx n = ins.item_number();
+    std::uniform_int_distribution<Cpt> dis_ss(1, n * m + (n * (n + 1)) / 2);
+    std::uniform_int_distribution<ItemIdx> dis_j(0, n - 1);
+    std::uniform_int_distribution<ItemIdx> dis_j2(0, n - 2);
+    std::uniform_int_distribution<AgentIdx> dis_i1(0, m - 2);
+    std::uniform_int_distribution<AgentIdx> dis_i2(0, m - 3);
 
-        if (j_best == -1)
-            return sol_random(ins, gen);
-        sol.set(j_best, i_best);
+    Cpt it_max = 2 * (n * m + (n * (n + 1)) / 2);
+    Cpt it_without_change = 0;
+
+    while (it_without_change < it_max) {
+        Weight wf = sol.feasible();
+        Cpt p = dis_ss(gen);
+        if (p <= m * n) { // shift
+            ItemIdx j = dis_j(gen);
+            AgentIdx i = dis_i1(gen);
+            AgentIdx i_old = sol.agent(j);
+            if (i >= i_old)
+                i++;
+            sol.set(j, i);
+            if (sol.feasible() > wf) {
+                sol.set(j, i_old);
+            }
+        } else { // swap
+            ItemIdx j1 = dis_j(gen);
+            ItemIdx j2 = dis_j2(gen);
+            if (j2 >= j1)
+                j2++;
+            AgentIdx i1 = sol.agent(j1);
+            AgentIdx i2 = sol.agent(j2);
+            sol.set(j1, i2);
+            sol.set(j2, i1);
+            if (sol.feasible() > wf) {
+                sol.set(j1, i1);
+                sol.set(j2, i2);
+            }
+        }
+        if (sol.feasible() == 0)
+            return algorithm_end(sol, info);
     }
 
-    return algorithm_end(sol, info);
+    return sol_random(ins, gen, info);
 }
 
