@@ -14,6 +14,7 @@ public:
     Solution(const Solution& solution);
     Solution& operator=(const Solution& solution);
     ~Solution() { };
+    bool operator==(const Solution& sol);
 
     inline const Instance& instance() const { return instance_; }
     inline Weight weight() const { return w_tot_; }

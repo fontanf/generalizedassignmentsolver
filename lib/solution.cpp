@@ -40,6 +40,18 @@ Solution& Solution::operator=(const Solution& solution)
     return *this;
 }
 
+bool Solution::operator==(const Solution& sol)
+{
+    if (w_tot_ != sol.w_tot_)
+        return false;
+    if (v_ != sol.v_)
+        return false;
+    for (ItemIdx j=0; j<instance().item_number(); ++j)
+        if (x_[j] != sol.x_[j])
+            return false;
+    return true;
+}
+
 AgentIdx Solution::agent(ItemIdx j) const
 {
     assert(j >= 0 && j < instance().item_number());
