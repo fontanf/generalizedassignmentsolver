@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
         sol = sol_ts_shiftswap({
                 .ins = ins,
                 .gen = gen,
-                .alpha = 10,
+                .alpha = 4,
                 .info = info});
     } else if (algorithm == "sa_shiftswap") {
         sol = sol_sa_shiftswap({

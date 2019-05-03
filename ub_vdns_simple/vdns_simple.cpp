@@ -1,5 +1,6 @@
 #include "gap/ub_vdns_simple/vdns_simple.hpp"
 #include "gap/ub_random/random.hpp"
+#include "gap/ub_ls_shiftswap/ls_shiftswap.hpp"
 #include "gap/opt_milp/milp.hpp"
 
 #include <set>
@@ -88,20 +89,19 @@ bool move_gap_first(const Instance& ins, Solution& sol,
 
 Solution gap::sol_vdns_simple(const Instance& ins, std::default_random_engine& gen, Info info)
 {
-    Solution sol = sol_random(ins, gen);
+    init_display(info);
+    Solution sol_best(ins);
+    Solution sol_curr = sol_random(ins, gen);
+    std::stringstream ss;
+    sol_best.update(sol_curr, 0, ss, info);
     Value lb = 0;
     for (ItemIdx j=0; j<ins.item_number(); ++j)
         lb += ins.item(j).v_min;
 
     std::vector<ItemIdx> items(ins.item_number(), 0);
     std::iota(items.begin(), items.end(), 0);
-    Solution sol_best(ins);
-    init_display(info);
-    std::stringstream ss;
-    sol_best.update(sol, 0, ss, info);
 
     for (AgentIdx m=2; m<=ins.agent_number() && info.check_time(); ++m) {
-
         std::vector<std::vector<AgentIdx>> agents;
         std::vector<AgentIdx> vec(m);
         std::iota(vec.begin(), vec.end(), 0);
@@ -120,12 +120,12 @@ Solution gap::sol_vdns_simple(const Instance& ins, std::default_random_engine& g
                 vec[i2] = vec[i2 - 1] + 1;
         }
 
-        while (move_gap_first(ins, sol, items, agents, gen, info)) {
+        while (move_gap_first(ins, sol_curr, items, agents, gen, info)) {
             std::stringstream ss;
             ss << " gap m " << m << " n " << ins.item_number();
-            sol_best.update(sol, lb, ss, info);
+            sol_best.update(sol_curr, lb, ss, info);
         }
     }
-    return algorithm_end(sol, info);
+    return algorithm_end(sol_best, info);
 }
 

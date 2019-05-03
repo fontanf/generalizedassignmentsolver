@@ -96,7 +96,7 @@ Solution gap::sopt_milp(MilpData d)
     for (AltIdx k=0; k<d.ins.alternative_number(); ++k)
         if (solution[k] > 0.5)
             d.sol.set(k);
-    if (d.sol.feasible())
+    if (!d.sol.feasible())
         d.sol = Solution(d.ins);
     return algorithm_end(d.sol, d.info);
 }
