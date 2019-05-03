@@ -39,6 +39,8 @@ struct SAShiftSwapData
     std::default_random_engine& gen;
     double alpha;
     Info info = Info();
+    double beta = 0.99;
+    Cpt l = 100000;
 };
 Solution sol_sa_shiftswap(SAShiftSwapData d);
 

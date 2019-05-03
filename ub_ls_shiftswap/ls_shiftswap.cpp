@@ -385,20 +385,17 @@ Solution gap::sol_sa_shiftswap(SAShiftSwapData d)
     for (ItemIdx j=0; j<n; ++j)
         sol_curr.set(j, dis_i(d.gen));
 
+    // Compute initial temperature
     double t0 = 0;
     for (ItemIdx j=0; j<n; ++j)
         for (AgentIdx i=0; i<m; ++i)
             if (t0 < d.ins.alternative(j, i).v)
                 t0 = d.ins.alternative(j, i).v;
 
-    double alpha = 0.99;
-    Cpt l = 100000;
-
     Cpt it_max = 2 * (n * m + (n * (n + 1)) / 2);
     Cpt it_without_change = 0;
-
-    for (double t=t0; d.info.check_time(); t*=alpha) {
-        for (Cpt it=0; it<l;) {
+    for (double t=t0; d.info.check_time(); t*=d.beta) {
+        for (Cpt it=0; it<d.l;) {
             Value v = sol_curr.value(d.alpha);
             Cpt p = dis_ss(d.gen);
             if (p <= m * n) { // shift
@@ -443,7 +440,7 @@ Solution gap::sol_sa_shiftswap(SAShiftSwapData d)
             // Update best solution
             if (sol_curr.feasible() && (!sol_best.feasible() || sol_best.value() > sol_curr.value())) {
                 std::stringstream ss;
-                ss << "t " << t;
+                ss << "T " << t;
                 sol_best.update(sol_curr, 0, ss, d.info);
             }
 
