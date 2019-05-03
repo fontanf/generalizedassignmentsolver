@@ -50,8 +50,8 @@ struct PRShiftSwapData
     std::default_random_engine& gen;
     double alpha;
     Info info = Info();
-    Cpt rho = 20;
-    Cpt gamma = 10;
+    Cpt rho = 50;
+    Cpt gamma = 20;
 };
 Solution sol_pr_shiftswap(PRShiftSwapData d);
 
