@@ -20,9 +20,11 @@ public:
     inline Weight weight(AgentIdx i) const { return w_[i]; }
     inline Weight remaining_capacity(AgentIdx i) const { return instance().capacity(i) - weight(i); }
     inline Value value() const { return v_; }
+    inline double value(double alpha) const { return v_ + alpha * wf_; }
     inline ItemIdx item_number() const { return n_; }
-    inline bool is_complete() const { return n_ == instance().item_number(); }
-    Weight feasible() const { return wf_; };
+    inline bool full() const { return n_ == instance().item_number(); }
+    inline bool feasible() const { return full() && (overcapacity() == 0); }
+    Weight overcapacity() const { return wf_; };
 
     const std::vector<AgentIdx>& data()  const { return x_; }
     const std::vector<Weight>& weights() const { return w_; }
@@ -50,7 +52,7 @@ private:
 
 };
 
-void init_display(Solution& sol, Value lb, Info& info);
+void init_display(Info& info);
 
 std::ostream& operator<<(std::ostream& os, const Solution& solution);
 

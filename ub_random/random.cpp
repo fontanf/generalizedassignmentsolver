@@ -26,7 +26,7 @@ Solution gap::sol_random(const Instance& ins, std::default_random_engine& gen, I
     Cpt it_without_change = 0;
 
     while (it_without_change < it_max) {
-        Weight wf = sol.feasible();
+        Weight wf = sol.overcapacity();
         Cpt p = dis_ss(gen);
         if (p <= m * n) { // shift
             ItemIdx j = dis_j(gen);
@@ -35,7 +35,7 @@ Solution gap::sol_random(const Instance& ins, std::default_random_engine& gen, I
             if (i >= i_old)
                 i++;
             sol.set(j, i);
-            if (sol.feasible() > wf) {
+            if (sol.overcapacity() > wf) {
                 sol.set(j, i_old);
             }
         } else { // swap
@@ -47,12 +47,12 @@ Solution gap::sol_random(const Instance& ins, std::default_random_engine& gen, I
             AgentIdx i2 = sol.agent(j2);
             sol.set(j1, i2);
             sol.set(j2, i1);
-            if (sol.feasible() > wf) {
+            if (sol.overcapacity() > wf) {
                 sol.set(j1, i1);
                 sol.set(j2, i2);
             }
         }
-        if (sol.feasible() == 0)
+        if (sol.overcapacity() == 0)
             return algorithm_end(sol, info);
     }
 

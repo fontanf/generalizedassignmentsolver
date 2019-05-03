@@ -86,18 +86,19 @@ bool move_gap_first(const Instance& ins, Solution& sol,
     return false;
 }
 
-Solution gap::sol_vdns_simple(const Instance& ins, Solution& sol, std::default_random_engine& gen, Info info)
+Solution gap::sol_vdns_simple(const Instance& ins, std::default_random_engine& gen, Info info)
 {
-    if (!sol.is_complete() || sol.feasible() > 0)
-        sol = sol_random(ins, gen);
+    Solution sol = sol_random(ins, gen);
     Value lb = 0;
     for (ItemIdx j=0; j<ins.item_number(); ++j)
         lb += ins.item(j).v_min;
 
     std::vector<ItemIdx> items(ins.item_number(), 0);
     std::iota(items.begin(), items.end(), 0);
-    Solution sol_best = sol;
-    init_display(sol_best, lb, info);
+    Solution sol_best(ins);
+    init_display(info);
+    std::stringstream ss;
+    sol_best.update(sol, 0, ss, info);
 
     for (AgentIdx m=2; m<=ins.agent_number() && info.check_time(); ++m) {
 

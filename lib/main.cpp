@@ -89,17 +89,37 @@ int main(int argc, char *argv[])
     } else if (algorithm == "random") {
         sol = sol_random(ins, gen, info);
     } else if (algorithm == "lsfirst_shiftswap") {
-        sol = sol_lsfirst_shiftswap(ins, gen, 10, info);
+        sol = sol_lsfirst_shiftswap({
+                .ins = ins,
+                .gen = gen,
+                .alpha = 10,
+                .info = info});
     } else if (algorithm == "lsbest_shiftswap") {
-        sol_lsbest_shiftswap(ins, sol, gen, info);
+        sol = sol_lsbest_shiftswap({
+                .ins = ins,
+                .gen = gen,
+                .alpha = 10,
+                .info = info});
     } else if (algorithm == "ts_shiftswap") {
-        sol_ts_shiftswap(ins, sol, gen, info);
+        sol = sol_ts_shiftswap({
+                .ins = ins,
+                .gen = gen,
+                .alpha = 10,
+                .info = info});
     } else if (algorithm == "sa_shiftswap") {
-        sol_sa_shiftswap(ins, sol, gen, info);
+        sol = sol_sa_shiftswap({
+                .ins = ins,
+                .gen = gen,
+                .alpha = 10,
+                .info = info});
     } else if (algorithm == "pr_shiftswap") {
-        sol_pr_shiftswap(ins, sol, gen, info);
+        sol = sol_pr_shiftswap({
+                .ins = ins,
+                .gen = gen,
+                .alpha = 10,
+                .info = info});
     } else if (algorithm == "vdns_simple") {
-        sol_vdns_simple(ins, sol, gen, info);
+        sol = sol_vdns_simple(ins, gen, info);
     /*
     } else if (algorithm == "tabuastar") {
         sol_tabuastar({

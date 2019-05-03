@@ -115,7 +115,7 @@ std::ostream& gap::operator<<(std::ostream& os, const Solution& sol)
 {
     os <<  "n " << sol.instance().item_number()
         << " v " << sol.value()
-        << " wf " << sol.feasible()
+        << " wf " << sol.overcapacity()
         << std::endl;
     for (AgentIdx i=0; i<sol.instance().agent_number(); ++i) {
         os << "agent " << i << " (" << sol.remaining_capacity(i) << "/" << sol.instance().capacity(i) <<  "):";
@@ -140,7 +140,7 @@ void Solution::update(const Solution& sol, Value lb, const std::stringstream& s,
 {
     info.output->mutex_sol.lock();
 
-    if (!is_complete() || sol.value() < value() || this == &sol) {
+    if (!feasible() || value() > sol.value()) {
         info.output->sol_number++;
         *this = sol;
         double t = std::round(info.elapsed_time());
@@ -163,7 +163,7 @@ void Solution::update(const Solution& sol, Value lb, const std::stringstream& s,
     info.output->mutex_sol.unlock();
 }
 
-void gap::init_display(Solution& sol, Value lb, Info& info)
+void gap::init_display(Info& info)
 {
     VER(info, std::left << std::setw(10) << "T (s)");
     VER(info, std::left << std::setw(12) << "UB");
@@ -171,13 +171,6 @@ void gap::init_display(Solution& sol, Value lb, Info& info)
     VER(info, std::left << std::setw(10) << "GAP");
     VER(info, "");
     VER(info, std::endl);
-
-    double t = std::round(info.elapsed_time());
-    VER(info, std::left << std::setw(10) << t);
-    VER(info, std::left << std::setw(12) << sol.value());
-    VER(info, std::left << std::setw(12) << lb);
-    VER(info, std::left << std::setw(10) << sol.value() - lb);
-    VER(info, "" << std::endl);
 }
 
 std::string Solution::to_string(AgentIdx i)

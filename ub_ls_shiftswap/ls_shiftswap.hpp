@@ -6,11 +6,50 @@
 namespace gap
 {
 
-Solution sol_lsfirst_shiftswap(const Instance& ins, std::default_random_engine& gen, double alpha, Info info = Info());
-Solution sol_lsbest_shiftswap(const Instance& ins, Solution& sol, std::default_random_engine& gen, Info info = Info());
-Solution sol_ts_shiftswap(const Instance& ins, Solution& sol, std::default_random_engine& gen, Info info = Info());
-Solution sol_sa_shiftswap(const Instance& ins, Solution& sol, std::default_random_engine& gen, Info info = Info());
-Solution sol_pr_shiftswap(const Instance& ins, Solution& sol, std::default_random_engine& gen, Info info = Info());
+struct LSFirstShiftSwapData
+{
+    const Instance& ins;
+    std::default_random_engine& gen;
+    double alpha;
+    Info info = Info();
+};
+Solution sol_lsfirst_shiftswap(LSFirstShiftSwapData d);
+
+struct LSBestShiftSwapData
+{
+    const Instance& ins;
+    std::default_random_engine& gen;
+    double alpha;
+    Info info = Info();
+};
+Solution sol_lsbest_shiftswap(LSBestShiftSwapData d);
+
+struct TSShiftSwapData
+{
+    const Instance& ins;
+    std::default_random_engine& gen;
+    double alpha;
+    Info info = Info();
+};
+Solution sol_ts_shiftswap(TSShiftSwapData d);
+
+struct SAShiftSwapData
+{
+    const Instance& ins;
+    std::default_random_engine& gen;
+    double alpha;
+    Info info = Info();
+};
+Solution sol_sa_shiftswap(SAShiftSwapData d);
+
+struct PRShiftSwapData
+{
+    const Instance& ins;
+    std::default_random_engine& gen;
+    double alpha;
+    Info info = Info();
+};
+Solution sol_pr_shiftswap(PRShiftSwapData d);
 
 bool doubleshift_best(const Instance& ins, Solution& sol, Info& info);
 bool tripleswap_best(const Instance& ins, Solution& sol, Info& info);

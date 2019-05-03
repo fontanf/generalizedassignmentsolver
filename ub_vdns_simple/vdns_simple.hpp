@@ -6,7 +6,7 @@
 namespace gap
 {
 
-Solution sol_vdns_simple(const Instance& ins, Solution& sol, std::default_random_engine& gen, Info info = Info());
+Solution sol_vdns_simple(const Instance& ins, std::default_random_engine& gen, Info info = Info());
 
 }
 

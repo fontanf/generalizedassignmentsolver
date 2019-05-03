@@ -72,7 +72,7 @@ Solution gap::sopt_milp(MilpData d)
 
     // Add initial solution
     std::vector<double> sol_init(d.ins.alternative_number(), 0);
-    if (d.sol.is_complete() && d.sol.feasible() >= 0) {
+    if (d.sol.feasible()) {
         for (AltIdx k=0; k<d.ins.alternative_number(); ++k)
             if (d.sol.agent(d.ins.alternative(k).j) == d.ins.alternative(k).i)
                 sol_init[k] = 1;
@@ -88,7 +88,7 @@ Solution gap::sopt_milp(MilpData d)
     // Do complete search
     model.branchAndBound();
 
-    if (d.sol.is_complete() && d.sol.feasible() >= 0 && d.sol.value() <= model.getObjValue() + 0.5)
+    if (d.sol.feasible() && d.sol.value() <= model.getObjValue() + 0.5)
         return algorithm_end(d.sol, d.info);
 
     // Get solution
@@ -96,7 +96,7 @@ Solution gap::sopt_milp(MilpData d)
     for (AltIdx k=0; k<d.ins.alternative_number(); ++k)
         if (solution[k] > 0.5)
             d.sol.set(k);
-    if (d.sol.feasible() > 0 || !d.sol.is_complete())
+    if (d.sol.feasible())
         d.sol = Solution(d.ins);
     return algorithm_end(d.sol, d.info);
 }
