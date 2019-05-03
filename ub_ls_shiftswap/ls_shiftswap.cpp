@@ -553,8 +553,8 @@ Solution gap::sol_pr_shiftswap(PRShiftSwapData d)
             b++;
 
         // With probability 1/2, replace solution b by a shift neighbor
-        Solution& sol_a = pool[a];
-        Solution  sol_b = pool[b];
+        Solution sol_a = pool[a];
+        Solution sol_b = pool[b];
         if (dis_sigma(d.gen) == 0) {
             ItemIdx j = dis_j(d.gen);
             AgentIdx i = dis_i1(d.gen);
@@ -563,60 +563,74 @@ Solution gap::sol_pr_shiftswap(PRShiftSwapData d)
             sol_b.set(j, i);
         }
 
-        // Fill s with N'shift(sol_a, sol_b)
         std::multiset<Solution, decltype(cmp)> s(cmp);
-        for (ItemIdx j=0; j<n; ++j) {
-            AgentIdx i_old = sol_a.agent(j);
-            AgentIdx i = sol_b.agent(j);
-            if (i == i_old)
-                continue;
-            sol_a.set(j, i);
-            add(d, s, sol_a);
-            sol_a.set(j, i_old);
+
+        // Fill s with N'shift(sol_a, sol_b)
+        {
+            double v_best = -1;
+            ItemIdx j_best = -1;
+            for (ItemIdx j=0; j<n; ++j) {
+                AgentIdx i_old = sol_a.agent(j);
+                AgentIdx i = sol_b.agent(j);
+                if (i == i_old)
+                    continue;
+                sol_a.set(j, i);
+                add(d, s, sol_a);
+                double v = sol_a.value(d.alpha);
+                if (v_best == -1 || v_best > v) {
+                    v_best = v;
+                    j_best = j;
+                }
+                sol_a.set(j, i_old);
+            }
+            sol_a.set(j_best, sol_b.agent(j_best));
         }
 
+        // Fill s with sol_2 ... sol_{dist - 1}
         ItemIdx dist = 0;
         for (ItemIdx j=0; j<n; ++j)
             if (sol_a.agent(j) != sol_b.agent(j))
                 dist++;
         //std::cout << "dist " << dist << std::endl;
-
-        for (Solution sol_curr=sol_a; dist>1; --dist) {
+        for (; dist>1; --dist) {
             double v_best = -1;
             ItemIdx j_best = -1;
             for (ItemIdx j=0; j<n; ++j) {
-                AgentIdx i_old = sol_curr.agent(j);
+                AgentIdx i_old = sol_a.agent(j);
                 AgentIdx i = sol_b.agent(j);
                 if (i == i_old)
                     continue;
-                sol_curr.set(j, i);
-                double v = sol_curr.value(d.alpha);
+                sol_a.set(j, i);
+                double v = sol_a.value(d.alpha);
                 if (v_best == -1 || v_best > v) {
                     v_best = v;
                     j_best = j;
                 }
-                sol_curr.set(j, i_old);
+                sol_a.set(j, i_old);
             }
-            sol_curr.set(j_best, sol_b.agent(j_best));
-            add(d, s, sol_curr);
+            sol_a.set(j_best, sol_b.agent(j_best));
+            add(d, s, sol_a);
         }
 
         for (Solution sol_curr: s) {
-            // Apply shift-swap
             //std::cout << " v before " << sol_curr.value(d.alpha);
+
+            // Apply shift-swap
             pr_shiftswap(d, sol_curr, sol_best);
-            // Update pool
+            //std::cout << " v after " << sol_curr.value(d.alpha);
+
+            // Add sol_curr to pool and remove worst solution from pool.
             double v_max = sol_curr.value(d.alpha);
-            //std::cout << " v after " << v_max;
             Cpt l_max = -1;
             for (Cpt l=0; l<d.rho; ++l) {
+                // If the solution is already in the pool, we don't add it again.
                 if (sol_curr == pool[l]) {
                     //std::cout << " already";
                     l_max = -1;
                     break;
                 }
                 double v = pool[l].value(d.alpha);
-                if (v_max < v) {
+                if (v_max <= v) {
                     v_max = v;
                     l_max = l;
                 }

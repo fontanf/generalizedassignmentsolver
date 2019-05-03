@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
         sol = sol_pr_shiftswap({
                 .ins = ins,
                 .gen = gen,
-                .alpha = 2,
+                .alpha = 10,
                 .info = info});
     } else if (algorithm == "vdns_simple") {
         sol = sol_vdns_simple(ins, gen, info);

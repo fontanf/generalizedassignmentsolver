@@ -51,7 +51,7 @@ struct PRShiftSwapData
     double alpha;
     Info info = Info();
     Cpt rho = 50;
-    Cpt gamma = 20;
+    Cpt gamma = 5;
 };
 Solution sol_pr_shiftswap(PRShiftSwapData d);
 
