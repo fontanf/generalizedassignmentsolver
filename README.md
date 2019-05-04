@@ -49,7 +49,7 @@ Classical meta-heuristics based on shift-swap neighborhood:
 - Hill climbing, best improvment `-a lsbest_shiftswap` :heavy_check_mark:
 - Tabu search `-a ts_shiftswap` :heavy_check_mark:
 - Simulated annealing `-a sa_shiftswap` :heavy_check_mark:
-- Path relinking `-a pr_shiftswap` :x:
+- Path relinking `-a pr_shiftswap` :heavy_check_mark:
 
 Others:
 - Random initial solution `-a random` :heavy_check_mark:

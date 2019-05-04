@@ -466,7 +466,7 @@ void pr_shiftswap(PRShiftSwapData& d, Solution& sol_curr, Solution& sol_best)
     Cpt it_max = n * m;
     Cpt it_without_change = 0;
 
-    while (it_without_change < it_max) {
+    for (Cpt it=0; it_without_change<it_max;) {
         double v = sol_curr.value(d.alpha);
         Cpt p = dis_ss(d.gen);
         if (p <= m * n) { // shift
@@ -487,6 +487,8 @@ void pr_shiftswap(PRShiftSwapData& d, Solution& sol_curr, Solution& sol_best)
                 j2++;
             AgentIdx i1 = sol_curr.agent(j1);
             AgentIdx i2 = sol_curr.agent(j2);
+            if (i1 == i2)
+                continue;
             sol_curr.set(j1, i2);
             sol_curr.set(j2, i1);
             double v_curr = sol_curr.value(d.alpha);
@@ -504,6 +506,7 @@ void pr_shiftswap(PRShiftSwapData& d, Solution& sol_curr, Solution& sol_best)
         } else {
             it_without_change++;
         }
+        ++it;
     }
 }
 
@@ -540,92 +543,57 @@ Solution gap::sol_pr_shiftswap(PRShiftSwapData d)
     auto cmp = [&d](const Solution& s1, const Solution& s2) { return s1.value(d.alpha) < s2.value(d.alpha); };
     for (;;) {
         //double val = 0;
-        //for (Solution& sol_curr: pool) {
-            //std::cout << sol_curr.value(d.alpha) << " ";
+        //for (Solution& sol_curr: pool)
             //val += sol_curr.value(d.alpha);
+        //if (!sol_best.feasible() || sol_best.value() > val/d.rho * 1.001) {
+            //d.alpha *= 1.01;
+        //} else {
+            //d.alpha *= 0.99;
         //}
-        //std::cout << "average " << val/d.rho << std::endl;
+        //std::cout << "average " << val/d.rho << " best " << sol_best.value() << " alpha " << d.alpha << std::endl;
 
         // Get solutions a and b
         Cpt a = dis_a(d.gen);
         Cpt b = dis_b(d.gen);
         if (b >= a)
             b++;
-
-        // With probability 1/2, replace solution b by a shift neighbor
         Solution sol_a = pool[a];
         Solution sol_b = pool[b];
-        if (dis_sigma(d.gen) == 0) {
-            ItemIdx j = dis_j(d.gen);
-            AgentIdx i = dis_i1(d.gen);
-            if (i >= sol_b.agent(j))
-                i++;
-            sol_b.set(j, i);
-        }
 
+        // Fill s
         std::multiset<Solution, decltype(cmp)> s(cmp);
-
-        // Fill s with N'shift(sol_a, sol_b)
-        {
-            double v_best = -1;
-            ItemIdx j_best = -1;
-            for (ItemIdx j=0; j<n; ++j) {
-                AgentIdx i_old = sol_a.agent(j);
-                AgentIdx i = sol_b.agent(j);
-                if (i == i_old)
-                    continue;
-                sol_a.set(j, i);
-                add(d, s, sol_a);
-                double v = sol_a.value(d.alpha);
-                if (v_best == -1 || v_best > v) {
-                    v_best = v;
-                    j_best = j;
-                }
-                sol_a.set(j, i_old);
-            }
-            sol_a.set(j_best, sol_b.agent(j_best));
-        }
-
-        // Fill s with sol_2 ... sol_{dist - 1}
         ItemIdx dist = 0;
         for (ItemIdx j=0; j<n; ++j)
             if (sol_a.agent(j) != sol_b.agent(j))
                 dist++;
-        //std::cout << "dist " << dist << std::endl;
         for (; dist>1; --dist) {
             double v_best = -1;
             ItemIdx j_best = -1;
             for (ItemIdx j=0; j<n; ++j) {
-                AgentIdx i_old = sol_a.agent(j);
-                AgentIdx i = sol_b.agent(j);
-                if (i == i_old)
+                AgentIdx ia = sol_a.agent(j);
+                AgentIdx ib = sol_b.agent(j);
+                if (ia == ib)
                     continue;
-                sol_a.set(j, i);
+                sol_a.set(j, ib);
                 double v = sol_a.value(d.alpha);
                 if (v_best == -1 || v_best > v) {
                     v_best = v;
                     j_best = j;
                 }
-                sol_a.set(j, i_old);
+                sol_a.set(j, ia);
             }
             sol_a.set(j_best, sol_b.agent(j_best));
             add(d, s, sol_a);
         }
 
         for (Solution sol_curr: s) {
-            //std::cout << " v before " << sol_curr.value(d.alpha);
-
-            // Apply shift-swap
-            pr_shiftswap(d, sol_curr, sol_best);
-            //std::cout << " v after " << sol_curr.value(d.alpha);
-
+            pr_shiftswap(d, sol_curr, sol_best); // Apply shift-swap
             // Add sol_curr to pool and remove worst solution from pool.
             double v_max = sol_curr.value(d.alpha);
             Cpt l_max = -1;
             for (Cpt l=0; l<d.rho; ++l) {
                 // If the solution is already in the pool, we don't add it again.
                 if (sol_curr == pool[l]) {
-                    //std::cout << " already";
                     l_max = -1;
                     break;
                 }
@@ -635,7 +603,6 @@ Solution gap::sol_pr_shiftswap(PRShiftSwapData d)
                     l_max = l;
                 }
             }
-            //std::cout << " l_max " << l_max << std::endl;
             if (l_max != -1)
                 pool[l_max] = sol_curr;
         }
