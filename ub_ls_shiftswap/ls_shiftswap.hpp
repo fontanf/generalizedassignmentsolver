@@ -6,6 +6,14 @@
 namespace gap
 {
 
+struct DualLSShiftSwapData
+{
+    const Instance& ins;
+    std::default_random_engine& gen;
+    Info info = Info();
+};
+Solution sol_dualls_shiftswap(DualLSShiftSwapData d);
+
 struct LSFirstShiftSwapData
 {
     const Instance& ins;

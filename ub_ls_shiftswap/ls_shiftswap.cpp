@@ -8,6 +8,72 @@
 
 using namespace gap;
 
+Solution gap::sol_dualls_shiftswap(DualLSShiftSwapData d)
+{
+    init_display(d.info);
+    AgentIdx m = d.ins.agent_number();
+    ItemIdx n = d.ins.item_number();
+    Cpt neighsize = n * m + (n * (n + 1)) / 2;
+    std::uniform_int_distribution<Cpt> dis_ss(1, n * m + (n * (n + 1)) / 2);
+    std::uniform_int_distribution<ItemIdx> dis_j(0, n - 1);
+    std::uniform_int_distribution<ItemIdx> dis_j2(0, n - 2);
+    std::uniform_int_distribution<AgentIdx> dis_i(0, m - 1);
+    std::uniform_int_distribution<AgentIdx> dis_i1(0, m - 2);
+    std::uniform_int_distribution<AgentIdx> dis_i2(0, m - 3);
+
+    // Initilize current solution
+    Solution sol_curr(d.ins);
+    for (ItemIdx j=0; j<d.ins.item_number(); ++j)
+        sol_curr.set(j, d.ins.item(j).i_best);
+
+    for (double alpha = 0.000001; ; alpha *= 1.1) {
+        Cpt it_without_change = 0;
+        while (it_without_change < neighsize) {
+            double v = sol_curr.value(alpha);
+            Cpt p = dis_ss(d.gen);
+            if (p <= m * n) { // shift
+                ItemIdx j = dis_j(d.gen);
+                AgentIdx i = dis_i1(d.gen);
+                AgentIdx i_old = sol_curr.agent(j);
+                if (i >= i_old)
+                    i++;
+                sol_curr.set(j, i);
+                double v_curr = sol_curr.value(alpha);
+                if (v < v_curr) {
+                    sol_curr.set(j, i_old);
+                    it_without_change++;
+                } else if (v > v_curr) {
+                    it_without_change = 0;
+                }
+            } else { // swap
+                ItemIdx j1 = dis_j(d.gen);
+                ItemIdx j2 = dis_j2(d.gen);
+                if (j2 >= j1)
+                    j2++;
+                AgentIdx i1 = sol_curr.agent(j1);
+                AgentIdx i2 = sol_curr.agent(j2);
+                sol_curr.set(j1, i2);
+                sol_curr.set(j2, i1);
+                double v_curr = sol_curr.value(alpha);
+                if (v < v_curr) {
+                    sol_curr.set(j1, i1);
+                    sol_curr.set(j2, i2);
+                    it_without_change++;
+                } else if (v > v_curr) {
+                    it_without_change = 0;
+                }
+            }
+        }
+
+        if (sol_curr.feasible())
+            return algorithm_end(sol_curr, d.info);
+    }
+
+    return algorithm_end(sol_curr, d.info);
+}
+
+/******************************************************************************/
+
 Solution gap::sol_lsfirst_shiftswap(LSFirstShiftSwapData d)
 {
     init_display(d.info);

@@ -91,7 +91,8 @@ Solution gap::sol_vdns_simple(const Instance& ins, std::default_random_engine& g
 {
     init_display(info);
     Solution sol_best(ins);
-    Solution sol_curr = sol_random(ins, gen);
+    //Solution sol_curr = sol_random(ins, gen);
+    Solution sol_curr = sol_dualls_shiftswap({ins, gen});
     std::stringstream ss;
     sol_best.update(sol_curr, 0, ss, info);
     Value lb = 0;

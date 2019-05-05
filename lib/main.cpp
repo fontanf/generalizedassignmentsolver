@@ -88,6 +88,11 @@ int main(int argc, char *argv[])
                 });
     } else if (algorithm == "random") {
         sol = sol_random(ins, gen, info);
+    } else if (algorithm == "dualls_shiftswap") {
+        sol = sol_dualls_shiftswap({
+                .ins = ins,
+                .gen = gen,
+                .info = info});
     } else if (algorithm == "lsfirst_shiftswap") {
         sol = sol_lsfirst_shiftswap({
                 .ins = ins,
