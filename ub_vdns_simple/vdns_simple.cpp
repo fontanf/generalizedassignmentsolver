@@ -8,13 +8,11 @@
 #include <algorithm>
 #include <vector>
 
-#include <coin/CbcModel.hpp>
-#include <coin/OsiCbcSolverInterface.hpp>
-
 using namespace gap;
 
-bool move_gap(const Instance& ins, Solution& sol, AgentIdx m, ItemIdx n,
-        const std::vector<ItemIdx>& items, const std::vector<AgentIdx>& agents,
+bool move_gap(const Instance& ins, Solution& sol,
+        AgentIdx m, const std::vector<AgentIdx>& agents,
+        ItemIdx n, const std::vector<ItemIdx>& items,
         Info& info)
 {
     (void)info;
@@ -56,7 +54,7 @@ bool move_gap(const Instance& ins, Solution& sol, AgentIdx m, ItemIdx n,
     sopt_milp({
             .ins = ins_tmp,
             .sol = sol_tmp,
-            .stop_at_first_improvment = true,
+            .stop_at_first_improvment = false,
             .info = Info(),
             });
     if (v <= sol_tmp.value())
@@ -71,22 +69,6 @@ bool move_gap(const Instance& ins, Solution& sol, AgentIdx m, ItemIdx n,
     return true;
 }
 
-bool move_gap_first(const Instance& ins, Solution& sol,
-        const std::vector<ItemIdx>& items,
-        std::vector<std::vector<AgentIdx>>& agents,
-        std::default_random_engine& gen,
-        Info& info)
-{
-    std::shuffle(agents.begin(), agents.end(), gen);
-    for (std::vector<AgentIdx>& ag: agents) {
-        if (move_gap(ins, sol, ag.size(), ins.item_number(), items, ag, info))
-            return true;
-        if (!info.check_time())
-            return false;
-    }
-    return false;
-}
-
 Solution gap::sol_vdns_simple(const Instance& ins, std::default_random_engine& gen, Info info)
 {
     init_display(info);
@@ -95,9 +77,6 @@ Solution gap::sol_vdns_simple(const Instance& ins, std::default_random_engine& g
     Solution sol_curr = sol_dualls_shiftswap({ins, gen});
     std::stringstream ss;
     sol_best.update(sol_curr, 0, ss, info);
-    Value lb = 0;
-    for (ItemIdx j=0; j<ins.item_number(); ++j)
-        lb += ins.item(j).v_min;
 
     std::vector<ItemIdx> items(ins.item_number(), 0);
     std::iota(items.begin(), items.end(), 0);
@@ -121,10 +100,21 @@ Solution gap::sol_vdns_simple(const Instance& ins, std::default_random_engine& g
                 vec[i2] = vec[i2 - 1] + 1;
         }
 
-        while (move_gap_first(ins, sol_curr, items, agents, gen, info)) {
-            std::stringstream ss;
-            ss << " gap m " << m << " n " << ins.item_number();
-            sol_best.update(sol_curr, lb, ss, info);
+        std::shuffle(agents.begin(), agents.end(), gen);
+        ItemIdx k_last = agents.size() - 1;
+        for (ItemIdx k=0; ; k=(k+1)%agents.size()) {
+            if (move_gap(ins, sol_curr, m, agents[k], ins.item_number(), items, info)) {
+                std::stringstream ss;
+                ss << " gap m " << m << ":";
+                for (AgentIdx i: agents[k])
+                    ss << " " << i;
+                sol_best.update(sol_curr, 0, ss, info);
+                k_last = (k != 0)? k - 1: agents.size() - 1;
+            }
+            if (k == k_last)
+                break;
+            if (!info.check_time())
+                return algorithm_end(sol_best, info);
         }
     }
     return algorithm_end(sol_best, info);
