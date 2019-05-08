@@ -2,6 +2,8 @@
 
 #include <coin/CbcModel.hpp>
 #include <coin/OsiCbcSolverInterface.hpp>
+#include <coin/CglKnapsackCover.hpp>
+#include <coin/CglClique.hpp>
 
 using namespace gap;
 
@@ -68,6 +70,12 @@ Solution gap::sopt_milp(MilpData d)
 
     // Pass data and solver to CbcModel
     CbcModel model(solver1);
+
+    // Reduce printout
+    model.setLogLevel(loglevel);
+    model.solver()->setHintParam(OsiDoReducePrint, true, OsiHintTry);
+
+    // Set time limit
     model.setMaximumSeconds(d.info.timelimit);
 
     // Add initial solution
@@ -80,10 +88,6 @@ Solution gap::sopt_milp(MilpData d)
     }
     if (d.stop_at_first_improvment)
         model.setMaximumSolutions(1);
-
-    // Reduce printout
-    model.setLogLevel(loglevel);
-    model.solver()->setHintParam(OsiDoReducePrint, true, OsiHintTry);
 
     // Do complete search
     model.branchAndBound();

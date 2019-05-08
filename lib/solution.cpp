@@ -5,36 +5,36 @@
 using namespace gap;
 
 Solution::Solution(const Instance& instance): instance_(instance),
-    x_(std::vector<AgentIdx>(instance.item_number(), -1)),
-    w_(std::vector<Weight>(instance.agent_number(), 0))
+    x_(std::vector<AgentIdx>(instance.item_number(), -1)), n_(0),
+    v_(std::vector<Weight>(instance.agent_number(), 0)), v_tot_(0),
+    w_(std::vector<Weight>(instance.agent_number(), 0)), w_tot_(0),
+    wf_(std::vector<Weight>(instance.agent_number(), 0)), wf_tot_(0)
 { }
 
-Solution::Solution(const Solution& solution):
-    instance_(solution.instance_),
-    n_(solution.n_),
-    v_(solution.v_),
-    w_tot_(solution.w_tot_),
-    wf_(solution.wf_),
-    x_(solution.x_),
-    w_(solution.w_)
+Solution::Solution(const Solution& sol):
+    instance_(sol.instance_),
+    x_(sol.x_), n_(sol.n_),
+    v_(sol.v_), v_tot_(sol.v_tot_),
+    w_(sol.w_), w_tot_(sol.w_tot_),
+    wf_(sol.wf_), wf_tot_(sol.wf_tot_)
 { }
 
-Solution& Solution::operator=(const Solution& solution)
+Solution& Solution::operator=(const Solution& sol)
 {
-    if (this != &solution) {
-        if (&solution.instance() == &instance()) {
-            n_ = solution.n_;
-            v_ = solution.v_;
-            w_ = solution.w_;
-            w_tot_ = solution.w_tot_;
-            wf_ = solution.wf_;
-            x_ = solution.x_;
+    if (this != &sol) {
+        if (&sol.instance() == &instance()) {
+            x_ = sol.x_;
+            n_ = sol.n_;
+            v_ = sol.v_;
+            v_tot_ = sol.v_tot_;
+            w_ = sol.w_;
+            w_tot_ = sol.w_tot_;
+            wf_ = sol.wf_;
+            wf_tot_ = sol.wf_tot_;
         } else {
-            assert(solution.instance().item_number() == instance().item_number());
-            assert(solution.instance().agent_number() == instance().agent_number());
             clear();
             for (ItemIdx j=0; j<instance().item_number(); ++j)
-                set(j, solution.agent(j));
+                set(j, sol.agent(j));
         }
     }
     return *this;
@@ -42,9 +42,7 @@ Solution& Solution::operator=(const Solution& solution)
 
 bool Solution::operator==(const Solution& sol)
 {
-    if (w_tot_ != sol.w_tot_)
-        return false;
-    if (v_ != sol.v_)
+    if (w_tot_ != sol.w_tot_ || v_tot_ != sol.v_tot_)
         return false;
     for (ItemIdx j=0; j<instance().item_number(); ++j)
         if (x_[j] != sol.x_[j])
@@ -52,10 +50,12 @@ bool Solution::operator==(const Solution& sol)
     return true;
 }
 
-AgentIdx Solution::agent(ItemIdx j) const
+double Solution::value(const std::vector<double>& alpha) const
 {
-    assert(j >= 0 && j < instance().item_number());
-    return x_[j];
+    double v = 0.0;
+    for (AgentIdx i=0; i<instance().agent_number(); ++i)
+        v += v_[i] + alpha[i] * wf_[i];
+    return v;
 }
 
 void Solution::set(ItemIdx j, AgentIdx i)
@@ -72,11 +72,14 @@ void Solution::set(ItemIdx j, AgentIdx i)
         const Alternative& a_old = ins.alternative(j, i_old);
         if (w_[i_old] <= ins.capacity(i_old)) {
         } else if (w_[i_old] - a_old.w >= ins.capacity(i_old)) {
-            wf_ -= a_old.w;
+            wf_tot_    -= a_old.w;
+            wf_[i_old] -= a_old.w;
         } else {
-            wf_ -= w_[i_old] - ins.capacity(i_old);
+            wf_tot_    -= w_[i_old] - ins.capacity(i_old);
+            wf_[i_old] -= w_[i_old] - ins.capacity(i_old);
         }
-        v_        -= a_old.v;
+        v_[i_old] -= a_old.v;
+        v_tot_    -= a_old.v;
         w_[i_old] -= a_old.w;
         w_tot_    -= a_old.w;
         n_--;
@@ -85,12 +88,15 @@ void Solution::set(ItemIdx j, AgentIdx i)
     if (i != -1) {
         const Alternative& a = ins.alternative(j, i);
         if (w_[i] >= ins.capacity(i)) {
-            wf_ += a.w;
+            wf_[i]  += a.w;
+            wf_tot_ += a.w;
         } else if (w_[i] + a.w <= ins.capacity(i)) {
         } else {
-            wf_ += w_[i] + a.w - ins.capacity(i);
+            wf_[i]  += w_[i] + a.w - ins.capacity(i);
+            wf_tot_ += w_[i] + a.w - ins.capacity(i);
         }
-        v_     += a.v;
+        v_[i]  += a.v;
+        v_tot_ += a.v;
         w_[i]  += a.w;
         w_tot_ += a.w;
         n_++;
@@ -107,10 +113,13 @@ void Solution::set(AltIdx k)
 void Solution::clear()
 {
     n_ = 0;
-    v_ = 0;
+    v_tot_ = 0;
     w_tot_ = 0;
+    wf_tot_ = 0;
     std::fill(x_.begin(), x_.end(), -1);
+    std::fill(v_.begin(), v_.end(), 0);
     std::fill(w_.begin(), w_.end(), 0);
+    std::fill(wf_.begin(), wf_.end(), 0);
 }
 
 void Solution::write_cert(std::string file)
@@ -138,14 +147,6 @@ std::ostream& gap::operator<<(std::ostream& os, const Solution& sol)
             os << std::endl;
     }
     return os;
-}
-
-bool Solution::check_capacity() const
-{
-    for (AgentIdx i=0; i<instance().agent_number(); ++i)
-        if (remaining_capacity(i) < 0)
-            return false;
-    return true;
 }
 
 void Solution::update(const Solution& sol, Value lb, const std::stringstream& s, Info& info)

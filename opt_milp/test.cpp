@@ -3,7 +3,12 @@
 
 using namespace gap;
 
-Value opt_milp_test(Instance& ins) { Solution sol(ins); return sopt_milp({.ins = ins, .sol = sol}).value(); }
+Value opt_milp_test(Instance& ins)
+{
+    Solution sol(ins);
+    MilpData d {.ins = ins, .sol = sol};
+    return sopt_milp(d).value();
+}
 
 std::vector<Value (*)(Instance&)> f = {
         opt_milp_test,

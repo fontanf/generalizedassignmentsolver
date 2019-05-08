@@ -134,7 +134,7 @@ Value Instance::check(std::string cert_file)
             return -1;
         sol.set(j, i);
     }
-    if (!sol.check_capacity())
+    if (!sol.feasible())
         return -1;
     return sol.value();
 }
