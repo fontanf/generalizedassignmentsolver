@@ -11,7 +11,7 @@ Instance test_instance(Cpt i);
 enum TestType { OPT, LB, UB };
 enum InstacesType { TEST };
 
-void test(InstacesType it, std::vector<Value (*)(Instance&)> fs, TestType tt = OPT);
+void test(InstacesType it, std::vector<Cost (*)(Instance&)> fs, TestType tt = OPT);
 
 }
 

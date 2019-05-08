@@ -4,33 +4,36 @@
 
 using namespace gap;
 
-Solution::Solution(const Instance& instance): instance_(instance),
-    x_(std::vector<AgentIdx>(instance.item_number(), -1)), n_(0),
-    v_(std::vector<Weight>(instance.agent_number(), 0)), v_tot_(0),
-    w_(std::vector<Weight>(instance.agent_number(), 0)), w_tot_(0),
-    wf_(std::vector<Weight>(instance.agent_number(), 0)), wf_tot_(0)
+Solution::Solution(const Instance& ins): instance_(ins),
+    x_(std::vector<AgentIdx>(ins.item_number(), -1)),
+    agents_(std::vector<SolutionAgent>(ins.agent_number())),
+    n_(0),
+    total_cost_(0),
+    total_weight_(0),
+    total_overcapacity_(0),
+    total_pcost_(0)
 { }
 
 Solution::Solution(const Solution& sol):
     instance_(sol.instance_),
-    x_(sol.x_), n_(sol.n_),
-    v_(sol.v_), v_tot_(sol.v_tot_),
-    w_(sol.w_), w_tot_(sol.w_tot_),
-    wf_(sol.wf_), wf_tot_(sol.wf_tot_)
+    x_(sol.x_), agents_(sol.agents_), n_(sol.n_),
+    total_cost_(sol.total_cost_),
+    total_weight_(sol.total_weight_),
+    total_overcapacity_(sol.total_overcapacity_),
+    total_pcost_(sol.total_pcost_)
 { }
 
 Solution& Solution::operator=(const Solution& sol)
 {
     if (this != &sol) {
         if (&sol.instance() == &instance()) {
-            x_ = sol.x_;
-            n_ = sol.n_;
-            v_ = sol.v_;
-            v_tot_ = sol.v_tot_;
-            w_ = sol.w_;
-            w_tot_ = sol.w_tot_;
-            wf_ = sol.wf_;
-            wf_tot_ = sol.wf_tot_;
+            x_                  = sol.x_;
+            agents_             = sol.agents_;
+            n_                  = sol.n_;
+            total_cost_         = sol.total_cost_;
+            total_weight_       = sol.total_weight_;
+            total_overcapacity_ = sol.total_overcapacity_;
+            total_pcost_        = sol.total_pcost_;
         } else {
             clear();
             for (ItemIdx j=0; j<instance().item_number(); ++j)
@@ -42,20 +45,12 @@ Solution& Solution::operator=(const Solution& sol)
 
 bool Solution::operator==(const Solution& sol)
 {
-    if (w_tot_ != sol.w_tot_ || v_tot_ != sol.v_tot_)
+    if (total_weight_ != sol.total_weight_ || total_cost_ != sol.total_cost_)
         return false;
     for (ItemIdx j=0; j<instance().item_number(); ++j)
         if (x_[j] != sol.x_[j])
             return false;
     return true;
-}
-
-double Solution::value(const std::vector<double>& alpha) const
-{
-    double v = 0.0;
-    for (AgentIdx i=0; i<instance().agent_number(); ++i)
-        v += v_[i] + alpha[i] * wf_[i];
-    return v;
 }
 
 void Solution::set(ItemIdx j, AgentIdx i)
@@ -70,35 +65,48 @@ void Solution::set(ItemIdx j, AgentIdx i)
 
     if (i_old != -1) {
         const Alternative& a_old = ins.alternative(j, i_old);
-        if (w_[i_old] <= ins.capacity(i_old)) {
-        } else if (w_[i_old] - a_old.w >= ins.capacity(i_old)) {
-            wf_tot_    -= a_old.w;
-            wf_[i_old] -= a_old.w;
+        if (agents_[i_old].weight <= ins.capacity(i_old)) {
+        } else if (agents_[i_old].weight - a_old.w >= ins.capacity(i_old)) {
+            agents_[i_old].overcapacity -= a_old.w;
+            total_overcapacity_         -= a_old.w;
+            agents_[i_old].pcost        -= agents_[i_old].penalty * a_old.w;
+            total_pcost_                -= agents_[i_old].penalty * a_old.w;
         } else {
-            wf_tot_    -= w_[i_old] - ins.capacity(i_old);
-            wf_[i_old] -= w_[i_old] - ins.capacity(i_old);
+            agents_[i_old].overcapacity -= agents_[i_old].weight - ins.capacity(i_old);
+            total_overcapacity_         -= agents_[i_old].weight - ins.capacity(i_old);
+            agents_[i_old].pcost        -= agents_[i_old].penalty * (agents_[i_old].weight - ins.capacity(i_old));
+            total_pcost_                -= agents_[i_old].penalty * (agents_[i_old].weight - ins.capacity(i_old));
         }
-        v_[i_old] -= a_old.v;
-        v_tot_    -= a_old.v;
-        w_[i_old] -= a_old.w;
-        w_tot_    -= a_old.w;
+        agents_[i_old].cost   -= a_old.c;
+        total_cost_           -= a_old.c;
+        agents_[i_old].pcost  -= a_old.c;
+        total_pcost_          -= a_old.c;
+        agents_[i_old].weight -= a_old.w;
+        total_weight_         -= a_old.w;
         n_--;
     }
 
     if (i != -1) {
         const Alternative& a = ins.alternative(j, i);
-        if (w_[i] >= ins.capacity(i)) {
-            wf_[i]  += a.w;
-            wf_tot_ += a.w;
-        } else if (w_[i] + a.w <= ins.capacity(i)) {
+        if (agents_[i].weight >= ins.capacity(i)) {
+            agents_[i].overcapacity    += a.w;
+            total_overcapacity_        += a.w;
+            agents_[i].pcost           += agents_[i].penalty * a.w;
+            total_pcost_               += agents_[i].penalty * a.w;
+        } else if (agents_[i].weight + a.w <= ins.capacity(i)) {
         } else {
-            wf_[i]  += w_[i] + a.w - ins.capacity(i);
-            wf_tot_ += w_[i] + a.w - ins.capacity(i);
+            Weight w = agents_[i].weight + a.w - ins.capacity(i);
+            agents_[i].overcapacity += w;
+            total_overcapacity_     += w;
+            agents_[i].pcost        += agents_[i].penalty * w;
+            total_pcost_            += agents_[i].penalty * w;
         }
-        v_[i]  += a.v;
-        v_tot_ += a.v;
-        w_[i]  += a.w;
-        w_tot_ += a.w;
+        agents_[i].cost   += a.c;
+        total_cost_       += a.c;
+        agents_[i].pcost  += a.c;
+        total_pcost_      += a.c;
+        agents_[i].weight += a.w;
+        total_weight_     += a.w;
         n_++;
     }
 
@@ -110,16 +118,62 @@ void Solution::set(AltIdx k)
     set(instance().alternative(k).j, instance().alternative(k).i);
 }
 
+void Solution::update_penalties(bool inc, PCost delta_inc, PCost delta_dec)
+{
+    ItemIdx m = instance().agent_number();
+    if (inc) {
+        double ratio_max = 0.0;
+        for (AgentIdx i=0; i<m; ++i) {
+            double r = (double)overcapacity(i) / instance().capacity(i);
+            if (ratio_max < r)
+                ratio_max = r;
+        }
+        double big_delta = delta_inc / ratio_max;
+        for (AgentIdx i=0; i<m; ++i)
+            agents_[i].penalty *= (1 + big_delta * overcapacity(i) / instance().capacity(i));
+    } else {
+        for (AgentIdx i=0; i<m; ++i)
+            agents_[i].penalty *= (1 - delta_dec);
+    }
+
+    total_pcost_ = 0;
+    for (AgentIdx i=0; i<m; ++i) {
+        agents_[i].pcost = agents_[i].cost + agents_[i].penalty * agents_[i].overcapacity;
+        total_pcost_    += agents_[i].pcost;
+    }
+}
+
+void Solution::update_penalties(PCost delta_inc)
+{
+    ItemIdx m = instance().agent_number();
+    total_pcost_ = 0;
+    for (AgentIdx i=0; i<m; ++i) {
+        agents_[i].penalty *= (1 + delta_inc);
+        agents_[i].pcost = agents_[i].cost + agents_[i].penalty * agents_[i].overcapacity;
+        total_pcost_    += agents_[i].pcost;
+    }
+}
+
+void Solution::update_penalties(const std::vector<PCost>& penalty)
+{
+    ItemIdx m = instance().agent_number();
+    total_pcost_ = 0;
+    for (AgentIdx i=0; i<m; ++i) {
+        agents_[i].penalty = penalty[i];
+        agents_[i].pcost = agents_[i].cost + agents_[i].penalty * agents_[i].overcapacity;
+        total_pcost_    += agents_[i].pcost;
+    }
+}
+
 void Solution::clear()
 {
-    n_ = 0;
-    v_tot_ = 0;
-    w_tot_ = 0;
-    wf_tot_ = 0;
     std::fill(x_.begin(), x_.end(), -1);
-    std::fill(v_.begin(), v_.end(), 0);
-    std::fill(w_.begin(), w_.end(), 0);
-    std::fill(wf_.begin(), wf_.end(), 0);
+    std::fill(agents_.begin(), agents_.end(), SolutionAgent{0, 0, 0, 0, 0});
+    n_ = 0;
+    total_cost_ = 0;
+    total_weight_ = 0;
+    total_overcapacity_ = 0;
+    total_pcost_ = 0;
 }
 
 void Solution::write_cert(std::string file)
@@ -135,8 +189,8 @@ void Solution::write_cert(std::string file)
 std::ostream& gap::operator<<(std::ostream& os, const Solution& sol)
 {
     os <<  "n " << sol.instance().item_number()
-        << " v " << sol.value()
-        << " wf " << sol.overcapacity()
+        << " cost " << sol.cost()
+        << " overcapacity " << sol.overcapacity()
         << std::endl;
     for (AgentIdx i=0; i<sol.instance().agent_number(); ++i) {
         os << "agent " << i << " (" << sol.remaining_capacity(i) << "/" << sol.instance().capacity(i) <<  "):";
@@ -149,22 +203,22 @@ std::ostream& gap::operator<<(std::ostream& os, const Solution& sol)
     return os;
 }
 
-void Solution::update(const Solution& sol, Value lb, const std::stringstream& s, Info& info)
+void Solution::update(const Solution& sol, Cost lb, const std::stringstream& s, Info& info)
 {
     info.output->mutex_sol.lock();
 
-    if (!feasible() || value() > sol.value()) {
+    if (!feasible() || cost() > sol.cost()) {
         info.output->sol_number++;
         *this = sol;
         double t = std::round(info.elapsed_time());
         std::string sol_str = "Solution" + std::to_string(info.output->sol_number);
-        PUT(info, sol_str + ".Value", sol.value());
+        PUT(info, sol_str + ".Cost", sol.cost());
         PUT(info, sol_str + ".Time", t);
 
         VER(info, std::left << std::setw(10) << t);
-        VER(info, std::left << std::setw(12) << sol.value());
+        VER(info, std::left << std::setw(12) << sol.cost());
         VER(info, std::left << std::setw(12) << lb);
-        VER(info, std::left << std::setw(10) << sol.value() - lb);
+        VER(info, std::left << std::setw(10) << sol.cost() - lb);
         VER(info, s.str() << std::endl);
 
         if (!info.output->onlywriteattheend) {
@@ -201,21 +255,21 @@ double SolutionCompare::value(const Solution& s)
 {
     switch(id) {
     case 0:
-        return s.value();
+        return s.cost();
     case 1:
-        return s.value() * s.weight();
+        return s.cost() * s.weight();
     case 2:
         if (s.item_number() == 0)
             return 0;
-        return (double)s.value() / s.item_number();
+        return (double)s.cost() / s.item_number();
     case 3:
         if (s.item_number() == 0)
             return 0;
-        return (double)s.value() / s.item_number() * (double)s.weight() / s.item_number();
+        return (double)s.cost() / s.item_number() * (double)s.weight() / s.item_number();
     case 4:
         if (s.item_number() == 0)
             return 0;
-        return (double)s.value() / s.item_number() * (double)s.weight();
+        return (double)s.cost() / s.item_number() * (double)s.weight();
     }
     return 0;
 }

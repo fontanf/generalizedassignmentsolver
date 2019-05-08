@@ -118,11 +118,9 @@ int main(int argc, char *argv[])
                 .alpha = 10,
                 .info = info});
     } else if (algorithm == "pr_shiftswap") {
-        sol = sol_pr_shiftswap({
-                .ins = ins,
-                .gen = gen,
-                .alpha = 10,
-                .info = info});
+        PRShiftSwapData d({.ins = ins, .gen = gen, .info = info});
+        d.alpha = std::vector<double>(ins.agent_number(), 10.0);
+        sol = sol_pr_shiftswap(d);
     } else if (algorithm == "vdns_simple") {
         sol = sol_vdns_simple(ins, gen, info);
     /*

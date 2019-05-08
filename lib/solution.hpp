@@ -5,6 +5,15 @@
 namespace gap
 {
 
+struct SolutionAgent
+{
+    Cost cost = 0;
+    Weight weight = 0;
+    Weight overcapacity = 0;
+    PCost penalty = 0;
+    PCost pcost = 0;
+};
+
 class Solution
 {
 
@@ -22,22 +31,22 @@ public:
 
     inline const Instance& instance() const { return instance_; }
 
-    inline Weight weight() const { return w_tot_; }
-    inline Weight weight(AgentIdx i) const { return w_[i]; }
+    inline Weight weight() const { return total_weight_; }
+    inline Weight weight(AgentIdx i) const { return agents_[i].weight; }
 
     inline Weight remaining_capacity(AgentIdx i) const { return instance().capacity(i) - weight(i); }
 
-    inline Value value() const { return v_tot_; }
-    inline Value value(AgentIdx i) const { return v_[i]; }
-    inline double value(double alpha) const { return v_tot_ + alpha * wf_tot_; }
-    inline double value(AgentIdx i, double alpha) const { return v_[i] + alpha * wf_[i]; }
-    double value(const std::vector<double>& alpha) const;
+    inline Weight overcapacity()           const { return total_overcapacity_; };
+    inline Weight overcapacity(AgentIdx i) const { return agents_[i].overcapacity; };
+
+    inline Cost cost()           const { return total_cost_; }
+    inline Cost cost(AgentIdx i) const { return agents_[i].cost; }
+
+    inline PCost pcost()           const { return total_pcost_; }
+    inline PCost pcost(AgentIdx i) const { return agents_[i].pcost; }
 
     inline bool full() const { return n_ == instance().item_number(); }
     inline bool feasible() const { return full() && (overcapacity() == 0); }
-
-    Weight overcapacity() const { return wf_tot_; };
-    Weight overcapacity(AgentIdx i) const { return wf_[i]; };
 
     inline ItemIdx item_number() const { return n_; }
     inline AgentIdx agent(ItemIdx j) const { return x_[j]; }
@@ -49,9 +58,13 @@ public:
     void set(ItemIdx j, AgentIdx i);
     void set(AltIdx k);
 
+    void update_penalties(bool inc, PCost delta_inc, PCost delta_dec);
+    void update_penalties(const std::vector<PCost>& penalty);
+    void update_penalties(PCost delta_inc);
+
     void clear();
 
-    void update(const Solution& sol, Value lb, const std::stringstream& s, Info& info);
+    void update(const Solution& sol, Cost lb, const std::stringstream& s, Info& info);
 
     void write_cert(std::string file);
     std::string to_string(AgentIdx i);
@@ -60,17 +73,13 @@ private:
 
     const Instance& instance_;
 
-    std::vector<AgentIdx> x_; // agent of each item (-1 if none)
-    ItemIdx n_ = 0; // total assigned item number
-
-    std::vector<Value> v_; // value of each agent
-    Value v_tot_ = 0; // total value
-
-    std::vector<Weight> w_; // weight of each agent
-    Weight w_tot_ = 0; // total weight
-
-    std::vector<Weight> wf_; // overcapacity of each agent
-    Weight wf_tot_ = 0; // total overcapacity
+    std::vector<AgentIdx> x_;
+    std::vector<SolutionAgent> agents_;
+    ItemIdx n_ = 0;
+    Cost total_cost_ = 0;
+    Weight total_weight_ = 0;
+    Weight total_overcapacity_ = 0;
+    PCost total_pcost_ = 0;
 };
 
 void init_display(Info& info);

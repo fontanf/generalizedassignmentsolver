@@ -27,7 +27,7 @@ Instance gap::generate(GenerateData data)
     std::uniform_int_distribution<Weight> d4(-10, 10);
     std::normal_distribution<double> d_norm(0, data.r / 10);
     Weight w = -1;
-    Value v = -1;
+    Cost v = -1;
 
     std::vector<Weight> wsum(data.m, 0);
     Weight wmax = 0;
@@ -44,10 +44,10 @@ Instance gap::generate(GenerateData data)
             } else if (data.t == "e") { // TODO
             } else if (data.t == "f") {
                 w =              std::min(data.r, std::max((Weight)1, data.r / 2 + (Weight)d_norm(data.g)));
-                v = data.r + 1 - std::min(data.r, std::max((Value)1,  w          + (Value)d_norm(data.g)));
+                v = data.r + 1 - std::min(data.r, std::max((Cost)1,  w          + (Cost)d_norm(data.g)));
             } else if (data.t == "g") {
                 w =              std::min(data.r, std::max((Weight)1, wj + (Weight)d_norm(data.g)));
-                v = data.r + 1 - std::min(data.r, std::max((Value)1,  w  + (Value)d_norm(data.g)));
+                v = data.r + 1 - std::min(data.r, std::max((Cost)1,  w  + (Cost)d_norm(data.g)));
             } else {
                 exit(1);
             }

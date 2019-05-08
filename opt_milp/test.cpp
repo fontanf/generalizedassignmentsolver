@@ -3,14 +3,14 @@
 
 using namespace gap;
 
-Value opt_milp_test(Instance& ins)
+Cost opt_milp_test(Instance& ins)
 {
     Solution sol(ins);
     MilpData d {.ins = ins, .sol = sol};
-    return sopt_milp(d).value();
+    return sopt_milp(d).cost();
 }
 
-std::vector<Value (*)(Instance&)> f = {
+std::vector<Cost (*)(Instance&)> f = {
         opt_milp_test,
 };
 

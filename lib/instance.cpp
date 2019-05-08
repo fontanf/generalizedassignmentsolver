@@ -34,15 +34,15 @@ void Instance::add_items(ItemIdx n)
         add_item();
 }
 
-void Instance::set_alternative(ItemIdx j, AgentIdx i, Weight w, Value v)
+void Instance::set_alternative(ItemIdx j, AgentIdx i, Weight w, Cost v)
 {
     alternatives_[items_[j].alt[i]].w = w;
-    alternatives_[items_[j].alt[i]].v = v;
+    alternatives_[items_[j].alt[i]].c = v;
     items_[j].w += w;
-    items_[j].v += v;
-    if (items_[j].i_best == -1 || items_[j].v_min > v) {
+    items_[j].c += v;
+    if (items_[j].i_best == -1 || items_[j].c_min > v) {
         items_[j].i_best = i;
-        items_[j].v_min = v;
+        items_[j].c_min = v;
     }
 }
 
@@ -70,13 +70,13 @@ void Instance::read_beasley(std::string filepath)
     add_items(n);
     for (AgentIdx i=0; i<m; ++i)
         for (ItemPos j=0; j<n; ++j)
-            file >> alternatives_[alternative_index(j, i)].v;
+            file >> alternatives_[alternative_index(j, i)].c;
     for (AgentIdx i=0; i<m; ++i)
         for (ItemPos j=0; j<n; ++j)
             file >> alternatives_[alternative_index(j, i)].w;
     for (AgentIdx i=0; i<m; ++i)
         for (ItemPos j=0; j<n; ++j)
-            set_alternative(j, i, alternatives_[alternative_index(j, i)].w, alternatives_[alternative_index(j, i)].v);
+            set_alternative(j, i, alternatives_[alternative_index(j, i)].w, alternatives_[alternative_index(j, i)].c);
     for (AgentIdx i=0; i<m; ++i)
         file >> c_[i];
 
@@ -98,7 +98,7 @@ void Instance::read_standard(std::string filepath)
     add_items(n);
     for (ItemPos j=0; j<n; ++j)
         for (AgentIdx i=0; i<m; ++i)
-            file >> alternatives_[items_[j].alt[i]].w >> alternatives_[items_[j].alt[i]].v;
+            file >> alternatives_[items_[j].alt[i]].w >> alternatives_[items_[j].alt[i]].c;
 
     file.close();
 }
@@ -123,7 +123,7 @@ Instance::Instance(const Instance& ins)
     sol_opt_ = (ins.sol_opt_ == NULL)? NULL: std::unique_ptr<Solution>(new Solution(*ins.sol_opt_));
 }
 
-Value Instance::check(std::string cert_file)
+Cost Instance::check(std::string cert_file)
 {
     std::ifstream file(cert_file, std::ios_base::in);
     Solution sol(*this);
@@ -136,12 +136,12 @@ Value Instance::check(std::string cert_file)
     }
     if (!sol.feasible())
         return -1;
-    return sol.value();
+    return sol.cost();
 }
 
-Value Instance::optimum() const
+Cost Instance::optimum() const
 {
-    return optimal_solution()->value();
+    return optimal_solution()->cost();
 }
 
 Instance::~Instance()
@@ -151,7 +151,7 @@ Instance::~Instance()
 
 std::ostream& gap::operator<<(std::ostream& os, const Alternative& alt)
 {
-    os << "(" << alt.i << " " << alt.w << " " << alt.v << " " << alt.efficiency() << ")";
+    os << "(" << alt.i << " " << alt.c << " " << alt.w << " " << alt.efficiency() << ")";
     return os;
 }
 
@@ -175,10 +175,10 @@ std::ostream& gap::operator<<(std::ostream& os, const Instance& ins)
 Solution gap::algorithm_end(const Solution& sol, Info& info)
 {
     double t = info.elapsed_time();
-    PUT(info, "Solution.Value", sol.value());
+    PUT(info, "Solution.Cost", sol.cost());
     PUT(info, "Solution.Time", t);
     VER(info, "---" << std::endl
-            << "Value: " << sol.value() << std::endl
+            << "Cost: " << sol.cost() << std::endl
             << "Time (s): " << t << std::endl);
     return sol;
 }
@@ -189,7 +189,7 @@ void Instance::plot(std::string filename)
     file << "w v" << std::endl;
     for (ItemIdx j=0; j<item_number(); ++j)
         for (AgentIdx i=0; i<agent_number(); ++i)
-            file << alternative(j, i).w << " " << alternative(j, i).v << std::endl;
+            file << alternative(j, i).w << " " << alternative(j, i).c << std::endl;
     file.close();
 }
 
@@ -199,7 +199,7 @@ void Instance::write(std::string filename)
     file << agent_number() << " " << item_number() << std::endl;
     for (AgentIdx i=0; i<agent_number(); ++i) {
         for (ItemIdx j=0; j<item_number(); ++j)
-            file << alternative(j, i).v << " ";
+            file << alternative(j, i).c << " ";
         file << std::endl;
     }
     for (AgentIdx i=0; i<agent_number(); ++i) {

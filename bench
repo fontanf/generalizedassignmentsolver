@@ -35,6 +35,6 @@ for i in "${data[@]}"; do
         -i "data/${i}" \
         -c ${certfile} \
         -o ${inifile}
-    sed -nr "/^\[Solution\]/ { :l /^Value[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" "${inifile}"
+    sed -nr "/^\[Solution\]/ { :l /^Cost[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" "${inifile}"
 done
 
