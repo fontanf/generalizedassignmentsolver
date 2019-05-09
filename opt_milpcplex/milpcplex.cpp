@@ -67,10 +67,15 @@ Solution gap::sopt_milpcplex(MilpCplexData d)
             startVar.end();
         }
 
-        // Optimize
+        // Display
         if (!d.info.output->verbose)
             cplex.setOut(env.getNullStream());
 
+        // Time limit
+        if (d.info.timelimit != std::numeric_limits<double>::infinity())
+            cplex.setParam(IloCplex::TiLim, d.info.timelimit);
+
+        // Optimize
         if (cplex.solve()) {
             // Get solution
             for (AgentIdx i=0; i<m; i++)

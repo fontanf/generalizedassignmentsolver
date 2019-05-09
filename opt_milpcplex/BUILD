@@ -5,11 +5,6 @@ cc_library(
         deps = ["//lib:cpp"],
         copts = [
                 "-m64",
-                "-O",
-                "-fPIC",
-                "-fno-strict-aliasing",
-                "-fexceptions",
-                "-DNDEBUG",
                 "-DIL_STD",
         ],
         linkopts = [
