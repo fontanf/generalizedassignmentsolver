@@ -2,6 +2,8 @@
 
 #include <coin/CbcModel.hpp>
 #include <coin/OsiCbcSolverInterface.hpp>
+#include <coin/CglKnapsackCover.hpp>
+#include <coin/CglClique.hpp>
 
 using namespace gap;
 
@@ -35,7 +37,7 @@ Solution gap::sopt_milp(MilpData d)
     // Rim data
     std::vector<double> objective(numberColumns);
     for (AltIdx k=0; k<numberColumns; ++k)
-        objective[k] = d.ins.alternative(k).v;
+        objective[k] = d.ins.alternative(k).c;
 
     std::vector<double> rowLower(numberRows);
     std::vector<double> rowUpper(numberRows);
@@ -68,6 +70,12 @@ Solution gap::sopt_milp(MilpData d)
 
     // Pass data and solver to CbcModel
     CbcModel model(solver1);
+
+    // Reduce printout
+    model.setLogLevel(loglevel);
+    model.solver()->setHintParam(OsiDoReducePrint, true, OsiHintTry);
+
+    // Set time limit
     model.setMaximumSeconds(d.info.timelimit);
 
     // Add initial solution
@@ -76,19 +84,15 @@ Solution gap::sopt_milp(MilpData d)
         for (AltIdx k=0; k<d.ins.alternative_number(); ++k)
             if (d.sol.agent(d.ins.alternative(k).j) == d.ins.alternative(k).i)
                 sol_init[k] = 1;
-        model.setBestSolution(sol_init.data(), d.ins.alternative_number(), d.sol.value());
+        model.setBestSolution(sol_init.data(), d.ins.alternative_number(), d.sol.cost());
     }
     if (d.stop_at_first_improvment)
         model.setMaximumSolutions(1);
 
-    // Reduce printout
-    model.setLogLevel(loglevel);
-    model.solver()->setHintParam(OsiDoReducePrint, true, OsiHintTry);
-
     // Do complete search
     model.branchAndBound();
 
-    if (d.sol.feasible() && d.sol.value() <= model.getObjValue() + 0.5)
+    if (d.sol.feasible() && d.sol.cost() <= model.getObjValue() + 0.5)
         return algorithm_end(d.sol, d.info);
 
     // Get solution

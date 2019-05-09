@@ -7,22 +7,22 @@
 using namespace gap;
 
 LagOut gap::lb_lagrangian(const SubInstance& sub,
-        StateIdx it_total, StateIdx a, std::vector<Value>* mult_init, Info* info)
+        StateIdx it_total, StateIdx a, std::vector<Cost>* mult_init, Info* info)
 {
     (void)info;
     const Instance& ins = sub.instance();
     LagOut out(ins);
-    std::vector<Value> multipliers_curr(ins.item_number(), 0);
+    std::vector<Cost> multipliers_curr(ins.item_number(), 0);
     if (mult_init != NULL)
         multipliers_curr = *mult_init;
     for (ItemIdx j=0; j<ins.item_number(); ++j)
         if (sub.reduced_solution()->agent(j) >= 0)
             multipliers_curr[j] = 0;
 
-    Value gamma = 0;
+    Cost gamma = 0;
     for (AltIdx k=0; k<ins.alternative_number(); ++k)
-        if (gamma < ins.alternative(k).v)
-            gamma = ins.alternative(k).v;
+        if (gamma < ins.alternative(k).c)
+            gamma = ins.alternative(k).c;
     gamma *= 4;
 
     StateIdx it = 1;
@@ -31,7 +31,7 @@ LagOut gap::lb_lagrangian(const SubInstance& sub,
                 std::vector<int>(ins.agent_number(), 0));
         std::vector<AgentIdx> xj(ins.item_number(), 0);
 
-        Value ub = 0;
+        Cost ub = 0;
         for (ItemIdx j=0; j<ins.item_number(); ++j)
             ub += multipliers_curr[j];
 
@@ -42,11 +42,11 @@ LagOut gap::lb_lagrangian(const SubInstance& sub,
                 if (sub.reduced_solution()->agent(j) == i) {
                     xj[j]++;
                     xji[j][i] = 1;
-                    ub += ins.alternative(k).v;
+                    ub += ins.alternative(k).c;
                 }
                 if (sub.reduced(k) == -1)
                     continue;
-                Value p = ins.alternative(k).v - multipliers_curr[j];
+                Cost p = ins.alternative(k).c - multipliers_curr[j];
                 if (p > 0)
                     ins_kp.add_item(ins.alternative(k).w, p);
             }

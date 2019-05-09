@@ -23,13 +23,15 @@ Solution gap::sol_dualls_shiftswap(DualLSShiftSwapData d)
 
     // Initilize current solution
     Solution sol_curr(d.ins);
+    sol_curr.update_penalties(std::vector<PCost>(m, 0.000001));
     for (ItemIdx j=0; j<d.ins.item_number(); ++j)
         sol_curr.set(j, d.ins.item(j).i_best);
 
-    for (double alpha = 0.000001; ; alpha *= 1.1) {
+    for (;; sol_curr.update_penalties(0.1)) {
+        //std::cout << "cost " << sol_curr.cost() << " pcost " << sol_curr.pcost() << " overcapacity " << sol_curr.overcapacity() << std::endl;
         Cpt it_without_change = 0;
         while (it_without_change < neighsize) {
-            double v = sol_curr.value(alpha);
+            double v = sol_curr.pcost();
             Cpt p = dis_ss(d.gen);
             if (p <= m * n) { // shift
                 ItemIdx j = dis_j(d.gen);
@@ -38,11 +40,10 @@ Solution gap::sol_dualls_shiftswap(DualLSShiftSwapData d)
                 if (i >= i_old)
                     i++;
                 sol_curr.set(j, i);
-                double v_curr = sol_curr.value(alpha);
-                if (v < v_curr) {
+                if (v < sol_curr.pcost()) {
                     sol_curr.set(j, i_old);
                     it_without_change++;
-                } else if (v > v_curr) {
+                } else if (v > sol_curr.pcost()) {
                     it_without_change = 0;
                 }
             } else { // swap
@@ -54,12 +55,11 @@ Solution gap::sol_dualls_shiftswap(DualLSShiftSwapData d)
                 AgentIdx i2 = sol_curr.agent(j2);
                 sol_curr.set(j1, i2);
                 sol_curr.set(j2, i1);
-                double v_curr = sol_curr.value(alpha);
-                if (v < v_curr) {
+                if (v < sol_curr.pcost()) {
                     sol_curr.set(j1, i1);
                     sol_curr.set(j2, i2);
                     it_without_change++;
-                } else if (v > v_curr) {
+                } else if (v > sol_curr.pcost()) {
                     it_without_change = 0;
                 }
             }
@@ -88,6 +88,7 @@ Solution gap::sol_lsfirst_shiftswap(LSFirstShiftSwapData d)
 
     Solution sol_best(d.ins);
     Solution sol_curr(d.ins);
+    sol_curr.update_penalties(std::vector<PCost>(m, d.alpha));
     for (ItemIdx j=0; j<d.ins.item_number(); ++j)
         sol_curr.set(j, dis_i(d.gen));
 
@@ -95,7 +96,7 @@ Solution gap::sol_lsfirst_shiftswap(LSFirstShiftSwapData d)
     Cpt it_without_change = 0;
 
     while (it_without_change < it_max) {
-        double v = sol_curr.value(d.alpha);
+        double v = sol_curr.pcost();
         Cpt p = dis_ss(d.gen);
         if (p <= m * n) { // shift
             ItemIdx j = dis_j(d.gen);
@@ -104,8 +105,7 @@ Solution gap::sol_lsfirst_shiftswap(LSFirstShiftSwapData d)
             if (i >= i_old)
                 i++;
             sol_curr.set(j, i);
-            double v_curr = sol_curr.value(d.alpha);
-            if (v < v_curr) {
+            if (v < sol_curr.pcost()) {
                 sol_curr.set(j, i_old);
             }
         } else { // swap
@@ -117,15 +117,14 @@ Solution gap::sol_lsfirst_shiftswap(LSFirstShiftSwapData d)
             AgentIdx i2 = sol_curr.agent(j2);
             sol_curr.set(j1, i2);
             sol_curr.set(j2, i1);
-            double v_curr = sol_curr.value(d.alpha);
-            if (v < v_curr) {
+            if (v < sol_curr.pcost()) {
                 sol_curr.set(j1, i1);
                 sol_curr.set(j2, i2);
             }
         }
 
         // Update it_without_change
-        if (sol_curr.feasible() && (!sol_best.feasible() || sol_best.value() > sol_curr.value())) {
+        if (sol_curr.feasible() && (!sol_best.feasible() || sol_best.cost() > sol_curr.cost())) {
             std::stringstream ss;
             sol_best.update(sol_curr, 0, ss, d.info);
             it_without_change = 0;
@@ -148,11 +147,12 @@ Solution gap::sol_lsbest_shiftswap(LSBestShiftSwapData d)
 
     Solution sol_best(d.ins);
     Solution sol_curr(d.ins);
+    sol_curr.update_penalties(std::vector<PCost>(m, d.alpha));
     for (ItemIdx j=0; j<d.ins.item_number(); ++j)
         sol_curr.set(j, dis_i(d.gen));
 
     for (Cpt it=0;; ++it) {
-        double v_best = sol_curr.value(d.alpha);
+        double v_best = sol_curr.pcost();
 
         ItemIdx j_best = -1;
         AgentIdx i_best = -1;
@@ -162,9 +162,8 @@ Solution gap::sol_lsbest_shiftswap(LSBestShiftSwapData d)
                 if (i == i_old)
                     continue;
                 sol_curr.set(j, i);
-                double v = sol_curr.value(d.alpha);
-                if (v_best > v) {
-                    v_best = v;
+                if (v_best > sol_curr.pcost()) {
+                    v_best = sol_curr.pcost();
                     j_best = j;
                     i_best = i;
                 }
@@ -182,9 +181,8 @@ Solution gap::sol_lsbest_shiftswap(LSBestShiftSwapData d)
                     continue;
                 sol_curr.set(j1, i2);
                 sol_curr.set(j2, i1);
-                double v = sol_curr.value(d.alpha);
-                if (v_best > v) {
-                    v_best = v;
+                if (v_best > sol_curr.pcost()) {
+                    v_best = sol_curr.pcost();
                     j_best = -1;
                     i_best = -1;
                     j1_best = j1;
@@ -209,7 +207,7 @@ Solution gap::sol_lsbest_shiftswap(LSBestShiftSwapData d)
         }
 
         // Update best solution
-        if (sol_curr.feasible() && (!sol_best.feasible() || sol_best.value() > sol_curr.value())) {
+        if (sol_curr.feasible() && (!sol_best.feasible() || sol_best.cost() > sol_curr.cost())) {
             std::stringstream ss;
             ss << "it " << it;
             sol_best.update(sol_curr, 0, ss, d.info);
@@ -223,7 +221,7 @@ Solution gap::sol_lsbest_shiftswap(LSBestShiftSwapData d)
 
 bool gap::doubleshift_best(const Instance& ins, Solution& sol, Info& info)
 {
-    double v_best = sol.value();
+    double v_best = sol.pcost();
 
     ItemIdx j1_best = -1;
     ItemIdx j2_best = -1;
@@ -239,8 +237,8 @@ bool gap::doubleshift_best(const Instance& ins, Solution& sol, Info& info)
                 if (i2 == i2_old)
                     continue;
                 sol.set(j2, i2);
-                if (sol.overcapacity() == 0 && v_best > sol.value()) {
-                    v_best = sol.value();
+                if (sol.overcapacity() == 0 && v_best > sol.pcost()) {
+                    v_best = sol.pcost();
                     j1_best = j1;
                     j2_best = j2;
                     i2_best = i2;
@@ -264,7 +262,7 @@ bool gap::doubleshift_best(const Instance& ins, Solution& sol, Info& info)
 
 bool gap::tripleswap_best(const Instance& ins, Solution& sol, Info& info)
 {
-    double v_best = sol.value();
+    double v_best = sol.pcost();
 
     ItemIdx j1_best = -1;
     ItemIdx j2_best = -1;
@@ -282,8 +280,8 @@ bool gap::tripleswap_best(const Instance& ins, Solution& sol, Info& info)
                     continue;
                 sol.set(j2, i3);
                 sol.set(j3, i1);
-                if (sol.overcapacity() == 0 && v_best > sol.value()) {
-                    v_best = sol.value();
+                if (sol.overcapacity() == 0 && v_best > sol.pcost()) {
+                    v_best = sol.pcost();
                     j1_best = j1;
                     j2_best = j2;
                     j3_best = j3;
@@ -327,6 +325,7 @@ Solution gap::sol_ts_shiftswap(TSShiftSwapData d)
 
     Solution sol_best(d.ins);
     Solution sol_curr(d.ins);
+    sol_curr.update_penalties(std::vector<PCost>(m, d.alpha));
     for (ItemIdx j=0; j<n; ++j)
         sol_curr.set(j, dis_i(d.gen));
 
@@ -359,9 +358,8 @@ Solution gap::sol_ts_shiftswap(TSShiftSwapData d)
                     continue;
 
                 sol_curr.set(j, i);
-                double v = sol_curr.value(d.alpha);
-                if (v_best == -1 || v_best > v) {
-                    v_best = v;
+                if (v_best == -1 || v_best > sol_curr.pcost()) {
+                    v_best = sol_curr.pcost();
                     j_best = j;
                     i_best = i;
                     j1_best = -1;
@@ -386,9 +384,8 @@ Solution gap::sol_ts_shiftswap(TSShiftSwapData d)
 
                 sol_curr.set(j1, i2);
                 sol_curr.set(j2, i1);
-                double v = sol_curr.value(d.alpha);
-                if (v_best == -1 || v_best > v) {
-                    v_best = v;
+                if (v_best == -1 || v_best > sol_curr.pcost()) {
+                    v_best = sol_curr.pcost();
                     j_best = -1;
                     i_best = -1;
                     j1_best = j1;
@@ -409,20 +406,20 @@ Solution gap::sol_ts_shiftswap(TSShiftSwapData d)
         if (j1_best != -1) {
             AgentIdx i1 = sol_curr.agent(j1_best);
             AgentIdx i2 = sol_curr.agent(j2_best);
-            if (v_best >= sol_curr.value(d.alpha)) {
+            if (v_best >= sol_curr.pcost()) {
                 tabu[j1_best][i1] = it;
                 tabu[j2_best][i2] = it;
             }
             sol_curr.set(j1_best, i2);
             sol_curr.set(j2_best, i1);
         } else {
-            if (v_best >= sol_curr.value(d.alpha))
+            if (v_best >= sol_curr.pcost())
                 tabu[j_best][sol_curr.agent(j_best)] = it;
             sol_curr.set(j_best, i_best);
         }
 
         // Update best solution
-        if (sol_curr.feasible() && (!sol_best.feasible() || sol_best.value() > sol_curr.value())) {
+        if (sol_curr.feasible() && (!sol_best.feasible() || sol_best.cost() > sol_curr.cost())) {
             std::stringstream ss;
             ss << "it " << it;
             sol_best.update(sol_curr, 0, ss, d.info);
@@ -448,6 +445,7 @@ Solution gap::sol_sa_shiftswap(SAShiftSwapData d)
 
     Solution sol_best(d.ins);
     Solution sol_curr(d.ins);
+    sol_curr.update_penalties(std::vector<PCost>(m, d.alpha));
     for (ItemIdx j=0; j<n; ++j)
         sol_curr.set(j, dis_i(d.gen));
 
@@ -455,14 +453,14 @@ Solution gap::sol_sa_shiftswap(SAShiftSwapData d)
     double t0 = 0;
     for (ItemIdx j=0; j<n; ++j)
         for (AgentIdx i=0; i<m; ++i)
-            if (t0 < d.ins.alternative(j, i).v)
-                t0 = d.ins.alternative(j, i).v;
+            if (t0 < d.ins.alternative(j, i).c)
+                t0 = d.ins.alternative(j, i).c;
 
     Cpt it_max = 2 * (n * m + (n * (n + 1)) / 2);
     Cpt it_without_change = 0;
     for (double t=t0; d.info.check_time(); t*=d.beta) {
         for (Cpt it=0; it<d.l;) {
-            double v = sol_curr.value(d.alpha);
+            PCost v = sol_curr.pcost();
             Cpt p = dis_ss(d.gen);
             if (p <= m * n) { // shift
                 ItemIdx j = dis_j(d.gen);
@@ -471,8 +469,7 @@ Solution gap::sol_sa_shiftswap(SAShiftSwapData d)
                 if (i >= i_old)
                     i++;
                 sol_curr.set(j, i);
-                double v_curr = sol_curr.value(d.alpha);
-                if ((v < v_curr && dis(d.gen) > exp((double)(v - v_curr) / t))) {
+                if ((v < sol_curr.pcost() && dis(d.gen) > exp((double)(v - sol_curr.pcost()) / t))) {
                     sol_curr.set(j, i_old);
                 }
             } else { // swap
@@ -487,15 +484,14 @@ Solution gap::sol_sa_shiftswap(SAShiftSwapData d)
 
                 sol_curr.set(j1, i2);
                 sol_curr.set(j2, i1);
-                double v_curr = sol_curr.value(d.alpha);
-                if ((v < v_curr && dis(d.gen) > exp((double)(v - v_curr) / t))) {
+                if ((v < sol_curr.pcost() && dis(d.gen) > exp((double)(v - sol_curr.pcost()) / t))) {
                     sol_curr.set(j1, i1);
                     sol_curr.set(j2, i2);
                 }
             }
 
             // Update it_without_change
-            if (sol_curr.value(d.alpha) == v) {
+            if (sol_curr.pcost() == v) {
                 it_without_change++;
                 if (it_without_change > it_max)
                     return algorithm_end(sol_best, d.info);
@@ -504,7 +500,7 @@ Solution gap::sol_sa_shiftswap(SAShiftSwapData d)
             }
 
             // Update best solution
-            if (sol_curr.feasible() && (!sol_best.feasible() || sol_best.value() > sol_curr.value())) {
+            if (sol_curr.feasible() && (!sol_best.feasible() || sol_best.cost() > sol_curr.cost())) {
                 std::stringstream ss;
                 ss << "T " << t;
                 sol_best.update(sol_curr, 0, ss, d.info);
@@ -518,8 +514,34 @@ Solution gap::sol_sa_shiftswap(SAShiftSwapData d)
 
 /******************************************************************************/
 
+void update_penalties(std::vector<PCost>& penalty, const Solution& sol,
+        bool inc, PCost delta_inc, PCost delta_dec)
+{
+    AgentIdx m = sol.instance().agent_number();
+    if (inc) {
+        double ratio_max = 0.0;
+        for (AgentIdx i=0; i<m; ++i) {
+            double r = (double)sol.overcapacity(i) / sol.instance().capacity(i);
+            if (ratio_max < r)
+                ratio_max = r;
+        }
+        double big_delta = delta_inc / ratio_max;
+        for (AgentIdx i=0; i<m; ++i)
+            penalty[i] *= (1 + big_delta * sol.overcapacity(i) / sol.instance().capacity(i));
+    } else {
+        for (AgentIdx i=0; i<m; ++i)
+            penalty[i] *= (1 - delta_dec);
+    }
+
+    //std::cout << "alpha ";
+    //for (AgentIdx i=0; i<m; ++i)
+        //std::cout << d.alpha[i] << " ";
+    //std::cout << std::endl;
+}
+
 void pr_shiftswap(PRShiftSwapData& d, Solution& sol_curr, Solution& sol_best)
 {
+    sol_curr.update_penalties(d.alpha);
     AgentIdx m = d.ins.agent_number();
     ItemIdx n = d.ins.item_number();
     std::uniform_int_distribution<Cpt> dis_ss(1, n * m + (n * (n + 1)) / 2);
@@ -528,12 +550,11 @@ void pr_shiftswap(PRShiftSwapData& d, Solution& sol_curr, Solution& sol_best)
     std::uniform_int_distribution<AgentIdx> dis_i(0, m - 1);
     std::uniform_int_distribution<AgentIdx> dis_i1(0, m - 2);
     std::uniform_int_distribution<AgentIdx> dis_i2(0, m - 3);
-
     Cpt it_max = n * m;
     Cpt it_without_change = 0;
-
+    bool feasible_found = false;
     for (Cpt it=0; it_without_change<it_max;) {
-        double v = sol_curr.value(d.alpha);
+        double v = sol_curr.pcost();
         Cpt p = dis_ss(d.gen);
         if (p <= m * n) { // shift
             ItemIdx j = dis_j(d.gen);
@@ -542,8 +563,7 @@ void pr_shiftswap(PRShiftSwapData& d, Solution& sol_curr, Solution& sol_best)
             if (i >= i_old)
                 i++;
             sol_curr.set(j, i);
-            double v_curr = sol_curr.value(d.alpha);
-            if (v < v_curr) {
+            if (v < sol_curr.pcost()) {
                 sol_curr.set(j, i_old);
             }
         } else { // swap
@@ -557,15 +577,16 @@ void pr_shiftswap(PRShiftSwapData& d, Solution& sol_curr, Solution& sol_best)
                 continue;
             sol_curr.set(j1, i2);
             sol_curr.set(j2, i1);
-            double v_curr = sol_curr.value(d.alpha);
-            if (v < v_curr) {
+            if (v < sol_curr.pcost()) {
                 sol_curr.set(j1, i1);
                 sol_curr.set(j2, i2);
             }
         }
+        if (sol_curr.feasible())
+            feasible_found = true;
 
         // Update it_without_change
-        if (sol_curr.feasible() && (!sol_best.feasible() || sol_best.value() > sol_curr.value())) {
+        if (sol_curr.feasible() && (!sol_best.feasible() || sol_best.cost() > sol_curr.cost())) {
             std::stringstream ss;
             sol_best.update(sol_curr, 0, ss, d.info);
             it_without_change = 0;
@@ -574,13 +595,15 @@ void pr_shiftswap(PRShiftSwapData& d, Solution& sol_curr, Solution& sol_best)
         }
         ++it;
     }
+
+    update_penalties(d.alpha, sol_curr, !feasible_found, d.delta_inc, d.delta_dec);
 }
 
 template <class Set>
 void add(PRShiftSwapData& d, Set& set, Solution& sol)
 {
     if ((Cpt)set.size() < d.gamma ||
-            (sol.value(d.alpha) < std::prev(set.end())->value(d.alpha))) {
+            (sol.pcost() < std::prev(set.end())->pcost())) {
         set.insert(sol);
         if ((Cpt)set.size() > d.gamma)
             set.erase(std::prev(set.end()));
@@ -606,18 +629,8 @@ Solution gap::sol_pr_shiftswap(PRShiftSwapData d)
         pr_shiftswap(d, sol_curr, sol_best);
     }
 
-    auto cmp = [&d](const Solution& s1, const Solution& s2) { return s1.value(d.alpha) < s2.value(d.alpha); };
+    auto cmp = [](const Solution& s1, const Solution& s2) { return s1.pcost() < s2.pcost(); };
     for (;;) {
-        //double val = 0;
-        //for (Solution& sol_curr: pool)
-            //val += sol_curr.value(d.alpha);
-        //if (!sol_best.feasible() || sol_best.value() > val/d.rho * 1.001) {
-            //d.alpha *= 1.01;
-        //} else {
-            //d.alpha *= 0.99;
-        //}
-        //std::cout << "average " << val/d.rho << " best " << sol_best.value() << " alpha " << d.alpha << std::endl;
-
         // Get solutions a and b
         Cpt a = dis_a(d.gen);
         Cpt b = dis_b(d.gen);
@@ -641,9 +654,8 @@ Solution gap::sol_pr_shiftswap(PRShiftSwapData d)
                 if (ia == ib)
                     continue;
                 sol_a.set(j, ib);
-                double v = sol_a.value(d.alpha);
-                if (v_best == -1 || v_best > v) {
-                    v_best = v;
+                if (v_best == -1 || v_best > sol_a.pcost()) {
+                    v_best = sol_a.pcost();
                     j_best = j;
                 }
                 sol_a.set(j, ia);
@@ -655,7 +667,7 @@ Solution gap::sol_pr_shiftswap(PRShiftSwapData d)
         for (Solution sol_curr: s) {
             pr_shiftswap(d, sol_curr, sol_best); // Apply shift-swap
             // Add sol_curr to pool and remove worst solution from pool.
-            double v_max = sol_curr.value(d.alpha);
+            double v_max = sol_curr.pcost();
             Cpt l_max = -1;
             for (Cpt l=0; l<d.rho; ++l) {
                 // If the solution is already in the pool, we don't add it again.
@@ -663,9 +675,8 @@ Solution gap::sol_pr_shiftswap(PRShiftSwapData d)
                     l_max = -1;
                     break;
                 }
-                double v = pool[l].value(d.alpha);
-                if (v_max <= v) {
-                    v_max = v;
+                if (v_max <= pool[l].pcost()) {
+                    v_max = pool[l].pcost();
                     l_max = l;
                 }
             }

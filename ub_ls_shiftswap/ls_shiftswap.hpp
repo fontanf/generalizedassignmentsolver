@@ -56,10 +56,12 @@ struct PRShiftSwapData
 {
     const Instance& ins;
     std::default_random_engine& gen;
-    double alpha;
     Info info = Info();
-    Cpt rho = 100;
-    Cpt gamma = 5;
+    std::vector<double> alpha;
+    Cpt rho = 20;
+    Cpt gamma = 10;
+    double delta_inc = 0.01;
+    double delta_dec = 0.1;
 };
 Solution sol_pr_shiftswap(PRShiftSwapData d);
 

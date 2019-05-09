@@ -5,12 +5,12 @@
 
 using namespace gap;
 
-bool test(const Instance& ins, std::vector<Value (*)(Instance&)> fs, TestType tt)
+bool test(const Instance& ins, std::vector<Cost (*)(Instance&)> fs, TestType tt)
 {
-    Value opt = (ins.optimal_solution() == NULL)? -1: ins.optimal_solution()->value();
+    Cost opt = (ins.optimal_solution() == NULL)? -1: ins.optimal_solution()->cost();
     for (auto f: fs) {
         Instance ins_tmp = ins;
-        Value val = f(ins_tmp);
+        Cost val = f(ins_tmp);
         if (opt == -1)
             opt = val;
         if (tt == OPT) {
@@ -189,7 +189,7 @@ private:
 
 };
 
-void test(Instances& inss, std::vector<Value (*)(Instance&)> fs, TestType tt)
+void test(Instances& inss, std::vector<Cost (*)(Instance&)> fs, TestType tt)
 {
     for (;;) {
         Instance ins(inss.next());
@@ -204,7 +204,7 @@ void test(Instances& inss, std::vector<Value (*)(Instance&)> fs, TestType tt)
     std::cout << "ok" << std::endl;
 }
 
-void gap::test(InstacesType it, std::vector<Value (*)(Instance&)> fs, TestType tt)
+void gap::test(InstacesType it, std::vector<Cost (*)(Instance&)> fs, TestType tt)
 {
     if (it == TEST) {
         TestInstances ti;

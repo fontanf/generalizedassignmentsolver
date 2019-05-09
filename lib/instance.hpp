@@ -14,7 +14,8 @@
 namespace gap
 {
 
-typedef int64_t Value;
+typedef int64_t Cost;
+typedef double  PCost;
 typedef int64_t Weight;
 typedef int64_t ItemIdx;
 typedef int64_t ItemPos;
@@ -34,9 +35,9 @@ struct Alternative
     ItemIdx j;
     AgentIdx i;
     Weight w;
-    Value v;
+    Cost c;
 
-    double efficiency() const { return v * w; }
+    double efficiency() const { return c * w; }
 };
 
 struct Item
@@ -44,9 +45,9 @@ struct Item
     ItemIdx j;
     std::vector<AltIdx> alt;
     Weight w; // total weight
-    Value v; // total value
-    Value v_min = -1; // minimum value
-    AgentIdx i_best = -1; // lowest value agent
+    Cost c; // total cost
+    Cost c_min = -1; // minimum cost
+    AgentIdx i_best = -1; // lowest cost agent
 };
 
 class Instance
@@ -58,7 +59,7 @@ public:
 
     void add_items(ItemIdx n);
     ItemIdx add_item();
-    void set_alternative(ItemIdx j, AgentIdx i, Weight w, Value p);
+    void set_alternative(ItemIdx j, AgentIdx i, Weight w, Cost p);
     void set_capacity(AgentIdx i, Weight c) { c_[i] = c; }
     void set_optimal_solution(Solution& sol);
 
@@ -77,9 +78,9 @@ public:
     AltIdx alternative_number() const { return alternatives_.size(); }
     Weight capacity(AgentIdx i) const { return c_[i]; }
 
-    Value check(std::string filepath);
+    Cost check(std::string filepath);
     const Solution* optimal_solution() const { return sol_opt_.get(); }
-    Value optimum() const;
+    Cost optimum() const;
 
     void plot(std::string filename);
     void write(std::string filename);

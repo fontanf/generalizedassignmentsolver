@@ -6,6 +6,7 @@ cc_library(
         linkopts = [
                 "-lCbcSolver",
                 "-lCbc",
+                "-lCgl",
                 "-lOsiCbc",
                 "-lCoinUtils",
         ],
