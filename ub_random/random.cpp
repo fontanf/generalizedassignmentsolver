@@ -7,7 +7,7 @@
 
 using namespace gap;
 
-Solution gap::sol_random(const Instance& ins, std::default_random_engine& gen, Info info)
+Solution gap::sol_random(const Instance& ins, std::mt19937_64& gen, Info info)
 {
     std::uniform_int_distribution<> dis(0, ins.agent_number() - 1);
     Solution sol(ins);

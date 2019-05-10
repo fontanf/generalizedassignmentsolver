@@ -9,7 +9,7 @@ namespace gap
 struct DualLSShiftSwapData
 {
     const Instance& ins;
-    std::default_random_engine& gen;
+    std::mt19937_64& gen;
     Info info = Info();
 };
 Solution sol_dualls_shiftswap(DualLSShiftSwapData d);
@@ -17,7 +17,7 @@ Solution sol_dualls_shiftswap(DualLSShiftSwapData d);
 struct LSFirstShiftSwapData
 {
     const Instance& ins;
-    std::default_random_engine& gen;
+    std::mt19937_64& gen;
     double alpha;
     Info info = Info();
 };
@@ -26,7 +26,7 @@ Solution sol_lsfirst_shiftswap(LSFirstShiftSwapData d);
 struct LSBestShiftSwapData
 {
     const Instance& ins;
-    std::default_random_engine& gen;
+    std::mt19937_64& gen;
     double alpha;
     Info info = Info();
 };
@@ -35,16 +35,16 @@ Solution sol_lsbest_shiftswap(LSBestShiftSwapData d);
 struct TSShiftSwapData
 {
     const Instance& ins;
-    std::default_random_engine& gen;
-    double alpha;
+    std::mt19937_64& gen;
     Info info = Info();
+    double alpha;
 };
 Solution sol_ts_shiftswap(TSShiftSwapData d);
 
 struct SAShiftSwapData
 {
     const Instance& ins;
-    std::default_random_engine& gen;
+    std::mt19937_64& gen;
     double alpha;
     Info info = Info();
     double beta = 0.99;
@@ -55,7 +55,7 @@ Solution sol_sa_shiftswap(SAShiftSwapData d);
 struct PRShiftSwapData
 {
     const Instance& ins;
-    std::default_random_engine& gen;
+    std::mt19937_64& gen;
     Info info = Info();
     std::vector<double> alpha;
     Cpt rho = 20;

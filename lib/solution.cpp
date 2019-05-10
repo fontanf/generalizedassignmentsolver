@@ -128,7 +128,7 @@ void Solution::update_penalties(bool inc, PCost delta_inc, PCost delta_dec)
             if (ratio_max < r)
                 ratio_max = r;
         }
-        double big_delta = delta_inc / ratio_max;
+        double big_delta = (ratio_max > 0)? delta_inc / ratio_max: 0;
         for (AgentIdx i=0; i<m; ++i)
             agents_[i].penalty *= (1 + big_delta * overcapacity(i) / instance().capacity(i));
     } else {
@@ -137,10 +137,14 @@ void Solution::update_penalties(bool inc, PCost delta_inc, PCost delta_dec)
     }
 
     total_pcost_ = 0;
+    //std::cout << ((inc)? "inc": "dec ");
+    //std::cout << " alpha";
     for (AgentIdx i=0; i<m; ++i) {
+        //std::cout << " " << agents_[i].penalty;
         agents_[i].pcost = agents_[i].cost + agents_[i].penalty * agents_[i].overcapacity;
         total_pcost_    += agents_[i].pcost;
     }
+    //std::cout << std::endl;
 }
 
 void Solution::update_penalties(PCost delta_inc)

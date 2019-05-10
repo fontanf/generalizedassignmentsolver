@@ -13,7 +13,7 @@ struct GenerateData
     Weight r = 100;
     Seed s = 0;
 
-    std::default_random_engine g;
+    std::mt19937_64 g;
 };
 
 std::ostream& operator<<(std::ostream& os, const GenerateData& data);

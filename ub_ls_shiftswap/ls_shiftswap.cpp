@@ -13,7 +13,6 @@ Solution gap::sol_dualls_shiftswap(DualLSShiftSwapData d)
     init_display(d.info);
     AgentIdx m = d.ins.agent_number();
     ItemIdx n = d.ins.item_number();
-    Cpt neighsize = n * m + (n * (n + 1)) / 2;
     std::uniform_int_distribution<Cpt> dis_ss(1, n * m + (n * (n + 1)) / 2);
     std::uniform_int_distribution<ItemIdx> dis_j(0, n - 1);
     std::uniform_int_distribution<ItemIdx> dis_j2(0, n - 2);
@@ -21,16 +20,20 @@ Solution gap::sol_dualls_shiftswap(DualLSShiftSwapData d)
     std::uniform_int_distribution<AgentIdx> dis_i1(0, m - 2);
     std::uniform_int_distribution<AgentIdx> dis_i2(0, m - 3);
 
+    PCost alpha = 0.01;
+    PCost delta = 0.01;
+    Cpt it_max = n * m;
+
     // Initilize current solution
     Solution sol_curr(d.ins);
-    sol_curr.update_penalties(std::vector<PCost>(m, 0.000001));
+    sol_curr.update_penalties(std::vector<PCost>(m, alpha));
     for (ItemIdx j=0; j<d.ins.item_number(); ++j)
         sol_curr.set(j, d.ins.item(j).i_best);
 
-    for (;; sol_curr.update_penalties(0.1)) {
+    for (;; sol_curr.update_penalties(delta)) {
         //std::cout << "cost " << sol_curr.cost() << " pcost " << sol_curr.pcost() << " overcapacity " << sol_curr.overcapacity() << std::endl;
         Cpt it_without_change = 0;
-        while (it_without_change < neighsize) {
+        while (it_without_change < it_max) {
             double v = sol_curr.pcost();
             Cpt p = dis_ss(d.gen);
             if (p <= m * n) { // shift
@@ -94,7 +97,6 @@ Solution gap::sol_lsfirst_shiftswap(LSFirstShiftSwapData d)
 
     Cpt it_max = 2 * (n * m + (n * (n + 1)) / 2);
     Cpt it_without_change = 0;
-
     while (it_without_change < it_max) {
         double v = sol_curr.pcost();
         Cpt p = dis_ss(d.gen);

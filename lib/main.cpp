@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
         .set_onlywriteattheend(true)
         .set_outputfile(outputfile);
 
-    std::default_random_engine gen(seed);
+    std::mt19937_64 gen(seed);
     if (algorithm == "milp") {
         sopt_milp({
                 .ins = ins,
@@ -109,8 +109,8 @@ int main(int argc, char *argv[])
         sol = sol_ts_shiftswap({
                 .ins = ins,
                 .gen = gen,
-                .alpha = 4,
-                .info = info});
+                .info = info,
+                .alpha = 4});
     } else if (algorithm == "sa_shiftswap") {
         sol = sol_sa_shiftswap({
                 .ins = ins,

@@ -69,11 +69,10 @@ bool move_gap(const Instance& ins, Solution& sol,
     return true;
 }
 
-Solution gap::sol_vdns_simple(const Instance& ins, std::default_random_engine& gen, Info info)
+Solution gap::sol_vdns_simple(const Instance& ins, std::mt19937_64& gen, Info info)
 {
     init_display(info);
     Solution sol_best(ins);
-    //Solution sol_curr = sol_random(ins, gen);
     Solution sol_curr = sol_dualls_shiftswap({ins, gen});
     std::stringstream ss;
     sol_best.update(sol_curr, 0, ss, info);
