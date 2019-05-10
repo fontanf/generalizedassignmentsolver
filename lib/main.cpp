@@ -78,50 +78,60 @@ int main(int argc, char *argv[])
         .set_onlywriteattheend(true)
         .set_outputfile(outputfile);
 
+    std::stringstream ss(algorithm);
+    std::istream_iterator<std::string> begin(ss);
+    std::istream_iterator<std::string> end;
+    std::vector<std::string> vstrings(begin, end);
+    std::map<std::string, std::string> args;
+    for (auto it=std::next(vstrings.begin());
+            it!=vstrings.end() && std::next(it)!=vstrings.end();
+            it=std::next(std::next(it)))
+        args[*it] = *std::next(it);
+
     std::mt19937_64 gen(seed);
-    if (algorithm == "milp") {
+    if (vstrings[0] == "milp") {
         sopt_milp({
                 .ins = ins,
                 .sol = sol,
                 .stop_at_first_improvment = false,
                 .info = info,
                 });
-    } else if (algorithm == "random") {
+    } else if (vstrings[0] == "random") {
         sol = sol_random(ins, gen, info);
-    } else if (algorithm == "dualls_shiftswap") {
+    } else if (vstrings[0] == "dualls_shiftswap") {
         sol = sol_dualls_shiftswap({
                 .ins = ins,
                 .gen = gen,
                 .info = info});
-    } else if (algorithm == "lsfirst_shiftswap") {
-        sol = sol_lsfirst_shiftswap({
+    } else if (vstrings[0] == "lsfirst_shiftswap") {
+        sol = sol_lsfirst_shiftswap(LSFirstShiftSwapData{
                 .ins = ins,
                 .gen = gen,
-                .alpha = 10,
-                .info = info});
-    } else if (algorithm == "lsbest_shiftswap") {
+                .info = info
+                }.set_params(args));
+    } else if (vstrings[0] == "lsbest_shiftswap") {
         sol = sol_lsbest_shiftswap({
                 .ins = ins,
                 .gen = gen,
                 .alpha = 10,
                 .info = info});
-    } else if (algorithm == "ts_shiftswap") {
+    } else if (vstrings[0] == "ts_shiftswap") {
         sol = sol_ts_shiftswap({
                 .ins = ins,
                 .gen = gen,
                 .info = info,
                 .alpha = 4});
-    } else if (algorithm == "sa_shiftswap") {
+    } else if (vstrings[0] == "sa_shiftswap") {
         sol = sol_sa_shiftswap({
                 .ins = ins,
                 .gen = gen,
                 .alpha = 10,
                 .info = info});
-    } else if (algorithm == "pr_shiftswap") {
+    } else if (vstrings[0] == "pr_shiftswap") {
         PRShiftSwapData d({.ins = ins, .gen = gen, .info = info});
         d.alpha = std::vector<double>(ins.agent_number(), 10.0);
         sol = sol_pr_shiftswap(d);
-    } else if (algorithm == "vdns_simple") {
+    } else if (vstrings[0] == "vdns_simple") {
         sol = sol_vdns_simple(ins, gen, info);
     /*
     } else if (algorithm == "tabuastar") {

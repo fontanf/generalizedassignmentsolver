@@ -18,8 +18,15 @@ struct LSFirstShiftSwapData
 {
     const Instance& ins;
     std::mt19937_64& gen;
-    double alpha;
     Info info = Info();
+    PCost alpha;
+
+    LSFirstShiftSwapData& set_params(const std::map<std::string, std::string>& args)
+    {
+        auto it = args.find("alpha");
+        alpha = (it == args.end())? 100: std::stod(it->second);
+        return *this;
+    }
 };
 Solution sol_lsfirst_shiftswap(LSFirstShiftSwapData d);
 

@@ -10,6 +10,7 @@
 #include <fstream>
 #include <chrono>
 #include <memory>
+#include <map>
 
 namespace gap
 {
