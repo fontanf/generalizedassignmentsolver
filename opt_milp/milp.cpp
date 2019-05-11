@@ -1,20 +1,12 @@
 #include "gap/opt_milp/milp.hpp"
 
-#include <coin/CbcModel.hpp>
-#include <coin/OsiCbcSolverInterface.hpp>
-#include <coin/CglKnapsackCover.hpp>
-#include <coin/CglClique.hpp>
-
 using namespace gap;
 
-Solution gap::sopt_milp(MilpData d)
+MilpMatrix::MilpMatrix(const Instance& ins)
 {
-    VER(d.info, "*** milp ***" << std::endl);
-
-    int loglevel = (d.info.output->verbose)? 1: 0;
-    int numberRows = d.ins.agent_number() + d.ins.item_number();
-    int numberColumns = d.ins.alternative_number();
-    int numberElements = 2 * d.ins.alternative_number();
+    int numberRows = ins.agent_number() + ins.item_number();
+    int numberColumns = ins.alternative_number();
+    int numberElements = 2 * ins.alternative_number();
 
     // Matrix data - column ordered
     std::vector<CoinBigIndex> start(numberColumns + 1);
@@ -24,33 +16,43 @@ Solution gap::sopt_milp(MilpData d)
 
     std::vector<int> rows(numberElements);
     std::vector<double> elements(numberElements);
-    for (AltIdx k=0; k<d.ins.alternative_number(); ++k) {
-            rows[2 * k] = d.ins.alternative(k).i;
-        elements[2 * k] = d.ins.alternative(k).w;
-            rows[2 * k + 1] = d.ins.agent_number() + d.ins.alternative(k).j;
+    for (AltIdx k=0; k<ins.alternative_number(); ++k) {
+            rows[2 * k] = ins.alternative(k).i;
+        elements[2 * k] = ins.alternative(k).w;
+            rows[2 * k + 1] = ins.agent_number() + ins.alternative(k).j;
         elements[2 * k + 1] = 1;
     }
 
-    CoinPackedMatrix matrix(true, numberRows, numberColumns, numberElements,
+    matrix = CoinPackedMatrix(true, numberRows, numberColumns, numberElements,
             elements.data(), rows.data(), start.data(), length.data());
 
     // Rim data
-    std::vector<double> objective(numberColumns);
+    objective = std::vector<double>(numberColumns);
     for (AltIdx k=0; k<numberColumns; ++k)
-        objective[k] = d.ins.alternative(k).c;
+        objective[k] = ins.alternative(k).c;
 
-    std::vector<double> rowLower(numberRows);
-    std::vector<double> rowUpper(numberRows);
-    for (AgentIdx i=0; i<d.ins.agent_number(); ++i) {
+    rowLower = std::vector<double>(numberRows);
+    rowUpper = std::vector<double>(numberRows);
+    for (AgentIdx i=0; i<ins.agent_number(); ++i) {
         rowLower[i] = 0;
-        rowUpper[i] = d.ins.capacity(i);
+        rowUpper[i] = ins.capacity(i);
     }
-    for (ItemIdx j=0; j<d.ins.item_number(); ++j) {
-        rowLower[d.ins.agent_number() + j] = 1;
-        rowUpper[d.ins.agent_number() + j] = 1;
+    for (ItemIdx j=0; j<ins.item_number(); ++j) {
+        rowLower[ins.agent_number() + j] = 1;
+        rowUpper[ins.agent_number() + j] = 1;
     }
-    std::vector<double> colLower(numberColumns, 0);
-    std::vector<double> colUpper(numberColumns, 1);
+    colLower = std::vector<double>(numberColumns, 0);
+    colUpper = std::vector<double>(numberColumns, 1);
+}
+
+Solution gap::sopt_milp(MilpData d)
+{
+    VER(d.info, "*** milp ***" << std::endl);
+
+    int loglevel = (d.info.output->verbose)? 1: 0;
+
+    MilpMatrix mat(d.ins);
+
     OsiCbcSolverInterface solver1;
 
     // Reduce printout
@@ -58,8 +60,8 @@ Solution gap::sopt_milp(MilpData d)
     solver1.messageHandler()->setLogLevel(loglevel);
 
     // Load problem
-    solver1.loadProblem(matrix, colLower.data(), colUpper.data(),
-              objective.data(), rowLower.data(), rowUpper.data());
+    solver1.loadProblem(mat.matrix, mat.colLower.data(), mat.colUpper.data(),
+              mat.objective.data(), mat.rowLower.data(), mat.rowUpper.data());
 
     // Mark integer
     for (AltIdx k=0; k<d.ins.alternative_number(); ++k)
