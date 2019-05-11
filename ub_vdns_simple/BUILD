@@ -6,7 +6,7 @@ cc_library(
                 "//lib:cpp",
                 "//ub_random:random",
                 "//ub_ls_shiftswap:ls_shiftswap",
-                "//opt_milp:milp",
+                "//opt_branchandcut_cbc:branchandcut_cbc",
         ],
         visibility = ["//visibility:public"],
         include_prefix = "gap/ub_vdns_simple/",

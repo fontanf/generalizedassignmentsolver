@@ -1,7 +1,7 @@
 cc_library(
-        name = "milpcplex",
-        hdrs = ["milpcplex.hpp"],
-        srcs = ["milpcplex.cpp"],
+        name = "branchandcut_cplex",
+        hdrs = ["branchandcut_cplex.hpp"],
+        srcs = ["branchandcut_cplex.cpp"],
         deps = ["//lib:cpp"],
         copts = [
                 "-m64",
@@ -17,7 +17,7 @@ cc_library(
                 "-lpthread",
         ],
         visibility = ["//visibility:public"],
-        include_prefix = "gap/opt_milpcplex/",
+        include_prefix = "gap/opt_branchandcut_cplex/",
 )
 
 cc_test(
@@ -25,7 +25,7 @@ cc_test(
         srcs = ["test.cpp"],
         deps = [
                 "//lib:tester",
-                "//opt_milpcplex:milpcplex",
+                "//opt_branchandcut_cplex:branchandcut_cplex",
         ],
         timeout = "moderate",
 )

@@ -1,4 +1,4 @@
-#include "gap/opt_milp/milp.hpp"
+#include "gap/opt_branchandcut_cbc/branchandcut_cbc.hpp"
 
 using namespace gap;
 
@@ -45,9 +45,9 @@ MilpMatrix::MilpMatrix(const Instance& ins)
     colUpper = std::vector<double>(numberColumns, 1);
 }
 
-Solution gap::sopt_milp(MilpData d)
+Solution gap::sopt_branchandcut_cbc(BranchAndCutCbcData d)
 {
-    VER(d.info, "*** milp ***" << std::endl);
+    VER(d.info, "*** branchandcut_cbc ***" << std::endl);
 
     int loglevel = (d.info.output->verbose)? 1: 0;
 

@@ -11,7 +11,7 @@ bazel build --cxxopt='-std=c++14' --compilation_mode=opt -- //...
 
 Solve:
 ```
-./bazel-bin/lib/main -v -a milp -i data/a05100 -o out.ini -c sol.txt
+./bazel-bin/lib/main -v -a branchandcut_cbc -i data/a05100 -o out.ini -c sol.txt
 ```
 
 Unit tests:
@@ -57,7 +57,7 @@ Others:
 
 ## Exact algorithms
 
-- MILP solved with CBC `-a milp` :heavy_check_mark:
+- Branch-and-cut: with CBC `-a branchandcut_cbc` :heavy_check_mark: with CPLEX `-a branchandcut_cplex` :heavy_check_mark:
 - Branch-and-price :x:
 
 ## Results

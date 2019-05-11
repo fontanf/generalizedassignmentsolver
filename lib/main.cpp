@@ -1,4 +1,4 @@
-#include "gap/opt_milp/milp.hpp"
+#include "gap/opt_branchandcut_cbc/branchandcut_cbc.hpp"
 #include "gap/ub_random/random.hpp"
 #include "gap/ub_ls_shiftswap/ls_shiftswap.hpp"
 #include "gap/ub_vdns_simple/vdns_simple.hpp"
@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
     namespace po = boost::program_options;
 
     // Parse program options
-    std::string algorithm = "milp";
+    std::string algorithm = "branchandcut_cbc";
     std::string instancefile = "";
     std::string outputfile = "";
     std::string format = "gap_beasley";
@@ -89,8 +89,8 @@ int main(int argc, char *argv[])
         args[*it] = *std::next(it);
 
     std::mt19937_64 gen(seed);
-    if (vstrings[0] == "milp") {
-        sopt_milp({
+    if (vstrings[0] == "branchandcut_cbc") {
+        sopt_branchandcut_cbc({
                 .ins = ins,
                 .sol = sol,
                 .stop_at_first_improvment = false,

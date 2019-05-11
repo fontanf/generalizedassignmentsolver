@@ -1,6 +1,6 @@
 #!/bin/bash
 
-algo="milp"
+algo="branchandcut_cbc"
 t="$1"
 m="$2"
 n="$3"

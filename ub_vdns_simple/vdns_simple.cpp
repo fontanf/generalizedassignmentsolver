@@ -1,7 +1,7 @@
 #include "gap/ub_vdns_simple/vdns_simple.hpp"
 #include "gap/ub_random/random.hpp"
 #include "gap/ub_ls_shiftswap/ls_shiftswap.hpp"
-#include "gap/opt_milp/milp.hpp"
+#include "gap/opt_branchandcut_cbc/branchandcut_cbc.hpp"
 
 #include <set>
 #include <random>
@@ -51,7 +51,7 @@ bool move_gap(const Instance& ins, Solution& sol,
     Solution sol_tmp(ins_tmp);
     for (ItemIdx j=0; j<(ItemIdx)pos.size(); ++j)
         sol_tmp.set(j, sol_vec[j]);
-    sopt_milp({
+    sopt_branchandcut_cbc({
             .ins = ins_tmp,
             .sol = sol_tmp,
             .stop_at_first_improvment = false,

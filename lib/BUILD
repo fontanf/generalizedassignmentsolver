@@ -57,7 +57,7 @@ cc_binary(
         name = "main",
         srcs = ["main.cpp"],
         deps = [
-                "//opt_milp:milp",
+                "//opt_branchandcut_cbc:branchandcut_cbc",
                 "//ub_random:random",
                 "//ub_ls_shiftswap:ls_shiftswap",
                 "//ub_vdns_simple:vdns_simple",
@@ -68,7 +68,7 @@ cc_binary(
         name = "test_main",
         srcs = ["test_main.cpp"],
         deps = [
-                "//opt_milp:milp",
+                "//opt_branchandcut_cbc:branchandcut_cbc",
                 ":tester",
         ],
 )

@@ -6,14 +6,14 @@
 namespace gap
 {
 
-struct MilpCplexData
+struct BranchAndCutCplexData
 {
     const Instance& ins;
     Solution& sol;
     Info info = Info();
 };
 
-Solution sopt_milpcplex(MilpCplexData d);
+Solution sopt_branchandcut_cplex(BranchAndCutCplexData d);
 
 }
 

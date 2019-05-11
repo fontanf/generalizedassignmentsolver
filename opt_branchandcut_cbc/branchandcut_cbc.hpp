@@ -22,7 +22,7 @@ struct MilpMatrix
     std::vector<double> rowUpper;
 };
 
-struct MilpData
+struct BranchAndCutCbcData
 {
     const Instance& ins;
     Solution& sol;
@@ -30,7 +30,7 @@ struct MilpData
     Info info = Info();
 };
 
-Solution sopt_milp(MilpData d);
+Solution sopt_branchandcut_cbc(BranchAndCutCbcData d);
 
 }
 

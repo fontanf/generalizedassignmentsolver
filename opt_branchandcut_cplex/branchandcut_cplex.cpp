@@ -1,4 +1,4 @@
-#include "gap/opt_milpcplex/milpcplex.hpp"
+#include "gap/opt_branchandcut_cplex/branchandcut_cplex.hpp"
 
 #include <ilcplex/ilocplex.h>
 
@@ -9,9 +9,9 @@ ILOSTLBEGIN
 typedef IloArray<IloNumVarArray> NumVarMatrix;
 typedef IloArray<IloNumArray>    NumMatrix;
 
-Solution gap::sopt_milpcplex(MilpCplexData d)
+Solution gap::sopt_branchandcut_cplex(BranchAndCutCplexData d)
 {
-    VER(d.info, "*** milpcplex ***" << std::endl);
+    VER(d.info, "*** branchandcut_cplex ***" << std::endl);
 
     IloEnv env;
     try {
