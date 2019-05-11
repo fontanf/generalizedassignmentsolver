@@ -1,6 +1,6 @@
 #!/bin/bash
 
-algo="vdns_simple"
+algo="$1"
 t=120;
 data=(
         "a05100" "a10100" "a20100" \

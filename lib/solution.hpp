@@ -82,6 +82,8 @@ private:
     PCost total_pcost_ = 0;
 };
 
+ItemIdx distance(const Solution& sol1, const Solution& sol2);
+
 void init_display(Info& info);
 
 std::ostream& operator<<(std::ostream& os, const Solution& solution);

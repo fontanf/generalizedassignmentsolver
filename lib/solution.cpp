@@ -255,6 +255,15 @@ std::string Solution::to_string(AgentIdx i)
     return s;
 }
 
+ItemIdx gap::distance(const Solution& sol1, const Solution& sol2)
+{
+    ItemIdx dist = 0;
+    for (ItemIdx j=0; j<sol1.instance().item_number(); ++j)
+        if (sol1.agent(j) != sol2.agent(j))
+            dist++;
+    return dist;
+}
+
 /*********************************** Compare **********************************/
 
 double SolutionCompare::value(const Solution& s)
