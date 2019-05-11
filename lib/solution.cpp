@@ -223,6 +223,7 @@ void Solution::update(const Solution& sol, Cost lb, const std::stringstream& s, 
         VER(info, std::left << std::setw(12) << sol.cost());
         VER(info, std::left << std::setw(12) << lb);
         VER(info, std::left << std::setw(10) << sol.cost() - lb);
+        VER(info, std::left << std::setw(10) << (double)(10000 * (sol.cost() - lb) / lb) / 100)
         VER(info, s.str() << std::endl);
 
         if (!info.output->onlywriteattheend) {
@@ -240,6 +241,7 @@ void gap::init_display(Info& info)
     VER(info, std::left << std::setw(12) << "UB");
     VER(info, std::left << std::setw(12) << "LB");
     VER(info, std::left << std::setw(10) << "GAP");
+    VER(info, std::left << std::setw(10) << "GAP (%)");
     VER(info, "");
     VER(info, std::endl);
 }
