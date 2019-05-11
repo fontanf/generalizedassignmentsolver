@@ -19,25 +19,9 @@ Unit tests:
 bazel test --cxxopt='-std=c++14' --compilation_mode=opt -- //...
 ```
 
-Generate an instance:
-```
-bazel build --cxxopt='-std=c++14' --compilation_mode=opt -- //lib:generator_main
-./bazel-bin/lib/generator_main -n 200 -m 20 -t f -r 100 -o ./ins.txt
-```
-
-Examples:
-- `-n 100 -m 10 -t f -r 100`
-- `-n 100 -m 10 -t g -r 100`
-
-Instances can be visualized with gnuplot:
-```
-./bazel-bin/lib/generator_main -n 200 -m 20 -t f -r 100 -o ./ins.txt -p ./ins.plot
-gnuplot
-gnuplot> set yrange[0:]; set xrange[0:]; plot 'ins.plot' u 1:2
-```
-
 ## Lower bounds
 
+- Linear relaxation solved with CLP `-a linrelax_clp` :heavy_check_mark:
 - Lagrangian relaxation solved with volume method :x:
 - Lagrangian relaxation solved with bundle method :x:
 - Column generation :x:
@@ -57,7 +41,8 @@ Others:
 
 ## Exact algorithms
 
-- Branch-and-cut: with CBC `-a branchandcut_cbc` :heavy_check_mark: with CPLEX `-a branchandcut_cplex` :heavy_check_mark:
+- Branch-and-cut with CBC `-a branchandcut_cbc` :heavy_check_mark:
+- Branch-and-cut with CPLEX `-a branchandcut_cplex` :heavy_check_mark:
 - Branch-and-price :x:
 
 ## Results

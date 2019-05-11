@@ -1,3 +1,4 @@
+#include "gap/lb_linrelax_clp/linrelax_clp.hpp"
 #include "gap/opt_branchandcut_cbc/branchandcut_cbc.hpp"
 #include "gap/ub_random/random.hpp"
 #include "gap/ub_ls_shiftswap/ls_shiftswap.hpp"
@@ -89,7 +90,9 @@ int main(int argc, char *argv[])
         args[*it] = *std::next(it);
 
     std::mt19937_64 gen(seed);
-    if (vstrings[0] == "branchandcut_cbc") {
+    if (vstrings[0] == "linrelax_clp") {
+        lb_linrelax_clp(ins, info);
+    } else if (vstrings[0] == "branchandcut_cbc") {
         sopt_branchandcut_cbc({
                 .ins = ins,
                 .sol = sol,

@@ -183,6 +183,16 @@ Solution gap::algorithm_end(const Solution& sol, Info& info)
     return sol;
 }
 
+void gap::algorithm_end(Cost lb, Info& info)
+{
+    double t = info.elapsed_time();
+    PUT(info, "Bound.Cost", lb);
+    PUT(info, "Bound.Time", t);
+    VER(info, "---" << std::endl
+            << "Cost: " << lb << std::endl
+            << "Time (s): " << t << std::endl);
+}
+
 void Instance::plot(std::string filename)
 {
     std::ofstream file(filename);

@@ -104,6 +104,7 @@ std::ostream& operator<<(std::ostream &os, const Alternative& alt);
 std::ostream& operator<<(std::ostream &os, const Instance& instance);
 
 Solution algorithm_end(const Solution& sol, Info& info);
+void algorithm_end(Cost lb, Info& info);
 
 }
 

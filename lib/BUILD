@@ -57,6 +57,7 @@ cc_binary(
         name = "main",
         srcs = ["main.cpp"],
         deps = [
+                "//lb_linrelax_clp:linrelax_clp",
                 "//opt_branchandcut_cbc:branchandcut_cbc",
                 "//ub_random:random",
                 "//ub_ls_shiftswap:ls_shiftswap",
