@@ -3,16 +3,12 @@
 #include "gap/lib/instance.hpp"
 #include "gap/lib/solution.hpp"
 
+#include "gap/lb_linrelax_clp/linrelax_clp.hpp"
+
 namespace gap
 {
 
-struct DualLSShiftSwapData
-{
-    const Instance& ins;
-    std::mt19937_64& gen;
-    Info info = Info();
-};
-Solution sol_dualls_shiftswap(DualLSShiftSwapData d);
+Solution sol_repairlinrelax(const Instance& ins, const LinRelaxClpOutput& linrelax_output, Info info = Info());
 
 struct LSFirstShiftSwapData
 {

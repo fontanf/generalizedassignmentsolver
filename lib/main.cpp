@@ -101,11 +101,9 @@ int main(int argc, char *argv[])
                 });
     } else if (vstrings[0] == "random") {
         sol = sol_random(ins, gen, info);
-    } else if (vstrings[0] == "dualls_shiftswap") {
-        sol = sol_dualls_shiftswap({
-                .ins = ins,
-                .gen = gen,
-                .info = info});
+    } else if (vstrings[0] == "repairlinrelax") {
+        LinRelaxClpOutput linrelax_output = lb_linrelax_clp(ins);
+        sol = sol_repairlinrelax(ins, linrelax_output, info);
     } else if (vstrings[0] == "lsfirst_shiftswap") {
         sol = sol_lsfirst_shiftswap(LSFirstShiftSwapData{
                 .ins = ins,

@@ -73,9 +73,13 @@ Solution gap::sol_vdns_simple(const Instance& ins, std::mt19937_64& gen, Info in
 {
     init_display(info);
     Solution sol_best(ins);
-    Solution sol_curr = sol_dualls_shiftswap({ins, gen});
+
+    LinRelaxClpOutput linrelax_output = lb_linrelax_clp(ins);
+    Cost lb = linrelax_output.lb;
+    Solution sol_curr = sol_repairlinrelax(ins, linrelax_output);
+
     std::stringstream ss;
-    sol_best.update(sol_curr, 0, ss, info);
+    sol_best.update(sol_curr, lb, ss, info);
 
     std::vector<ItemIdx> items(ins.item_number(), 0);
     std::iota(items.begin(), items.end(), 0);
@@ -107,7 +111,7 @@ Solution gap::sol_vdns_simple(const Instance& ins, std::mt19937_64& gen, Info in
                 ss << " gap m " << m << ":";
                 for (AgentIdx i: agents[k])
                     ss << " " << i;
-                sol_best.update(sol_curr, 0, ss, info);
+                sol_best.update(sol_curr, lb, ss, info);
                 k_last = (k != 0)? k - 1: agents.size() - 1;
             }
             if (k == k_last)

@@ -8,71 +8,60 @@
 
 using namespace gap;
 
-Solution gap::sol_dualls_shiftswap(DualLSShiftSwapData d)
+Solution gap::sol_repairlinrelax(const Instance& ins, const LinRelaxClpOutput& linrelax_output, Info info)
 {
-    init_display(d.info);
-    AgentIdx m = d.ins.agent_number();
-    ItemIdx n = d.ins.item_number();
-    std::uniform_int_distribution<Cpt> dis_ss(1, n * m + (n * (n + 1)) / 2);
-    std::uniform_int_distribution<ItemIdx> dis_j(0, n - 1);
-    std::uniform_int_distribution<ItemIdx> dis_j2(0, n - 2);
-    std::uniform_int_distribution<AgentIdx> dis_i(0, m - 1);
-    std::uniform_int_distribution<AgentIdx> dis_i1(0, m - 2);
-    std::uniform_int_distribution<AgentIdx> dis_i2(0, m - 3);
-
-    PCost alpha = 0.01;
-    PCost delta = 0.01;
-    Cpt it_max = n * m;
+    init_display(info);
+    AgentIdx m = ins.agent_number();
+    ItemIdx n = ins.item_number();
 
     // Initilize current solution
-    Solution sol_curr(d.ins);
-    sol_curr.update_penalties(std::vector<PCost>(m, alpha));
-    for (ItemIdx j=0; j<d.ins.item_number(); ++j)
-        sol_curr.set(j, d.ins.item(j).i_best);
-
-    for (;; sol_curr.update_penalties(delta)) {
-        //std::cout << "cost " << sol_curr.cost() << " pcost " << sol_curr.pcost() << " overcapacity " << sol_curr.overcapacity() << std::endl;
-        Cpt it_without_change = 0;
-        while (it_without_change < it_max) {
-            double v = sol_curr.pcost();
-            Cpt p = dis_ss(d.gen);
-            if (p <= m * n) { // shift
-                ItemIdx j = dis_j(d.gen);
-                AgentIdx i = dis_i1(d.gen);
-                AgentIdx i_old = sol_curr.agent(j);
-                if (i >= i_old)
-                    i++;
-                sol_curr.set(j, i);
-                if (v < sol_curr.pcost()) {
-                    sol_curr.set(j, i_old);
-                    it_without_change++;
-                } else if (v > sol_curr.pcost()) {
-                    it_without_change = 0;
-                }
-            } else { // swap
-                ItemIdx j1 = dis_j(d.gen);
-                ItemIdx j2 = dis_j2(d.gen);
-                if (j2 >= j1)
-                    j2++;
-                AgentIdx i1 = sol_curr.agent(j1);
-                AgentIdx i2 = sol_curr.agent(j2);
-                sol_curr.set(j1, i2);
-                sol_curr.set(j2, i1);
-                if (v < sol_curr.pcost()) {
-                    sol_curr.set(j1, i1);
-                    sol_curr.set(j2, i2);
-                    it_without_change++;
-                } else if (v > sol_curr.pcost()) {
-                    it_without_change = 0;
-                }
+    Solution sol_curr(ins);
+    for (ItemIdx j=0; j<n; ++j) {
+        AgentIdx i_best = -1;
+        Cost c_best = -1;
+        for (AgentIdx i=0; i<m; ++i) {
+            double x = linrelax_output.x.at(ins.alternative_index(j, i));
+            Cost c = ins.alternative(j, i).c;
+            if (x > 0 && (c_best == -1 || c_best > c)) {
+                i_best = i;
+                c_best = c;
             }
         }
-
-        if (sol_curr.feasible())
-            return algorithm_end(sol_curr, d.info);
+        sol_curr.set(j, i_best);
     }
 
-    return algorithm_end(sol_curr, d.info);
+    while (!sol_curr.feasible()) {
+        Weight oc = sol_curr.overcapacity();
+        Cost c = sol_curr.cost();
+        ItemIdx j1_best = -1;
+        ItemIdx j2_best = -1;
+        double v_best = -1;
+        for (ItemIdx j1=0; j1<n; ++j1) {
+            AgentIdx i1 = sol_curr.agent(j1);
+            for (ItemIdx j2=j1+1; j2<n; ++j2) {
+                AgentIdx i2 = sol_curr.agent(j2);
+                if (i1 == i2)
+                    continue;
+                sol_curr.set(j2, i1);
+                sol_curr.set(j1, i2);
+                if (sol_curr.overcapacity() < oc) {
+                    double v = (double)(sol_curr.cost() - c) / (oc - sol_curr.overcapacity());
+                    if (j1_best < 0 || v_best > v) {
+                        v_best = v;
+                        j1_best = j1;
+                        j2_best = j2;
+                    }
+                }
+                sol_curr.set(j2, i2);
+            }
+            sol_curr.set(j1, i1);
+        }
+        AgentIdx i1 = sol_curr.agent(j1_best);
+        AgentIdx i2 = sol_curr.agent(j2_best);
+        sol_curr.set(j1_best, i2);
+        sol_curr.set(j2_best, i1);
+    }
+    return algorithm_end(sol_curr, info);
 }
 
 /******************************************************************************/

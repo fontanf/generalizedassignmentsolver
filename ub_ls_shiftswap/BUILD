@@ -4,6 +4,7 @@ cc_library(
         srcs = ["ls_shiftswap.cpp"],
         deps = [
                 "//lib:cpp",
+                "//lb_linrelax_clp:linrelax_clp",
                 "//ub_random:random",
         ],
         visibility = ["//visibility:public"],
