@@ -223,7 +223,9 @@ void Solution::update(const Solution& sol, Cost lb, const std::stringstream& s, 
         VER(info, std::left << std::setw(12) << sol.cost());
         VER(info, std::left << std::setw(12) << lb);
         VER(info, std::left << std::setw(10) << sol.cost() - lb);
-        VER(info, std::left << std::setw(10) << (double)(10000 * (sol.cost() - lb) / lb) / 100)
+        double gap = (lb == 0)? std::numeric_limits<double>::infinity():
+            (double)(10000 * (sol.cost() - lb) / lb) / 100;
+        VER(info, std::left << std::setw(10) << gap);
         VER(info, s.str() << std::endl);
 
         if (!info.output->onlywriteattheend) {

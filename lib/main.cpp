@@ -111,23 +111,23 @@ int main(int argc, char *argv[])
                 .info = info
                 }.set_params(args));
     } else if (vstrings[0] == "lsbest_shiftswap") {
-        sol = sol_lsbest_shiftswap({
+        sol = sol_lsbest_shiftswap(LSBestShiftSwapData{
                 .ins = ins,
                 .gen = gen,
-                .alpha = 10,
-                .info = info});
+                .info = info
+                }.set_params(args));
     } else if (vstrings[0] == "ts_shiftswap") {
-        sol = sol_ts_shiftswap({
+        sol = sol_ts_shiftswap(TSShiftSwapData{
                 .ins = ins,
                 .gen = gen,
-                .info = info,
-                .alpha = 4});
+                .info = info
+                }.set_params(args));
     } else if (vstrings[0] == "sa_shiftswap") {
-        sol = sol_sa_shiftswap({
+        sol = sol_sa_shiftswap(SAShiftSwapData{
                 .ins = ins,
                 .gen = gen,
-                .alpha = 10,
-                .info = info});
+                .info = info
+                }.set_params(args));
     } else if (vstrings[0] == "pr_shiftswap") {
         PRShiftSwapData d({.ins = ins, .gen = gen, .info = info});
         d.alpha = std::vector<double>(ins.agent_number(), 10.0);

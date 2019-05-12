@@ -28,7 +28,7 @@ bazel test --cxxopt='-std=c++14' --compilation_mode=opt -- //...
 
 ## Upper bounds
 
-Classical meta-heuristics based on shift-swap neighborhood:
+Classical meta-heuristics based on shift-swap neighborhood and fixed penalty of capacity constraint violation:
 - Hill climbing, first improvment `-a lsfirst_shiftswap` :heavy_check_mark:
 - Hill climbing, best improvment `-a lsbest_shiftswap` :heavy_check_mark:
 - Tabu search `-a ts_shiftswap` :heavy_check_mark:
