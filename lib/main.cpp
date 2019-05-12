@@ -129,9 +129,11 @@ int main(int argc, char *argv[])
                 .info = info
                 }.set_params(args));
     } else if (vstrings[0] == "pr_shiftswap") {
-        PRShiftSwapData d({.ins = ins, .gen = gen, .info = info});
-        d.alpha = std::vector<double>(ins.agent_number(), 10.0);
-        sol = sol_pr_shiftswap(d);
+        sol = sol_pr_shiftswap(PRShiftSwapData{
+                .ins = ins,
+                .gen = gen,
+                .info = info
+                }.set_params(args));
     } else if (vstrings[0] == "vdns_simple") {
         sol = sol_vdns_simple(ins, gen, info);
     /*

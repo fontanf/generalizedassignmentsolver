@@ -100,11 +100,26 @@ struct PRShiftSwapData
     const Instance& ins;
     std::mt19937_64& gen;
     Info info = Info();
-    std::vector<double> alpha;
+    PCost alpha = 100;
     Cpt rho = 20;
     Cpt gamma = 10;
-    double delta_inc = 0.01;
-    double delta_dec = 0.1;
+
+    PRShiftSwapData& set_params(const std::map<std::string, std::string>& args)
+    {
+        auto it = args.find("alpha");
+        if (it != args.end())
+            alpha = std::stod(it->second);
+
+        it = args.find("rho");
+        if (it != args.end())
+            rho = std::stol(it->second);
+
+        it = args.find("gamma");
+        if (it != args.end())
+            gamma = std::stol(it->second);
+
+        return *this;
+    }
 };
 Solution sol_pr_shiftswap(PRShiftSwapData d);
 
