@@ -8,6 +8,16 @@
 
 using namespace gap;
 
+/**
+ * Useful links to use Vol:
+ * https://github.com/coin-or/Vol/blob/master/Vol/doc/volDoc.pdf
+ * https://domino.watson.ibm.com/library/cyberdig.nsf/papers/7A1B25774639540A852565BE0070CFB5/$File/RC21103.pdf
+ * https://github.com/coin-or/Vol/tree/master/Vol/examples/VolUfl
+ * https://www.coin-or.org/Doxygen/Clp/classVOL__user__hooks.html
+ * https://www.coin-or.org/Doxygen/Osi/classVOL__problem.html
+ * https://www.coin-or.org/Doxygen/Osi/structVOL__parms.html
+ */
+
 class LagRelaxAssignmentHook: public VOL_user_hooks
 {
 

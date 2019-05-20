@@ -28,7 +28,7 @@ LinRelaxClpOutput gap::lb_linrelax_clp(const Instance& ins, Info info)
 
     // Get solution
     LinRelaxClpOutput out;
-    out.lb = model.getObjValue();
+    out.lb = std::ceil(model.getObjValue());
     out.x = std::vector<double>(ins.alternative_number(), 0);
     const double *solution = model.getColSolution();
     for (AltIdx k=0; k<ins.alternative_number(); ++k)
