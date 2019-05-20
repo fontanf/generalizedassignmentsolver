@@ -1,4 +1,5 @@
 #include "gap/lb_linrelax_clp/linrelax_clp.hpp"
+#include "gap/lb_lagrelax_volume/lagrelax_volume.hpp"
 #include "gap/opt_branchandcut_cbc/branchandcut_cbc.hpp"
 #include "gap/ub_random/random.hpp"
 #include "gap/ub_ls_shiftswap/ls_shiftswap.hpp"
@@ -92,6 +93,8 @@ int main(int argc, char *argv[])
     std::mt19937_64 gen(seed);
     if (vstrings[0] == "linrelax_clp") {
         lb_linrelax_clp(ins, info);
+    } else if (vstrings[0] == "lagrelax_knapsack_volume") {
+        lb_lagrelax_knapsack_volume(ins, info);
     } else if (vstrings[0] == "branchandcut_cbc") {
         sopt_branchandcut_cbc({
                 .ins = ins,

@@ -22,8 +22,10 @@ bazel test --cxxopt='-std=c++14' --compilation_mode=opt -- //...
 ## Lower bounds
 
 - Linear relaxation solved with CLP `-a linrelax_clp` :heavy_check_mark:
-- Lagrangian relaxation solved with volume method :x:
-- Lagrangian relaxation solved with bundle method :x:
+- Lagrangian relaxation of knapsack constraints solved with volume method `-a lagrelax_knapsack_volume` :heavy_check_mark:
+- Lagrangian relaxation of assignment constraints solved with volume method `-a lagrelax_assignment_volume` :x:
+- Lagrangian relaxation of knapsack constraints solved with bundle method `-a lagrelax_knapsack_bundle` :x:
+- Lagrangian relaxation of assignment constraints solved with bundle method `-a lagrelax_assignment_bundle` :x:
 - Column generation :x:
 
 ## Upper bounds
