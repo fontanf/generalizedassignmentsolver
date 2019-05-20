@@ -2,7 +2,10 @@ cc_library(
         name = "lagrelax_volume",
         hdrs = ["lagrelax_volume.hpp"],
         srcs = ["lagrelax_volume.cpp"],
-        deps = ["//lib:cpp"],
+        deps = [
+                "//lib:cpp",
+                "@knapsack//opt_minknap:minknap",
+        ],
         linkopts = [
                 "-lVol",
                 "-lCoinUtils",

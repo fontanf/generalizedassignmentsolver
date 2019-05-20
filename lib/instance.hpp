@@ -48,6 +48,7 @@ struct Item
     Weight w; // total weight
     Cost c; // total cost
     Cost c_min = -1; // minimum cost
+    Cost c_max = -1; // maximum cost
     AgentIdx i_best = -1; // lowest cost agent
 };
 

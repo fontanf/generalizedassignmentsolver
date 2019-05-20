@@ -95,6 +95,8 @@ int main(int argc, char *argv[])
         lb_linrelax_clp(ins, info);
     } else if (vstrings[0] == "lagrelax_knapsack_volume") {
         lb_lagrelax_knapsack_volume(ins, info);
+    } else if (vstrings[0] == "lagrelax_assignment_volume") {
+        lb_lagrelax_assignment_volume(ins, info);
     } else if (vstrings[0] == "branchandcut_cbc") {
         sopt_branchandcut_cbc({
                 .ins = ins,
@@ -165,6 +167,8 @@ int main(int argc, char *argv[])
                 .gen = gen,
                 .info = info});
     */
+    } else {
+        std::cout << "unknown algorithm" << std::endl;
     }
 
     info.write_ini(outputfile);

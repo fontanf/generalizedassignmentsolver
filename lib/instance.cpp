@@ -44,6 +44,9 @@ void Instance::set_alternative(ItemIdx j, AgentIdx i, Weight w, Cost v)
         items_[j].i_best = i;
         items_[j].c_min = v;
     }
+    if (items_[j].c_max == -1 || items_[j].c_max < v) {
+        items_[j].c_max = v;
+    }
 }
 
 Instance::Instance(std::string filepath, std::string format)
