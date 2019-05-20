@@ -78,8 +78,7 @@ int LagRelaxAssignmentHook::solve_subproblem(const VOL_dvector& dual, const VOL_
 
    lcost = 0;
    pcost = 0;
-
-   for (AgentIdx j=0; j<ins.item_number(); ++j) {
+   for (ItemIdx j=0; j<ins.item_number(); ++j) {
        lcost += dual[j];
        v[j] = 1;
    }
@@ -90,7 +89,9 @@ int LagRelaxAssignmentHook::solve_subproblem(const VOL_dvector& dual, const VOL_
    for (AgentIdx i=0; i<ins.agent_number(); ++i) {
        knapsack::Instance ins_kp(ins.item_number(), ins.capacity(i));
        for (ItemIdx j=0; j<ins.item_number(); ++j) {
-           const Alternative& a = ins.alternative(j, i);
+           AltIdx k = ins.alternative_index(j, i);
+           const Alternative& a = ins.alternative(k);
+           x[k] = 0;
            knapsack::Profit p = mult * dual[j] - mult * a.c;
            if (p > 0) {
                knapsack::ItemIdx j_kp = ins_kp.add_item(a.w, p);
@@ -121,6 +122,15 @@ int LagRelaxAssignmentHook::solve_subproblem(const VOL_dvector& dual, const VOL_
        //std::cout << " " << v[j];
    //std::cout << std::endl;
 
+    //for (ItemIdx j=0; j<ins.item_number(); ++j) {
+        //std::cout << "j " << j;
+        //for (AgentIdx i=0; i<ins.agent_number(); ++i) {
+            //AltIdx k = ins.alternative_index(j, i);
+            //std::cout << " " << round(x[k] * 100) / 100;
+        //}
+        //std::cout << std::endl;
+    //}
+
    return 0;
 }
 
@@ -130,6 +140,13 @@ LagRelaxAssignmentVolumeOutput gap::lb_lagrelax_assignment_volume(const Instance
 
     VOL_problem volprob;
     volprob.parm.printflag = (info.output->verbose)? 1: 0;
+
+    // These parameters don't seem too bad...
+    volprob.parm.alphainit = 0.75;
+    volprob.parm.alphafactor = 0.9;
+    volprob.parm.maxsgriters = 10000;
+    volprob.parm.minimum_rel_ascent = 0;
+    volprob.parm.primal_abs_precision = 0;
 
     // Set the lb/ub on the duals
     volprob.psize = ins.alternative_number();
@@ -147,7 +164,7 @@ LagRelaxAssignmentVolumeOutput gap::lb_lagrelax_assignment_volume(const Instance
     // Extract solution
     LagRelaxAssignmentVolumeOutput output;
 
-    output.lb = volprob.value; // bound
+    output.lb = std::ceil(volprob.value); // bound
 
     output.multipliers.resize(ins.item_number()); // multipliers
     for (ItemIdx j=0; j<ins.item_number(); ++j)
@@ -164,7 +181,6 @@ LagRelaxAssignmentVolumeOutput gap::lb_lagrelax_assignment_volume(const Instance
     algorithm_end(output.lb, info);
     return output;
 }
-
 
 /*****************************************************************************/
 
@@ -300,7 +316,7 @@ LagRelaxKnapsackVolumeOutput gap::lb_lagrelax_knapsack_volume(const Instance& in
     // Extract solution
     LagRelaxKnapsackVolumeOutput output;
 
-    output.lb = volprob.value; // bound
+    output.lb = std::ceil(volprob.value); // bound
 
     output.multipliers.resize(ins.agent_number()); // multipliers
     for (AgentIdx i=0; i<ins.agent_number(); ++i)
