@@ -155,8 +155,6 @@ LagRelaxAssignmentVolumeOutput gap::lb_lagrelax_assignment_volume(const Instance
     volprob.parm.alphainit = 0.75;
     volprob.parm.alphafactor = 0.9;
     volprob.parm.maxsgriters = 10000;
-    volprob.parm.minimum_rel_ascent = 0;
-    volprob.parm.primal_abs_precision = 0;
 
     // Set the lb/ub on the duals
     volprob.psize = ins.alternative_number();
