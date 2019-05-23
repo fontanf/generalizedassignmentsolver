@@ -7,7 +7,6 @@ cc_library(
                 "//opt_branchandcut_cbc:branchandcut_cbc",
         ],
         linkopts = [
-                "-lClpSolver",
                 "-lClp",
                 "-lOsiClp",
                 "-lCoinUtils",

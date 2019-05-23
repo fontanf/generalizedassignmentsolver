@@ -94,6 +94,8 @@ def FlagsForFile( filename, **kwargs ):
     '-I', './bazel-knapsack/external/googletest/',
     '-I', './bazel-knapsack/external/',
     '-I', '/usr/lib/gcc/x86_64-linux-gnu/7.3.0/include/',
+    '-I', '/opt/ibm/ILOG/CPLEX_Studio126/cplex/include/',
+    '-I', '/opt/ibm/ILOG/CPLEX_Studio126/opl/include/',
   ]
 
   data = kwargs['client_data']
