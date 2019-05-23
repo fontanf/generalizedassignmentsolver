@@ -124,6 +124,10 @@ int main(int argc, char *argv[])
     */
     } else if (vstrings[0] == "random") {
         sol = sol_random(ins, gen, info);
+    } else if (vstrings[0] == "repaircombrelax") {
+        sol = sol_repaircombrelax(ins, info);
+    } else if (vstrings[0] == "repairgreedy") {
+        sol = sol_repairgreedy(ins, info);
     } else if (vstrings[0] == "repairlinrelax") {
         LinRelaxClpOutput linrelax_output = lb_linrelax_clp(ins);
         sol = sol_repairlinrelax(ins, linrelax_output, info);
