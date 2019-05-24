@@ -130,3 +130,47 @@ Solution gap::sol_greedyregret(const Instance& ins, const Desirability& f, Info 
     return algorithm_end(sol, info);
 }
 
+/******************************************************************************/
+
+void nshift(Solution& sol)
+{
+    const Instance& ins = sol.instance();
+    ItemIdx n = ins.item_number();
+    AgentIdx m = ins.agent_number();
+    for (ItemIdx j=0; j<n; ++j) {
+        AgentIdx i_old = sol.agent(j);
+        Cost c_best = sol.cost();
+        AgentIdx i_best = -1;
+        for (AgentIdx i=0; i<m; ++i) {
+            if (i == i_old)
+                continue;
+            sol.set(j, i);
+            if (sol.overcapacity() == 0 && c_best > sol.cost()) {
+                i_best = i;
+                c_best = sol.cost();
+            }
+        }
+        if (i_best != -1) {
+            sol.set(j, i_best);
+        } else {
+            sol.set(j, i_old);
+        }
+    }
+}
+
+Solution gap::sol_mthg(const Instance& ins, const Desirability& f, Info info)
+{
+    Solution sol(ins);
+    sol_greedy(sol, f);
+    nshift(sol);
+    return algorithm_end(sol, info);
+}
+
+Solution gap::sol_mthgregret(const Instance& ins, const Desirability& f, Info info)
+{
+    Solution sol(ins);
+    sol_greedyregret(sol, f);
+    nshift(sol);
+    return algorithm_end(sol, info);
+}
+

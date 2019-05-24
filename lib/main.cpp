@@ -135,6 +135,16 @@ int main(int argc, char *argv[])
         std::string des_str = (it == args.end())? "cij": it->second;
         std::unique_ptr<Desirability> f = desirability(des_str, ins);
         sol = sol_greedyregret(ins, *f, info);
+    } else if (vstrings[0] == "mthg") {
+        auto it = args.find("f");
+        std::string des_str = (it == args.end())? "cij": it->second;
+        std::unique_ptr<Desirability> f = desirability(des_str, ins);
+        sol = sol_mthg(ins, *f, info);
+    } else if (vstrings[0] == "mthgregret") {
+        auto it = args.find("f");
+        std::string des_str = (it == args.end())? "cij": it->second;
+        std::unique_ptr<Desirability> f = desirability(des_str, ins);
+        sol = sol_mthgregret(ins, *f, info);
     } else if (vstrings[0] == "repaircombrelax") {
         sol = sol_repaircombrelax(ins, info);
     } else if (vstrings[0] == "repairgreedy") {

@@ -105,5 +105,8 @@ Solution sol_greedy(const Instance& ins, const Desirability& f, Info info = Info
 void sol_greedyregret(Solution& sol, const Desirability& f);
 Solution sol_greedyregret(const Instance& ins, const Desirability& f, Info info = Info());
 
+Solution sol_mthg(const Instance& ins, const Desirability& f, Info info = Info());
+Solution sol_mthgregret(const Instance& ins, const Desirability& f, Info info = Info());
+
 }
 
