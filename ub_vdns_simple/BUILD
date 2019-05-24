@@ -5,7 +5,7 @@ cc_library(
         deps = [
                 "//lib:cpp",
                 "//ub_random:random",
-                "//ub_ls_shiftswap:ls_shiftswap",
+                "//ub_repair:repair",
                 "//opt_branchandcut_cbc:branchandcut_cbc",
         ],
         visibility = ["//visibility:public"],

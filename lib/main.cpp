@@ -1,10 +1,13 @@
 #include "gap/lb_linrelax_clp/linrelax_clp.hpp"
 #include "gap/lb_lagrelax_volume/lagrelax_volume.hpp"
 #include "gap/opt_branchandcut_cbc/branchandcut_cbc.hpp"
+//#include "gap/opt_constraintprogramming_cplex/constraintprogramming_cplex.hpp"
+//#include "gap/opt_branchandcut_cplex/branchandcut_cplex.hpp"
 #include "gap/ub_random/random.hpp"
+#include "gap/ub_greedy/greedy.hpp"
 #include "gap/ub_ls_shiftswap/ls_shiftswap.hpp"
 #include "gap/ub_vdns_simple/vdns_simple.hpp"
-//#include "gap/ub_mbastar/mbastar.hpp"
+#include "gap/ub_repair/repair.hpp"
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
@@ -104,8 +107,48 @@ int main(int argc, char *argv[])
                 .stop_at_first_improvment = false,
                 .info = info,
                 });
+    /*
+    } else if (vstrings[0] == "branchandcut_cplex") {
+        sopt_branchandcut_cplex({
+                .ins = ins,
+                .sol = sol,
+                .info = info,
+                });
+    */
+    /*
+    } else if (vstrings[0] == "constraintprogramming_cplex") {
+        sopt_constraintprogramming_cplex({
+                .ins = ins,
+                .sol = sol,
+                .info = info,
+                });
+    */
     } else if (vstrings[0] == "random") {
         sol = sol_random(ins, gen, info);
+    } else if (vstrings[0] == "greedy") {
+        auto it = args.find("f");
+        std::string des_str = (it == args.end())? "cij": it->second;
+        std::unique_ptr<Desirability> f = desirability(des_str, ins);
+        sol = sol_greedy(ins, *f, info);
+    } else if (vstrings[0] == "greedyregret") {
+        auto it = args.find("f");
+        std::string des_str = (it == args.end())? "cij": it->second;
+        std::unique_ptr<Desirability> f = desirability(des_str, ins);
+        sol = sol_greedyregret(ins, *f, info);
+    } else if (vstrings[0] == "mthg") {
+        auto it = args.find("f");
+        std::string des_str = (it == args.end())? "cij": it->second;
+        std::unique_ptr<Desirability> f = desirability(des_str, ins);
+        sol = sol_mthg(ins, *f, info);
+    } else if (vstrings[0] == "mthgregret") {
+        auto it = args.find("f");
+        std::string des_str = (it == args.end())? "cij": it->second;
+        std::unique_ptr<Desirability> f = desirability(des_str, ins);
+        sol = sol_mthgregret(ins, *f, info);
+    } else if (vstrings[0] == "repaircombrelax") {
+        sol = sol_repaircombrelax(ins, info);
+    } else if (vstrings[0] == "repairgreedy") {
+        sol = sol_repairgreedy(ins, info);
     } else if (vstrings[0] == "repairlinrelax") {
         LinRelaxClpOutput linrelax_output = lb_linrelax_clp(ins);
         sol = sol_repairlinrelax(ins, linrelax_output, info);
@@ -141,32 +184,6 @@ int main(int argc, char *argv[])
                 }.set_params(args));
     } else if (vstrings[0] == "vdns_simple") {
         sol = sol_vdns_simple(ins, gen, info);
-    /*
-    } else if (algorithm == "tabuastar") {
-        sol_tabuastar({
-                .ins = ins,
-                .growth_factor = 1.5,
-                .criterion_id = 3,
-                .sol_best = sol,
-                .gen = gen,
-                .info = info});
-    } else if (algorithm == "mbastar1") {
-        sol_mbastar_1({
-                .ins = ins,
-                .growth_factor = 1.5,
-                .criterion_id = 3,
-                .sol_best = sol,
-                .gen = gen,
-                .info = info});
-    } else if (algorithm == "mbastar2") {
-        sol_mbastar_2({
-                .ins = ins,
-                .growth_factor = 1.5,
-                .criterion_id = 3,
-                .sol_best = sol,
-                .gen = gen,
-                .info = info});
-    */
     } else {
         std::cout << "unknown algorithm" << std::endl;
     }

@@ -60,8 +60,12 @@ cc_binary(
                 "//lb_linrelax_clp:linrelax_clp",
                 "//lb_lagrelax_volume:lagrelax_volume",
                 "//opt_branchandcut_cbc:branchandcut_cbc",
+                #"//opt_branchandcut_cplex:branchandcut_cplex",
+                #"//opt_constraintprogramming_cplex:constraintprogramming_cplex",
                 "//ub_random:random",
+                "//ub_greedy:greedy",
                 "//ub_ls_shiftswap:ls_shiftswap",
+                "//ub_repair:repair",
                 "//ub_vdns_simple:vdns_simple",
         ],
 )

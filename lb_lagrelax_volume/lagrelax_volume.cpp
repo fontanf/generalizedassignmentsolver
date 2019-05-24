@@ -58,9 +58,36 @@ public:
            const VOL_dvector& x, double& heur_val)
    {
        (void)p;
-       (void)x;
-       (void)heur_val;
-       return 0;
+       //(void)x;
+       //(void)heur_val;
+       //return 0;
+       Solution sol(ins_);
+       ItemIdx n = ins_.item_number();
+       AgentIdx m = ins_.agent_number();
+       for (ItemIdx j=0; j<n; ++j) {
+           bool fixed = false;
+           AgentIdx i_best = -1;
+           Weight w_best = -1;
+           for (AgentIdx i=0; i<m; ++i) {
+               AltIdx k = ins_.alternative_index(j, i);
+               if (x[k] == 1) {
+                   sol.set(j, i);
+                   fixed = true;
+                   break;
+               }
+               Weight w = ins_.alternative(k).w;
+               if (x[k] > 0 && (w_best < 0 || w_best > w)) {
+                   w_best = w;
+                   i_best = i;
+               }
+           }
+           if (!fixed)
+               sol.set(j, i_best);
+       }
+       if (sol.feasible())
+           heur_val = sol.cost();
+       std::cout << "oc " << sol.overcapacity() << " c " << sol.cost() << std::endl;
+       return (sol.feasible())? 1: 0;
    }
 
 private:
@@ -152,11 +179,10 @@ LagRelaxAssignmentVolumeOutput gap::lb_lagrelax_assignment_volume(const Instance
     volprob.parm.printflag = (info.output->verbose)? 1: 0;
 
     // These parameters don't seem too bad...
+    volprob.parm.heurinvl = 10;
     volprob.parm.alphainit = 0.75;
     volprob.parm.alphafactor = 0.9;
     volprob.parm.maxsgriters = 10000;
-    volprob.parm.minimum_rel_ascent = 0;
-    volprob.parm.primal_abs_precision = 0;
 
     // Set the lb/ub on the duals
     volprob.psize = ins.alternative_number();

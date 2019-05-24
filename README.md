@@ -30,6 +30,20 @@ bazel test --cxxopt='-std=c++14' --compilation_mode=opt -- //...
 
 ## Upper bounds
 
+Polynomial algorithms:
+- Basic greedy:
+  - `-a "greedy f cij"` :heavy_check_mark: `-a "greedy f wij"` :heavy_check_mark:
+  - `-a "greedy f cij*wij"` :heavy_check_mark: `-a "greedy f pij/wij"` :heavy_check_mark: `-a "greedy f wij/tij"` :heavy_check_mark:
+- Greedy with regret measure:
+  - `-a "greedy f cij"` :heavy_check_mark: `-a "greedy f wij"` :heavy_check_mark:
+  - `-a "greedy f cij*wij"` :heavy_check_mark: `-a "greedy f pij/wij"` :heavy_check_mark: `-a "greedy f wij/tij"` :heavy_check_mark:
+- MTHG, basic greedy (+ n shifts):
+  - `-a "mthg f cij"` :heavy_check_mark: `-a "mthg f wij"` :heavy_check_mark:
+  - `-a "mthg f cij*wij"` :heavy_check_mark: `-a "mthg f pij/wij"` :heavy_check_mark: `-a "mthg f wij/tij"` :heavy_check_mark:
+- MTHG, greedy with regret measure (+ n shifts):
+  - `-a "mthgregret f cij"` :heavy_check_mark: `-a "mthgregret f wij"` :heavy_check_mark:
+  - `-a "mthgregret f cij*wij"` :heavy_check_mark: `-a "mthgregret f pij/wij"` :heavy_check_mark: `-a "mthgregret f wij/tij"` :heavy_check_mark:
+
 Classical meta-heuristics based on shift-swap neighborhood and fixed penalty of capacity constraint violation:
 - Hill climbing, first improvment `-a lsfirst_shiftswap` :heavy_check_mark:
 - Hill climbing, best improvment `-a lsbest_shiftswap` :heavy_check_mark:
@@ -48,6 +62,12 @@ Others:
 - Branch-and-price :x:
 
 ## Results
+
+The largest gap between the lower bound from the linear relaxation and the best known upper bound is 1.93%.
+
+The bound from the lagrangian relaxation of knapsack constraints is theoritically equal to the bound from the linear relaxation. However, here, the bound obtain by solving the lagrangian relaxation by the Volume method is rather far from it.
+
+The bound obtained by solving the lagrangian relaxation of assignment constraints by the Volume method is not as good as the value obtained in the literature.
 
 `vdns_simple` does not compete with state of the art meta-heuristics like the ones presented in "A path relinking approach with ejection chains for the generalized assignment problem" (Yagiura, 2006) or "Variable-fixing then subgradient optimization guided very large scale neighborhood search for the generalized assignment problem" (Haddadi, 2018) in terms of solution quality on long runs. However:
 - on short runs (2 minutes, Processor Intel® Core™ i5-8500 CPU @ 3.00GHz × 6), it provides solutions of good quality (less than 1% gap from optimal for all instances of the literature, and less than 0.5% for instances with more than 900 items)
