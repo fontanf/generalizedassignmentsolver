@@ -13,8 +13,8 @@ namespace gap
 struct LagRelaxAssignmentVolumeOutput
 {
     Cost lb;
-    std::vector<double> x;
-    std::vector<double> multipliers;
+    std::vector<double> x; // vector of size ins.alternative_number()
+    std::vector<double> multipliers; // vector of size ins.item_number()
 };
 LagRelaxAssignmentVolumeOutput lb_lagrelax_assignment_volume(const Instance& ins, Info info = Info());
 
@@ -25,8 +25,8 @@ LagRelaxAssignmentVolumeOutput lb_lagrelax_assignment_volume(const Instance& ins
 struct LagRelaxKnapsackVolumeOutput
 {
     Cost lb;
-    std::vector<double> x;
-    std::vector<double> multipliers;
+    std::vector<double> x; // vector of size ins.alternative_number()
+    std::vector<double> multipliers; // vector of size ins.agent_number()
 };
 LagRelaxKnapsackVolumeOutput lb_lagrelax_knapsack_volume(const Instance& ins, Info info = Info());
 
