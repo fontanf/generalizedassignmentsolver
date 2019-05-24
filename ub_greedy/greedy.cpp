@@ -20,6 +20,7 @@ std::unique_ptr<Desirability> gap::desirability(std::string str, const Instance&
     } else if (str == "wij/ti") {
         return std::unique_ptr<Desirability>(new DesirabilityWeightCapacity(ins));
     } else {
+        std::cout << "unknown desirability function" << std::endl;
         return std::unique_ptr<Desirability>(new DesirabilityCost(ins));
     }
 }
@@ -158,19 +159,29 @@ void nshift(Solution& sol)
     }
 }
 
+void gap::sol_mthg(Solution& sol, const Desirability& f)
+{
+    sol_greedy(sol, f);
+    nshift(sol);
+}
+
 Solution gap::sol_mthg(const Instance& ins, const Desirability& f, Info info)
 {
     Solution sol(ins);
-    sol_greedy(sol, f);
-    nshift(sol);
+    sol_mthg(sol, f);
     return algorithm_end(sol, info);
+}
+
+void gap::sol_mthgregret(Solution& sol, const Desirability& f)
+{
+    sol_greedyregret(sol, f);
+    nshift(sol);
 }
 
 Solution gap::sol_mthgregret(const Instance& ins, const Desirability& f, Info info)
 {
     Solution sol(ins);
-    sol_greedyregret(sol, f);
-    nshift(sol);
+    sol_mthgregret(sol, f);
     return algorithm_end(sol, info);
 }
 

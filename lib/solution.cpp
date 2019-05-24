@@ -214,7 +214,7 @@ void Solution::update(const Solution& sol, Cost lb, const std::stringstream& s, 
     if (!feasible() || cost() > sol.cost()) {
         info.output->sol_number++;
         *this = sol;
-        double t = std::round(info.elapsed_time());
+        double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
         std::string sol_str = "Solution" + std::to_string(info.output->sol_number);
         PUT(info, sol_str + ".Cost", sol.cost());
         PUT(info, sol_str + ".Time", t);
