@@ -30,6 +30,20 @@ bazel test --cxxopt='-std=c++14' --compilation_mode=opt -- //...
 
 ## Upper bounds
 
+Greedy (basic):
+- `-a "greedy f cij"` :heavy_check_mark:
+- `-a "greedy f wij"` :heavy_check_mark:
+- `-a "greedy f cij*wij"` :heavy_check_mark:
+- `-a "greedy f pij/wij"` :heavy_check_mark:
+- `-a "greedy f wij/tij"` :heavy_check_mark:
+
+Greedy (with regret):
+- `-a "greedy f cij"` :x:
+- `-a "greedy f wij"` :x:
+- `-a "greedy f cij*wij"` :x:
+- `-a "greedy f pij/wij"` :x:
+- `-a "greedy f wij/tij"` :x:
+
 Classical meta-heuristics based on shift-swap neighborhood and fixed penalty of capacity constraint violation:
 - Hill climbing, first improvment `-a lsfirst_shiftswap` :heavy_check_mark:
 - Hill climbing, best improvment `-a lsbest_shiftswap` :heavy_check_mark:

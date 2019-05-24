@@ -178,11 +178,14 @@ std::ostream& gap::operator<<(std::ostream& os, const Instance& ins)
 Solution gap::algorithm_end(const Solution& sol, Info& info)
 {
     double t = info.elapsed_time();
+    std::string feas = (sol.feasible())? "True": "False";
     PUT(info, "Solution.Cost", sol.cost());
     PUT(info, "Solution.Time", t);
-    VER(info, "---" << std::endl
-            << "Cost: " << sol.cost() << std::endl
-            << "Time (s): " << t << std::endl);
+    PUT(info, "Solution.Feasible", feas);
+    VER(info, "---" << std::endl);
+    VER(info, "Feasible: " << feas << std::endl);
+    VER(info, "Cost: " << sol.cost() << std::endl);
+    VER(info, "Time (s): " << t << std::endl);
     return sol;
 }
 
@@ -191,9 +194,9 @@ void gap::algorithm_end(Cost lb, Info& info)
     double t = info.elapsed_time();
     PUT(info, "Bound.Cost", lb);
     PUT(info, "Bound.Time", t);
-    VER(info, "---" << std::endl
-            << "Cost: " << lb << std::endl
-            << "Time (s): " << t << std::endl);
+    VER(info, "---" << std::endl);
+    VER(info, "Cost: " << lb << std::endl);
+    VER(info, "Time (s): " << t << std::endl);
 }
 
 void Instance::plot(std::string filename)
