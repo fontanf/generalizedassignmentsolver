@@ -102,8 +102,8 @@ std::unique_ptr<Desirability> desirability(std::string str, const Instance& ins)
 void sol_greedy(Solution& sol, const Desirability& f);
 Solution sol_greedy(const Instance& ins, const Desirability& f, Info info = Info());
 
-void sol_mthg(Solution& sol, const Desirability& f);
-Solution sol_mthg(const Instance& ins, const Desirability& f, Info info = Info());
+void sol_greedyregret(Solution& sol, const Desirability& f);
+Solution sol_greedyregret(const Instance& ins, const Desirability& f, Info info = Info());
 
 }
 

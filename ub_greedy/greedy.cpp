@@ -64,18 +64,69 @@ Solution gap::sol_greedy(const Instance& ins, const Desirability& f, Info info)
 
 /******************************************************************************/
 
-void gap::sol_mthg(Solution& sol, const Desirability& f)
+void gap::sol_greedyregret(Solution& sol, const Desirability& f)
 {
-    (void)f;
-    while (!sol.full()) {
+    const Instance& ins = sol.instance();
+    ItemIdx n = ins.item_number();
+    AgentIdx m = ins.agent_number();
+    std::vector<std::pair<AgentIdx, AgentIdx>> bests(n, {0, 1});
 
+    std::vector<std::vector<AgentIdx>> agents(n, std::vector<AgentIdx>(m));
+    for (ItemIdx j=0; j<n; ++j) {
+        std::iota(agents[j].begin(), agents[j].end(), 0);
+        sort(agents[j].begin(), agents[j].end(), [&f, &j](
+                    AgentIdx i1, AgentIdx i2) -> bool {
+                return f(j, i1) < f(j, i2); });
+    }
+
+    while (!sol.full()) {
+        ItemIdx j_best = -1;
+        double f_best = -1;
+        for (ItemIdx j=0; j<n; ++j) {
+            if (sol.agent(j) != -1)
+                continue;
+
+            AgentIdx& i_first = bests[j].first;
+            AgentIdx& i_second = bests[j].second;
+
+            while (i_first < m) {
+                AgentIdx i = agents[j][i_first];
+                if (ins.alternative(j, i).w > sol.remaining_capacity(i)) {
+                    i_first++;
+                    if (i_first == i_second)
+                        i_second++;
+                } else {
+                    break;
+                }
+            }
+            if (i_first == m)
+                return;
+
+            while (i_second < m) {
+                AgentIdx i = agents[j][i_second];
+                if (ins.alternative(j, i).w > sol.remaining_capacity(i)) {
+                    i_second++;
+                } else {
+                    break;
+                }
+            }
+
+            double f_curr = (i_second == m)?
+                std::numeric_limits<double>::infinity():
+                f(j, agents[j][i_second]) - f(j, agents[j][i_first]);
+            if (j_best == -1 || f_best < f_curr) {
+                f_best = f_curr;
+                j_best = j;
+            }
+        }
+        sol.set(j_best, agents[j_best][bests[j_best].first]);
     }
 }
 
-Solution gap::sol_mthg(const Instance& ins, const Desirability& f, Info info)
+Solution gap::sol_greedyregret(const Instance& ins, const Desirability& f, Info info)
 {
     Solution sol(ins);
-    sol_mthg(sol, f);
+    sol_greedyregret(sol, f);
     return algorithm_end(sol, info);
 }
 
