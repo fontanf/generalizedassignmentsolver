@@ -31,13 +31,11 @@ Solution random_solution(const Instance& ins, std::mt19937_64& gen)
     return sol;
 }
 
-Solution gap::sol_lsfirst_shiftswap(LSFirstShiftSwapData d)
+void gap::sol_lsfirst_shiftswap(LSFirstShiftSwapData d, Solution& sol_best)
 {
-    init_display(d.info);
-    Solution sol_best(d.ins);
     AgentIdx m = d.ins.agent_number();
 
-    Solution sol_curr = random_solution(d.ins, d.gen);
+    Solution sol_curr = sol_best;
     sol_curr.update_penalties(std::vector<PCost>(m, d.alpha));
     auto moves = get_moves(d.ins);
 
@@ -92,7 +90,14 @@ Solution gap::sol_lsfirst_shiftswap(LSFirstShiftSwapData d)
         if (!improved)
             break;
     }
-    return algorithm_end(sol_best, d.info);
+}
+
+Solution gap::sol_lsfirst_shiftswap(LSFirstShiftSwapData d)
+{
+    init_display(d.info);
+    Solution sol = random_solution(d.ins, d.gen);
+    sol_lsfirst_shiftswap(d, sol);
+    return algorithm_end(sol, d.info);
 }
 
 /******************************************************************************/
