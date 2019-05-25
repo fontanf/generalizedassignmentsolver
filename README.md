@@ -73,7 +73,7 @@ Classical meta-heuristics based on shift-swap neighborhood and fixed penalty of 
 
 Others:
 - Random initial solution `-a random` :heavy_check_mark:
-- Repair linear relaxation solution `-a repairlinrelax` :heavy_check_mark`
+- Repair linear relaxation solution `-a repairlinrelax` :heavy_check_mark:
 - Variable Depth Neighborhood Search `-a vdns_simple` :heavy_check_mark:
 
 ## Exact algorithms
