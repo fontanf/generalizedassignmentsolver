@@ -38,11 +38,14 @@ void gap::sol_greedy(Solution& sol, const std::vector<std::pair<ItemIdx, AgentId
         if (sol.remaining_capacity(i) < a.w)
             continue;
         sol.set(j, i);
+        if (sol.full())
+            break;
     }
 }
 
 Solution gap::sol_greedy(const Instance& ins, const Desirability& f, Info info)
 {
+    VER(info, "*** greedy " << f.to_string() << " ***" << std::endl);
     Solution sol(ins);
     auto alt = sol_greedy_init(sol, f);
     sol_greedy(sol, alt);
@@ -112,6 +115,7 @@ void gap::sol_greedyregret(Solution& sol, const Desirability& f)
 
 Solution gap::sol_greedyregret(const Instance& ins, const Desirability& f, Info info)
 {
+    VER(info, "*** greedyregret " << f.to_string() << " ***" << std::endl);
     Solution sol(ins);
     sol_greedyregret(sol, f);
     return algorithm_end(sol, info);
@@ -146,11 +150,13 @@ void nshift(Solution& sol)
 void gap::sol_mthg(Solution& sol, const std::vector<std::pair<ItemIdx, AgentIdx>>& alt)
 {
     sol_greedy(sol, alt);
-    nshift(sol);
+    if (sol.feasible())
+        nshift(sol);
 }
 
 Solution gap::sol_mthg(const Instance& ins, const Desirability& f, Info info)
 {
+    VER(info, "*** mthg " << f.to_string() << " ***" << std::endl);
     Solution sol(ins);
     auto alt = sol_greedy_init(sol, f);
     sol_mthg(sol, alt);
@@ -160,11 +166,13 @@ Solution gap::sol_mthg(const Instance& ins, const Desirability& f, Info info)
 void gap::sol_mthgregret(Solution& sol, const Desirability& f)
 {
     sol_greedyregret(sol, f);
-    nshift(sol);
+    if (sol.feasible())
+        nshift(sol);
 }
 
 Solution gap::sol_mthgregret(const Instance& ins, const Desirability& f, Info info)
 {
+    VER(info, "*** mthgregret " << f.to_string() << " ***" << std::endl);
     Solution sol(ins);
     sol_mthgregret(sol, f);
     return algorithm_end(sol, info);

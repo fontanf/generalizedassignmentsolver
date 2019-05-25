@@ -9,8 +9,8 @@ namespace gap
 class Desirability
 {
 public:
-    Desirability() {  }
     virtual double operator()(ItemIdx j, AgentIdx i) const = 0;
+    virtual std::string to_string() const = 0;
 };
 
 /**
@@ -28,6 +28,7 @@ public:
     {
         return ins_.alternative(j, i).c;
     }
+    std::string to_string() const { return "cij"; }
 private:
     const Instance& ins_;
 };
@@ -43,6 +44,7 @@ public:
     {
         return ins_.alternative(j, i).w;
     }
+    std::string to_string() const { return "wij"; }
 private:
     const Instance& ins_;
 };
@@ -59,6 +61,7 @@ public:
         const Alternative& a = ins_.alternative(j, i);
         return a.c * a.w;
     }
+    std::string to_string() const { return "cij*wij"; }
 private:
     const Instance& ins_;
 };
@@ -76,6 +79,7 @@ public:
         const Alternative& a = ins_.alternative(j, i);
         return (double)(a.c - ins_.item(j).c_max) / a.w;
     }
+    std::string to_string() const { return "-pij/wij"; }
 private:
     const Instance& ins_;
 };
@@ -91,6 +95,7 @@ public:
     {
         return (double)ins_.alternative(j, i).w / ins_.capacity(i);
     }
+    std::string to_string() const { return "wij/ti"; }
 private:
     const Instance& ins_;
 };
@@ -113,6 +118,7 @@ public:
     {
         return ins_.alternative(j, i).c - v_[j];
     }
+    std::string to_string() const { return "cij-vj"; }
 private:
     const Instance& ins_;
     std::vector<double> v_;
@@ -137,6 +143,7 @@ public:
         const Alternative& a = ins_.alternative(j, i);
         return a.c - u_[i] * a.w;
     }
+    std::string to_string() const { return "cij-uj*wij"; }
 private:
     const Instance& ins_;
     std::vector<double> u_;

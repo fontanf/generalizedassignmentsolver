@@ -32,7 +32,7 @@ os.system('bazel build --cxxopt=\'-std=c++14\' --compilation_mode=opt -- //lib:m
 for i in data:
     certfile = "solutions_" + algo + "_" + str(t) + "/" + i + "_solution.txt"
     inifile  = "solutions_" + algo + "_" + str(t) + "/" + i + "_output.ini"
-    print(i + ",", end="")
+    # print(i + ",", end="")
     os.system("./bazel-bin/lib/main"
         + " -a \"" + algo + "\""
         + " -t " + str(t)
@@ -41,5 +41,9 @@ for i in data:
         + " -o \"" + inifile + "\"")
     ini = configparser.ConfigParser()
     ini.read(inifile)
-    print(ini["Bound"]["Cost"], ini["Bound"]["Time"], sep=",")
+    if (ini["Solution"]["Feasible"] == "True"):
+        print(ini["Solution"]["Cost"], end="")
+    else:
+        print(-1, end="")
+    print("," + ini["Solution"]["Time"])
 

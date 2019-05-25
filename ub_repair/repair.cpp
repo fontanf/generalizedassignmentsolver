@@ -14,13 +14,13 @@ void repair(Solution& sol_curr)
     ItemIdx n = ins.item_number();
 
     while (sol_curr.overcapacity() > 0) {
-        std::cout << "cost " << sol_curr.cost() << " oc " << sol_curr.overcapacity() << std::endl;
+        //std::cout << "cost " << sol_curr.cost() << " oc " << sol_curr.overcapacity() << std::endl;
         Weight oc = sol_curr.overcapacity();
         Cost c = sol_curr.cost();
         ItemIdx j1_best = -1;
         ItemIdx j2_best = -1;
-        ItemIdx j_best = -1;
-        ItemIdx i_best = -1;
+        ItemIdx i1_best = -1;
+        ItemIdx i2_best = -1;
         double v_best = -1;
         for (ItemIdx j1=0; j1<n; ++j1) {
             AgentIdx i1 = sol_curr.agent(j1);
@@ -36,8 +36,9 @@ void repair(Solution& sol_curr)
                     double v = (double)(sol_curr.cost() - c) / (oc - sol_curr.overcapacity());
                     if (j1_best < 0 || v_best > v) {
                         v_best = v;
-                        j_best = j1;
-                        i_best = i;
+                        j1_best = j1;
+                        i1_best = i;
+                        j2_best = -1;
                     }
                 }
             }
@@ -55,7 +56,8 @@ void repair(Solution& sol_curr)
                         v_best = v;
                         j1_best = j1;
                         j2_best = j2;
-                        j_best = -1;
+                        i1_best = i2;
+                        i2_best = i1;
                     }
                 }
                 sol_curr.set(j2, i2);
@@ -64,14 +66,11 @@ void repair(Solution& sol_curr)
             sol_curr.set(j1, i1);
         }
 
-        if (j_best != -1) { // Shift
-            sol_curr.set(j_best, i_best);
-        } else { // Swap
-            AgentIdx i1 = sol_curr.agent(j1_best);
-            AgentIdx i2 = sol_curr.agent(j2_best);
-            sol_curr.set(j1_best, i2);
-            sol_curr.set(j2_best, i1);
-        }
+        if (j1_best == -1)
+            break;
+        sol_curr.set(j1_best, i1_best);
+        if (j2_best != -1)
+            sol_curr.set(j2_best, i2_best);
     }
 }
 

@@ -53,16 +53,16 @@ bazel test --cxxopt='-std=c++14' --compilation_mode=opt -- //...
 Polynomial algorithms:
 - Basic greedy:
   - `-a "greedy f cij"` :heavy_check_mark: `-a "greedy f wij"` :heavy_check_mark:
-  - `-a "greedy f cij*wij"` :heavy_check_mark: `-a "greedy f pij/wij"` :heavy_check_mark: `-a "greedy f wij/tij"` :heavy_check_mark:
+  - `-a "greedy f cij*wij"` :heavy_check_mark: `-a "greedy f -pij/wij"` :heavy_check_mark: `-a "greedy f wij/tij"` :heavy_check_mark:
 - Greedy with regret measure:
   - `-a "greedy f cij"` :heavy_check_mark: `-a "greedy f wij"` :heavy_check_mark:
-  - `-a "greedy f cij*wij"` :heavy_check_mark: `-a "greedy f pij/wij"` :heavy_check_mark: `-a "greedy f wij/tij"` :heavy_check_mark:
+  - `-a "greedy f cij*wij"` :heavy_check_mark: `-a "greedy f -pij/wij"` :heavy_check_mark: `-a "greedy f wij/tij"` :heavy_check_mark:
 - MTHG, basic greedy (+ n shifts):
   - `-a "mthg f cij"` :heavy_check_mark: `-a "mthg f wij"` :heavy_check_mark:
-  - `-a "mthg f cij*wij"` :heavy_check_mark: `-a "mthg f pij/wij"` :heavy_check_mark: `-a "mthg f wij/tij"` :heavy_check_mark:
+  - `-a "mthg f cij*wij"` :heavy_check_mark: `-a "mthg f -pij/wij"` :heavy_check_mark: `-a "mthg f wij/tij"` :heavy_check_mark:
 - MTHG, greedy with regret measure (+ n shifts):
   - `-a "mthgregret f cij"` :heavy_check_mark: `-a "mthgregret f wij"` :heavy_check_mark:
-  - `-a "mthgregret f cij*wij"` :heavy_check_mark: `-a "mthgregret f pij/wij"` :heavy_check_mark: `-a "mthgregret f wij/tij"` :heavy_check_mark:
+  - `-a "mthgregret f cij*wij"` :heavy_check_mark: `-a "mthgregret f -pij/wij"` :heavy_check_mark: `-a "mthgregret f wij/tij"` :heavy_check_mark:
 
 Classical meta-heuristics based on shift-swap neighborhood and fixed penalty of capacity constraint violation:
 - Hill climbing, first improvment `-a lsfirst_shiftswap` :heavy_check_mark:
@@ -73,6 +73,7 @@ Classical meta-heuristics based on shift-swap neighborhood and fixed penalty of 
 
 Others:
 - Random initial solution `-a random` :heavy_check_mark:
+- Repair linear relaxation solution `-a repairlinrelax` :heavy_check_mark`
 - Variable Depth Neighborhood Search `-a vdns_simple` :heavy_check_mark:
 
 ## Exact algorithms
