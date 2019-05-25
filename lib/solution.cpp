@@ -11,7 +11,8 @@ Solution::Solution(const Instance& ins): instance_(ins),
     total_cost_(0),
     total_weight_(0),
     total_overcapacity_(0),
-    total_pcost_(0)
+    total_pcost_(0),
+    comp_(0)
 { }
 
 Solution::Solution(const Solution& sol):
@@ -20,7 +21,8 @@ Solution::Solution(const Solution& sol):
     total_cost_(sol.total_cost_),
     total_weight_(sol.total_weight_),
     total_overcapacity_(sol.total_overcapacity_),
-    total_pcost_(sol.total_pcost_)
+    total_pcost_(sol.total_pcost_),
+    comp_(sol.comp_)
 { }
 
 Solution& Solution::operator=(const Solution& sol)
@@ -34,6 +36,7 @@ Solution& Solution::operator=(const Solution& sol)
             total_weight_       = sol.total_weight_;
             total_overcapacity_ = sol.total_overcapacity_;
             total_pcost_        = sol.total_pcost_;
+            comp_               = sol.comp_;
         } else {
             clear();
             for (ItemIdx j=0; j<instance().item_number(); ++j)
@@ -264,35 +267,5 @@ ItemIdx gap::distance(const Solution& sol1, const Solution& sol2)
         if (sol1.agent(j) != sol2.agent(j))
             dist++;
     return dist;
-}
-
-/*********************************** Compare **********************************/
-
-double SolutionCompare::value(const Solution& s)
-{
-    switch(id) {
-    case 0:
-        return s.cost();
-    case 1:
-        return s.cost() * s.weight();
-    case 2:
-        if (s.item_number() == 0)
-            return 0;
-        return (double)s.cost() / s.item_number();
-    case 3:
-        if (s.item_number() == 0)
-            return 0;
-        return (double)s.cost() / s.item_number() * (double)s.weight() / s.item_number();
-    case 4:
-        if (s.item_number() == 0)
-            return 0;
-        return (double)s.cost() / s.item_number() * (double)s.weight();
-    }
-    return 0;
-}
-
-bool SolutionCompare::operator()(const Solution& s1, const Solution& s2)
-{
-    return value(s1) < value(s2);
 }
 

@@ -4,11 +4,12 @@ cc_library(
                 "instance.hpp",
                 "solution.hpp",
                 "subinstance.hpp",
+                "desirability.hpp",
         ],
         srcs = [
                 "instance.cpp",
                 "solution.cpp",
-                "subinstance.cpp",
+                "desirability.cpp",
         ],
         deps = ["@benchtools//:info"],
         linkopts = [

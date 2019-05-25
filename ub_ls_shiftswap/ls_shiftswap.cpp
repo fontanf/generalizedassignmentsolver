@@ -31,6 +31,48 @@ Solution random_solution(const Instance& ins, std::mt19937_64& gen)
     return sol;
 }
 
+void gap::sol_lsfirst_shift(LSFirstShiftSwapData d, Solution& sol_best)
+{
+    ItemIdx n = d.ins.item_number();
+    AgentIdx m = d.ins.agent_number();
+
+    Solution sol_curr = sol_best;
+    sol_curr.update_penalties(std::vector<PCost>(m, d.alpha));
+    std::vector<std::pair<ItemIdx, ItemIdx>> moves;
+    for (ItemIdx j=0; j<n; ++j)
+        for (AgentIdx i=0; i<m-1; ++i)
+            moves.push_back({j, i});
+
+    for (Cpt it=0; d.info.check_time();) {
+        PCost v_curr = sol_curr.pcost();
+        bool improved = false;
+        for (Cpt k=0; k<(Cpt)moves.size(); ++k, ++it) {
+            std::uniform_int_distribution<Cpt> dis(k, moves.size() - 1);
+            Cpt move_idx = dis(d.gen);
+            iter_swap(moves.begin() + k, moves.begin() + move_idx);
+            ItemIdx j = moves[k].first;
+            AgentIdx i_old = sol_curr.agent(j);
+            AgentIdx i = moves[k].second;
+            if (i >= i_old)
+                i++;
+            //std::cout << "j " << j << " i_old " << i_old << " i " << i << std::endl;
+            sol_curr.set(j, i);
+            if (sol_curr.feasible() && (!sol_best.feasible() || sol_best.cost() > sol_curr.cost())) {
+                std::stringstream ss;
+                ss << "it " << it;
+                sol_best.update(sol_curr, 0, ss, d.info);
+            }
+            if (v_curr > sol_curr.pcost()) {
+                improved = true;
+                break;
+            }
+            sol_curr.set(j, i_old);
+        }
+        if (!improved)
+            break;
+    }
+}
+
 void gap::sol_lsfirst_shiftswap(LSFirstShiftSwapData d, Solution& sol_best)
 {
     AgentIdx m = d.ins.agent_number();

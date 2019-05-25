@@ -23,6 +23,7 @@ struct LSFirstShiftSwapData
         return *this;
     }
 };
+void sol_lsfirst_shift(LSFirstShiftSwapData d, Solution& sol);
 void sol_lsfirst_shiftswap(LSFirstShiftSwapData d, Solution& sol);
 Solution sol_lsfirst_shiftswap(LSFirstShiftSwapData d);
 

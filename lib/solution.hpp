@@ -45,6 +45,8 @@ public:
     inline PCost pcost()           const { return total_pcost_; }
     inline PCost pcost(AgentIdx i) const { return agents_[i].pcost; }
 
+    inline double comp() const { return comp_; }
+
     inline bool full() const { return n_ == instance().item_number(); }
     inline bool feasible() const { return full() && (overcapacity() == 0); }
 
@@ -57,6 +59,8 @@ public:
 
     void set(ItemIdx j, AgentIdx i);
     void set(AltIdx k);
+
+    void comp(double c) { comp_ = c; }
 
     void update_penalties(bool inc, PCost delta_inc, PCost delta_dec);
     void update_penalties(const std::vector<PCost>& penalty);
@@ -80,6 +84,7 @@ private:
     Weight total_weight_ = 0;
     Weight total_overcapacity_ = 0;
     PCost total_pcost_ = 0;
+    double comp_;
 };
 
 ItemIdx distance(const Solution& sol1, const Solution& sol2);
@@ -90,10 +95,7 @@ std::ostream& operator<<(std::ostream& os, const Solution& solution);
 
 struct SolutionCompare
 {
-    SolutionCompare(int comparator_id): id(comparator_id) {  }
-    double value(const Solution& s);
-    bool operator()(const Solution& s1, const Solution& s2);
-    int id;
+    bool operator()(const Solution& s1, const Solution& s2) { return s1.comp() < s2.comp(); }
 };
 
 }

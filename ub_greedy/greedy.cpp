@@ -7,27 +7,7 @@
 
 using namespace gap;
 
-std::unique_ptr<Desirability> gap::desirability(std::string str, const Instance& ins)
-{
-    if (str == "cij") {
-        return std::unique_ptr<Desirability>(new DesirabilityCost(ins));
-    } else if (str == "wij") {
-        return std::unique_ptr<Desirability>(new DesirabilityWeight(ins));
-    } else if (str == "cij*wij") {
-        return std::unique_ptr<Desirability>(new DesirabilityCostWeight(ins));
-    } else if (str == "pij/wij") {
-        return std::unique_ptr<Desirability>(new DesirabilityEfficiency(ins));
-    } else if (str == "wij/ti") {
-        return std::unique_ptr<Desirability>(new DesirabilityWeightCapacity(ins));
-    } else {
-        std::cout << "unknown desirability function" << std::endl;
-        return std::unique_ptr<Desirability>(new DesirabilityCost(ins));
-    }
-}
-
-/******************************************************************************/
-
-void gap::sol_greedy(Solution& sol, const Desirability& f)
+std::vector<std::pair<ItemIdx, AgentIdx>> gap::sol_greedy_init(const Solution& sol, const Desirability& f)
 {
     const Instance& ins = sol.instance();
     ItemIdx n = ins.item_number();
@@ -43,7 +23,12 @@ void gap::sol_greedy(Solution& sol, const Desirability& f)
                 const std::pair<ItemIdx, AgentIdx>& a,
                 const std::pair<ItemIdx, AgentIdx>& b) -> bool {
             return f(a.first, a.second) < f(b.first, b.second); });
+    return alt;
+}
 
+void gap::sol_greedy(Solution& sol, const std::vector<std::pair<ItemIdx, AgentIdx>>& alt)
+{
+    const Instance& ins = sol.instance();
     for (auto p: alt) {
         ItemIdx j = p.first;
         if (sol.agent(j) != -1)
@@ -59,7 +44,8 @@ void gap::sol_greedy(Solution& sol, const Desirability& f)
 Solution gap::sol_greedy(const Instance& ins, const Desirability& f, Info info)
 {
     Solution sol(ins);
-    sol_greedy(sol, f);
+    auto alt = sol_greedy_init(sol, f);
+    sol_greedy(sol, alt);
     return algorithm_end(sol, info);
 }
 
@@ -140,35 +126,34 @@ void nshift(Solution& sol)
     AgentIdx m = ins.agent_number();
     for (ItemIdx j=0; j<n; ++j) {
         AgentIdx i_old = sol.agent(j);
-        Cost c_best = sol.cost();
+        const Alternative& a_old = ins.alternative(j, i_old);
+        Cost c_best = 0;
         AgentIdx i_best = -1;
         for (AgentIdx i=0; i<m; ++i) {
             if (i == i_old)
                 continue;
-            sol.set(j, i);
-            if (sol.overcapacity() == 0 && c_best > sol.cost()) {
+            const Alternative& a = ins.alternative(j, i);
+            if (sol.remaining_capacity(i) >= a.w && c_best > a.c - a_old.c) {
                 i_best = i;
-                c_best = sol.cost();
+                c_best = a.c - a_old.c;
             }
         }
-        if (i_best != -1) {
+        if (i_best != -1)
             sol.set(j, i_best);
-        } else {
-            sol.set(j, i_old);
-        }
     }
 }
 
-void gap::sol_mthg(Solution& sol, const Desirability& f)
+void gap::sol_mthg(Solution& sol, const std::vector<std::pair<ItemIdx, AgentIdx>>& alt)
 {
-    sol_greedy(sol, f);
+    sol_greedy(sol, alt);
     nshift(sol);
 }
 
 Solution gap::sol_mthg(const Instance& ins, const Desirability& f, Info info)
 {
     Solution sol(ins);
-    sol_mthg(sol, f);
+    auto alt = sol_greedy_init(sol, f);
+    sol_mthg(sol, alt);
     return algorithm_end(sol, info);
 }
 

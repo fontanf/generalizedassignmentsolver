@@ -8,18 +8,18 @@ Algorithm implementations for the Generalized Assignment Problem.
 
 The Generalized Assignment Problem (GAP) is the problem of assigning n jobs to m agent at minimum cost:
 - for each agent i, each job j has associated cost cij and weight wij
-- each agent has a capacity ti
+- each agent i has a capacity ti
 - each job must be assigned to exactly one agent
 - the sum of the weights of jobs assigned to an agent must not overcome its capacity
 - the total cost of the assignment must be minimized
 
 GAP is interesting for several reasons:
 - it is simple (to state, to understand...)
-- it is difficult, i.e. it is NP-complete, and there are several instances of reasonable size that are not solved exactly (unlike for example the Knapsack Problem, which is also NP-complete, but all instances of the literature are solved exactly by state-of-the-art algorithms)
+- it is difficult to solve, i.e. it is NP-complete, and there are several instances of reasonable size that are not solved exactly (unlike for example the Knapsack Problem, which is also NP-complete, but all instances of the literature are solved exactly by state-of-the-art algorithms)
 - the size of input data is not very large: O(nm) (unlike for example TSP, which input size is O(n^2))
 - it appears as subproblem of many practical applications
 - it is structured for simple local search algorithms, i.e. the basic shift-swap neighbourhood makes it possible to implement simulated annealing, tabu search or other classical meta-heuristics (unlike for example the roadef2018 problem, which has no simple neighbourhoods)
-- it is also structured for decompositions techniques (Lagrangian relaxations, Column generation...)
+- it is also structured for decomposition techniques (Lagrangian relaxations, Column generation...)
 - it is well-studied, i.e. researchers have proposed many and various algorithms to solve it (branch-and-bound, cutting plane, large neighbourhood search, path relinking...)
 
 ## Technical informations
