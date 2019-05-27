@@ -30,8 +30,8 @@ data = [
 os.system('bazel build --cxxopt=\'-std=c++14\' --compilation_mode=opt -- //lib:main')
 
 for i in data:
-    certfile = "solutions_" + algo + "_" + str(t) + "/" + i + "_solution.txt"
-    inifile  = "solutions_" + algo + "_" + str(t) + "/" + i + "_output.ini"
+    certfile = "out/solutions_" + algo + "_" + str(t) + "/" + i + "_solution.txt"
+    inifile  = "out/solutions_" + algo + "_" + str(t) + "/" + i + "_output.ini"
     # print(i + ",", end="")
     os.system("./bazel-bin/lib/main"
         + " -a \"" + algo + "\""
