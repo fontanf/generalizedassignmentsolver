@@ -62,7 +62,7 @@ public:
     void add_items(ItemIdx n);
     ItemIdx add_item();
     void set_alternative(ItemIdx j, AgentIdx i, Weight w, Cost p);
-    void set_capacity(AgentIdx i, Weight c) { c_[i] = c; }
+    void set_capacity(AgentIdx i, Weight t) { t_[i] = t; }
     void set_optimal_solution(Solution& sol);
 
     Instance(std::string filename, std::string format);
@@ -71,14 +71,18 @@ public:
     Instance(const Instance& ins);
 
     const Item& item(ItemPos j) const { return items_[j]; }
-    const Alternative& alternative(AltPos k) const { return alternatives_[k]; }
     AltIdx alternative_index(ItemIdx j, AgentIdx i) const { return items_[j].alt[i]; } 
+    const Alternative& alternative(AltPos k) const { return alternatives_[k]; }
     const Alternative& alternative(ItemIdx j, AgentIdx i) const { return alternatives_[items_[j].alt[i]]; } 
 
+    inline Cost profit(const Alternative& a)  const { return c_max_ - a.c; }
+    inline Cost profit(AltIdx k)              const { return profit(alternative(k)); }
+    inline Cost profit(ItemIdx j, AgentIdx i) const { return profit(alternative_index(i, j)); }
+
     ItemIdx item_number()       const { return items_.size(); }
-    AgentIdx agent_number()     const { return c_.size(); }
+    AgentIdx agent_number()     const { return t_.size(); }
     AltIdx alternative_number() const { return alternatives_.size(); }
-    Weight capacity(AgentIdx i) const { return c_[i]; }
+    Weight capacity(AgentIdx i) const { return t_[i]; }
 
     Cost check(std::string filepath);
     const Solution* optimal_solution() const { return sol_opt_.get(); }
@@ -95,7 +99,8 @@ private:
 
     std::vector<Item> items_;
     std::vector<Alternative> alternatives_;
-    std::vector<Weight> c_;
+    std::vector<Weight> t_;
+    Cost c_max_ = -1;
 
     std::unique_ptr<Solution> sol_opt_;
 

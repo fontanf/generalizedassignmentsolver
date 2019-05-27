@@ -11,8 +11,8 @@ Cost lb_linrelax_clp_test(Instance& ins)
 }
 
 std::vector<Cost (*)(Instance&)> f = {
-        sopt_branchandcut_cbc_test,
+        lb_linrelax_clp_test,
 };
 
-TEST(BranchAndCutCbc, TEST) { test(TEST, f); }
+TEST(BranchAndCutCbc, TEST) { test(TEST, f, LB); }
 

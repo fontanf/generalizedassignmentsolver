@@ -7,7 +7,7 @@ using namespace gap;
 Instance::Instance(AgentIdx m, ItemIdx n)
 {
     items_.reserve(n);
-    c_.resize(m);
+    t_.resize(m);
 }
 
 void Instance::set_optimal_solution(Solution& sol)
@@ -44,9 +44,10 @@ void Instance::set_alternative(ItemIdx j, AgentIdx i, Weight w, Cost v)
         items_[j].i_best = i;
         items_[j].c_min = v;
     }
-    if (items_[j].c_max < v) {
+    if (items_[j].c_max < v)
         items_[j].c_max = v;
-    }
+    if (c_max_ < v)
+        c_max_ = v;
 }
 
 Instance::Instance(std::string filepath, std::string format)
@@ -68,7 +69,7 @@ void Instance::read_beasley(std::string filepath)
     AgentIdx m;
     file >> m >> n;
 
-    c_.resize(m);
+    t_.resize(m);
     items_.reserve(n);
     add_items(n);
     for (AgentIdx i=0; i<m; ++i)
@@ -81,7 +82,7 @@ void Instance::read_beasley(std::string filepath)
         for (ItemPos j=0; j<n; ++j)
             set_alternative(j, i, alternatives_[alternative_index(j, i)].w, alternatives_[alternative_index(j, i)].c);
     for (AgentIdx i=0; i<m; ++i)
-        file >> c_[i];
+        file >> t_[i];
 
     file.close();
 }
@@ -93,9 +94,9 @@ void Instance::read_standard(std::string filepath)
     AgentIdx m;
     file >> m >> n;
 
-    c_.resize(m);
+    t_.resize(m);
     for (AgentIdx i=0; i<m; ++i)
-        file >> c_[i];
+        file >> t_[i];
 
     items_.reserve(n);
     add_items(n);
@@ -122,7 +123,7 @@ Instance::Instance(const Instance& ins)
 {
     items_ = ins.items_;
     alternatives_ = ins.alternatives_;
-    c_ = ins.c_;
+    t_ = ins.t_;
     sol_opt_ = (ins.sol_opt_ == NULL)? NULL: std::unique_ptr<Solution>(new Solution(*ins.sol_opt_));
 }
 
