@@ -24,6 +24,35 @@ GAP is interesting for several reasons:
 
 ## Technical informations
 
+Dependencies:
+- boost `sudo apt-get install libboost-all-dev`
+- CLP, CBC, VOL `sudo apt-get install coinor-lib*-dev`
+- DIP: uncompress https://bintray.com/coin-or/download/Dip and update `.bashrc`:
+```sh
+# DIP
+export DIP_HOME="/opt/Dip-master-linux-x86_64-gcc4.8"
+export PATH="${PATH}:${DIP_HOME}/bin"
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${DIP_HOME}/lib"
+export CPLUS_INCLUDE_PATH="${CPLUS_INCLUDE_PATH}:${DIP_HOME}/include"
+```
+
+- CPLEX (optional): you may need to update `.bashrc`:
+```sh
+# CPlex
+export CPLEX_VERSION="126"
+export CPLEX_HOME="/opt/ibm/ILOG/CPLEX_Studio${CPLEX_VERSION}/cplex"
+export CONCERT_HOME="/opt/ibm/ILOG/CPLEX_Studio${CPLEX_VERSION}/concert"
+export CPOPTIMIZER_HOME="/opt/ibm/ILOG/CPLEX_Studio${CPLEX_VERSION}/cpoptimizer"
+export PATH="$PATH:${CPLEX_HOME}/bin/x86-64_linux"
+export CLASSPATH="$CLASSPATH:${CPLEX_HOME}/lib/cplex.jar"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${CPLEX_HOME}/bin/x86-64_linux"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${CONCERT_HOME}/bin/x86-64_linux"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${CPOPTIMIZER_HOME}/bin/x86-64_linux"
+export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:${CPLEX_HOME}/include"
+export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:${CONCERT_HOME}/include"
+export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:${CPOPTIMIZER_HOME}/include"
+```
+
 Compile:
 ```
 bazel build --cxxopt='-std=c++14' --compilation_mode=opt -- //...

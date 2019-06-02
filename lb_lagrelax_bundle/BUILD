@@ -1,13 +1,13 @@
 cc_library(
-        name = "lagbundle",
-        hdrs = ["lagbundle.hpp"],
-        srcs = ["lagbundle.cpp"],
+        name = "lagrelax_bundle",
+        hdrs = ["lagrelax_bundle.hpp"],
+        srcs = ["lagrelax_bundle.cpp"],
         deps = [
                 "//lib:cpp",
                 "@knapsack//opt_minknap:minknap",
         ],
         visibility = ["//visibility:public"],
-        include_prefix = "gap/lb_lagbundle/",
+        include_prefix = "gap/lb_lagrelax_bundle/",
 )
 
 cc_test(
@@ -15,7 +15,7 @@ cc_test(
         srcs = ["test.cpp"],
         deps = [
                 "//lib:tester",
-                ":lagbundle",
+                ":lagrelax_bundle",
         ],
         timeout = "moderate",
 )
