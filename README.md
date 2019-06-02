@@ -27,31 +27,8 @@ GAP is interesting for several reasons:
 Dependencies:
 - boost `sudo apt-get install libboost-all-dev`
 - CLP, CBC, VOL `sudo apt-get install coinor-lib*-dev`
-- DIP: uncompress https://bintray.com/coin-or/download/Dip and update `.bashrc`:
-```sh
-# DIP
-export DIP_HOME="/opt/Dip-master-linux-x86_64-gcc4.8"
-export PATH="${PATH}:${DIP_HOME}/bin"
-export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${DIP_HOME}/lib"
-export CPLUS_INCLUDE_PATH="${CPLUS_INCLUDE_PATH}:${DIP_HOME}/include"
-```
-
-- CPLEX (optional): you may need to update `.bashrc`:
-```sh
-# CPlex
-export CPLEX_VERSION="126"
-export CPLEX_HOME="/opt/ibm/ILOG/CPLEX_Studio${CPLEX_VERSION}/cplex"
-export CONCERT_HOME="/opt/ibm/ILOG/CPLEX_Studio${CPLEX_VERSION}/concert"
-export CPOPTIMIZER_HOME="/opt/ibm/ILOG/CPLEX_Studio${CPLEX_VERSION}/cpoptimizer"
-export PATH="$PATH:${CPLEX_HOME}/bin/x86-64_linux"
-export CLASSPATH="$CLASSPATH:${CPLEX_HOME}/lib/cplex.jar"
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${CPLEX_HOME}/bin/x86-64_linux"
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${CONCERT_HOME}/bin/x86-64_linux"
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${CPOPTIMIZER_HOME}/bin/x86-64_linux"
-export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:${CPLEX_HOME}/include"
-export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:${CONCERT_HOME}/include"
-export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:${CPOPTIMIZER_HOME}/include"
-```
+- DIP: https://bintray.com/coin-or/download/Dip
+- CPLEX (optional)
 
 Compile:
 ```
@@ -104,7 +81,7 @@ Classical meta-heuristics based on shift-swap neighborhood and fixed penalty of 
 Others:
 - Random initial solution `-a random` :heavy_check_mark:
 - Repair linear relaxation solution `-a repairlinrelax` :heavy_check_mark:
-- Variable Neighborhood Branching
+- Variable Neighborhood Branching (see "Handbook of Metaheuristics", 3.6.1 Variable Neighborhood Branching)
   - with CBC `-a vnsbranching_cbc` :heavy_check_mark:
   - with CPLEX `-a vnsbranching_cplex` :x:
 - Variable Depth Neighborhood Search `-a vdns_simple` :heavy_check_mark:

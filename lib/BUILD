@@ -65,9 +65,10 @@ cc_binary(
                 #"//opt_constraintprogramming_cplex:constraintprogramming_cplex",
                 "//ub_random:random",
                 "//ub_greedy:greedy",
-                "//ub_ls_shiftswap:ls_shiftswap",
                 "//ub_repair:repair",
+                "//ub_ls_shiftswap:ls_shiftswap",
                 "//ub_vdns_simple:vdns_simple",
+                "//ub_vnsbranching_cbc:vnsbranching_cbc",
         ],
 )
 
