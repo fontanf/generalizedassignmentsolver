@@ -75,12 +75,16 @@ Classical meta-heuristics based on shift-swap neighborhood and fixed penalty of 
 Others:
 - Random initial solution `-a random` :heavy_check_mark:
 - Repair linear relaxation solution `-a repairlinrelax` :heavy_check_mark:
+- Variable Neighborhood Branching
+  - with CBC `-a vnsbranching_cbc` :heavy_check_mark:
+  - with CPLEX `-a vnsbranching_cplex` :x:
 - Variable Depth Neighborhood Search `-a vdns_simple` :heavy_check_mark:
 
 ## Exact algorithms
 
-- Branch-and-cut with CBC `-a branchandcut_cbc` :heavy_check_mark:
-- Branch-and-cut with CPLEX `-a branchandcut_cplex` :heavy_check_mark:
+- Branch-and-cut
+  - with CBC `-a branchandcut_cbc` :heavy_check_mark:
+  - with CPLEX `-a branchandcut_cplex` :heavy_check_mark:
 - Branch-and-price :x:
 
 ## Results
