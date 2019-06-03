@@ -83,7 +83,7 @@ Others:
 - Repair linear relaxation solution `-a repairlinrelax` :heavy_check_mark:
 - Variable Neighborhood Branching (see "Handbook of Metaheuristics", 3.6.1 Variable Neighborhood Branching)
   - with CBC `-a vnsbranching_cbc` :heavy_check_mark:
-  - with CPLEX `-a vnsbranching_cplex` :heav_check_mark:
+  - with CPLEX `-a vnsbranching_cplex` :heavy_check_mark:
 - Variable-Depth Neighborhood Search (see "Handbook of Metaheuristics", 4.5.1 Variable-Depth Methods) `-a vdns_simple` :heavy_check_mark:
 
 ## Exact algorithms
