@@ -62,8 +62,8 @@ Polynomial algorithms:
   - `-a "greedy f cij"` :heavy_check_mark: `-a "greedy f wij"` :heavy_check_mark:
   - `-a "greedy f cij*wij"` :heavy_check_mark: `-a "greedy f -pij/wij"` :heavy_check_mark: `-a "greedy f wij/tij"` :heavy_check_mark:
 - Greedy with regret measure:
-  - `-a "greedy f cij"` :heavy_check_mark: `-a "greedy f wij"` :heavy_check_mark:
-  - `-a "greedy f cij*wij"` :heavy_check_mark: `-a "greedy f -pij/wij"` :heavy_check_mark: `-a "greedy f wij/tij"` :heavy_check_mark:
+  - `-a "greedyregret f cij"` :heavy_check_mark: `-a "greedyregret f wij"` :heavy_check_mark:
+  - `-a "greedyregret f cij*wij"` :heavy_check_mark: `-a "greedyregret f -pij/wij"` :heavy_check_mark: `-a "greedyregret f wij/tij"` :heavy_check_mark:
 - MTHG, basic greedy (+ n shifts):
   - `-a "mthg f cij"` :heavy_check_mark: `-a "mthg f wij"` :heavy_check_mark:
   - `-a "mthg f cij*wij"` :heavy_check_mark: `-a "mthg f -pij/wij"` :heavy_check_mark: `-a "mthg f wij/tij"` :heavy_check_mark:
