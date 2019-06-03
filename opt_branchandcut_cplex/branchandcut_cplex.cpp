@@ -23,7 +23,7 @@ Solution gap::sopt_branchandcut_cplex(BranchAndCutCplexData d)
         // Variables
         NumVarMatrix x(env, n);
         for (ItemIdx j=0; j<n; ++j)
-            x[j] = IloNumVarArray(env, d.ins.alternative_number(), 0, 1, ILOBOOL);
+            x[j] = IloNumVarArray(env, m, 0, 1, ILOBOOL);
 
         // Objective
         IloExpr expr(env);
