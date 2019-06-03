@@ -69,6 +69,7 @@ cc_binary(
                 "//ub_ls_shiftswap:ls_shiftswap",
                 "//ub_vdns_simple:vdns_simple",
                 "//ub_vnsbranching_cbc:vnsbranching_cbc",
+                #"//ub_vnsbranching_cplex:vnsbranching_cplex",
         ],
 )
 

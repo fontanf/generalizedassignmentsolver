@@ -9,6 +9,7 @@
 #include "gap/ub_ls_shiftswap/ls_shiftswap.hpp"
 #include "gap/ub_vdns_simple/vdns_simple.hpp"
 #include "gap/ub_vnsbranching_cbc/vnsbranching_cbc.hpp"
+//#include "gap/ub_vnsbranching_cplex/vnsbranching_cplex.hpp"
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
@@ -187,6 +188,10 @@ int main(int argc, char *argv[])
         sol = sol_vdns_simple(ins, gen, info);
     } else if (vstrings[0] == "vnsbranching_cbc") {
         sol = sol_vnsbranching_cbc(ins, info);
+    /*
+    } else if (vstrings[0] == "vnsbranching_cplex") {
+        sol = sol_vnsbranching_cplex(ins, info);
+    */
     } else {
         std::cout << "unknown algorithm" << std::endl;
     }
