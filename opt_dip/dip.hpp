@@ -6,5 +6,7 @@
 namespace gap
 {
 
+Cost dip(const Instance& ins);
+
 }
 

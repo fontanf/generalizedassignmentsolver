@@ -7,12 +7,11 @@ cc_library(
                 "@knapsack//opt_minknap:minknap",
         ],
         linkopts = [
+                "-lAlps",
                 "-lDecomp",
-                "-lVol",
-                "-lCoinUtils",
         ],
         visibility = ["//visibility:public"],
-        include_prefix = "gap/lb_dip/",
+        include_prefix = "gap/opt_dip/",
 )
 
 cc_test(
@@ -20,7 +19,7 @@ cc_test(
         srcs = ["test.cpp"],
         deps = [
                 "//lib:tester",
-                "//lb_dip:dip",
+                "//opt_dip:dip",
         ],
         timeout = "moderate",
 )
