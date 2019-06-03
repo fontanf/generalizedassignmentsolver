@@ -12,8 +12,6 @@ cc_library(
                 "-DIL_STD",
         ],
         linkopts = [
-                "-L/opt/ibm/ILOG/CPLEX_Studio126/cplex/lib/x86-64_linux/static_pic",
-                "-L/opt/ibm/ILOG/CPLEX_Studio126/concert/lib/x86-64_linux/static_pic/",
                 "-lconcert",
                 "-lilocplex",
                 "-lcplex",

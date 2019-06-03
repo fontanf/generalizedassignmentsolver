@@ -27,8 +27,22 @@ GAP is interesting for several reasons:
 Dependencies:
 - boost `sudo apt-get install libboost-all-dev`
 - CLP, CBC, VOL `sudo apt-get install coinor-lib*-dev`
-- DIP: https://bintray.com/coin-or/download/Dip
-- CPLEX (optional)
+- DIP: https://bintray.com/coin-or/download/Dip you may need to link DIP libs somewhere Bazel will find them:
+```
+DIP_HOME="/opt/Dip-master-linux-x86_64-gcc4.8"
+LIB_DIR="/usr/lib/x86_64-linux-gnu/"
+sudo ln -s "${DIP_HOME}/lib/libDecomp.so" "${LIB_DIR}"
+```
+- CPLEX (optional): you may need to link CPLEX libs somewhere Bazel will find them:
+```
+CPLEX_HOME="/opt/ibm/ILOG/CPLEX_Studio126"
+LIB_DIR="/usr/lib/x86_64-linux-gnu/"
+sudo ln -s "${CPLEX_HOME}/cplex/lib/x86-64_linux/static_pic/libcplex.a" "${LIB_DIR}"
+sudo ln -s "${CPLEX_HOME}/cplex/lib/x86-64_linux/static_pic/libcp.a" "${LIB_DIR}"
+sudo ln -s "${CPLEX_HOME}/cplex/lib/x86-64_linux/static_pic/libcplexdistmip.a" "${LIB_DIR}"
+sudo ln -s "${CPLEX_HOME}/concert/lib/x86-64_linux/static_pic/libconcert.a" "${LIB_DIR}"
+sudo ln -s "${CPLEX_HOME}/cpoptimizer/lib/x86-64_linux/static_pic/libcp.a" "${LIB_DIR}"
+```
 
 Compile:
 ```
@@ -86,6 +100,7 @@ Others:
   - with CPLEX `-a vnsbranching_cplex` :heavy_check_mark:
 - Variable-Depth Neighborhood Search (see "Handbook of Metaheuristics", 4.5.1 Variable-Depth Methods)
   - k-agents reallocation neighborhood `-a vdns_simple` :heavy_check_mark:
+- Very Large Scale Neighborhood Search using Monotone Binary Program Neighborhood, based on "Variable-fixing then subgradient optimization guided very large scale neighborhood search for the generalized assignment problem" (Haddadi, 2018) `-a vlsn_mbp` :x:
 
 ## Exact algorithms
 

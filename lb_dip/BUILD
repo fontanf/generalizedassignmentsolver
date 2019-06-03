@@ -7,6 +7,7 @@ cc_library(
                 "@knapsack//opt_minknap:minknap",
         ],
         linkopts = [
+                "-lDecomp",
                 "-lVol",
                 "-lCoinUtils",
         ],
