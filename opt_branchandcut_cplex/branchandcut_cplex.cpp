@@ -71,6 +71,9 @@ Solution gap::sopt_branchandcut_cplex(BranchAndCutCplexData d)
         if (!d.info.output->verbose)
             cplex.setOut(env.getNullStream());
 
+        // Precision
+        cplex.setParam(IloCplex::Param::MIP::Tolerances::MIPGap, 0.0);
+
         // Time limit
         if (d.info.timelimit != std::numeric_limits<double>::infinity())
             cplex.setParam(IloCplex::TiLim, d.info.timelimit);
