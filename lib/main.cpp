@@ -3,6 +3,7 @@
 #include "gap/opt_branchandcut_cbc/branchandcut_cbc.hpp"
 //#include "gap/opt_constraintprogramming_cplex/constraintprogramming_cplex.hpp"
 //#include "gap/opt_branchandcut_cplex/branchandcut_cplex.hpp"
+//#include "gap/opt_dip/dip.hpp"
 #include "gap/ub_random/random.hpp"
 #include "gap/ub_greedy/greedy.hpp"
 #include "gap/ub_repair/repair.hpp"
@@ -125,6 +126,10 @@ int main(int argc, char *argv[])
                 .info = info,
                 });
     */
+    /*
+    } else if (vstrings[0] == "dip") {
+        dip(ins);
+    */
     } else if (vstrings[0] == "random") {
         sol = sol_random(ins, gen, info);
     } else if (vstrings[0] == "greedy") {
@@ -154,8 +159,20 @@ int main(int argc, char *argv[])
     } else if (vstrings[0] == "repairlinrelax") {
         LinRelaxClpOutput linrelax_output = lb_linrelax_clp(ins);
         sol = sol_repairlinrelax(ins, linrelax_output, info);
+    } else if (vstrings[0] == "lsfirst_shift") {
+        sol = sol_lsfirst_shift(LSFirstShiftSwapData{
+                .ins = ins,
+                .gen = gen,
+                .info = info
+                }.set_params(args));
     } else if (vstrings[0] == "lsfirst_shiftswap") {
         sol = sol_lsfirst_shiftswap(LSFirstShiftSwapData{
+                .ins = ins,
+                .gen = gen,
+                .info = info
+                }.set_params(args));
+    } else if (vstrings[0] == "lsfirst_shift_swap") {
+        sol = sol_lsfirst_shift_swap(LSFirstShiftSwapData{
                 .ins = ins,
                 .gen = gen,
                 .info = info
@@ -187,10 +204,10 @@ int main(int argc, char *argv[])
     } else if (vstrings[0] == "vdns_simple") {
         sol = sol_vdns_simple(ins, gen, info);
     } else if (vstrings[0] == "vnsbranching_cbc") {
-        sol = sol_vnsbranching_cbc(ins, info);
+        sol = sol_vnsbranching_cbc(ins, gen, info);
     /*
     } else if (vstrings[0] == "vnsbranching_cplex") {
-        sol = sol_vnsbranching_cplex(ins, info);
+        sol = sol_vnsbranching_cplex(ins, gen, info);
     */
     } else {
         std::cout << "unknown algorithm" << std::endl;

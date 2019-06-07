@@ -6,6 +6,7 @@ cc_library(
                 "//lib:cpp",
                 "//ub_random:random",
                 "//ub_repair:repair",
+                "//ub_ls_shiftswap:ls_shiftswap",
                 "//opt_branchandcut_cbc:branchandcut_cbc",
         ],
         visibility = ["//visibility:public"],

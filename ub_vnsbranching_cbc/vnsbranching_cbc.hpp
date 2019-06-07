@@ -6,7 +6,7 @@
 namespace gap
 {
 
-Solution sol_vnsbranching_cbc(const Instance& ins, Info info = Info());
+Solution sol_vnsbranching_cbc(const Instance& ins, std::mt19937_64& gen, Info info = Info());
 
 }
 

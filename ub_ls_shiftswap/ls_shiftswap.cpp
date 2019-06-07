@@ -8,7 +8,81 @@
 
 using namespace gap;
 
-std::vector<std::pair<ItemIdx, ItemIdx>> get_moves(const Instance& ins)
+Solution random_solution(const Instance& ins, std::mt19937_64& gen)
+{
+    Solution sol(ins);
+    std::uniform_int_distribution<AgentIdx> dis_i(0, ins.agent_number() - 1);
+    for (ItemIdx j=0; j<ins.item_number(); ++j)
+        sol.set(j, dis_i(gen));
+    return sol;
+}
+
+/******************************************************************************/
+
+std::vector<std::pair<ItemIdx, ItemIdx>> gap::moves_shift(const Instance& ins)
+{
+    ItemIdx n = ins.item_number();
+    AgentIdx m = ins.agent_number();
+    std::vector<std::pair<ItemIdx, ItemIdx>> moves;
+    for (ItemIdx j=0; j<n; ++j)
+        for (AgentIdx i=0; i<m-1; ++i)
+            moves.push_back({j, i});
+    return moves;
+}
+
+bool gap::shift_iter(
+        Solution& sol_curr,
+        std::vector<std::pair<ItemIdx, AgentIdx>>& moves,
+        std::mt19937_64& gen,
+        Cpt& it)
+{
+    PCost v_curr = sol_curr.pcost();
+    for (Cpt k=0; k<(Cpt)moves.size(); ++k, ++it) {
+        std::uniform_int_distribution<Cpt> dis(k, moves.size() - 1);
+        Cpt move_idx = dis(gen);
+        iter_swap(moves.begin() + k, moves.begin() + move_idx);
+        ItemIdx j = moves[k].first;
+        AgentIdx i_old = sol_curr.agent(j);
+        AgentIdx i = moves[k].second;
+        if (i >= i_old)
+            i++;
+        sol_curr.set(j, i);
+        if (v_curr > sol_curr.pcost())
+            return true;
+        sol_curr.set(j, i_old);
+    }
+    return false;
+}
+
+void gap::sol_lsfirst_shift(LSFirstShiftSwapData d, Solution& sol_best)
+{
+    AgentIdx m = d.ins.agent_number();
+    Solution sol_curr = sol_best;
+    sol_curr.update_penalties(std::vector<PCost>(m, d.alpha));
+    auto moves = moves_shift(d.ins);
+    for (Cpt it=0; d.info.check_time();) {
+        bool improved = shift_iter(sol_curr, moves, d.gen, it);
+        if (!improved)
+            break;
+        if (sol_curr.feasible() && (!sol_best.feasible() || sol_best.cost() > sol_curr.cost())) {
+            std::stringstream ss;
+            ss << "it " << it;
+            sol_best.update(sol_curr, 0, ss, d.info);
+        }
+    }
+}
+
+Solution gap::sol_lsfirst_shift(LSFirstShiftSwapData d)
+{
+    init_display(d.info);
+    Solution sol = random_solution(d.ins, d.gen);
+    sol_lsfirst_shift(d, sol);
+    return algorithm_end(sol, d.info);
+}
+
+/******************************************************************************/
+
+std::vector<std::pair<ItemIdx, ItemIdx>> gap::moves_shiftswap(const Instance& ins)
 {
     ItemIdx n = ins.item_number();
     AgentIdx m = ins.agent_number();
@@ -22,115 +96,60 @@ std::vector<std::pair<ItemIdx, ItemIdx>> get_moves(const Instance& ins)
     return moves;
 }
 
-Solution random_solution(const Instance& ins, std::mt19937_64& gen)
+bool gap::shiftswap_iter(
+        Solution& sol_curr,
+        std::vector<std::pair<ItemIdx, ItemIdx>>& moves,
+        std::mt19937_64& gen,
+        Cpt& it)
 {
-    Solution sol(ins);
-    std::uniform_int_distribution<AgentIdx> dis_i(0, ins.agent_number() - 1);
-    for (ItemIdx j=0; j<ins.item_number(); ++j)
-        sol.set(j, dis_i(gen));
-    return sol;
-}
-
-void gap::sol_lsfirst_shift(LSFirstShiftSwapData d, Solution& sol_best)
-{
-    ItemIdx n = d.ins.item_number();
-    AgentIdx m = d.ins.agent_number();
-
-    Solution sol_curr = sol_best;
-    sol_curr.update_penalties(std::vector<PCost>(m, d.alpha));
-    std::vector<std::pair<ItemIdx, ItemIdx>> moves;
-    for (ItemIdx j=0; j<n; ++j)
-        for (AgentIdx i=0; i<m-1; ++i)
-            moves.push_back({j, i});
-
-    for (Cpt it=0; d.info.check_time();) {
-        PCost v_curr = sol_curr.pcost();
-        bool improved = false;
-        for (Cpt k=0; k<(Cpt)moves.size(); ++k, ++it) {
-            std::uniform_int_distribution<Cpt> dis(k, moves.size() - 1);
-            Cpt move_idx = dis(d.gen);
-            iter_swap(moves.begin() + k, moves.begin() + move_idx);
+    PCost v_curr = sol_curr.pcost();
+    for (Cpt k=0; k<(Cpt)moves.size(); ++k, ++it) {
+        std::uniform_int_distribution<Cpt> dis(k, moves.size() - 1);
+        Cpt move_idx = dis(gen);
+        iter_swap(moves.begin() + k, moves.begin() + move_idx);
+        if (moves[k].second < 0) { // shift
             ItemIdx j = moves[k].first;
             AgentIdx i_old = sol_curr.agent(j);
-            AgentIdx i = moves[k].second;
+            AgentIdx i = - (moves[k].second + 1);
             if (i >= i_old)
                 i++;
-            //std::cout << "j " << j << " i_old " << i_old << " i " << i << std::endl;
             sol_curr.set(j, i);
-            if (sol_curr.feasible() && (!sol_best.feasible() || sol_best.cost() > sol_curr.cost())) {
-                std::stringstream ss;
-                ss << "it " << it;
-                sol_best.update(sol_curr, 0, ss, d.info);
-            }
-            if (v_curr > sol_curr.pcost()) {
-                improved = true;
-                break;
-            }
+            if (v_curr > sol_curr.pcost())
+                return true;
             sol_curr.set(j, i_old);
+        } else { // swap
+            ItemIdx j1 = moves[k].first;
+            ItemIdx j2 = moves[k].second;
+            AgentIdx i1 = sol_curr.agent(j1);
+            AgentIdx i2 = sol_curr.agent(j2);
+            if (i1 == i2)
+                continue;
+            sol_curr.set(j1, i2);
+            sol_curr.set(j2, i1);
+            if (v_curr > sol_curr.pcost())
+                return true;
+            sol_curr.set(j1, i1);
+            sol_curr.set(j2, i2);
         }
-        if (!improved)
-            break;
     }
+    return false;
 }
 
 void gap::sol_lsfirst_shiftswap(LSFirstShiftSwapData d, Solution& sol_best)
 {
     AgentIdx m = d.ins.agent_number();
-
     Solution sol_curr = sol_best;
     sol_curr.update_penalties(std::vector<PCost>(m, d.alpha));
-    auto moves = get_moves(d.ins);
-
+    auto moves = moves_shiftswap(d.ins);
     for (Cpt it=0; d.info.check_time();) {
-        PCost v_curr = sol_curr.pcost();
-        bool improved = false;
-        for (Cpt k=0; k<(Cpt)moves.size(); ++k, ++it) {
-            std::uniform_int_distribution<Cpt> dis(k, moves.size() - 1);
-            Cpt move_idx = dis(d.gen);
-            iter_swap(moves.begin() + k, moves.begin() + move_idx);
-            if (moves[k].second < 0) { // shift
-                ItemIdx j = moves[k].first;
-                AgentIdx i_old = sol_curr.agent(j);
-                AgentIdx i = - (moves[k].second + 1);
-                if (i >= i_old)
-                    i++;
-                //std::cout << "j " << j << " i_old " << i_old << " i " << i << std::endl;
-                sol_curr.set(j, i);
-                if (sol_curr.feasible() && (!sol_best.feasible() || sol_best.cost() > sol_curr.cost())) {
-                    std::stringstream ss;
-                    ss << "it " << it;
-                    sol_best.update(sol_curr, 0, ss, d.info);
-                }
-                if (v_curr > sol_curr.pcost()) {
-                    improved = true;
-                    break;
-                }
-                sol_curr.set(j, i_old);
-            } else { // swap
-                ItemIdx j1 = moves[k].first;
-                ItemIdx j2 = moves[k].second;
-                AgentIdx i1 = sol_curr.agent(j1);
-                AgentIdx i2 = sol_curr.agent(j2);
-                if (i1 == i2)
-                    continue;
-                //std::cout << "j1 " << j1 << " i1 " << i1 << " j2 " << j2 << " i2 " << i2 << std::endl;
-                sol_curr.set(j1, i2);
-                sol_curr.set(j2, i1);
-                if (sol_curr.feasible() && (!sol_best.feasible() || sol_best.cost() > sol_curr.cost())) {
-                    std::stringstream ss;
-                    ss << "it " << it;
-                    sol_best.update(sol_curr, 0, ss, d.info);
-                }
-                if (v_curr > sol_curr.pcost()) {
-                    improved = true;
-                    break;
-                }
-                sol_curr.set(j1, i1);
-                sol_curr.set(j2, i2);
-            }
-        }
+        bool improved = shiftswap_iter(sol_curr, moves, d.gen, it);
         if (!improved)
             break;
+        if (sol_curr.feasible() && (!sol_best.feasible() || sol_best.cost() > sol_curr.cost())) {
+            std::stringstream ss;
+            ss << "it " << it;
+            sol_best.update(sol_curr, 0, ss, d.info);
+        }
     }
 }
 
@@ -139,6 +158,74 @@ Solution gap::sol_lsfirst_shiftswap(LSFirstShiftSwapData d)
     init_display(d.info);
     Solution sol = random_solution(d.ins, d.gen);
     sol_lsfirst_shiftswap(d, sol);
+    return algorithm_end(sol, d.info);
+}
+
+/******************************************************************************/
+
+std::vector<std::pair<ItemIdx, ItemIdx>> gap::moves_swap(const Instance& ins)
+{
+    ItemIdx n = ins.item_number();
+    std::vector<std::pair<ItemIdx, ItemIdx>> moves;
+    for (ItemIdx j1=0; j1<n; ++j1)
+        for (ItemIdx j2=j1+1; j2<n; ++j2)
+            moves.push_back({j1, j2});
+    return moves;
+}
+
+bool gap::swap_iter(
+        Solution& sol_curr,
+        std::vector<std::pair<ItemIdx, ItemIdx>>& moves,
+        std::mt19937_64& gen,
+        Cpt& it)
+{
+    PCost v_curr = sol_curr.pcost();
+    for (Cpt k=0; k<(Cpt)moves.size(); ++k, ++it) {
+        std::uniform_int_distribution<Cpt> dis(k, moves.size() - 1);
+        Cpt move_idx = dis(gen);
+        iter_swap(moves.begin() + k, moves.begin() + move_idx);
+        ItemIdx j1 = moves[k].first;
+        ItemIdx j2 = moves[k].second;
+        AgentIdx i1 = sol_curr.agent(j1);
+        AgentIdx i2 = sol_curr.agent(j2);
+        if (i1 == i2)
+            continue;
+        sol_curr.set(j1, i2);
+        sol_curr.set(j2, i1);
+        if (v_curr > sol_curr.pcost())
+            return true;
+        sol_curr.set(j1, i1);
+        sol_curr.set(j2, i2);
+    }
+    return false;
+}
+
+void gap::sol_lsfirst_shift_swap(LSFirstShiftSwapData d, Solution& sol_best)
+{
+    AgentIdx m = d.ins.agent_number();
+    Solution sol_curr = sol_best;
+    sol_curr.update_penalties(std::vector<PCost>(m, d.alpha));
+    auto moves_1 = moves_shift(d.ins);
+    auto moves_2 = moves_swap(d.ins);
+    for (Cpt it=0; d.info.check_time();) {
+        if       (shift_iter(sol_curr, moves_1, d.gen, it)) {
+        } else if (swap_iter(sol_curr, moves_2, d.gen, it)) {
+        } else {
+            break;
+        }
+        if (sol_curr.feasible() && (!sol_best.feasible() || sol_best.cost() > sol_curr.cost())) {
+            std::stringstream ss;
+            ss << "it " << it;
+            sol_best.update(sol_curr, 0, ss, d.info);
+        }
+    }
+}
+
+Solution gap::sol_lsfirst_shift_swap(LSFirstShiftSwapData d)
+{
+    init_display(d.info);
+    Solution sol = random_solution(d.ins, d.gen);
+    sol_lsfirst_shift_swap(d, sol);
     return algorithm_end(sol, d.info);
 }
 
@@ -234,7 +321,7 @@ Solution gap::sol_ts_shiftswap(TSShiftSwapData d)
 
     Solution sol_curr = random_solution(d.ins, d.gen);
     sol_curr.update_penalties(std::vector<PCost>(m, d.alpha));
-    auto moves = get_moves(d.ins);
+    auto moves = moves_shiftswap(d.ins);
 
     Cpt tabu_size = 16;
     std::vector<std::vector<Cpt>> tabu(n, std::vector<Cpt>(m, - tabu_size - 1));
@@ -489,7 +576,7 @@ Solution gap::sol_pr_shiftswap(PRShiftSwapData d)
     ItemIdx  n = d.ins.item_number();
     std::uniform_int_distribution<Cpt> dis_a(0, d.rho - 1);
     std::uniform_int_distribution<Cpt> dis_b(0, d.rho - 2);
-    auto moves = get_moves(d.ins);
+    auto moves = moves_shiftswap(d.ins);
 
     std::vector<Solution> pool(d.rho, Solution(d.ins));
     for (Solution& sol_curr: pool) {
