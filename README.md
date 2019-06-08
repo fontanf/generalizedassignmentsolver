@@ -108,6 +108,9 @@ Others:
   - with CBC `-a branchandcut_cbc` :heavy_check_mark:
   - with CPLEX `-a branchandcut_cplex` :heavy_check_mark:
 - Branch-and-price :x:
+- Constraint Programming
+  - with Gecode `-a constraintprogramming_gecode` :x:
+  - with CPLEX `-a constraintprogramming_cplex` :x:
 
 ## Results
 

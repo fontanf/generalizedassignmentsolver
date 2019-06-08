@@ -1,6 +1,7 @@
 #include "gap/lb_linrelax_clp/linrelax_clp.hpp"
 #include "gap/lb_lagrelax_volume/lagrelax_volume.hpp"
 #include "gap/opt_branchandcut_cbc/branchandcut_cbc.hpp"
+#include "gap/opt_constraintprogramming_gecode/constraintprogramming_gecode.hpp"
 //#include "gap/opt_constraintprogramming_cplex/constraintprogramming_cplex.hpp"
 //#include "gap/opt_branchandcut_cplex/branchandcut_cplex.hpp"
 //#include "gap/opt_dip/dip.hpp"
@@ -118,6 +119,12 @@ int main(int argc, char *argv[])
                 .info = info,
                 });
     */
+    } else if (vstrings[0] == "constraintprogramming_gecode") {
+        sopt_constraintprogramming_gecode({
+                .ins = ins,
+                .sol = sol,
+                .info = info,
+                });
     /*
     } else if (vstrings[0] == "constraintprogramming_cplex") {
         sopt_constraintprogramming_cplex({
