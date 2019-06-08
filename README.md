@@ -26,12 +26,24 @@ GAP is interesting for several reasons:
 
 Dependencies:
 - boost `sudo apt-get install libboost-all-dev`
-- CLP, CBC, VOL `sudo apt-get install coinor-lib*-dev`
-- DIP: https://bintray.com/coin-or/download/Dip you may need to link DIP libs somewhere Bazel will find them:
+- COIN-OR (CLP, CBC, VOL, DIP) https://coin-or.github.io/coinbrew/
+- Gecode: download https://www.gecode.org/download.html
+Compile (more info https://www.gecode.org/doc/2.2.0/reference/PageComp.html):
 ```
-DIP_HOME="/opt/Dip-master-linux-x86_64-gcc4.8"
-LIB_DIR="/usr/lib/x86_64-linux-gnu/"
-sudo ln -s "${DIP_HOME}/lib/libDecomp.so" "${LIB_DIR}"
+./configure
+make
+```
+Update include path in `.bashrc`:
+```
+# Gecode
+export GECODE_HOME="/opt/gecode-release-6.2.0"
+export CPLUS_INCLUDE_PATH="${CPLUS_INCLUDE_PATH}:${GECODE_HOME}"
+```
+Create symlinks for libraries:
+```
+for i in "${GECODE_HOME}"/*.so; do
+    sudo ln -s "$i" /usr/lib/x86_64-linux-gnu/
+done
 ```
 - CPLEX (optional): you may need to link CPLEX libs somewhere Bazel will find them:
 ```

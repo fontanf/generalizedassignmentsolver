@@ -108,74 +108,70 @@ Solution gap::sopt_branchandcut_cbc(BranchAndCutCbcData d)
     model.solver()->setHintParam(OsiDoReducePrint, true, OsiHintTry);
 
     // Heuristics
-    /*
-    CbcHeuristicDiveCoefficient heuristic_divecoefficient(model);
-    model.addHeuristic(&heuristic_divecoefficient);
-    CbcHeuristicDiveFractional heuristic_divefractional(model);
-    model.addHeuristic(&heuristic_divefractional);
-    CbcHeuristicDiveGuided heuristic_diveguided(model);
-    model.addHeuristic(&heuristic_diveguided);
-    CbcHeuristicDiveVectorLength heuristic_divevetorlength(model);
-    model.addHeuristic(&heuristic_divevetorlength);
+    //CbcHeuristicDiveCoefficient heuristic_divecoefficient(model);
+    //model.addHeuristic(&heuristic_divecoefficient);
+    //CbcHeuristicDiveFractional heuristic_divefractional(model);
+    //model.addHeuristic(&heuristic_divefractional);
+    //CbcHeuristicDiveGuided heuristic_diveguided(model);
+    //model.addHeuristic(&heuristic_diveguided);
+    //CbcHeuristicDiveVectorLength heuristic_divevetorlength(model);
+    //model.addHeuristic(&heuristic_divevetorlength);
     //CbcHeuristicDynamic3 heuristic_dynamic3(model); // crash
     //model.addHeuristic(&heuristic_dynamic3);
-    CbcHeuristicFPump heuristic_fpump(model);
-    model.addHeuristic(&heuristic_fpump);
-    CbcHeuristicGreedyCover heuristic_greedycover(model);
-    model.addHeuristic(&heuristic_greedycover);
-    CbcHeuristicGreedyEquality heuristic_greedyequality(model);
-    model.addHeuristic(&heuristic_greedyequality);
-    CbcHeuristicLocal heuristic_local(model);
-    model.addHeuristic(&heuristic_local);
-    CbcHeuristicPartial heuristic_partial(model);
-    model.addHeuristic(&heuristic_partial);
-    CbcHeuristicRENS heuristic_rens(model);
-    model.addHeuristic(&heuristic_rens);
-    CbcHeuristicRINS heuristic_rins(model);
-    model.addHeuristic(&heuristic_rins);
-    CbcRounding heuristic_rounding(model);
-    model.addHeuristic(&heuristic_rounding);
-    CbcSerendipity heuristic_serendipity(model);
-    model.addHeuristic(&heuristic_serendipity);
-    */
+    //CbcHeuristicFPump heuristic_fpump(model);
+    //model.addHeuristic(&heuristic_fpump);
+    //CbcHeuristicGreedyCover heuristic_greedycover(model);
+    //model.addHeuristic(&heuristic_greedycover);
+    //CbcHeuristicGreedyEquality heuristic_greedyequality(model);
+    //model.addHeuristic(&heuristic_greedyequality);
+    //CbcHeuristicLocal heuristic_local(model);
+    //model.addHeuristic(&heuristic_local);
+    //CbcHeuristicPartial heuristic_partial(model);
+    //model.addHeuristic(&heuristic_partial);
+    //CbcHeuristicRENS heuristic_rens(model);
+    //model.addHeuristic(&heuristic_rens);
+    //CbcHeuristicRINS heuristic_rins(model);
+    //model.addHeuristic(&heuristic_rins);
+    //CbcRounding heuristic_rounding(model);
+    //model.addHeuristic(&heuristic_rounding);
+    //CbcSerendipity heuristic_serendipity(model);
+    //model.addHeuristic(&heuristic_serendipity);
 
     // Cuts
-    /*
     //CglClique cutgen_clique;
     //model.addCutGenerator(&cutgen_clique);
     //CglAllDifferent cutgen_alldifferent;
     //model.addCutGenerator(&cutgen_alldifferent);
-    CglDuplicateRow cutgen_duplicaterow;
-    model.addCutGenerator(&cutgen_duplicaterow);
-    CglFlowCover cutgen_flowcover;
-    model.addCutGenerator(&cutgen_flowcover);
-    CglGomory cutgen_gomory;
-    model.addCutGenerator(&cutgen_gomory);
-    CglKnapsackCover cutgen_knapsackcover;
-    model.addCutGenerator(&cutgen_knapsackcover);
+    //CglDuplicateRow cutgen_duplicaterow;
+    //model.addCutGenerator(&cutgen_duplicaterow);
+    //CglFlowCover cutgen_flowcover;
+    //model.addCutGenerator(&cutgen_flowcover);
+    //CglGomory cutgen_gomory;
+    //model.addCutGenerator(&cutgen_gomory);
+    //CglKnapsackCover cutgen_knapsackcover;
+    //model.addCutGenerator(&cutgen_knapsackcover);
     //CglLandP cutgen_landp;
     //model.addCutGenerator(&cutgen_landp);
     //CglLiftAndProject cutgen_liftandproject;
     //model.addCutGenerator(&cutgen_liftandproject);
-    CglMixedIntegerRounding cutgen_mixedintegerrounding;
-    model.addCutGenerator(&cutgen_mixedintegerrounding);
-    CglMixedIntegerRounding2 cutgen_mixedintegerrounding2;
-    model.addCutGenerator(&cutgen_mixedintegerrounding2);
-    CglOddHole cutgen_oddhole;
-    model.addCutGenerator(&cutgen_oddhole);
-    CglProbing cutgen_probing;
-    model.addCutGenerator(&cutgen_probing);
-    CglRedSplit cutgen_redsplit;
-    model.addCutGenerator(&cutgen_redsplit);
-    CglResidualCapacity cutgen_residualcapacity;
-    model.addCutGenerator(&cutgen_residualcapacity);
-    CglSimpleRounding cutgen_simplerounding;
-    model.addCutGenerator(&cutgen_simplerounding);
-    CglStored cutgen_stored;
-    model.addCutGenerator(&cutgen_stored);
-    CglTwomir cutgen_twomir;
-    model.addCutGenerator(&cutgen_twomir);
-    */
+    //CglMixedIntegerRounding cutgen_mixedintegerrounding;
+    //model.addCutGenerator(&cutgen_mixedintegerrounding);
+    //CglMixedIntegerRounding2 cutgen_mixedintegerrounding2;
+    //model.addCutGenerator(&cutgen_mixedintegerrounding2);
+    //CglOddHole cutgen_oddhole;
+    //model.addCutGenerator(&cutgen_oddhole);
+    //CglProbing cutgen_probing;
+    //model.addCutGenerator(&cutgen_probing);
+    //CglRedSplit cutgen_redsplit;
+    //model.addCutGenerator(&cutgen_redsplit);
+    //CglResidualCapacity cutgen_residualcapacity;
+    //model.addCutGenerator(&cutgen_residualcapacity);
+    //CglSimpleRounding cutgen_simplerounding;
+    //model.addCutGenerator(&cutgen_simplerounding);
+    //CglStored cutgen_stored;
+    //model.addCutGenerator(&cutgen_stored);
+    //CglTwomir cutgen_twomir;
+    //model.addCutGenerator(&cutgen_twomir);
 
     // Set time limit
     model.setMaximumSeconds(d.info.timelimit);

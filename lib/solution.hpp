@@ -41,6 +41,7 @@ public:
 
     inline Cost cost()           const { return total_cost_; }
     inline Cost cost(AgentIdx i) const { return agents_[i].cost; }
+    inline Cost profit()         const { return item_number() * instance().cost_max() - total_cost_; }
 
     inline PCost pcost()           const { return total_pcost_; }
     inline PCost pcost(AgentIdx i) const { return agents_[i].pcost; }
@@ -99,3 +100,4 @@ struct SolutionCompare
 };
 
 }
+
