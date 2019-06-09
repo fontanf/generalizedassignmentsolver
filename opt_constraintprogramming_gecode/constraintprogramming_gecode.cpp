@@ -8,6 +8,11 @@
 using namespace gap;
 using namespace Gecode;
 
+/**
+ * Useful links
+ * https://www.gecode.org/doc-latest/MPG.pdf
+ */
+
 class GapGecode: public IntMinimizeSpace
 {
 
@@ -20,32 +25,35 @@ public:
         cj_(*this, ins.item_number()),
         load_(*this, ins.agent_number())
     {
-        // Channel xij == 1 <=> xj = i
-        Matrix<BoolVarArgs> xij(xij0_, ins.item_number(), ins.agent_number());
-        for (ItemIdx j=0; j<ins.item_number(); j++)
+        ItemIdx n = ins.item_number();
+        AgentIdx m = ins.agent_number();
+
+        // Channel xij == 1 <=> xj == i
+        Matrix<BoolVarArgs> xij(xij0_, n, m);
+        for (ItemIdx j=0; j<n; j++)
             channel(*this, xij.col(j), xj_[j]);
 
         // Weights
-        weights_ = std::vector<IntArgs>(ins.agent_number(), IntArgs(ins.item_number()));
-        for (AgentIdx i=0; i<ins.agent_number(); ++i)
-            for (ItemIdx j=0; j<ins.item_number(); ++j)
+        weights_ = std::vector<IntArgs>(m, IntArgs(n));
+        for (AgentIdx i=0; i<m; ++i)
+            for (ItemIdx j=0; j<n; ++j)
                 weights_[i][j] = ins.alternative(j, i).w;
 
         // Costs
-        costs_ = std::vector<IntArgs>(ins.item_number(), IntArgs(ins.agent_number()));
-        for (ItemIdx j=0; j<ins.item_number(); ++j)
-            for (AgentIdx i=0; i<ins.agent_number(); ++i)
+        costs_ = std::vector<IntArgs>(n, IntArgs(m));
+        for (ItemIdx j=0; j<n; ++j)
+            for (AgentIdx i=0; i<m; ++i)
                 costs_[j][i] = ins.alternative(j, i).c;
 
         // Cost variables
-        for (ItemIdx j=0; j<ins.item_number(); j++) {
+        for (ItemIdx j=0; j<n; j++) {
             cj_[j] = IntVar(*this, ins.item(j).c_min, ins.item(j).c_max);
             element(*this, costs_[j], xj_[j], cj_[j]);
         }
         c_ = expr(*this, sum(cj_));
 
         // Load variables (and capacity constraint)
-        for (AgentIdx i=0; i<ins.agent_number(); ++i) {
+        for (AgentIdx i=0; i<m; ++i) {
             load_[i] = IntVar(*this, 0, ins.capacity(i));
             linear(*this, weights_[i], xij.row(i), IRT_EQ, load_[i]);
         }
