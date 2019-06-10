@@ -109,7 +109,7 @@ export CPLUS_INCLUDE_PATH="${CPLUS_INCLUDE_PATH}:${GECODE_HOME}"
 ```
 Create symlinks for libraries:
 ```shell
-for i in "${GECODE_HOME}"/*.so; do
+for i in "${GECODE_HOME}"/*.so*; do
     sudo ln -s "$i" /usr/lib/x86_64-linux-gnu/
 done
 ```

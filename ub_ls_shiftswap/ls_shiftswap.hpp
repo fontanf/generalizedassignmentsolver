@@ -26,9 +26,9 @@ struct LSFirstShiftSwapData
 std::vector<std::pair<ItemIdx, AgentIdx>> moves_shift(const Instance& ins);
 std::vector<std::pair<ItemIdx, ItemIdx>> moves_swap(const Instance& ins);
 std::vector<std::pair<ItemIdx, ItemIdx>> moves_shiftswap(const Instance& ins);
-bool shift_iter(Solution& sol_curr, std::vector<std::pair<ItemIdx, ItemIdx>>& moves, std::mt19937_64& gen, Cpt& it);
-bool swap_iter(Solution& sol_curr, std::vector<std::pair<ItemIdx, ItemIdx>>& moves, std::mt19937_64& gen, Cpt& it);
-bool shiftswap_iter(Solution& sol_curr, std::vector<std::pair<ItemIdx, ItemIdx>>& moves, std::mt19937_64& gen, Cpt& it);
+bool shift_iter(Solution& sol_curr, std::vector<std::pair<ItemIdx, ItemIdx>>& moves, std::mt19937_64& gen, std::stringstream& ss);
+bool swap_iter(Solution& sol_curr, std::vector<std::pair<ItemIdx, ItemIdx>>& moves, std::mt19937_64& gen, std::stringstream& ss);
+bool shiftswap_iter(Solution& sol_curr, std::vector<std::pair<ItemIdx, ItemIdx>>& moves, std::mt19937_64& gen, std::stringstream& ss);
 void sol_lsfirst_shift(LSFirstShiftSwapData d, Solution& sol);
 void sol_lsfirst_shiftswap(LSFirstShiftSwapData d, Solution& sol);
 void sol_lsfirst_shift_swap(LSFirstShiftSwapData d, Solution& sol);

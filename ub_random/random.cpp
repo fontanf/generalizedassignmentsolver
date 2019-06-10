@@ -7,13 +7,18 @@
 
 using namespace gap;
 
-Solution gap::sol_random(const Instance& ins, std::mt19937_64& gen, Info info)
+Solution gap::sol_random_infeasible(const Instance& ins, std::mt19937_64& gen, Info info)
 {
     std::uniform_int_distribution<> dis(0, ins.agent_number() - 1);
     Solution sol(ins);
     for (ItemIdx j=0; j<ins.item_number(); ++j)
         sol.set(j, dis(gen));
+    return algorithm_end(sol, info);
+}
 
+Solution gap::sol_random(const Instance& ins, std::mt19937_64& gen, Info info)
+{
+    Solution sol = sol_random_infeasible(ins, gen);
     AgentIdx m = ins.agent_number();
     ItemIdx n = ins.item_number();
     std::uniform_int_distribution<Cpt> dis_ss(1, n * m + (n * (n + 1)) / 2);

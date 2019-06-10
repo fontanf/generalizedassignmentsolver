@@ -9,6 +9,7 @@
 #include "gap/ub_greedy/greedy.hpp"
 #include "gap/ub_repair/repair.hpp"
 #include "gap/ub_ls_shiftswap/ls_shiftswap.hpp"
+#include "gap/ub_ls_ejectionchain/ls_ejectionchain.hpp"
 #include "gap/ub_vdns_simple/vdns_simple.hpp"
 #include "gap/ub_vnsbranching_cbc/vnsbranching_cbc.hpp"
 //#include "gap/ub_vnsbranching_cplex/vnsbranching_cplex.hpp"
@@ -204,6 +205,12 @@ int main(int argc, char *argv[])
                 }.set_params(args));
     } else if (vstrings[0] == "pr_shiftswap") {
         sol = sol_pr_shiftswap(PRShiftSwapData{
+                .ins = ins,
+                .gen = gen,
+                .info = info
+                }.set_params(args));
+    } else if (vstrings[0] == "lsfirst_ejectionchain") {
+        sol = sol_lsfirst_ejectionchain(LSFirstECData{
                 .ins = ins,
                 .gen = gen,
                 .info = info
