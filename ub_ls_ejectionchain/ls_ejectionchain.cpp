@@ -46,7 +46,7 @@ std::vector<ItemIdx> gap::ejectionchain_iter(Solution& sol_best, std::vector<Ite
                 }
 
                 sol_curr.set(j0, i_suiv);
-                if (sol_curr.feasible() && (!sol_best.feasible() || sol_best.cost() > sol_curr.cost())) {
+                if (compare(sol_best, sol_curr)) {
                     sol_best = sol_curr;
                     ss << "ec " << chain.size();
                     if (chain.size() <= 8) {
@@ -70,7 +70,7 @@ std::vector<ItemIdx> gap::ejectionchain_iter(Solution& sol_best, std::vector<Ite
             i_last = i_best;
             for (AgentIdx i=0; i<m; ++i) {
                 sol_curr.set(j0, i);
-                if (sol_curr.feasible() && ( !sol_best.feasible() || sol_best.cost() > sol_curr.cost())) {
+                if (compare(sol_best, sol_curr)) {
                     sol_best = sol_curr;
                     ss << "ec " << chain.size();
                     if (chain.size() <= 8) {

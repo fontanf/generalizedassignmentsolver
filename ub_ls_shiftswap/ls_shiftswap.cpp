@@ -56,7 +56,7 @@ void gap::sol_lsfirst_shift(LSFirstShiftSwapData d, Solution& sol_best)
         bool improved = shift_iter(sol_curr, moves, d.gen, ss);
         if (!improved)
             break;
-        if (sol_curr.feasible() && (!sol_best.feasible() || sol_best.cost() > sol_curr.cost()))
+        if (compare(sol_best, sol_curr))
             sol_best.update(sol_curr, 0, ss, d.info);
     }
 }
@@ -139,7 +139,7 @@ void gap::sol_lsfirst_shiftswap(LSFirstShiftSwapData d, Solution& sol_best)
         bool improved = shiftswap_iter(sol_curr, moves, d.gen, ss);
         if (!improved)
             break;
-        if (sol_curr.feasible() && (!sol_best.feasible() || sol_best.cost() > sol_curr.cost()))
+        if (compare(sol_best, sol_curr))
             sol_best.update(sol_curr, 0, ss, d.info);
     }
 }
@@ -207,9 +207,8 @@ void gap::sol_lsfirst_shift_swap(LSFirstShiftSwapData d, Solution& sol_best)
         } else {
             break;
         }
-        if (sol_curr.feasible() && (!sol_best.feasible() || sol_best.cost() > sol_curr.cost())) {
+        if (compare(sol_best, sol_curr))
             sol_best.update(sol_curr, 0, ss, d.info);
-        }
     }
 }
 
@@ -292,7 +291,7 @@ Solution gap::sol_lsbest_shiftswap(LSBestShiftSwapData d)
         }
 
         // Update best solution
-        if (sol_curr.feasible() && (!sol_best.feasible() || sol_best.cost() > sol_curr.cost())) {
+        if (compare(sol_best, sol_curr)) {
             std::stringstream ss;
             ss << "it " << it;
             sol_best.update(sol_curr, 0, ss, d.info);
@@ -340,7 +339,7 @@ Solution gap::sol_ts_shiftswap(TSShiftSwapData d)
                 if (it - tabu[j][i] < tabu_size)
                     continue;
                 sol_curr.set(j, i);
-                if (sol_curr.feasible() && (!sol_best.feasible() || sol_best.cost() > sol_curr.cost())) {
+                if (compare(sol_best, sol_curr)) {
                     std::stringstream ss;
                     ss << "it " << it;
                     sol_best.update(sol_curr, 0, ss, d.info);
@@ -371,7 +370,7 @@ Solution gap::sol_ts_shiftswap(TSShiftSwapData d)
                     continue;
                 sol_curr.set(j1, i2);
                 sol_curr.set(j2, i1);
-                if (sol_curr.feasible() && (!sol_best.feasible() || sol_best.cost() > sol_curr.cost())) {
+                if (compare(sol_best, sol_curr)) {
                     std::stringstream ss;
                     ss << "it " << it;
                     sol_best.update(sol_curr, 0, ss, d.info);
@@ -481,7 +480,7 @@ Solution gap::sol_sa_shiftswap(SAShiftSwapData d)
             }
 
             // Update best solution
-            if (sol_curr.feasible() && (!sol_best.feasible() || sol_best.cost() > sol_curr.cost())) {
+            if (compare(sol_best, sol_curr)) {
                 std::stringstream ss;
                 ss << "T " << t;
                 sol_best.update(sol_curr, 0, ss, d.info);
@@ -514,7 +513,7 @@ void pr_shiftswap(PRShiftSwapData& d,
                     i++;
                 //std::cout << "j " << j << " i_old " << i_old << " i " << i << std::endl;
                 sol_curr.set(j, i);
-                if (sol_curr.feasible() && (!sol_best.feasible() || sol_best.cost() > sol_curr.cost())) {
+                if (compare(sol_best, sol_curr)) {
                     std::stringstream ss;
                     sol_best.update(sol_curr, 0, ss, d.info);
                 }
@@ -533,7 +532,7 @@ void pr_shiftswap(PRShiftSwapData& d,
                 //std::cout << "j1 " << j1 << " i1 " << i1 << " j2 " << j2 << " i2 " << i2 << std::endl;
                 sol_curr.set(j1, i2);
                 sol_curr.set(j2, i1);
-                if (sol_curr.feasible() && (!sol_best.feasible() || sol_best.cost() > sol_curr.cost())) {
+                if (compare(sol_best, sol_curr)) {
                     std::stringstream ss;
                     sol_best.update(sol_curr, 0, ss, d.info);
                 }

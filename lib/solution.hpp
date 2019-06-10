@@ -88,7 +88,15 @@ private:
     double comp_;
 };
 
+/**
+ * Return the number of items assigned to different machines between sol1 and sol2.
+ */
 ItemIdx distance(const Solution& sol1, const Solution& sol2);
+
+/**
+ * Return true iff sol_best should be updated.
+ */
+bool compare(const Solution& sol_best, const Solution& sol_curr);
 
 void init_display(Info& info);
 

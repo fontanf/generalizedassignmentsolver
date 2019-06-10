@@ -55,8 +55,12 @@ Classical meta-heuristics based on shift-swap neighborhood and fixed penalty of 
 - Simulated annealing `-a sa_shiftswap` :heavy_check_mark:
 - Path relinking `-a pr_shiftswap` :heavy_check_mark:
 
+Meta-heuristics based on ejection chain neighborhood and adaptative control of penalty weights:
+- Hill climbing, first improvment `-a lsfirst_ejectionchain` :x:
+- Path relinking `-a pr_ejectionchain` :x:
+
 Others:
-- Random initial solution `-a random` :heavy_check_mark:
+- Random feasible solution `-a random` :heavy_check_mark:
 - Repair linear relaxation solution `-a repairlinrelax` :heavy_check_mark:
 - Variable Neighborhood Branching (see "Handbook of Metaheuristics", 3.6.1 Variable Neighborhood Branching)
   - with CBC `-a vnsbranching_cbc` :heavy_check_mark:
