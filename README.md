@@ -22,43 +22,6 @@ GAP is interesting for several reasons:
 - it is also structured for decomposition techniques (Lagrangian relaxations, Column generation...)
 - it is well-studied, i.e. researchers have proposed many and various algorithms to solve it (branch-and-bound, cutting plane, large neighbourhood search, path relinking...)
 
-## Technical informations
-
-Dependencies:
-- boost `sudo apt-get install libboost-all-dev`
-- CLP, CBC, VOL `sudo apt-get install coinor-lib*-dev`
-- DIP: https://bintray.com/coin-or/download/Dip you may need to link DIP libs somewhere Bazel will find them:
-```
-DIP_HOME="/opt/Dip-master-linux-x86_64-gcc4.8"
-LIB_DIR="/usr/lib/x86_64-linux-gnu/"
-sudo ln -s "${DIP_HOME}/lib/libDecomp.so" "${LIB_DIR}"
-```
-- CPLEX (optional): you may need to link CPLEX libs somewhere Bazel will find them:
-```
-CPLEX_HOME="/opt/ibm/ILOG/CPLEX_Studio126"
-LIB_DIR="/usr/lib/x86_64-linux-gnu/"
-sudo ln -s "${CPLEX_HOME}/cplex/lib/x86-64_linux/static_pic/libcplex.a" "${LIB_DIR}"
-sudo ln -s "${CPLEX_HOME}/cplex/lib/x86-64_linux/static_pic/libcp.a" "${LIB_DIR}"
-sudo ln -s "${CPLEX_HOME}/cplex/lib/x86-64_linux/static_pic/libcplexdistmip.a" "${LIB_DIR}"
-sudo ln -s "${CPLEX_HOME}/concert/lib/x86-64_linux/static_pic/libconcert.a" "${LIB_DIR}"
-sudo ln -s "${CPLEX_HOME}/cpoptimizer/lib/x86-64_linux/static_pic/libcp.a" "${LIB_DIR}"
-```
-
-Compile:
-```
-bazel build --cxxopt='-std=c++14' --compilation_mode=opt -- //...
-```
-
-Solve:
-```
-./bazel-bin/lib/main -v -a branchandcut_cbc -i data/a05100 -o out.ini -c sol.txt
-```
-
-Unit tests:
-```
-bazel test --cxxopt='-std=c++14' --compilation_mode=opt -- //...
-```
-
 ## Lower bounds
 
 - Linear relaxation solved with CLP `-a linrelax_clp` :heavy_check_mark:
@@ -92,8 +55,12 @@ Classical meta-heuristics based on shift-swap neighborhood and fixed penalty of 
 - Simulated annealing `-a sa_shiftswap` :heavy_check_mark:
 - Path relinking `-a pr_shiftswap` :heavy_check_mark:
 
+Meta-heuristics based on ejection chain neighborhood and adaptative control of penalty weights:
+- Hill climbing, first improvment `-a lsfirst_ejectionchain` :x:
+- Path relinking `-a pr_ejectionchain` :x:
+
 Others:
-- Random initial solution `-a random` :heavy_check_mark:
+- Random feasible solution `-a random` :heavy_check_mark:
 - Repair linear relaxation solution `-a repairlinrelax` :heavy_check_mark:
 - Variable Neighborhood Branching (see "Handbook of Metaheuristics", 3.6.1 Variable Neighborhood Branching)
   - with CBC `-a vnsbranching_cbc` :heavy_check_mark:
@@ -108,6 +75,9 @@ Others:
   - with CBC `-a branchandcut_cbc` :heavy_check_mark:
   - with CPLEX `-a branchandcut_cplex` :heavy_check_mark:
 - Branch-and-price :x:
+- Constraint Programming
+  - with Gecode `-a constraintprogramming_gecode` :x:
+  - with CPLEX `-a constraintprogramming_cplex` :x:
 
 ## Results
 
@@ -121,4 +91,73 @@ The bound obtained by solving the lagrangian relaxation of assignment constraint
 - on short runs (2 minutes, Processor Intel® Core™ i5-8500 CPU @ 3.00GHz × 6), it provides solutions of good quality (less than 1% gap from optimal for all instances of the literature, and less than 0.5% for instances with more than 900 items)
 - it is very simple and the implementation is very short
 - it is available and free (MIT License)
+
+## Dependencies
+
+- boost `sudo apt-get install libboost-all-dev`
+- COIN-OR (CLP, CBC, VOL, DIP) https://coin-or.github.io/coinbrew/
+- Gecode:
+
+Download latest version: download https://www.gecode.org/download.html
+
+Compile (more info https://www.gecode.org/doc/2.2.0/reference/PageComp.html):
+```shell
+./configure
+make
+```
+Update include path in `.bashrc`:
+```shell
+# Gecode
+export GECODE_HOME="/opt/gecode-release-6.2.0"
+export CPLUS_INCLUDE_PATH="${CPLUS_INCLUDE_PATH}:${GECODE_HOME}"
+```
+Create symlinks for libraries:
+```shell
+for i in "${GECODE_HOME}"/*.so*; do
+    sudo ln -s "$i" /usr/lib/x86_64-linux-gnu/
+done
+```
+
+- CPLEX (optional)
+
+Update include path in `.bashrc`:
+```shell
+# CPlex
+export CPLEX_VERSION="126"
+export CPLEX_HOME="/opt/ibm/ILOG/CPLEX_Studio${CPLEX_VERSION}/cplex"
+export CONCERT_HOME="/opt/ibm/ILOG/CPLEX_Studio${CPLEX_VERSION}/concert"
+export CPOPTIMIZER_HOME="/opt/ibm/ILOG/CPLEX_Studio${CPLEX_VERSION}/cpoptimizer"
+export PATH="$PATH:${CPLEX_HOME}/bin/x86-64_linux"
+export CLASSPATH="$CLASSPATH:${CPLEX_HOME}/lib/cplex.jar"
+export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:${CPLEX_HOME}/include"
+export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:${CONCERT_HOME}/include"
+export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:${CPOPTIMIZER_HOME}/include"
+```
+Create symlinks for libraries:
+```shell
+CPLEX_HOME="/opt/ibm/ILOG/CPLEX_Studio126"
+LIB_DIR="/usr/lib/x86_64-linux-gnu/"
+sudo ln -s "${CPLEX_HOME}/cplex/lib/x86-64_linux/static_pic/libcplex.a" "${LIB_DIR}"
+sudo ln -s "${CPLEX_HOME}/cplex/lib/x86-64_linux/static_pic/libcp.a" "${LIB_DIR}"
+sudo ln -s "${CPLEX_HOME}/cplex/lib/x86-64_linux/static_pic/libcplexdistmip.a" "${LIB_DIR}"
+sudo ln -s "${CPLEX_HOME}/concert/lib/x86-64_linux/static_pic/libconcert.a" "${LIB_DIR}"
+sudo ln -s "${CPLEX_HOME}/cpoptimizer/lib/x86-64_linux/static_pic/libcp.a" "${LIB_DIR}"
+```
+
+## Technical informations
+
+Compile:
+```
+bazel build --cxxopt='-std=c++14' --compilation_mode=opt -- //...
+```
+
+Solve:
+```
+./bazel-bin/lib/main -v -a branchandcut_cbc -i data/a05100 -o out.ini -c sol.txt
+```
+
+Unit tests:
+```
+bazel test --cxxopt='-std=c++14' --compilation_mode=opt -- //...
+```
 

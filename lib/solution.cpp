@@ -269,3 +269,12 @@ ItemIdx gap::distance(const Solution& sol1, const Solution& sol2)
     return dist;
 }
 
+bool gap::compare(const Solution& sol_best, const Solution& sol_curr)
+{
+    if (!sol_curr.feasible())
+        return false;
+    if (!sol_best.feasible())
+        return true;
+    return sol_best.cost() > sol_curr.cost();
+}
+

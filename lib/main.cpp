@@ -1,6 +1,7 @@
 #include "gap/lb_linrelax_clp/linrelax_clp.hpp"
 #include "gap/lb_lagrelax_volume/lagrelax_volume.hpp"
 #include "gap/opt_branchandcut_cbc/branchandcut_cbc.hpp"
+#include "gap/opt_constraintprogramming_gecode/constraintprogramming_gecode.hpp"
 //#include "gap/opt_constraintprogramming_cplex/constraintprogramming_cplex.hpp"
 //#include "gap/opt_branchandcut_cplex/branchandcut_cplex.hpp"
 //#include "gap/opt_dip/dip.hpp"
@@ -8,6 +9,7 @@
 #include "gap/ub_greedy/greedy.hpp"
 #include "gap/ub_repair/repair.hpp"
 #include "gap/ub_ls_shiftswap/ls_shiftswap.hpp"
+#include "gap/ub_ls_ejectionchain/ls_ejectionchain.hpp"
 #include "gap/ub_vdns_simple/vdns_simple.hpp"
 #include "gap/ub_vnsbranching_cbc/vnsbranching_cbc.hpp"
 //#include "gap/ub_vnsbranching_cplex/vnsbranching_cplex.hpp"
@@ -118,6 +120,12 @@ int main(int argc, char *argv[])
                 .info = info,
                 });
     */
+    } else if (vstrings[0] == "constraintprogramming_gecode") {
+        sopt_constraintprogramming_gecode({
+                .ins = ins,
+                .sol = sol,
+                .info = info,
+                });
     /*
     } else if (vstrings[0] == "constraintprogramming_cplex") {
         sopt_constraintprogramming_cplex({
@@ -197,6 +205,12 @@ int main(int argc, char *argv[])
                 }.set_params(args));
     } else if (vstrings[0] == "pr_shiftswap") {
         sol = sol_pr_shiftswap(PRShiftSwapData{
+                .ins = ins,
+                .gen = gen,
+                .info = info
+                }.set_params(args));
+    } else if (vstrings[0] == "lsfirst_ejectionchain") {
+        sol = sol_lsfirst_ejectionchain(LSFirstECData{
                 .ins = ins,
                 .gen = gen,
                 .info = info

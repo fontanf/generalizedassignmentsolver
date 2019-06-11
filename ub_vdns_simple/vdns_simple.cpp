@@ -216,78 +216,85 @@ Solution gap::sol_vdns_simple(const Instance& ins, std::mt19937_64& gen, Info in
 
     std::vector<Cpt> last_modif(m, -1);
     std::vector<Cpt> imp_nb(m, 0);
+
+    std::vector<std::vector<std::pair<std::vector<AgentIdx>, Cpt>>> agents {{}};
+    for (AgentIdx i1=0; i1<m; ++i1)
+        for (AgentIdx i2=i1+1; i2<m; ++i2)
+            agents[0].push_back({{i1, i2}, -1});
+    std::shuffle(agents[0].begin(), agents[0].end(), gen);
+
     Cpt it = 0;
-    for (AgentIdx m_gap=2; m_gap<=m && info.check_time(); ++m_gap) {
-        std::vector<std::pair<std::vector<AgentIdx>, Cpt>> agents;
-        std::vector<AgentIdx> vec(m_gap);
-        std::iota(vec.begin(), vec.end(), 0);
-        while (vec[0] <= m - m_gap) {
-            while (vec.back() < m) {
-                agents.push_back({vec, -1});
-                vec.back()++;
+    AgentIdx m_gap = 2;
+    Cpt k = 0;
+    for (; info.check_time(); ++it) {
+        std::uniform_int_distribution<Cpt> dis(k, agents[m_gap - 2].size() - 1);
+        Cpt move_idx = dis(gen);
+        iter_swap(agents[m_gap - 2].begin() + k, agents[m_gap - 2].begin() + move_idx);
+
+        bool todo = false;
+        if (agents[m_gap - 2][k].second >= 0) {
+            for (AgentIdx i: agents[m_gap - 2][k].first) {
+                if (last_modif[i] > agents[m_gap - 2][k].second) {
+                    todo = true;
+                    break;
+                }
             }
-            AgentIdx i = m_gap - 1;
-            while (i >= 0 && vec[i] >= m - m_gap + i)
-                i--;
-            if (i == -1)
-                break;
-            vec[i]++;
-            for (AgentIdx i2=i+1; i2<m_gap; ++i2)
-                vec[i2] = vec[i2 - 1] + 1;
+        } else {
+            todo = true;
+        }
+        agents[m_gap - 2][k].second = it;
+
+        if (todo && move_gap(ins, sol_curr, m_gap, agents[m_gap - 2][k].first, n, items, info)) {
+            std::stringstream ss;
+            ss << "gap m " << m_gap << ":";
+            for (AgentIdx i: agents[m_gap - 2][k].first) {
+                last_modif[i] = it;
+                imp_nb[i]++;
+                ss << " " << i;
+            }
+            sol_best.update(sol_curr, lb, ss, info);
+            k = 0;
+            m_gap = 2;
         }
 
-        if (m_gap == 2) {
-            std::shuffle(agents.begin(), agents.end(), gen);
-        } else {
-            sort(agents.begin(), agents.end(), [&imp_nb](
+        if (k == (Cpt)agents[m_gap - 2].size() - 1) {
+            m_gap++;
+            if (m_gap > m)
+                break;
+
+            if ((AgentIdx)agents.size() < m_gap - 1) {
+                agents.push_back({});
+                std::vector<AgentIdx> vec(m_gap);
+                std::iota(vec.begin(), vec.end(), 0);
+                while (vec[0] <= m - m_gap) {
+                    while (vec.back() < m) {
+                        agents[m_gap - 2].push_back({vec, -1});
+                        vec.back()++;
+                    }
+                    AgentIdx i = m_gap - 1;
+                    while (i >= 0 && vec[i] >= m - m_gap + i)
+                        i--;
+                    if (i == -1)
+                        break;
+                    vec[i]++;
+                    for (AgentIdx i2=i+1; i2<m_gap; ++i2)
+                        vec[i2] = vec[i2 - 1] + 1;
+                }
+            }
+            //std::shuffle(agents[m_gap - 2].begin(), agents[m_gap - 2].end(), gen);
+            sort(agents[m_gap - 2].begin(), agents[m_gap - 2].end(), [&imp_nb](
                         const std::pair<std::vector<AgentIdx>, Cpt>& a,
                         const std::pair<std::vector<AgentIdx>, Cpt>& b) -> bool {
                     int va = 0; for (AgentIdx i: a.first) va += imp_nb[i];
                     int vb = 0; for (AgentIdx i: b.first) vb += imp_nb[i];
                     return va > vb; });
-        }
 
-        ItemIdx k_last = agents.size() - 1;
-        for (ItemIdx k=0; ; k=(k+1)%agents.size(), ++it) {
-            //if (k == 0)
-                //std::cout << "k = 0" << std::endl;
-            bool todo = false;
-            if (agents[k].second >= 0) {
-                for (AgentIdx i: agents[k].first) {
-                    if (last_modif[i] > agents[k].second) {
-                        todo = true;
-                        break;
-                    }
-                }
-            } else {
-                todo = true;
-            }
-            //if (!todo) {
-                //std::cout << "toto";
-                //for (AgentIdx i: agents[k].first) {
-                    //std::cout << " " << i;
-                //}
-                //std::cout << std::endl;
-            //}
-            agents[k].second = it;
-
-            if (todo && move_gap(ins, sol_curr, m_gap, agents[k].first, n, items, info)) {
-                std::stringstream ss;
-                ss << "gap m " << m_gap << ":";
-                for (AgentIdx i: agents[k].first) {
-                    last_modif[i] = it;
-                    imp_nb[i]++;
-                    ss << " " << i;
-                }
-                sol_best.update(sol_curr, lb, ss, info);
-                k_last = (k != 0)? k - 1: agents.size() - 1;
-            }
-            if (k == k_last)
-                break;
-            if (!info.check_time())
-                return algorithm_end(sol_best, info);
+            k = 0;
+        } else {
+            k++;
         }
     }
+
     return algorithm_end(sol_best, info);
 }
 

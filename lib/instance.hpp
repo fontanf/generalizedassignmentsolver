@@ -75,6 +75,7 @@ public:
     const Alternative& alternative(AltPos k) const { return alternatives_[k]; }
     const Alternative& alternative(ItemIdx j, AgentIdx i) const { return alternatives_[items_[j].alt[i]]; } 
 
+    inline Cost cost_max() const { return c_max_; }
     inline Cost profit(const Alternative& a)  const { return c_max_ - a.c; }
     inline Cost profit(AltIdx k)              const { return profit(alternative(k)); }
     inline Cost profit(ItemIdx j, AgentIdx i) const { return profit(alternative_index(i, j)); }

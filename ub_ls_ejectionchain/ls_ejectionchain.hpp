@@ -23,7 +23,9 @@ struct LSFirstECData
         return *this;
     }
 };
+std::vector<ItemIdx> ejectionchain_iter(Solution& sol_curr, std::vector<ItemIdx>& items, std::mt19937_64& gen, std::stringstream& ss);
 void sol_lsfirst_ejectionchain(LSFirstECData d, Solution& sol_best);
+Solution sol_lsfirst_ejectionchain(LSFirstECData d);
 
 }
 

@@ -8,17 +8,6 @@
 
 using namespace gap;
 
-Solution random_solution(const Instance& ins, std::mt19937_64& gen)
-{
-    Solution sol(ins);
-    std::uniform_int_distribution<AgentIdx> dis_i(0, ins.agent_number() - 1);
-    for (ItemIdx j=0; j<ins.item_number(); ++j)
-        sol.set(j, dis_i(gen));
-    return sol;
-}
-
-/******************************************************************************/
-
 std::vector<std::pair<ItemIdx, ItemIdx>> gap::moves_shift(const Instance& ins)
 {
     ItemIdx n = ins.item_number();
@@ -34,10 +23,10 @@ bool gap::shift_iter(
         Solution& sol_curr,
         std::vector<std::pair<ItemIdx, AgentIdx>>& moves,
         std::mt19937_64& gen,
-        Cpt& it)
+        std::stringstream& ss)
 {
     PCost v_curr = sol_curr.pcost();
-    for (Cpt k=0; k<(Cpt)moves.size(); ++k, ++it) {
+    for (Cpt k=0; k<(Cpt)moves.size(); ++k) {
         std::uniform_int_distribution<Cpt> dis(k, moves.size() - 1);
         Cpt move_idx = dis(gen);
         iter_swap(moves.begin() + k, moves.begin() + move_idx);
@@ -47,8 +36,10 @@ bool gap::shift_iter(
         if (i >= i_old)
             i++;
         sol_curr.set(j, i);
-        if (v_curr > sol_curr.pcost())
+        if (v_curr > sol_curr.pcost()) {
+            ss << "shift " << j << ": " << i_old << " => " << i;
             return true;
+        }
         sol_curr.set(j, i_old);
     }
     return false;
@@ -60,22 +51,20 @@ void gap::sol_lsfirst_shift(LSFirstShiftSwapData d, Solution& sol_best)
     Solution sol_curr = sol_best;
     sol_curr.update_penalties(std::vector<PCost>(m, d.alpha));
     auto moves = moves_shift(d.ins);
-    for (Cpt it=0; d.info.check_time();) {
-        bool improved = shift_iter(sol_curr, moves, d.gen, it);
+    for (; d.info.check_time();) {
+        std::stringstream ss;
+        bool improved = shift_iter(sol_curr, moves, d.gen, ss);
         if (!improved)
             break;
-        if (sol_curr.feasible() && (!sol_best.feasible() || sol_best.cost() > sol_curr.cost())) {
-            std::stringstream ss;
-            ss << "it " << it;
+        if (compare(sol_best, sol_curr))
             sol_best.update(sol_curr, 0, ss, d.info);
-        }
     }
 }
 
 Solution gap::sol_lsfirst_shift(LSFirstShiftSwapData d)
 {
     init_display(d.info);
-    Solution sol = random_solution(d.ins, d.gen);
+    Solution sol = sol_random_infeasible(d.ins, d.gen);
     sol_lsfirst_shift(d, sol);
     return algorithm_end(sol, d.info);
 }
@@ -100,10 +89,10 @@ bool gap::shiftswap_iter(
         Solution& sol_curr,
         std::vector<std::pair<ItemIdx, ItemIdx>>& moves,
         std::mt19937_64& gen,
-        Cpt& it)
+        std::stringstream& ss)
 {
     PCost v_curr = sol_curr.pcost();
-    for (Cpt k=0; k<(Cpt)moves.size(); ++k, ++it) {
+    for (Cpt k=0; k<(Cpt)moves.size(); ++k) {
         std::uniform_int_distribution<Cpt> dis(k, moves.size() - 1);
         Cpt move_idx = dis(gen);
         iter_swap(moves.begin() + k, moves.begin() + move_idx);
@@ -114,8 +103,10 @@ bool gap::shiftswap_iter(
             if (i >= i_old)
                 i++;
             sol_curr.set(j, i);
-            if (v_curr > sol_curr.pcost())
+            if (v_curr > sol_curr.pcost()) {
+                ss << "shift " << j << ": " << i_old << " => " << i;
                 return true;
+            }
             sol_curr.set(j, i_old);
         } else { // swap
             ItemIdx j1 = moves[k].first;
@@ -126,8 +117,10 @@ bool gap::shiftswap_iter(
                 continue;
             sol_curr.set(j1, i2);
             sol_curr.set(j2, i1);
-            if (v_curr > sol_curr.pcost())
+            if (v_curr > sol_curr.pcost()) {
+                ss << "swap " << j1 << " (" << i1 << ") " << j2 << " (" << i2 << ")";
                 return true;
+            }
             sol_curr.set(j1, i1);
             sol_curr.set(j2, i2);
         }
@@ -141,22 +134,20 @@ void gap::sol_lsfirst_shiftswap(LSFirstShiftSwapData d, Solution& sol_best)
     Solution sol_curr = sol_best;
     sol_curr.update_penalties(std::vector<PCost>(m, d.alpha));
     auto moves = moves_shiftswap(d.ins);
-    for (Cpt it=0; d.info.check_time();) {
-        bool improved = shiftswap_iter(sol_curr, moves, d.gen, it);
+    for (; d.info.check_time();) {
+        std::stringstream ss;
+        bool improved = shiftswap_iter(sol_curr, moves, d.gen, ss);
         if (!improved)
             break;
-        if (sol_curr.feasible() && (!sol_best.feasible() || sol_best.cost() > sol_curr.cost())) {
-            std::stringstream ss;
-            ss << "it " << it;
+        if (compare(sol_best, sol_curr))
             sol_best.update(sol_curr, 0, ss, d.info);
-        }
     }
 }
 
 Solution gap::sol_lsfirst_shiftswap(LSFirstShiftSwapData d)
 {
     init_display(d.info);
-    Solution sol = random_solution(d.ins, d.gen);
+    Solution sol = sol_random_infeasible(d.ins, d.gen);
     sol_lsfirst_shiftswap(d, sol);
     return algorithm_end(sol, d.info);
 }
@@ -177,10 +168,10 @@ bool gap::swap_iter(
         Solution& sol_curr,
         std::vector<std::pair<ItemIdx, ItemIdx>>& moves,
         std::mt19937_64& gen,
-        Cpt& it)
+        std::stringstream& ss)
 {
     PCost v_curr = sol_curr.pcost();
-    for (Cpt k=0; k<(Cpt)moves.size(); ++k, ++it) {
+    for (Cpt k=0; k<(Cpt)moves.size(); ++k) {
         std::uniform_int_distribution<Cpt> dis(k, moves.size() - 1);
         Cpt move_idx = dis(gen);
         iter_swap(moves.begin() + k, moves.begin() + move_idx);
@@ -192,8 +183,10 @@ bool gap::swap_iter(
             continue;
         sol_curr.set(j1, i2);
         sol_curr.set(j2, i1);
-        if (v_curr > sol_curr.pcost())
+        if (v_curr > sol_curr.pcost()) {
+            ss << "swap " << j1 << " (" << i1 << ") " << j2 << " (" << i2 << ")";
             return true;
+        }
         sol_curr.set(j1, i1);
         sol_curr.set(j2, i2);
     }
@@ -207,24 +200,22 @@ void gap::sol_lsfirst_shift_swap(LSFirstShiftSwapData d, Solution& sol_best)
     sol_curr.update_penalties(std::vector<PCost>(m, d.alpha));
     auto moves_1 = moves_shift(d.ins);
     auto moves_2 = moves_swap(d.ins);
-    for (Cpt it=0; d.info.check_time();) {
-        if       (shift_iter(sol_curr, moves_1, d.gen, it)) {
-        } else if (swap_iter(sol_curr, moves_2, d.gen, it)) {
+    for (; d.info.check_time();) {
+        std::stringstream ss;
+        if       (shift_iter(sol_curr, moves_1, d.gen, ss)) {
+        } else if (swap_iter(sol_curr, moves_2, d.gen, ss)) {
         } else {
             break;
         }
-        if (sol_curr.feasible() && (!sol_best.feasible() || sol_best.cost() > sol_curr.cost())) {
-            std::stringstream ss;
-            ss << "it " << it;
+        if (compare(sol_best, sol_curr))
             sol_best.update(sol_curr, 0, ss, d.info);
-        }
     }
 }
 
 Solution gap::sol_lsfirst_shift_swap(LSFirstShiftSwapData d)
 {
     init_display(d.info);
-    Solution sol = random_solution(d.ins, d.gen);
+    Solution sol = sol_random_infeasible(d.ins, d.gen);
     sol_lsfirst_shift_swap(d, sol);
     return algorithm_end(sol, d.info);
 }
@@ -300,7 +291,7 @@ Solution gap::sol_lsbest_shiftswap(LSBestShiftSwapData d)
         }
 
         // Update best solution
-        if (sol_curr.feasible() && (!sol_best.feasible() || sol_best.cost() > sol_curr.cost())) {
+        if (compare(sol_best, sol_curr)) {
             std::stringstream ss;
             ss << "it " << it;
             sol_best.update(sol_curr, 0, ss, d.info);
@@ -319,7 +310,7 @@ Solution gap::sol_ts_shiftswap(TSShiftSwapData d)
     AgentIdx m = d.ins.agent_number();
     ItemIdx n = d.ins.item_number();
 
-    Solution sol_curr = random_solution(d.ins, d.gen);
+    Solution sol_curr = sol_random_infeasible(d.ins, d.gen);
     sol_curr.update_penalties(std::vector<PCost>(m, d.alpha));
     auto moves = moves_shiftswap(d.ins);
 
@@ -348,7 +339,7 @@ Solution gap::sol_ts_shiftswap(TSShiftSwapData d)
                 if (it - tabu[j][i] < tabu_size)
                     continue;
                 sol_curr.set(j, i);
-                if (sol_curr.feasible() && (!sol_best.feasible() || sol_best.cost() > sol_curr.cost())) {
+                if (compare(sol_best, sol_curr)) {
                     std::stringstream ss;
                     ss << "it " << it;
                     sol_best.update(sol_curr, 0, ss, d.info);
@@ -379,7 +370,7 @@ Solution gap::sol_ts_shiftswap(TSShiftSwapData d)
                     continue;
                 sol_curr.set(j1, i2);
                 sol_curr.set(j2, i1);
-                if (sol_curr.feasible() && (!sol_best.feasible() || sol_best.cost() > sol_curr.cost())) {
+                if (compare(sol_best, sol_curr)) {
                     std::stringstream ss;
                     ss << "it " << it;
                     sol_best.update(sol_curr, 0, ss, d.info);
@@ -489,7 +480,7 @@ Solution gap::sol_sa_shiftswap(SAShiftSwapData d)
             }
 
             // Update best solution
-            if (sol_curr.feasible() && (!sol_best.feasible() || sol_best.cost() > sol_curr.cost())) {
+            if (compare(sol_best, sol_curr)) {
                 std::stringstream ss;
                 ss << "T " << t;
                 sol_best.update(sol_curr, 0, ss, d.info);
@@ -522,7 +513,7 @@ void pr_shiftswap(PRShiftSwapData& d,
                     i++;
                 //std::cout << "j " << j << " i_old " << i_old << " i " << i << std::endl;
                 sol_curr.set(j, i);
-                if (sol_curr.feasible() && (!sol_best.feasible() || sol_best.cost() > sol_curr.cost())) {
+                if (compare(sol_best, sol_curr)) {
                     std::stringstream ss;
                     sol_best.update(sol_curr, 0, ss, d.info);
                 }
@@ -541,7 +532,7 @@ void pr_shiftswap(PRShiftSwapData& d,
                 //std::cout << "j1 " << j1 << " i1 " << i1 << " j2 " << j2 << " i2 " << i2 << std::endl;
                 sol_curr.set(j1, i2);
                 sol_curr.set(j2, i1);
-                if (sol_curr.feasible() && (!sol_best.feasible() || sol_best.cost() > sol_curr.cost())) {
+                if (compare(sol_best, sol_curr)) {
                     std::stringstream ss;
                     sol_best.update(sol_curr, 0, ss, d.info);
                 }
@@ -580,7 +571,7 @@ Solution gap::sol_pr_shiftswap(PRShiftSwapData d)
 
     std::vector<Solution> pool(d.rho, Solution(d.ins));
     for (Solution& sol_curr: pool) {
-        sol_curr = random_solution(d.ins, d.gen);
+        sol_curr = sol_random_infeasible(d.ins, d.gen);
         sol_curr.update_penalties(std::vector<PCost>(m, d.alpha));
         pr_shiftswap(d, moves, sol_curr, sol_best);
     }
