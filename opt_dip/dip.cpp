@@ -13,6 +13,7 @@ using namespace gap;
 
 /**
  * Useful links to use Dip:
+ * https://github.com/coin-or/Dip/wiki
  * https://github.com/coin-or/Dip/blob/master/Dip/examples/GAP/GAPDecompApp.cpp
  * http://coral.ie.lehigh.edu/~ted/files/talks/DecompCSIRO11.pdf
  * https://www.coin-or.org/Doxygen/Dip/class_decomp_app.html
