@@ -2,12 +2,12 @@
 
 #include "knapsack/opt_minknap/minknap.hpp"
 
-#include "coin/DecompApp.h"
-#include "coin/DecompVar.h"
-#include "coin/AlpsDecompModel.h"
-#include "coin/DecompAlgoC.h"
-#include "coin/DecompAlgoPC.h"
-#include "coin/UtilTimer.h"
+#include <coin/DecompApp.h>
+#include <coin/DecompVar.h>
+#include <coin/AlpsDecompModel.h>
+#include <coin/DecompAlgoC.h>
+#include <coin/DecompAlgoPC.h>
+#include <coin/UtilTimer.h>
 
 using namespace gap;
 
@@ -24,11 +24,7 @@ class GAPDecompApp: public DecompApp
 
 public:
 
-    GAPDecompApp(UtilParameters& util_param, const Instance& ins):
-        DecompApp(util_param), ins_(ins)
-    {
-        initializeApp();
-    }
+    GAPDecompApp(UtilParameters& util_param, const Instance& ins);
 
     virtual ~GAPDecompApp() { UtilDeleteMapPtr(models_); };
 
@@ -36,11 +32,6 @@ public:
             const int whichBlock, const double* redCostX,
             const double target, std::list<DecompVar*>& vars);
 
-    void printOriginalColumn(const int index, std::ostream* os = &std::cout) const;
-
-    void initializeApp();
-
-    int createModels();
     int createModelPartAP(DecompConstraintSet* model);
 
     inline const Instance& instance() const { return ins_; }
@@ -70,10 +61,37 @@ private:
 
 };
 
-void GAPDecompApp::initializeApp()
+GAPDecompApp::GAPDecompApp(UtilParameters& util_param, const Instance& ins):
+    DecompApp(util_param), ins_(ins)
 {
-    createModels();
+    ItemIdx n = ins.item_number();
+    AgentIdx m = ins.agent_number();
+    AltIdx o = ins.alternative_number();
+
+    std::vector<double> objective(o);
+    m_objective = new double[o];
+    for (ItemIdx j=0; j<n; ++j) {
+        for (AgentIdx i=0; i<m; ++i) {
+            AltIdx k = ins.alternative_index(j, i);
+            objective[k] = ins.alternative(k).c;
+        }
+    }
+    setModelObjective(objective.data(), o);
+
+    DecompConstraintSet* modelCore = new DecompConstraintSet();
+    int status = createModelPartAP(modelCore);
+    if (status)
+        return;
+
+    setModelCore(modelCore, "AP");
+    models_.insert(std::make_pair("AP", modelCore));
+
+    for (AgentIdx i=0; i<m; i++) {
+        std::string modelName = "KP" + UtilIntToStr(i);
+        setModelRelax(NULL, modelName, i);
+    }
 }
+
 
 int GAPDecompApp::createModelPartAP(DecompConstraintSet* model)
 {
@@ -117,38 +135,6 @@ int GAPDecompApp::createModelPartAP(DecompConstraintSet* model)
     return 0;
 }
 
-int GAPDecompApp::createModels()
-{
-    const Instance& ins = ins_;
-    ItemIdx n = ins.item_number();
-    AgentIdx m = ins.agent_number();
-    AltIdx o = ins.alternative_number();
-
-    std::vector<double> objective(o, 0);
-    for (ItemIdx j=0; j<n; ++j) {
-        for (AgentIdx i=0; i<m; ++i) {
-            AltIdx k = ins.alternative_index(j, i);
-            objective[k] = ins.alternative(k).c;
-        }
-    }
-    setModelObjective(m_objective, o);
-
-    DecompConstraintSet* modelCore = new DecompConstraintSet();
-    int status = createModelPartAP(modelCore);
-    if (status)
-        return status;
-
-    setModelCore(modelCore, "AP");
-    models_.insert(std::make_pair("AP", modelCore));
-
-    for (AgentIdx i=0; i<m; i++) {
-        std::string modelName = "KP" + UtilIntToStr(i);
-        setModelRelax(NULL, modelName, i);
-    }
-
-    return status;
-}
-
 DecompSolverStatus GAPDecompApp::solveRelaxed(
         const int i, const double* rc, const double target, std::list<DecompVar*>& vars)
 {
@@ -160,6 +146,10 @@ DecompSolverStatus GAPDecompApp::solveRelaxed(
     double varOrigCost = 0.0;
     std::vector<int>    sol_ind(n, -1);
     std::vector<double> sol_els(n, 0);
+
+    for (AltIdx k=0; k<ins.alternative_number(); ++k)
+        std::cout << " " << rc[k];
+    std::cout << std::endl;
 
     // Solve independent knapsack problems
     Weight mult = 10000;

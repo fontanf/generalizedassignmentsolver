@@ -4,7 +4,7 @@
 #include "gap/opt_constraintprogramming_gecode/constraintprogramming_gecode.hpp"
 //#include "gap/opt_constraintprogramming_cplex/constraintprogramming_cplex.hpp"
 //#include "gap/opt_branchandcut_cplex/branchandcut_cplex.hpp"
-//#include "gap/opt_dip/dip.hpp"
+#include "gap/opt_dip/dip.hpp"
 #include "gap/ub_random/random.hpp"
 #include "gap/ub_greedy/greedy.hpp"
 #include "gap/ub_repair/repair.hpp"
@@ -134,10 +134,8 @@ int main(int argc, char *argv[])
                 .info = info,
                 });
     */
-    /*
     } else if (vstrings[0] == "dip") {
         dip(ins);
-    */
     } else if (vstrings[0] == "random") {
         sol = sol_random(ins, gen, info);
     } else if (vstrings[0] == "greedy") {

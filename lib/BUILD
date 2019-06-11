@@ -62,7 +62,7 @@ cc_binary(
                 "//lb_lagrelax_volume:lagrelax_volume",
                 "//opt_branchandcut_cbc:branchandcut_cbc",
                 #"//opt_branchandcut_cplex:branchandcut_cplex",
-                #"//opt_dip:dip",
+                "//opt_dip:dip",
                 "//opt_constraintprogramming_gecode:constraintprogramming_gecode",
                 #"//opt_constraintprogramming_cplex:constraintprogramming_cplex",
                 "//ub_random:random",
