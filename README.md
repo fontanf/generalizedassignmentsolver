@@ -94,15 +94,22 @@ The bound obtained by solving the lagrangian relaxation of assignment constraint
 
 ## Dependencies
 
-- boost `sudo apt-get install libboost-all-dev`
-- COIN-OR (CLP, CBC, VOL, DIP) https://coin-or.github.io/coinbrew/
+### boost
 
+```shell
+`sudo apt-get install libboost-all-dev`
+```
+
+### COIN-OR (CLP, CBC, VOL, DIP)
+
+Install (https://coin-or.github.io/coinbrew/):
 ```shell
 git clone https://www.github.com/coin-or/coinbrew
 cd coinbrew
 ./coinbrew fetch build Dip --no-prompt
 ./coinbrew fetch build Vol --no-prompt
 ```
+
 Update `.bashrc`:
 ```shell
 # COIN-OR
@@ -110,13 +117,15 @@ export COINOR_HOME="/home/florian/Programmes/coinbrew"
 export PATH="${PATH}:${COINOR_HOME}/build/bin"
 export CPLUS_INCLUDE_PATH="${CPLUS_INCLUDE_PATH}:${COINOR_HOME}/build/include"
 ```
+
 Create symlinks for libraries:
 ```shell
 for i in "${COINOR_HOME}"/build/lib/*.so*; do
     sudo ln -f -s "$i" /usr/lib/x86_64-linux-gnu/
 done
 ```
-- Gecode:
+
+### Gecode:
 
 Download latest version: download https://www.gecode.org/download.html
 
@@ -125,12 +134,14 @@ Compile (more info https://www.gecode.org/doc/2.2.0/reference/PageComp.html):
 ./configure
 make
 ```
+
 Update `.bashrc`:
 ```shell
 # Gecode
 export GECODE_HOME="/opt/gecode-release-6.2.0"
 export CPLUS_INCLUDE_PATH="${CPLUS_INCLUDE_PATH}:${GECODE_HOME}"
 ```
+
 Create symlinks for libraries:
 ```shell
 for i in "${GECODE_HOME}"/*.so*; do
@@ -138,7 +149,7 @@ for i in "${GECODE_HOME}"/*.so*; do
 done
 ```
 
-- CPLEX (optional)
+### CPLEX (optional)
 
 Update `.bashrc`:
 ```shell
@@ -153,6 +164,7 @@ export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:${CPLEX_HOME}/include"
 export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:${CONCERT_HOME}/include"
 export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:${CPOPTIMIZER_HOME}/include"
 ```
+
 Create symlinks for libraries:
 ```shell
 CPLEX_HOME="/opt/ibm/ILOG/CPLEX_Studio126"
