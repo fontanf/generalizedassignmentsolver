@@ -7,7 +7,6 @@ cc_library(
                 "@knapsack//opt_minknap:minknap",
         ],
         linkopts = [
-                "-lAlps",
                 "-lDecomp",
         ],
         visibility = ["//visibility:public"],
