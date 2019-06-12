@@ -129,7 +129,7 @@ int LagRelaxAssignmentHook::solve_subproblem(const VOL_dvector& dual, const VOL_
            AltIdx k = ins.alternative_index(j, i);
            const Alternative& a = ins.alternative(k);
            x[k] = 0;
-           knapsack::Profit p = mult * dual[j] - mult * a.c;
+           knapsack::Profit p = std::ceil(mult * dual[j] - mult * a.c);
            if (p > 0) {
                knapsack::ItemIdx j_kp = ins_kp.add_item(a.w, p);
                indices[j_kp] = j;

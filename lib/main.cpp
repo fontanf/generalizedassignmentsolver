@@ -112,6 +112,8 @@ int main(int argc, char *argv[])
                 .stop_at_first_improvment = false,
                 .info = info,
                 });
+    } else if (vstrings[0] == "branchandcut_dip") {
+        sopt_branchandcut_dip(ins, info);
     /*
     } else if (vstrings[0] == "branchandcut_cplex") {
         sopt_branchandcut_cplex({
@@ -120,6 +122,10 @@ int main(int argc, char *argv[])
                 .info = info,
                 });
     */
+    } else if (vstrings[0] == "branchandpriceandcut_dip") {
+        sopt_branchandpriceandcut_dip(ins, info);
+    } else if (vstrings[0] == "relaxandcut_dip") {
+        sopt_relaxandcut_dip(ins, info);
     } else if (vstrings[0] == "constraintprogramming_gecode") {
         sopt_constraintprogramming_gecode({
                 .ins = ins,

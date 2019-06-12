@@ -73,8 +73,12 @@ Others:
 
 - Branch-and-cut
   - with CBC `-a branchandcut_cbc` :heavy_check_mark:
+  - with DIP `-a branchandcut_dip` :x:
   - with CPLEX `-a branchandcut_cplex` :heavy_check_mark:
-- Branch-and-price :x:
+- Branch-and-price-and-cut with DIP
+  - with DIP `-a branchandpriceandcut_dip` :x:
+  - with CPLEX `-a branchandpriceandcut_dip` :x:
+- Relax-and-cut with DIP `-a relaxandcut_dip` :x:
 - Constraint Programming
   - with Gecode `-a constraintprogramming_gecode` :x:
   - with CPLEX `-a constraintprogramming_cplex` :x:
