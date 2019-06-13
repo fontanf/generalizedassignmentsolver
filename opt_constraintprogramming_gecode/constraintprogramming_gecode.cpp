@@ -54,13 +54,13 @@ public:
         }
         c_ = expr(*this, sum(cj_));
 
-        // Load variables (and capacity constraint)
+        // Load variables (and capacity constraints)
         for (AgentIdx i=0; i<m; ++i) {
             load_[i] = IntVar(*this, 0, ins.capacity(i));
             linear(*this, weights_[i], xij.row(i), IRT_EQ, load_[i]);
         }
 
-        // Branch on the most efficient agent.
+        // Branch on the most efficient agent
         auto v = [](const Space& home, IntVar x, int j)
         {
             const Instance& ins = static_cast<const GapGecode&>(home).instance();
