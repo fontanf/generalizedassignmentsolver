@@ -195,3 +195,9 @@ Unit tests:
 bazel test --cxxopt='-std=c++14' --compilation_mode=opt -- //...
 ```
 
+Checker:
+```
+bazel build --cxxopt='-std=c++14' --compilation_mode=opt -- //lib:checker
+./bazel-bin/lib/checker instancefile solutionfile
+```
+

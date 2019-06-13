@@ -30,6 +30,7 @@ int main(int argc, char *argv[])
     std::string instancefile = "";
     std::string outputfile = "";
     std::string format = "gap_beasley";
+    std::string initsolfile = "";
     std::string certfile = "";
     std::string logfile = "";
     int loglevelmax = 999;
@@ -41,7 +42,8 @@ int main(int argc, char *argv[])
         ("help,h", "produce help message")
         ("algorithm,a", po::value<std::string>(&algorithm), "set algorithm")
         ("input,i", po::value<std::string>(&instancefile)->required(), "set input file (required)")
-        ("format,f", po::value<std::string>(&format), "set input file format (default: knapsack_standard)")
+        ("format,f", po::value<std::string>(&format), "set input file format (default: gap_beasley)")
+        ("initsol", po::value<std::string>(&initsolfile), "set initial solution file")
         ("output,o", po::value<std::string>(&outputfile), "set output file")
         ("cert,c", po::value<std::string>(&certfile), "set certificate file")
         ("time-limit,t", po::value<double>(&time_limit), "Time limit in seconds\n  ex: 3600")
@@ -78,6 +80,9 @@ int main(int argc, char *argv[])
 
     Instance ins(instancefile, format);
     Solution sol(ins);
+    if (initsolfile != "")
+        sol.read(initsolfile);
+    std::cout << "toto" << std::endl;
 
     Info info = Info()
         .set_verbose(vm.count("verbose"))
