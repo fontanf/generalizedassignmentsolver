@@ -78,7 +78,7 @@ Others:
 - Branch-and-price-and-cut with DIP `-a branchandpriceandcut_dip` :x:
 - Relax-and-cut with DIP `-a relaxandcut_dip` :x:
 - Constraint Programming
-  - with Gecode `-a constraintprogramming_gecode` :x:
+  - with Gecode `-a constraintprogramming_gecode` :heavy_check_mark:
   - with CPLEX `-a constraintprogramming_cplex` :heavy_check_mark:
 
 ## Results
@@ -99,7 +99,7 @@ The bound obtained by solving the lagrangian relaxation of assignment constraint
 ### Boost
 
 ```shell
-`sudo apt-get install libboost-all-dev`
+sudo apt-get install libboost-all-dev
 ```
 
 ### COIN-OR (CLP, CBC, VOL, DIP)

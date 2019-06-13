@@ -26,14 +26,6 @@ Solution gap::sopt_constraintprogramming_cplex(ConstraintProgrammingCplexData d)
         for(ItemIdx j=0; j<n; j++)
             model.add((xij[j][i] == 1) == (xj[j] == i));
 
-    // Weights
-    IloArray<IloIntArray> weight(env);
-    for(AgentIdx i=0; i<m; i++) {
-        weight.add(IloIntArray(env, n));
-        for(ItemIdx j=0; j<n; j++)
-            weight[i][j] = d.ins.alternative(j, i).w;
-    }
-
     // Costs
     IloArray<IloIntArray> cost(env);
     for(ItemIdx j=0; j<n; j++) {

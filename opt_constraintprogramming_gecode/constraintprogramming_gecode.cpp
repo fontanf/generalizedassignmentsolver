@@ -32,6 +32,8 @@ public:
         Matrix<BoolVarArgs> xij(xij0_, n, m);
         for (ItemIdx j=0; j<n; j++)
             channel(*this, xij.col(j), xj_[j]);
+        for (ItemIdx j=0; j<n; j++)
+            rel(*this, sum(xij.col(j)) == 1);
 
         // Weights
         weights_ = std::vector<IntArgs>(m, IntArgs(n));
@@ -52,11 +54,29 @@ public:
         }
         c_ = expr(*this, sum(cj_));
 
-        // Load variables (and capacity constraint)
+        // Load variables (and capacity constraints)
         for (AgentIdx i=0; i<m; ++i) {
             load_[i] = IntVar(*this, 0, ins.capacity(i));
             linear(*this, weights_[i], xij.row(i), IRT_EQ, load_[i]);
         }
+
+        // Branch on the most efficient agent
+        auto v = [](const Space& home, IntVar x, int j)
+        {
+            const Instance& ins = static_cast<const GapGecode&>(home).instance();
+            AgentIdx i_best = -1;
+            double c_best = -1;
+            for (IntVarValues i(x); i(); ++i) {
+                AltIdx k = ins.alternative_index(j, i.val());
+                double c = ins.profit(k) / ins.alternative(k).w;
+                if (i_best == -1 || c_best < c) {
+                    i_best = i.val();
+                    c_best = c;
+                }
+            }
+            return i_best;
+        };
+        branch(*this, xj_, INT_VAR_NONE(), INT_VAL(v));
     }
 
     ~GapGecode() {  }
@@ -81,6 +101,7 @@ public:
     }
 
     AgentIdx agent(ItemIdx j) const { return xj_[j].val(); }
+    const Instance& instance() const { return ins_; }
 
 private:
 
@@ -99,15 +120,16 @@ Solution gap::sopt_constraintprogramming_gecode(ConstraintProgrammingGecodeData 
 {
     VER(d.info, "*** constraintprogramming_gecode ***" << std::endl);
 
+    init_display(d.info);
     GapGecode model(d.ins);
     //Gist::bab(&model);
     BAB<GapGecode> engine(&model);
     GapGecode* sol = NULL;
+    Solution sol_best(d.ins);
     while ((sol = engine.next())) {
-        std::cout << "New solution" << std::endl;
-        sol->print();
         for (ItemIdx j=0; j<d.ins.item_number(); j++)
             d.sol.set(j, sol->agent(j));
+        sol_best.update(d.sol, 0, std::stringstream(""), d.info);
         delete sol;
     }
 
