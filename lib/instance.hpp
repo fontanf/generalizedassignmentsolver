@@ -7,7 +7,6 @@
 #include <string>
 #include <algorithm>
 #include <iostream>
-#include <fstream>
 #include <chrono>
 #include <memory>
 #include <map>
@@ -65,7 +64,7 @@ public:
     void set_capacity(AgentIdx i, Weight t) { t_[i] = t; }
     void set_optimal_solution(Solution& sol);
 
-    Instance(std::string filename, std::string format);
+    Instance(std::string filename, std::string format = "gap_beasley");
     ~Instance();
 
     Instance(const Instance& ins);

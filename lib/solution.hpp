@@ -71,7 +71,8 @@ public:
 
     void update(const Solution& sol, Cost lb, const std::stringstream& s, Info& info);
 
-    void write_cert(std::string file);
+    void read(std::string filepath);
+    void write_cert(std::string filepath);
     std::string to_string(AgentIdx i);
 
 private:

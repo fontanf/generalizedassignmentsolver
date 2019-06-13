@@ -77,6 +77,12 @@ cc_binary(
 )
 
 cc_binary(
+        name = "checker",
+        srcs = ["checker.cpp"],
+        deps = [":cpp"],
+)
+
+cc_binary(
         name = "test_main",
         srcs = ["test_main.cpp"],
         deps = [

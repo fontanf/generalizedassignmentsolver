@@ -64,7 +64,7 @@ Instance::Instance(std::string filepath, std::string format)
 
 void Instance::read_beasley(std::string filepath)
 {
-    std::ifstream file(filepath, std::ios_base::in);
+    std::ifstream file(filepath);
     ItemIdx n;
     AgentIdx m;
     file >> m >> n;

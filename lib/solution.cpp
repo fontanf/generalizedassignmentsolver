@@ -1,6 +1,7 @@
 #include "gap/lib/solution.hpp"
 
 #include <iomanip>
+#include <iostream>
 
 using namespace gap;
 
@@ -183,14 +184,26 @@ void Solution::clear()
     total_pcost_ = 0;
 }
 
-void Solution::write_cert(std::string file)
+void Solution::read(std::string filepath)
 {
-    if (file != "") {
-        std::ofstream cert;
-        cert.open(file);
-        std::copy(x_.begin(), x_.end(), std::ostream_iterator<AgentIdx>(cert, " "));
-        cert.close();
+    std::ifstream file(filepath);
+    ItemIdx n = instance().item_number();
+    AgentIdx i = -1;
+    for (ItemPos j=0; j<n; ++j) {
+        file >> i;
+        set(j, i);
     }
+}
+
+void Solution::write_cert(std::string filepath)
+{
+    if (filepath == "")
+        return;
+    std::ofstream cert;
+    cert.open(filepath);
+    std::copy(x_.begin(), x_.end(), std::ostream_iterator<AgentIdx>(cert, " "));
+    cert << std::endl;
+    cert.close();
 }
 
 std::ostream& gap::operator<<(std::ostream& os, const Solution& sol)
