@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "produce help message")
-        (",t", po::value<std::string>(&data.t)->required(), "set instance type (a, b, c, d, e, nn, ns, nc)")
+        (",t", po::value<std::string>(&data.t)->required(), "set instance type (a, b, c, d, e, f, g)")
         (",n", po::value<ItemIdx>(&data.n)->required(), "set item number")
         (",m", po::value<AgentIdx>(&data.m), "set agent number")
         (",r", po::value<Weight>(&data.r), "set R")
