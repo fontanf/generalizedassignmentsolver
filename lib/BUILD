@@ -3,7 +3,6 @@ cc_library(
         hdrs = [
                 "instance.hpp",
                 "solution.hpp",
-                "subinstance.hpp",
                 "desirability.hpp",
         ],
         srcs = [
@@ -26,7 +25,6 @@ cc_library(
         hdrs = [
                 "instance.hpp",
                 "solution.hpp",
-                "subinstance.hpp",
         ],
         visibility = ["//visibility:public"],
         include_prefix = "gap/lib/",
@@ -94,12 +92,6 @@ cc_binary(
 cc_binary(
         name = "generator_main",
         srcs = ["generator_main.cpp"],
-        deps = [":generator"],
-)
-
-cc_binary(
-        name = "geninst",
-        srcs = ["geninst.cpp"],
         deps = [":generator"],
 )
 

@@ -1,9 +1,9 @@
 #include "gap/lb_linrelax_clp/linrelax_clp.hpp"
 #include "gap/lb_lagrelax_volume/lagrelax_volume.hpp"
 #include "gap/opt_branchandcut_cbc/branchandcut_cbc.hpp"
+//#include "gap/opt_branchandcut_cplex/branchandcut_cplex.hpp"
 #include "gap/opt_constraintprogramming_gecode/constraintprogramming_gecode.hpp"
 //#include "gap/opt_constraintprogramming_cplex/constraintprogramming_cplex.hpp"
-//#include "gap/opt_branchandcut_cplex/branchandcut_cplex.hpp"
 #include "gap/opt_dip/dip.hpp"
 #include "gap/ub_random/random.hpp"
 #include "gap/ub_greedy/greedy.hpp"
@@ -82,7 +82,6 @@ int main(int argc, char *argv[])
     Solution sol(ins);
     if (initsolfile != "")
         sol.read(initsolfile);
-    std::cout << "toto" << std::endl;
 
     Info info = Info()
         .set_verbose(vm.count("verbose"))
@@ -225,7 +224,7 @@ int main(int argc, char *argv[])
                 .info = info
                 }.set_params(args));
     } else if (vstrings[0] == "vdns_simple") {
-        sol = sol_vdns_simple(ins, gen, info);
+        sol = sol_vdns_simple(ins, sol, gen, info);
     } else if (vstrings[0] == "vnsbranching_cbc") {
         sol = sol_vnsbranching_cbc(ins, gen, info);
     /*

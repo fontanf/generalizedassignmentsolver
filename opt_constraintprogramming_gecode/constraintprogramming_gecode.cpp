@@ -121,6 +121,10 @@ Solution gap::sopt_constraintprogramming_gecode(ConstraintProgrammingGecodeData 
     VER(d.info, "*** constraintprogramming_gecode ***" << std::endl);
 
     init_display(d.info);
+
+    if (d.ins.item_number() == 0)
+        return d.sol;
+
     GapGecode model(d.ins);
     //Gist::bab(&model);
     BAB<GapGecode> engine(&model);

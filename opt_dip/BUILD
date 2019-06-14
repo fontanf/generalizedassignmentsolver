@@ -7,6 +7,11 @@ cc_library(
                 "@knapsack//opt_minknap:minknap",
         ],
         linkopts = [
+                "-lCbcSolver",
+                "-lCbc",
+                "-lCgl",
+                "-lOsiCbc",
+                "-lCoinUtils",
                 "-lAlps",
                 "-lDecomp",
         ],

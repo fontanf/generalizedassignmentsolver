@@ -38,7 +38,7 @@ Solution gap::sol_vnsbranching_cplex(const Instance& ins, std::mt19937_64& gen, 
     sol_best.update(sol_curr, lb, ss, info);
     IloEnv env;
 
-    std::stringstream& ss_tmp;
+    std::stringstream ss_tmp;
     auto moves = moves_shiftswap(ins);
     for (AltIdx k_max=4; k_max<o; k_max+=4) {
         bool improved = false;

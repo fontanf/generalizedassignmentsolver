@@ -16,6 +16,9 @@ Solution gap::sopt_branchandcut_cplex(BranchAndCutCplexData d)
     ItemIdx n = d.ins.item_number();
     AgentIdx m = d.ins.agent_number();
 
+    if (n == 0)
+        return d.sol;
+
     IloEnv env;
     IloModel model(env);
 

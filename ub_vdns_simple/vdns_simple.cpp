@@ -174,13 +174,12 @@ bool move_mbp(const Instance& ins, Solution& sol,
     return (csum + v > sol.cost());
 }
 
-Solution gap::sol_vdns_simple(const Instance& ins, std::mt19937_64& gen, Info info)
+Solution gap::sol_vdns_simple(const Instance& ins, Solution& sol_best, std::mt19937_64& gen, Info info)
 {
     ItemIdx n = ins.item_number();
     AgentIdx m = ins.agent_number();
 
     init_display(info);
-    Solution sol_best(ins);
 
     LinRelaxClpOutput linrelax_output = lb_linrelax_clp(ins);
     Cost lb = linrelax_output.lb;
@@ -188,7 +187,8 @@ Solution gap::sol_vdns_simple(const Instance& ins, std::mt19937_64& gen, Info in
     //Solution sol_curr = sol_random(ins, gen);
 
     std::stringstream ss;
-    sol_best.update(sol_curr, lb, ss, info);
+    if (compare(sol_best, sol_curr))
+        sol_best.update(sol_curr, lb, ss, info);
 
     std::vector<ItemIdx> items(n, 0);
     std::iota(items.begin(), items.end(), 0);

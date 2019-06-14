@@ -1,27 +1,34 @@
 #pragma once
 
-#include "gap/lib/subinstance.hpp"
+#include "gap/lib/instance.hpp"
+#include "gap/lib/solution.hpp"
 
 namespace gap
 {
 
-struct LagOut
-{
-    LagOut(const Instance& ins)
-    {
-        mult = std::vector<Cost>(ins.item_number(), 0);
-        xj   = std::vector<AgentIdx>(ins.item_number(), 0);
-        xji  = std::vector<std::vector<int>>(ins.item_number(), std::vector<int>(ins.agent_number(), 0));
-    }
-    Cost u = -1;
-    std::vector<Cost> mult;
-    std::vector<std::vector<int>> xji;
-    std::vector<AgentIdx> xj;
-    std::vector<Cost> zi;
-};
+/**
+ * Relax assignment constraints.
+ */
 
-LagOut lb_lagrangian(const SubInstance& sub,
-        StateIdx it_total = 100, StateIdx x = 2, std::vector<Cost>* mult_init = NULL, Info* info = NULL);
+struct LagRelaxAssignmentBundleOutput
+{
+    Cost lb;
+    std::vector<double> x; // vector of size ins.alternative_number()
+    std::vector<double> multipliers; // vector of size ins.item_number()
+};
+LagRelaxAssignmentBundleOutput lb_lagrelax_assignment_bundle(const Instance& ins, Info info = Info());
+
+/*ù
+ * Relax knapsack constraints.
+ */
+
+struct LagRelaxKnapsackBundleOutput
+{
+    Cost lb;
+    std::vector<double> x; // vector of size ins.alternative_number()
+    std::vector<double> multipliers; // vector of size ins.agent_number()
+};
+LagRelaxKnapsackBundleOutput lb_lagrelax_knapsack_bundle(const Instance& ins, Info info = Info());
 
 }
 

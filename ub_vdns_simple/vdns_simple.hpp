@@ -6,7 +6,7 @@
 namespace gap
 {
 
-Solution sol_vdns_simple(const Instance& ins, std::mt19937_64& gen, Info info = Info());
+Solution sol_vdns_simple(const Instance& ins, Solution& sol_best, std::mt19937_64& gen, Info info = Info());
 
 }
 
