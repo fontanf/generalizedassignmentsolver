@@ -62,22 +62,19 @@ Meta-heuristics based on ejection chain neighborhood and adaptative control of p
 Others:
 - Random feasible solution `-a random` :heavy_check_mark:
 - Repair linear relaxation solution `-a repairlinrelax` :heavy_check_mark:
-- Variable Neighborhood Branching (see "Handbook of Metaheuristics", 3.6.1 Variable Neighborhood Branching)
+- Variable neighborhood branching (see "Handbook of Metaheuristics", 3.6.1 Variable Neighborhood Branching)
   - with CBC `-a vnsbranching_cbc` :heavy_check_mark:
   - with CPLEX `-a vnsbranching_cplex` :heavy_check_mark:
-- Variable-Depth Neighborhood Search (see "Handbook of Metaheuristics", 4.5.1 Variable-Depth Methods)
+- Variable-depth neighborhood search (see "Handbook of Metaheuristics", 4.5.1 Variable-Depth Methods)
   - k-agents reallocation neighborhood `-a vdns_simple` :heavy_check_mark:
-- Very Large Scale Neighborhood Search using Monotone Binary Program Neighborhood, based on "Variable-fixing then subgradient optimization guided very large scale neighborhood search for the generalized assignment problem" (Haddadi, 2018) `-a vlsn_mbp` :x:
+- Very large scale neighborhood search using Monotone Binary Program neighborhood, based on "Variable-fixing then subgradient optimization guided very large scale neighborhood search for the generalized assignment problem" (Haddadi, 2018) `-a vlsn_mbp` :x:
 
 ## Exact algorithms
 
 - Branch-and-cut
   - with CBC `-a branchandcut_cbc` :heavy_check_mark:
-  - with DIP `-a branchandcut_dip` :x:
   - with CPLEX `-a branchandcut_cplex` :heavy_check_mark:
-- Branch-and-price-and-cut with DIP `-a branchandpriceandcut_dip` :x:
-- Relax-and-cut with DIP `-a relaxandcut_dip` :x:
-- Constraint Programming
+- Constraint programming
   - with Gecode `-a constraintprogramming_gecode` :heavy_check_mark:
   - with CPLEX `-a constraintprogramming_cplex` :heavy_check_mark:
 
