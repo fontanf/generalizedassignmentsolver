@@ -86,7 +86,6 @@ public:
        }
        if (sol.feasible())
            heur_val = sol.cost();
-       std::cout << "oc " << sol.overcapacity() << " c " << sol.cost() << std::endl;
        return (sol.feasible())? 1: 0;
    }
 
@@ -121,7 +120,8 @@ int LagRelaxAssignmentHook::solve_subproblem(const VOL_dvector& dual, const VOL_
    }
 
    // Solve independent knapsack problems
-   Weight mult = 10000;
+   //Weight mult = 10000;
+   Weight mult = 1000000;
    std::vector<ItemIdx> indices(ins.item_number());
    for (AgentIdx i=0; i<ins.agent_number(); ++i) {
        knapsack::Instance ins_kp(ins.item_number(), ins.capacity(i));
