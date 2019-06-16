@@ -1,5 +1,6 @@
 #include "gap/lb_linrelax_clp/linrelax_clp.hpp"
 #include "gap/lb_lagrelax_volume/lagrelax_volume.hpp"
+#include "gap/lb_lagrelax_bundle/lagrelax_bundle.hpp"
 #include "gap/opt_branchandcut_cbc/branchandcut_cbc.hpp"
 //#include "gap/opt_branchandcut_cplex/branchandcut_cplex.hpp"
 #include "gap/opt_constraintprogramming_gecode/constraintprogramming_gecode.hpp"
@@ -103,12 +104,22 @@ int main(int argc, char *argv[])
         args[*it] = *std::next(it);
 
     std::mt19937_64 gen(seed);
+    /*
+     * Lower bounds
+     */
     if (vstrings[0] == "linrelax_clp") {
         lb_linrelax_clp(ins, info);
     } else if (vstrings[0] == "lagrelax_knapsack_volume") {
         lb_lagrelax_knapsack_volume(ins, info);
+    } else if (vstrings[0] == "lagrelax_knapsack_bundle") {
+        lb_lagrelax_knapsack_bundle(ins, info);
     } else if (vstrings[0] == "lagrelax_assignment_volume") {
         lb_lagrelax_assignment_volume(ins, info);
+    } else if (vstrings[0] == "lagrelax_assignment_bundle") {
+        lb_lagrelax_assignment_bundle(ins, info);
+    /*
+     * Exact
+     */
     } else if (vstrings[0] == "branchandcut_cbc") {
         sopt_branchandcut_cbc({
                 .ins = ins,
@@ -146,6 +157,9 @@ int main(int argc, char *argv[])
     */
     } else if (vstrings[0] == "dip") {
         dip(ins);
+    /*
+     * Upper bounds
+     */
     } else if (vstrings[0] == "random") {
         sol = sol_random(ins, gen, info);
     } else if (vstrings[0] == "greedy") {
@@ -224,6 +238,7 @@ int main(int argc, char *argv[])
                 .info = info
                 }.set_params(args));
     } else if (vstrings[0] == "vdns_simple") {
+        info.set_onlywriteattheend(false);
         sol = sol_vdns_simple(ins, sol, gen, info);
     } else if (vstrings[0] == "vnsbranching_cbc") {
         sol = sol_vnsbranching_cbc(ins, gen, info);

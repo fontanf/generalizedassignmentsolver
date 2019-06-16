@@ -58,6 +58,7 @@ cc_binary(
         deps = [
                 "//lb_linrelax_clp:linrelax_clp",
                 "//lb_lagrelax_volume:lagrelax_volume",
+                "//lb_lagrelax_bundle:lagrelax_bundle",
                 "//opt_branchandcut_cbc:branchandcut_cbc",
                 #"//opt_branchandcut_cplex:branchandcut_cplex",
                 "//opt_dip:dip",
