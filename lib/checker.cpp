@@ -5,13 +5,22 @@ using namespace gap;
 
 int main(int argc, char *argv[])
 {
-    if (argc <= 2)
+    if (argc <= 1)
         return 1;
-    Instance ins(argv[1]);
+
+    std::string instancefile = argv[1];
+    std::string certfile = (argc <= 2)? instancefile + ".sol": argv[2];
+
+    Instance ins(instancefile);
+
     Solution sol(ins);
-    sol.read(argv[2]);
-    std::cout << "Feasible: " << ((sol.feasible())? "OK": "NO") << std::endl;
-    std::cout << "Cost: " << sol.cost() << std::endl;
+    sol.read(certfile);
+
+    if (!sol.feasible()) {
+        std::cout << "INFEASIBLE" << std::endl;
+    } else {
+        std::cout << sol.cost() << std::endl;
+    }
     return 0;
 }
 
