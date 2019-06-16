@@ -27,10 +27,10 @@ GAP is interesting for several reasons:
 - Linear relaxation solved with CLP `-a linrelax_clp` :heavy_check_mark:
 - Lagrangian relaxation of knapsack constraints
   - solved with volume method `-a lagrelax_knapsack_volume` :heavy_check_mark:
-  - solved with L-BFGS method `-a lagrelax_knapsack_bfgs` :x:
+  - solved with L-BFGS method `-a lagrelax_knapsack_lbfgs` :heavy_check_mark:
 - Lagrangian relaxation of assignment constraints
   - solved with volume method `-a lagrelax_assignment_volume` :heavy_check_mark:
-  - solved with L-BFGS method `-a lagrelax_assignment_bfgs` :heavy_check_mark:
+  - solved with L-BFGS method `-a lagrelax_assignment_lbfgs` :heavy_check_mark:
 
 ## Upper bounds
 

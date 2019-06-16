@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
         lb_lagrelax_knapsack_volume(ins, info);
     } else if (vstrings[0] == "lagrelax_knapsack_bundle") {
         lb_lagrelax_knapsack_bundle(ins, info);
-    } else if (vstrings[0] == "lb_lagrelax_knapsack_lbfgs") {
+    } else if (vstrings[0] == "lagrelax_knapsack_lbfgs") {
         lb_lagrelax_knapsack_lbfgs(ins, info);
     } else if (vstrings[0] == "lagrelax_assignment_volume") {
         lb_lagrelax_assignment_volume(ins, info);
