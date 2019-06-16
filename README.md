@@ -27,10 +27,10 @@ GAP is interesting for several reasons:
 - Linear relaxation solved with CLP `-a linrelax_clp` :heavy_check_mark:
 - Lagrangian relaxation of knapsack constraints
   - solved with volume method `-a lagrelax_knapsack_volume` :heavy_check_mark:
-  - solved with bundle method `-a lagrelax_knapsack_bundle` :x:
+  - solved with L-BFGS method `-a lagrelax_knapsack_bfgs` :x:
 - Lagrangian relaxation of assignment constraints
   - solved with volume method `-a lagrelax_assignment_volume` :heavy_check_mark:
-  - solved with bundle method `-a lagrelax_assignment_bundle` :x:
+  - solved with L-BFGS method `-a lagrelax_assignment_bfgs` :heavy_check_mark:
 
 ## Upper bounds
 
@@ -146,6 +146,27 @@ Create symlinks for libraries:
 for i in "${GECODE_HOME}"/*.so*; do
     sudo ln -f -s "$i" /usr/lib/x86_64-linux-gnu/
 done
+```
+
+### DLib
+
+Download and compile
+```shell
+git clone https://github.com/davisking/dlib.git
+cd dlib
+mkdir build; cd build; cmake .. ; cmake --build .
+```
+
+Update `.bashrc`:
+```shell
+# DLib
+export DLIB_HOME="/home/florian/Programmes/dlib"
+export CPLUS_INCLUDE_PATH="${CPLUS_INCLUDE_PATH}:${DLIB_HOME}"
+```
+
+Create symlinks for libraries:
+```shell
+sudo ln -s "${DLIB_HOME}/build/dlib/libdlib.a" /usr/lib/x86_64-linux-gnu/
 ```
 
 ### CPLEX (optional)

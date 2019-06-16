@@ -1,6 +1,7 @@
 #include "gap/lb_linrelax_clp/linrelax_clp.hpp"
 #include "gap/lb_lagrelax_volume/lagrelax_volume.hpp"
 #include "gap/lb_lagrelax_bundle/lagrelax_bundle.hpp"
+#include "gap/lb_lagrelax_lbfgs/lagrelax_lbfgs.hpp"
 #include "gap/opt_branchandcut_cbc/branchandcut_cbc.hpp"
 //#include "gap/opt_branchandcut_cplex/branchandcut_cplex.hpp"
 #include "gap/opt_constraintprogramming_gecode/constraintprogramming_gecode.hpp"
@@ -113,10 +114,14 @@ int main(int argc, char *argv[])
         lb_lagrelax_knapsack_volume(ins, info);
     } else if (vstrings[0] == "lagrelax_knapsack_bundle") {
         lb_lagrelax_knapsack_bundle(ins, info);
+    } else if (vstrings[0] == "lb_lagrelax_knapsack_lbfgs") {
+        lb_lagrelax_knapsack_lbfgs(ins, info);
     } else if (vstrings[0] == "lagrelax_assignment_volume") {
         lb_lagrelax_assignment_volume(ins, info);
     } else if (vstrings[0] == "lagrelax_assignment_bundle") {
         lb_lagrelax_assignment_bundle(ins, info);
+    } else if (vstrings[0] == "lagrelax_assignment_lbfgs") {
+        lb_lagrelax_assignment_lbfgs(ins, info);
     /*
      * Exact
      */
