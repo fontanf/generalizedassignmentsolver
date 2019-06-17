@@ -6,6 +6,11 @@ cc_library(
                 "//lib:cpp",
                 "@knapsack//opt_minknap:minknap",
         ],
+        linkopts = [
+                "-lClp",
+                "-lOsiClp",
+                "-lCoinUtils",
+        ],
         visibility = ["//visibility:public"],
         include_prefix = "gap/lb_lagrelax_bundle/",
 )
