@@ -4,7 +4,7 @@ cc_library(
         srcs = ["vlsn_mbp.cpp"],
         deps = [
                 "//lib:cpp",
-                "//lb_lagrelax_volume:lagrelax_volume",
+                "//lb_lagrelax_lbfgs:lagrelax_lbfgs",
                 "//ub_random:random",
                 "//ub_repair:repair",
         ],

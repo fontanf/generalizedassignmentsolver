@@ -6,7 +6,7 @@
 namespace gap
 {
 
-Solution sol_vlsn_mbp(const Instance& ins, std::mt19937_64& gen, Info info = Info());
+Solution sol_vlsn_mbp(const Instance& ins, Solution& sol, std::mt19937_64& gen, Info info = Info());
 
 }
 
