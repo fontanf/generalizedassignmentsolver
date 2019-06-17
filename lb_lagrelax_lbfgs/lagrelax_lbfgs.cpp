@@ -126,12 +126,18 @@ double LagRelaxKnapsackLbfgsFunction::f(const column_vector& mu)
 {
     ItemIdx n = ins_.item_number();
     AgentIdx m = ins_.agent_number();
-    double l = 0;
 
+    //std::cout << "mu";
+    //for (AgentIdx i=0; i<m; ++i)
+        //std::cout << " " << mu(i);
+    //std::cout << std::endl;
+
+    double l = 0;
     for (AgentIdx i=0; i<m; ++i) {
         l += mu(i) * ins_.capacity(i);
         grad_(i) = ins_.capacity(i);
     }
+    //std::cout << "l0 " << l << std::endl;
 
     for (ItemIdx j=0; j<n; ++j) {
         AltIdx k_best = -1;
@@ -148,17 +154,15 @@ double LagRelaxKnapsackLbfgsFunction::f(const column_vector& mu)
         }
         grad_(i_best) -= ins_.alternative(k_best).w;
         l += rc_best;
+        //std::cout << "l " << l << std::endl;
     }
 
-    //std::cout << "mu";
-    //for (AgentIdx i=0; i<m; ++i)
-        //std::cout << " " << mu(i);
-    //std::cout << std::endl;
     //std::cout << "grad";
     //for (AgentIdx i=0; i<m; ++i)
         //std::cout << " " << grad_(i);
     //std::cout << std::endl;
     //std::cout << "l " << l << std::endl;
+
     return l;
 }
 
@@ -173,6 +177,7 @@ LagRelaxKnapsackLbfgsOutput gap::lb_lagrelax_knapsack_lbfgs(const Instance& ins,
     for (ItemIdx i=0; i<m; ++i) {
         //mu_lower(i) = 0;
         //mu_upper(i) = std::numeric_limits<double>::max();
+        mu(i) = 0;
         mu_lower(i) = -std::numeric_limits<double>::max();
         mu_upper(i) = 0;
     }
@@ -195,6 +200,12 @@ LagRelaxKnapsackLbfgsOutput gap::lb_lagrelax_knapsack_lbfgs(const Instance& ins,
     out.multipliers.resize(m);
     for (AgentIdx i=0; i<m; ++i)
         out.multipliers[i] = mu(i);
+
+    //std::cout << "mu";
+    //for (AgentIdx i=0; i<ins.agent_number(); ++i)
+        //std::cout << " " << mu(i);
+    //std::cout << std::endl;
+    //std::cout << "lb " << out.lb << std::endl;
 
     algorithm_end(out.lb, info);
     return out;
