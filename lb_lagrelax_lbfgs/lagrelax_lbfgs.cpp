@@ -93,9 +93,9 @@ LagRelaxAssignmentLbfgsOutput gap::lb_lagrelax_assignment_lbfgs(const Instance& 
             std::numeric_limits<double>::max());
 
     out.lb = std::ceil(res);
-    out.x.resize(n);
+    out.multipliers.resize(n);
     for (ItemIdx j=0; j<n; ++j)
-        out.x[j] = mu(j);
+        out.multipliers[j] = mu(j);
 
     algorithm_end(out.lb, info);
     return out;
@@ -108,7 +108,7 @@ class LagRelaxKnapsackLbfgsFunction
 
 public:
 
-    LagRelaxKnapsackLbfgsFunction(const Instance& ins): ins_(ins), grad_(ins.item_number()) {  }
+    LagRelaxKnapsackLbfgsFunction(const Instance& ins): ins_(ins), grad_(ins.agent_number()) {  }
     virtual ~LagRelaxKnapsackLbfgsFunction() { };
 
     double f(const column_vector& x);
@@ -128,28 +128,37 @@ double LagRelaxKnapsackLbfgsFunction::f(const column_vector& mu)
     AgentIdx m = ins_.agent_number();
     double l = 0;
 
-   for (AgentIdx i=0; i<m; ++i) {
-       l += mu(i) * ins_.capacity(i);
-       grad_(i) = ins_.capacity(i);
-   }
+    for (AgentIdx i=0; i<m; ++i) {
+        l += mu(i) * ins_.capacity(i);
+        grad_(i) = ins_.capacity(i);
+    }
 
-   for (ItemIdx j=0; j<n; ++j) {
-       AltIdx k_best = -1;
-       AgentIdx i_best = -1;
-       double rc_best = -1;
-       for (AgentIdx i=0; i<m; ++i) {
-           AltIdx k = ins_.alternative_index(j, i);
-           double rc = ins_.alternative(k).c - mu(i) * ins_.alternative(k).w;
-           if (k_best == -1 || rc_best > rc) {
-               k_best = k;
-               i_best = i;
-               rc_best = rc;
-           }
-       }
-       grad_(i_best) -= ins_.alternative(k_best).w;
-       l += rc_best;
-   }
+    for (ItemIdx j=0; j<n; ++j) {
+        AltIdx k_best = -1;
+        AgentIdx i_best = -1;
+        double rc_best = -1;
+        for (AgentIdx i=0; i<m; ++i) {
+            AltIdx k = ins_.alternative_index(j, i);
+            double rc = ins_.alternative(k).c - mu(i) * ins_.alternative(k).w;
+            if (k_best == -1 || rc_best > rc) {
+                k_best = k;
+                i_best = i;
+                rc_best = rc;
+            }
+        }
+        grad_(i_best) -= ins_.alternative(k_best).w;
+        l += rc_best;
+    }
 
+    //std::cout << "mu";
+    //for (AgentIdx i=0; i<m; ++i)
+        //std::cout << " " << mu(i);
+    //std::cout << std::endl;
+    //std::cout << "grad";
+    //for (AgentIdx i=0; i<m; ++i)
+        //std::cout << " " << grad_(i);
+    //std::cout << std::endl;
+    //std::cout << "l " << l << std::endl;
     return l;
 }
 
@@ -159,24 +168,33 @@ LagRelaxKnapsackLbfgsOutput gap::lb_lagrelax_knapsack_lbfgs(const Instance& ins,
     AgentIdx m = ins.agent_number();
     LagRelaxKnapsackLbfgsFunction func(ins);
     column_vector mu(m);
+    column_vector mu_lower(m);
+    column_vector mu_upper(m);
+    for (ItemIdx i=0; i<m; ++i) {
+        //mu_lower(i) = 0;
+        //mu_upper(i) = std::numeric_limits<double>::max();
+        mu_lower(i) = -std::numeric_limits<double>::max();
+        mu_upper(i) = 0;
+    }
     auto f   = [&func](const column_vector& x) { return func.f(x); };
     auto def = [&func](const column_vector& x) { return func.der(x); };
     auto stop_strategy = objective_delta_stop_strategy(0.0001);
     //auto stop_strategy = gradient_norm_stop_strategy().be_verbose(),
     if (info.output->verbose)
         stop_strategy.be_verbose();
-    double res = find_max(
+    double res = find_max_box_constrained(
             lbfgs_search_strategy(256),
             stop_strategy,
             f,
             def,
             mu,
-            std::numeric_limits<double>::max());
+            mu_lower,
+            mu_upper);
 
     out.lb = std::ceil(res);
-    out.x.resize(m);
+    out.multipliers.resize(m);
     for (AgentIdx i=0; i<m; ++i)
-        out.x[i] = mu(i);
+        out.multipliers[i] = mu(i);
 
     algorithm_end(out.lb, info);
     return out;
