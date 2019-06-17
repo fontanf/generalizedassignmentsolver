@@ -96,6 +96,10 @@ def FlagsForFile( filename, **kwargs ):
     '-I', '/usr/lib/gcc/x86_64-linux-gnu/7.3.0/include/',
     '-I', '/opt/ibm/ILOG/CPLEX_Studio126/cplex/include/',
     '-I', '/opt/ibm/ILOG/CPLEX_Studio126/opl/include/',
+    '-I', '/opt/ibm/ILOG/CPLEX_Studio126/concert/include/',
+    '-I', '/opt/ibm/ILOG/CPLEX_Studio126/cpoptimizer/include/',
+    '-I', '/home/florian/Programmes/coinbrew/build/include/',
+    '-I', '/home/florian/Programmes/dlib/',
   ]
 
   data = kwargs['client_data']
