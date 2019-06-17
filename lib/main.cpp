@@ -92,6 +92,7 @@ int main(int argc, char *argv[])
         .set_loglevelmax(loglevelmax)
         .set_timelimit(time_limit)
         .set_onlywriteattheend(true)
+        .set_certfile(certfile)
         .set_outputfile(outputfile);
 
     std::stringstream ss(algorithm);
@@ -136,6 +137,7 @@ int main(int argc, char *argv[])
         sopt_branchandcut_dip(ins, info);
     /*
     } else if (vstrings[0] == "branchandcut_cplex") {
+        info.set_onlywriteattheend(false);
         sopt_branchandcut_cplex({
                 .ins = ins,
                 .sol = sol,
