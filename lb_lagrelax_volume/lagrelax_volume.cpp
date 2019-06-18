@@ -23,152 +23,152 @@ class LagRelaxAssignmentHook: public VOL_user_hooks
 
 public:
 
-   LagRelaxAssignmentHook(const Instance& ins): ins_(ins) {  }
-   virtual ~LagRelaxAssignmentHook() { }
+    LagRelaxAssignmentHook(const Instance& ins): ins_(ins) {  }
+    virtual ~LagRelaxAssignmentHook() { }
 
-   // for all hooks: return value of -1 means that volume should quit
+    // for all hooks: return value of -1 means that volume should quit
 
-   /**
-    * compute reduced costs
-    * @param u (IN) the dual variables
-    * @param rc (OUT) the reduced cost with respect to the dual values
-    */
-   virtual int compute_rc(const VOL_dvector& u, VOL_dvector& rc);
+    /**
+     * compute reduced costs
+     * @param u (IN) the dual variables
+     * @param rc (OUT) the reduced cost with respect to the dual values
+     */
+    virtual int compute_rc(const VOL_dvector& u, VOL_dvector& rc);
 
-   /**
-    * Solve the subproblem for the subgradient step.
-    * @param dual (IN) the dual variables
-    * @param rc (IN) the reduced cost with respect to the dual values
-    * @param lcost (OUT) the lagrangean cost with respect to the dual values
-    * @param x (OUT) the primal result of solving the subproblem
-    * @param v (OUT) b-Ax for the relaxed constraints
-    * @param pcost (OUT) the primal objective value of <code>x</code>
-    */
-   virtual int solve_subproblem(const VOL_dvector& dual, const VOL_dvector& rc,
-           double& lcost, VOL_dvector& x, VOL_dvector& v, double& pcost);
+    /**
+     * Solve the subproblem for the subgradient step.
+     * @param dual (IN) the dual variables
+     * @param rc (IN) the reduced cost with respect to the dual values
+     * @param lcost (OUT) the lagrangean cost with respect to the dual values
+     * @param x (OUT) the primal result of solving the subproblem
+     * @param v (OUT) b-Ax for the relaxed constraints
+     * @param pcost (OUT) the primal objective value of <code>x</code>
+     */
+    virtual int solve_subproblem(const VOL_dvector& dual, const VOL_dvector& rc,
+            double& lcost, VOL_dvector& x, VOL_dvector& v, double& pcost);
 
-   /**
-    * Starting from the primal vector x, run a heuristic to produce
-    * an integer solution
-    * @param x (IN) the primal vector
-    * @param heur_val (OUT) the value of the integer solution (return
-    * <code>DBL_MAX</code> here if no feas sol was found
-    */
-   virtual int heuristics(const VOL_problem& p,
-           const VOL_dvector& x, double& heur_val)
-   {
-       (void)p;
-       //(void)x;
-       //(void)heur_val;
-       //return 0;
-       Solution sol(ins_);
-       ItemIdx n = ins_.item_number();
-       AgentIdx m = ins_.agent_number();
-       for (ItemIdx j=0; j<n; ++j) {
-           bool fixed = false;
-           AgentIdx i_best = -1;
-           Weight w_best = -1;
-           for (AgentIdx i=0; i<m; ++i) {
-               AltIdx k = ins_.alternative_index(j, i);
-               if (x[k] == 1) {
-                   sol.set(j, i);
-                   fixed = true;
-                   break;
-               }
-               Weight w = ins_.alternative(k).w;
-               if (x[k] > 0 && (w_best < 0 || w_best > w)) {
-                   w_best = w;
-                   i_best = i;
-               }
-           }
-           if (!fixed)
-               sol.set(j, i_best);
-       }
-       if (sol.feasible())
-           heur_val = sol.cost();
-       return (sol.feasible())? 1: 0;
-   }
+    /**
+     * Starting from the primal vector x, run a heuristic to produce
+     * an integer solution
+     * @param x (IN) the primal vector
+     * @param heur_val (OUT) the value of the integer solution (return
+     * <code>DBL_MAX</code> here if no feas sol was found
+     */
+    virtual int heuristics(const VOL_problem& p,
+            const VOL_dvector& x, double& heur_val)
+    {
+        (void)p;
+        //(void)x;
+        //(void)heur_val;
+        //return 0;
+        Solution sol(ins_);
+        ItemIdx n = ins_.item_number();
+        AgentIdx m = ins_.agent_number();
+        for (ItemIdx j=0; j<n; ++j) {
+            bool fixed = false;
+            AgentIdx i_best = -1;
+            Weight w_best = -1;
+            for (AgentIdx i=0; i<m; ++i) {
+                AltIdx k = ins_.alternative_index(j, i);
+                if (x[k] == 1) {
+                    sol.set(j, i);
+                    fixed = true;
+                    break;
+                }
+                Weight w = ins_.alternative(k).w;
+                if (x[k] > 0 && (w_best < 0 || w_best > w)) {
+                    w_best = w;
+                    i_best = i;
+                }
+            }
+            if (!fixed)
+                sol.set(j, i_best);
+        }
+        if (sol.feasible())
+            heur_val = sol.cost();
+        return (sol.feasible())? 1: 0;
+    }
 
 private:
 
-   const Instance& ins_;
+    const Instance& ins_;
 
 };
 
 int LagRelaxAssignmentHook::compute_rc(const VOL_dvector& u, VOL_dvector& rc)
 {
-   const Instance& ins = ins_;
-   for (ItemIdx j=0; j<ins.item_number(); ++j) {
-       for (AgentIdx i=0; i<ins.agent_number(); ++i) {
-           AltIdx k = ins.alternative_index(j, i);
-           rc[k] = ins.alternative(k).c - u[j];
-       }
-   }
-   return 0;
+    const Instance& ins = ins_;
+    for (ItemIdx j=0; j<ins.item_number(); ++j) {
+        for (AgentIdx i=0; i<ins.agent_number(); ++i) {
+            AltIdx k = ins.alternative_index(j, i);
+            rc[k] = ins.alternative(k).c - u[j];
+        }
+    }
+    return 0;
 }
 
 int LagRelaxAssignmentHook::solve_subproblem(const VOL_dvector& dual, const VOL_dvector& rc,
         double& lcost, VOL_dvector& x, VOL_dvector& v, double& pcost)
 {
-   const Instance& ins = ins_;
+    const Instance& ins = ins_;
 
-   lcost = 0;
-   pcost = 0;
-   for (ItemIdx j=0; j<ins.item_number(); ++j) {
-       lcost += dual[j];
-       v[j] = 1;
-   }
+    lcost = 0;
+    pcost = 0;
+    for (ItemIdx j=0; j<ins.item_number(); ++j) {
+        lcost += dual[j];
+        v[j] = 1;
+    }
 
-   // Solve independent knapsack problems
-   //Weight mult = 10000;
-   Weight mult = 1000000;
-   std::vector<ItemIdx> indices(ins.item_number());
-   for (AgentIdx i=0; i<ins.agent_number(); ++i) {
-       knapsack::Instance ins_kp(ins.item_number(), ins.capacity(i));
-       for (ItemIdx j=0; j<ins.item_number(); ++j) {
-           AltIdx k = ins.alternative_index(j, i);
-           const Alternative& a = ins.alternative(k);
-           x[k] = 0;
-           knapsack::Profit p = std::ceil(mult * dual[j] - mult * a.c);
-           if (p > 0) {
-               knapsack::ItemIdx j_kp = ins_kp.add_item(a.w, p);
-               indices[j_kp] = j;
-           }
-       }
-       knapsack::Solution sol = knapsack::Minknap(ins_kp, knapsack::MinknapParams::combo()).run();
-       for (knapsack::ItemIdx j_kp=0; j_kp<ins_kp.total_item_number(); ++j_kp) {
-           if (sol.contains_idx(j_kp)) {
-               ItemIdx j = indices[j_kp];
-               AltIdx k = ins.alternative_index(j, i);
-               x[k] = 1;
-               v[j]--;
-               pcost += ins.alternative(k).c;
-               lcost += rc[k];
-           }
-       }
-   }
+    // Solve independent knapsack problems
+    //Weight mult = 10000;
+    Weight mult = 1000000;
+    std::vector<ItemIdx> indices(ins.item_number());
+    for (AgentIdx i=0; i<ins.agent_number(); ++i) {
+        knapsack::Instance ins_kp(ins.item_number(), ins.capacity(i));
+        for (ItemIdx j=0; j<ins.item_number(); ++j) {
+            AltIdx k = ins.alternative_index(j, i);
+            const Alternative& a = ins.alternative(k);
+            x[k] = 0;
+            knapsack::Profit p = std::ceil(mult * dual[j] - mult * a.c);
+            if (p > 0) {
+                knapsack::ItemIdx j_kp = ins_kp.add_item(a.w, p);
+                indices[j_kp] = j;
+            }
+        }
+        knapsack::Solution sol = knapsack::Minknap(ins_kp, knapsack::MinknapParams::combo()).run();
+        for (knapsack::ItemIdx j_kp=0; j_kp<ins_kp.total_item_number(); ++j_kp) {
+            if (sol.contains_idx(j_kp)) {
+                ItemIdx j = indices[j_kp];
+                AltIdx k = ins.alternative_index(j, i);
+                x[k] = 1;
+                v[j]--;
+                pcost += ins.alternative(k).c;
+                lcost += rc[k];
+            }
+        }
+    }
 
-   //std::cout << "mult";
-   //for (ItemIdx j=0; j<ins.item_number(); ++j)
-       //std::cout << " " << dual[j];
-   //std::cout << std::endl;
-   //std::cout << "pcost " << pcost << std::endl;
-   //std::cout << "lcost " << lcost << std::endl;
-   //std::cout << "v ";
-   //for (ItemIdx j=0; j<ins.item_number(); ++j)
-       //std::cout << " " << v[j];
-   //std::cout << std::endl;
+    //std::cout << "mult";
+    //for (ItemIdx j=0; j<ins.item_number(); ++j)
+    //std::cout << " " << dual[j];
+    //std::cout << std::endl;
+    //std::cout << "pcost " << pcost << std::endl;
+    //std::cout << "lcost " << lcost << std::endl;
+    //std::cout << "v ";
+    //for (ItemIdx j=0; j<ins.item_number(); ++j)
+    //std::cout << " " << v[j];
+    //std::cout << std::endl;
 
     //for (ItemIdx j=0; j<ins.item_number(); ++j) {
-        //std::cout << "j " << j;
-        //for (AgentIdx i=0; i<ins.agent_number(); ++i) {
-            //AltIdx k = ins.alternative_index(j, i);
-            //std::cout << " " << round(x[k] * 100) / 100;
-        //}
-        //std::cout << std::endl;
+    //std::cout << "j " << j;
+    //for (AgentIdx i=0; i<ins.agent_number(); ++i) {
+    //AltIdx k = ins.alternative_index(j, i);
+    //std::cout << " " << round(x[k] * 100) / 100;
+    //}
+    //std::cout << std::endl;
     //}
 
-   return 0;
+    return 0;
 }
 
 LagRelaxAssignmentVolumeOutput gap::lb_lagrelax_assignment_volume(const Instance& ins, Info info)
@@ -225,108 +225,109 @@ class LagRelaxKnapsackHook: public VOL_user_hooks
 
 public:
 
-   LagRelaxKnapsackHook(const Instance& ins): ins_(ins) {  }
-   virtual ~LagRelaxKnapsackHook() { }
+    LagRelaxKnapsackHook(const Instance& ins): ins_(ins) {  }
+    virtual ~LagRelaxKnapsackHook() { }
 
-   // for all hooks: return value of -1 means that volume should quit
+    // for all hooks: return value of -1 means that volume should quit
 
-   /**
-    * compute reduced costs
-    * @param u (IN) the dual variables
-    * @param rc (OUT) the reduced cost with respect to the dual values
-    */
-   virtual int compute_rc(const VOL_dvector& u, VOL_dvector& rc);
+    /**
+     * compute reduced costs
+     * @param u (IN) the dual variables
+     * @param rc (OUT) the reduced cost with respect to the dual values
+     */
+    virtual int compute_rc(const VOL_dvector& u, VOL_dvector& rc);
 
-   /**
-    * Solve the subproblem for the subgradient step.
-    * @param dual (IN) the dual variables
-    * @param rc (IN) the reduced cost with respect to the dual values
-    * @param lcost (OUT) the lagrangean cost with respect to the dual values
-    * @param x (OUT) the primal result of solving the subproblem
-    * @param v (OUT) b-Ax for the relaxed constraints
-    * @param pcost (OUT) the primal objective value of <code>x</code>
-    */
-   virtual int solve_subproblem(const VOL_dvector& dual, const VOL_dvector& rc,
-           double& lcost, VOL_dvector& x, VOL_dvector& v, double& pcost);
+    /**
+     * Solve the subproblem for the subgradient step.
+     * @param dual (IN) the dual variables
+     * @param rc (IN) the reduced cost with respect to the dual values
+     * @param lcost (OUT) the lagrangean cost with respect to the dual values
+     * @param x (OUT) the primal result of solving the subproblem
+     * @param v (OUT) b-Ax for the relaxed constraints
+     * @param pcost (OUT) the primal objective value of <code>x</code>
+     */
+    virtual int solve_subproblem(const VOL_dvector& dual, const VOL_dvector& rc,
+            double& lcost, VOL_dvector& x, VOL_dvector& v, double& pcost);
 
-   /**
-    * Starting from the primal vector x, run a heuristic to produce
-    * an integer solution
-    * @param x (IN) the primal vector
-    * @param heur_val (OUT) the value of the integer solution (return
-    * <code>DBL_MAX</code> here if no feas sol was found
-    */
-   virtual int heuristics(const VOL_problem& p,
-           const VOL_dvector& x, double& heur_val)
-   {
-       (void)p;
-       (void)x;
-       (void)heur_val;
-       return 0;
-   }
+    /**
+     * Starting from the primal vector x, run a heuristic to produce
+     * an integer solution
+     * @param x (IN) the primal vector
+     * @param heur_val (OUT) the value of the integer solution (return
+     * <code>DBL_MAX</code> here if no feas sol was found
+     */
+    virtual int heuristics(const VOL_problem& p,
+            const VOL_dvector& x, double& heur_val)
+    {
+        (void)p;
+        (void)x;
+        (void)heur_val;
+        return 0;
+    }
 
 private:
 
-   const Instance& ins_;
+    const Instance& ins_;
 
 };
 
 int LagRelaxKnapsackHook::compute_rc(const VOL_dvector& u, VOL_dvector& rc)
 {
-   const Instance& ins = ins_;
-   for (ItemIdx j=0; j<ins.item_number(); ++j) {
-       for (AgentIdx i=0; i<ins.agent_number(); ++i) {
-           AltIdx k = ins.alternative_index(j, i);
-           rc[k] = ins.alternative(k).c - u[i] * ins.alternative(k).w;
-       }
-   }
-   return 0;
+    const Instance& ins = ins_;
+    for (ItemIdx j=0; j<ins.item_number(); ++j) {
+        for (AgentIdx i=0; i<ins.agent_number(); ++i) {
+            AltIdx k = ins.alternative_index(j, i);
+            rc[k] = ins.alternative(k).c - u[i] * ins.alternative(k).w;
+        }
+    }
+    return 0;
 }
 
 int LagRelaxKnapsackHook::solve_subproblem(const VOL_dvector& dual, const VOL_dvector& rc,
         double& lcost, VOL_dvector& x, VOL_dvector& v, double& pcost)
 {
-   const Instance& ins = ins_;
+    const Instance& ins = ins_;
 
-   lcost = 0;
-   pcost = 0;
+    lcost = 0;
+    pcost = 0;
 
-   for (AgentIdx i=0; i<ins.agent_number(); ++i) {
-       lcost += dual[i] * ins.capacity(i);
-       v[i] = ins.capacity(i);
-   }
+    for (AgentIdx i=0; i<ins.agent_number(); ++i) {
+        lcost += dual[i] * ins.capacity(i);
+        v[i] = ins.capacity(i);
+    }
 
-   for (ItemIdx j=0; j<ins.item_number(); ++j) {
-       AltIdx k_best = -1;
-       AgentIdx i_best = -1;
-       double rc_best = -1;
-       for (AgentIdx i=0; i<ins.agent_number(); ++i) {
-           AltIdx k = ins.alternative_index(j, i);
-           x[k] = 0;
-           if (k_best == -1 || rc_best > rc[k]) {
-               k_best = k;
-               i_best = i;
-               rc_best = rc[k];
-           }
-       }
-       x[k_best] = 1;
-       v[i_best] -= ins.alternative(k_best).w;
-       pcost += ins.alternative(k_best).c;
-       lcost += rc_best;
-   }
+    for (ItemIdx j=0; j<ins.item_number(); ++j) {
+        AltIdx k_best = -1;
+        AgentIdx i_best = -1;
+        double rc_best = -1;
+        for (AgentIdx i=0; i<ins.agent_number(); ++i) {
+            AltIdx k = ins.alternative_index(j, i);
+            x[k] = 0;
+            if (k_best == -1
+                    || rc_best > rc[k]) {
+                k_best = k;
+                i_best = i;
+                rc_best = rc[k];
+            }
+        }
+        x[k_best] = 1;
+        v[i_best] -= ins.alternative(k_best).w;
+        pcost += ins.alternative(k_best).c;
+        lcost += rc_best;
+    }
 
-   //std::cout << "mult";
-   //for (AgentIdx i=0; i<ins.agent_number(); ++i)
-       //std::cout << " " << dual[i];
-   //std::cout << std::endl;
-   //std::cout << "pcost " << pcost << std::endl;
-   //std::cout << "lcost " << lcost << std::endl;
-   //std::cout << "v ";
-   //for (AgentIdx i=0; i<ins.agent_number(); ++i)
-       //std::cout << " " << v[i];
-   //std::cout << std::endl;
+    //std::cout << "mult";
+    //for (AgentIdx i=0; i<ins.agent_number(); ++i)
+    //std::cout << " " << dual[i];
+    //std::cout << std::endl;
+    //std::cout << "pcost " << pcost << std::endl;
+    //std::cout << "lcost " << lcost << std::endl;
+    //std::cout << "v ";
+    //for (AgentIdx i=0; i<ins.agent_number(); ++i)
+    //std::cout << " " << v[i];
+    //std::cout << std::endl;
 
-   return 0;
+    return 0;
 }
 
 LagRelaxKnapsackVolumeOutput gap::lb_lagrelax_knapsack_volume(const Instance& ins, Info info)

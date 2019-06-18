@@ -146,7 +146,15 @@ double LagRelaxKnapsackLbfgsFunction::f(const column_vector& mu)
         for (AgentIdx i=0; i<m; ++i) {
             AltIdx k = ins_.alternative_index(j, i);
             double rc = ins_.alternative(k).c - mu(i) * ins_.alternative(k).w;
-            if (k_best == -1 || rc_best > rc) {
+            if (k_best == -1
+                    || rc_best > rc
+                    // If the minimum reduced cost of a job is reached for
+                    // several agents, schedule the job on the agent with the
+                    // most available remaining capacity.
+                    // Without this condition, the relaxation fails to get the
+                    // optimal bound (the one from the linear relaxation) for
+                    // some instances.
+                    || (rc_best == rc && grad_(i) > grad_(i_best))) {
                 k_best = k;
                 i_best = i;
                 rc_best = rc;
