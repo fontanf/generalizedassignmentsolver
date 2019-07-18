@@ -7,6 +7,7 @@ cc_library(
                 "//lb_lagrelax_lbfgs:lagrelax_lbfgs",
                 "//ub_random:random",
                 "//ub_repair:repair",
+                "//ub_ls_shiftswap:ls_shiftswap",
         ],
         copts = [
                 "-m64",
