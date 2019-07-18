@@ -30,6 +30,13 @@
 #include "coin/CglStored.hpp"
 #include "coin/CglTwomir.hpp"
 
+/**
+ * Useful links:
+ * https://github.com/coin-or/Cgl/wiki
+ * https://github.com/coin-or/Cbc/blob/master/Cbc/examples/sample2.cpp
+ * https://github.com/coin-or/Cbc/blob/master/Cbc/examples/sample3.cpp
+ */
+
 using namespace gap;
 
 MilpMatrix::MilpMatrix(const Instance& ins)
