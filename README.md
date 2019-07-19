@@ -119,8 +119,9 @@ export CPLUS_INCLUDE_PATH="${CPLUS_INCLUDE_PATH}:${COINOR_HOME}/build/include"
 
 Create symlinks for libraries:
 ```shell
+LIB_DIR="/usr/lib/x86_64-linux-gnu/"
 for i in "${COINOR_HOME}"/build/lib/*.so*; do
-    sudo ln -f -s "$i" /usr/lib/x86_64-linux-gnu/
+    sudo ln -f -s "$i" "${LIB_DIR}"
 done
 ```
 
@@ -143,8 +144,9 @@ export CPLUS_INCLUDE_PATH="${CPLUS_INCLUDE_PATH}:${GECODE_HOME}"
 
 Create symlinks for libraries:
 ```shell
+LIB_DIR="/usr/lib/x86_64-linux-gnu/"
 for i in "${GECODE_HOME}"/*.so*; do
-    sudo ln -f -s "$i" /usr/lib/x86_64-linux-gnu/
+    sudo ln -f -s "$i" "${LIB_DIR}"
 done
 ```
 
@@ -166,7 +168,8 @@ export CPLUS_INCLUDE_PATH="${CPLUS_INCLUDE_PATH}:${DLIB_HOME}"
 
 Create symlinks for libraries:
 ```shell
-sudo ln -s "${DLIB_HOME}/build/dlib/libdlib.a" /usr/lib/x86_64-linux-gnu/
+LIB_DIR="/usr/lib/x86_64-linux-gnu/"
+sudo ln -s "${DLIB_HOME}/build/dlib/libdlib.a" "${LIB_DIR}"
 ```
 
 ### CPLEX (optional)
@@ -195,7 +198,7 @@ sudo ln -s "${CPLEX_HOME}/concert/lib/x86-64_linux/static_pic/libconcert.a" "${L
 sudo ln -s "${CPLEX_HOME}/cpoptimizer/lib/x86-64_linux/static_pic/libcp.a" "${LIB_DIR}"
 ```
 
-### LocalSolver
+### LocalSolver (optional)
 
 Update `.bashrc`:
 ```shell
@@ -208,7 +211,7 @@ Create symlinks for libraries:
 ```shell
 LIB_DIR="/usr/lib/x86_64-linux-gnu/"
 for i in "${LOCALSOLVER_HOME}"/bin/*.so*; do
-    sudo ln -f -s "$i" ${LIB_DIR};
+    sudo ln -f -s "$i" "${LIB_DIR}";
 done
 ```
 
