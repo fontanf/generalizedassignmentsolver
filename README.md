@@ -187,13 +187,29 @@ export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:${CPOPTIMIZER_HOME}/include"
 
 Create symlinks for libraries:
 ```shell
-CPLEX_HOME="/opt/ibm/ILOG/CPLEX_Studio126"
 LIB_DIR="/usr/lib/x86_64-linux-gnu/"
 sudo ln -s "${CPLEX_HOME}/cplex/lib/x86-64_linux/static_pic/libcplex.a" "${LIB_DIR}"
 sudo ln -s "${CPLEX_HOME}/cplex/lib/x86-64_linux/static_pic/libcp.a" "${LIB_DIR}"
 sudo ln -s "${CPLEX_HOME}/cplex/lib/x86-64_linux/static_pic/libcplexdistmip.a" "${LIB_DIR}"
 sudo ln -s "${CPLEX_HOME}/concert/lib/x86-64_linux/static_pic/libconcert.a" "${LIB_DIR}"
 sudo ln -s "${CPLEX_HOME}/cpoptimizer/lib/x86-64_linux/static_pic/libcp.a" "${LIB_DIR}"
+```
+
+### LocalSolver
+
+Update `.bashrc`:
+```shell
+# LocalSolver
+export LOCALSOLVER_HOME="/opt/localsolver_8_5"
+export CPLUS_INCLUDE_PATH="${CPLUS_INCLUDE_PATH}:${LOCALSOLVER_HOME}/include"
+```
+
+Create symlinks for libraries:
+```shell
+LIB_DIR="/usr/lib/x86_64-linux-gnu/"
+for i in "${LOCALSOLVER_HOME}"/bin/*.so*; do
+    sudo ln -f -s "$i" ${LIB_DIR};
+done
 ```
 
 ## Technical informations
