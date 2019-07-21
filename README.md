@@ -200,7 +200,7 @@ sudo ln -s "${CPLEX_HOME}/cpoptimizer/lib/x86-64_linux/static_pic/libcp.a" "${LI
 
 Compile:
 ```
-bazel build --cxxopt='-std=c++14' --compilation_mode=opt -- //...
+bazel build -- //...
 ```
 
 Solve:
@@ -210,12 +210,12 @@ Solve:
 
 Unit tests:
 ```
-bazel test --cxxopt='-std=c++14' --compilation_mode=opt -- //...
+bazel test --compilation_mode=dbg -- //...
 ```
 
 Checker:
 ```
-bazel build --cxxopt='-std=c++14' --compilation_mode=opt -- //lib:checker
+bazel build -- //lib:checker
 ./bazel-bin/lib/checker instancefile solutionfile
 ```
 
