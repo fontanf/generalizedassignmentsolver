@@ -12,9 +12,11 @@
 #include "gap/ub_repair/repair.hpp"
 #include "gap/ub_ls_shiftswap/ls_shiftswap.hpp"
 #include "gap/ub_ls_ejectionchain/ls_ejectionchain.hpp"
+//#include "gap/ub_localsolver/localsolver.hpp"
 #include "gap/ub_vdns_simple/vdns_simple.hpp"
 #include "gap/ub_vnsbranching_cbc/vnsbranching_cbc.hpp"
 //#include "gap/ub_vnsbranching_cplex/vnsbranching_cplex.hpp"
+//#include "gap/ub_vlsn_mbp/vlsn_mbp.hpp"
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
@@ -91,7 +93,7 @@ int main(int argc, char *argv[])
         .set_log2stderr(vm.count("log2stderr"))
         .set_loglevelmax(loglevelmax)
         .set_timelimit(time_limit)
-        .set_onlywriteattheend(true)
+        .set_onlywriteattheend(false)
         .set_certfile(certfile)
         .set_outputfile(outputfile);
 
@@ -244,6 +246,10 @@ int main(int argc, char *argv[])
                 .gen = gen,
                 .info = info
                 }.set_params(args));
+    /*
+    } else if (vstrings[0] == "localsolver") {
+        sol = ub_localsolver({ins, sol, info});
+    */
     } else if (vstrings[0] == "vdns_simple") {
         info.set_onlywriteattheend(false);
         sol = sol_vdns_simple(ins, sol, gen, info);
@@ -252,6 +258,10 @@ int main(int argc, char *argv[])
     /*
     } else if (vstrings[0] == "vnsbranching_cplex") {
         sol = sol_vnsbranching_cplex(ins, gen, info);
+    */
+    /*
+    } else if (vstrings[0] == "vlsn_mbp") {
+        sol = sol_vlsn_mbp(ins, sol, gen, info);
     */
     } else {
         std::cout << "unknown algorithm" << std::endl;
