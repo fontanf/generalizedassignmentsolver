@@ -8,7 +8,7 @@ cc_library(
         ],
         copts = select({"//lib:coinor_build": ["-DCOINOR_FOUND"], "//conditions:default": []}),
         linkopts = select({
-                "//lib:cplex_build": [
+                "//lib:coinor_build": [
                         "-lVol",
                         "-lCoinUtils",
                 ],

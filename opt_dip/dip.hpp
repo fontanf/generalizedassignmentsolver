@@ -1,5 +1,7 @@
 #pragma once
 
+#if COINOR_FOUND
+
 #include "gap/lib/instance.hpp"
 #include "gap/lib/solution.hpp"
 
@@ -15,4 +17,6 @@ Solution sopt_branchandpriceandcut_dip(const Instance& ins, Info info = Info());
 Solution sopt_relaxandcut_dip(const Instance& ins, Info info = Info());
 
 }
+
+#endif
 

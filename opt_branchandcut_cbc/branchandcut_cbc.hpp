@@ -1,5 +1,7 @@
 #pragma once
 
+#if COINOR_FOUND
+
 #include "gap/lib/instance.hpp"
 #include "gap/lib/solution.hpp"
 
@@ -33,4 +35,6 @@ struct BranchAndCutCbcData
 Solution sopt_branchandcut_cbc(BranchAndCutCbcData d);
 
 }
+
+#endif
 

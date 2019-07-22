@@ -1,3 +1,5 @@
+#if COINOR_FOUND
+
 #include "gap/opt_dip/dip.hpp"
 
 #include "knapsack/opt_minknap/minknap.hpp"
@@ -268,4 +270,6 @@ Solution gap::sopt_relaxandcut_dip(const Instance& ins, Info info)
     Solution sol(ins);
     return algorithm_end(sol, info);
 }
+
+#endif
 

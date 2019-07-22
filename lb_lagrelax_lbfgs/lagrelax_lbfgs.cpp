@@ -1,3 +1,5 @@
+#if DLIB_FOUND
+
 #include "gap/lb_lagrelax_lbfgs/lagrelax_lbfgs.hpp"
 
 #include "knapsack/opt_minknap/minknap.hpp"
@@ -218,4 +220,6 @@ LagRelaxKnapsackLbfgsOutput gap::lb_lagrelax_knapsack_lbfgs(const Instance& ins,
     algorithm_end(out.lb, info);
     return out;
 }
+
+#endif
 

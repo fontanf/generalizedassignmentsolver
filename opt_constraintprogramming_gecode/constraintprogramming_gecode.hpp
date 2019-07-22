@@ -1,5 +1,7 @@
 #pragma once
 
+#if GECODE_FOUND
+
 #include "gap/lib/instance.hpp"
 #include "gap/lib/solution.hpp"
 
@@ -16,4 +18,6 @@ struct ConstraintProgrammingGecodeData
 Solution sopt_constraintprogramming_gecode(ConstraintProgrammingGecodeData d);
 
 }
+
+#endif
 

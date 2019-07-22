@@ -1,3 +1,5 @@
+#if GECODE_FOUND
+
 #include "gap/opt_constraintprogramming_gecode/constraintprogramming_gecode.hpp"
 
 #include <gecode/int.hh>
@@ -139,4 +141,6 @@ Solution gap::sopt_constraintprogramming_gecode(ConstraintProgrammingGecodeData 
 
     return algorithm_end(d.sol, d.info);
 }
+
+#endif
 

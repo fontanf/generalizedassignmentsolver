@@ -1,3 +1,5 @@
+#if COINOR_FOUND
+
 #include "gap/ub_vdns_simple/vdns_simple.hpp"
 #include "gap/ub_random/random.hpp"
 #include "gap/ub_repair/repair.hpp"
@@ -297,4 +299,6 @@ Solution gap::sol_vdns_simple(const Instance& ins, Solution& sol_best, std::mt19
 
     return algorithm_end(sol_best, info);
 }
+
+#endif
 

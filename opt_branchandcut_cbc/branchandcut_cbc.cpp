@@ -1,3 +1,5 @@
+#if COINOR_FOUND
+
 #include "gap/opt_branchandcut_cbc/branchandcut_cbc.hpp"
 
 #include "coin/CbcHeuristicDiveCoefficient.hpp"
@@ -209,4 +211,6 @@ Solution gap::sopt_branchandcut_cbc(BranchAndCutCbcData d)
         d.sol = Solution(d.ins);
     return algorithm_end(d.sol, d.info);
 }
+
+#endif
 

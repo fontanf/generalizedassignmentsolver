@@ -1,5 +1,7 @@
 #pragma once
 
+#if DLIB_FOUND
+
 #include "gap/lib/instance.hpp"
 #include "gap/lib/solution.hpp"
 
@@ -31,4 +33,6 @@ struct LagRelaxKnapsackLbfgsOutput
 LagRelaxKnapsackLbfgsOutput lb_lagrelax_knapsack_lbfgs(const Instance& ins, Info info = Info());
 
 }
+
+#endif
 

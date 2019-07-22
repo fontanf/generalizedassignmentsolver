@@ -6,15 +6,20 @@ cc_library(
                 "//lib:cpp",
                 "@knapsack//opt_minknap:minknap",
         ],
-        linkopts = [
-                "-lCbcSolver",
-                "-lCbc",
-                "-lCgl",
-                "-lOsiCbc",
-                "-lCoinUtils",
-                "-lAlps",
-                "-lDecomp",
-        ],
+        copts = select({"//lib:coinor_build": ["-DCOINOR_FOUND"], "//conditions:default": []}),
+        linkopts = select({
+                "//lib:coinor_build": [
+                        "-lCbcSolver",
+                        "-lCbc",
+                        "-lCgl",
+                        "-lOsiCbc",
+                        "-lCoinUtils",
+                        "-lAlps",
+                        "-lDecomp",
+                ],
+                "//conditions:default": [
+                ],
+        }),
         visibility = ["//visibility:public"],
         include_prefix = "gap/opt_dip/",
 )

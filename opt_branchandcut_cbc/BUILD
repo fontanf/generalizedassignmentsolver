@@ -3,13 +3,18 @@ cc_library(
         hdrs = ["branchandcut_cbc.hpp"],
         srcs = ["branchandcut_cbc.cpp"],
         deps = ["//lib:cpp"],
-        linkopts = [
-                "-lCbcSolver",
-                "-lCbc",
-                "-lCgl",
-                "-lOsiCbc",
-                "-lCoinUtils",
-        ],
+        copts = select({"//lib:coinor_build": ["-DCOINOR_FOUND"], "//conditions:default": []}),
+        linkopts = select({
+                "//lib:coinor_build": [
+                        "-lCbcSolver",
+                        "-lCbc",
+                        "-lCgl",
+                        "-lOsiCbc",
+                        "-lCoinUtils",
+                ],
+                "//conditions:default": [
+                ],
+        }),
         visibility = ["//visibility:public"],
         include_prefix = "gap/opt_branchandcut_cbc/",
 )

@@ -1,3 +1,5 @@
+#if COINOR_FOUND
+
 #include "gap/ub_vnsbranching_cbc/vnsbranching_cbc.hpp"
 
 #include "gap/ub_random/random.hpp"
@@ -122,4 +124,6 @@ Solution gap::sol_vnsbranching_cbc(const Instance& ins, std::mt19937_64& gen, In
 
     return algorithm_end(sol_best, info);
 }
+
+#endif
 

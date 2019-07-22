@@ -6,9 +6,14 @@ cc_library(
                 "//lib:cpp",
                 "@knapsack//opt_minknap:minknap",
         ],
-        linkopts = [
-                "-ldlib",
-        ],
+        copts = select({"//lib:dlib_build": ["-DDLIB_FOUND"], "//conditions:default": []}),
+        linkopts = select({
+                "//lib:cplex_build": [
+                        "-ldlib",
+                ],
+                "//conditions:default": [
+                ],
+        }),
         visibility = ["//visibility:public"],
         include_prefix = "gap/lb_lagrelax_lbfgs/",
 )

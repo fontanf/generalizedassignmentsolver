@@ -9,6 +9,7 @@ cc_library(
                 "//ub_ls_shiftswap:ls_shiftswap",
                 "//opt_branchandcut_cbc:branchandcut_cbc",
         ],
+        copts = select({"//lib:coinor_build": ["-DCOINOR_FOUND"], "//conditions:default": []}),
         visibility = ["//visibility:public"],
         include_prefix = "gap/ub_vnsbranching_cbc/",
 )
