@@ -1,3 +1,9 @@
+config_setting(name = "cplex_build",       values = {"define": "cplex=true"},       visibility = ["//visibility:public"])
+config_setting(name = "localsolver_build", values = {"define": "localsolver=true"}, visibility = ["//visibility:public"])
+config_setting(name = "gecode_build",      values = {"define": "gecode=true"},      visibility = ["//visibility:public"])
+config_setting(name = "dlib_build",        values = {"define": "dlib=true"},        visibility = ["//visibility:public"])
+config_setting(name = "coinor_build",      values = {"define": "coinor=true"},      visibility = ["//visibility:public"])
+
 cc_library(
         name = "cpp",
         hdrs = [
@@ -61,7 +67,7 @@ cc_binary(
                 "//lb_lagrelax_bundle:lagrelax_bundle",
                 "//lb_lagrelax_lbfgs:lagrelax_lbfgs",
                 "//opt_branchandcut_cbc:branchandcut_cbc",
-                #"//opt_branchandcut_cplex:branchandcut_cplex",
+                "//opt_branchandcut_cplex:branchandcut_cplex",
                 "//opt_dip:dip",
                 "//opt_constraintprogramming_gecode:constraintprogramming_gecode",
                 #"//opt_constraintprogramming_cplex:constraintprogramming_cplex",
@@ -76,6 +82,12 @@ cc_binary(
                 #"//ub_vnsbranching_cplex:vnsbranching_cplex",
                 #"//ub_vlsn_mbp:vlsn_mbp",
         ],
+        copts = [] +
+            select({":cplex_build":       ["-DCPLEX_FOUND"],       "//conditions:default": []}) +
+            select({":localsolver_build": ["-DLOCALSOLVER_FOUND"], "//conditions:default": []}) +
+            select({":gecode_build":      ["-DGECODE_FOUND"],      "//conditions:default": []}) +
+            select({":coinor_build":      ["-DCOINOR_FOUND"],      "//conditions:default": []}) +
+            select({":dlib_build":        ["-DDLIB_FOUND"],        "//conditions:default": []}),
 )
 
 cc_binary(

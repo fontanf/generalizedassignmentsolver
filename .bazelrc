@@ -1,1 +1,7 @@
 build --cxxopt='-std=c++14' --compilation_mode=opt
+#build --define coinor=true
+#build --define cplex=true
+#build --define gecode=true
+#build --define dlib=true
+#build --define localsolver=true
+

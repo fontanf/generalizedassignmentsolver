@@ -3,7 +3,6 @@
 #include "gap/lb_lagrelax_bundle/lagrelax_bundle.hpp"
 #include "gap/lb_lagrelax_lbfgs/lagrelax_lbfgs.hpp"
 #include "gap/opt_branchandcut_cbc/branchandcut_cbc.hpp"
-//#include "gap/opt_branchandcut_cplex/branchandcut_cplex.hpp"
 #include "gap/opt_constraintprogramming_gecode/constraintprogramming_gecode.hpp"
 //#include "gap/opt_constraintprogramming_cplex/constraintprogramming_cplex.hpp"
 #include "gap/opt_dip/dip.hpp"
@@ -17,6 +16,10 @@
 #include "gap/ub_vnsbranching_cbc/vnsbranching_cbc.hpp"
 //#include "gap/ub_vnsbranching_cplex/vnsbranching_cplex.hpp"
 //#include "gap/ub_vlsn_mbp/vlsn_mbp.hpp"
+
+#if CPLEX_FOUND
+#include "gap/opt_branchandcut_cplex/branchandcut_cplex.hpp"
+#endif
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
@@ -137,7 +140,7 @@ int main(int argc, char *argv[])
                 });
     } else if (vstrings[0] == "branchandcut_dip") {
         sopt_branchandcut_dip(ins, info);
-    /*
+#if CPLEX_FOUND
     } else if (vstrings[0] == "branchandcut_cplex") {
         info.set_onlywriteattheend(false);
         sopt_branchandcut_cplex({
@@ -145,7 +148,7 @@ int main(int argc, char *argv[])
                 .sol = sol,
                 .info = info,
                 });
-    */
+#endif
     } else if (vstrings[0] == "branchandpriceandcut_dip") {
         sopt_branchandpriceandcut_dip(ins, info);
     } else if (vstrings[0] == "relaxandcut_dip") {

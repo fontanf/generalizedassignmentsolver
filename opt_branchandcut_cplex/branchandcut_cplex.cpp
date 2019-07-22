@@ -1,3 +1,5 @@
+#if CPLEX_FOUND
+
 #include "gap/opt_branchandcut_cplex/branchandcut_cplex.hpp"
 
 #include <ilcplex/ilocplex.h>
@@ -91,4 +93,6 @@ Solution gap::sopt_branchandcut_cplex(BranchAndCutCplexData d)
 
     return algorithm_end(d.sol, d.info);
 }
+
+#endif
 
