@@ -1,3 +1,5 @@
+#if COINOR_FOUND
+
 #include "gap/lb_linrelax_clp/linrelax_clp.hpp"
 #include "gap/opt_branchandcut_cbc/branchandcut_cbc.hpp"
 
@@ -37,4 +39,6 @@ LinRelaxClpOutput gap::lb_linrelax_clp(const Instance& ins, Info info)
     algorithm_end(out.lb, info);
     return out;
 }
+
+#endif
 

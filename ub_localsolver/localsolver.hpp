@@ -1,5 +1,7 @@
 #pragma once
 
+#if LOCALSOLVER_FOUND
+
 #include "gap/lib/instance.hpp"
 #include "gap/lib/solution.hpp"
 
@@ -16,4 +18,6 @@ struct LocalSolverData
 Solution ub_localsolver(LocalSolverData d);
 
 }
+
+#endif
 

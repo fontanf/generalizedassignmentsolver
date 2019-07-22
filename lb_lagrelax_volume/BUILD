@@ -6,10 +6,15 @@ cc_library(
                 "//lib:cpp",
                 "@knapsack//opt_minknap:minknap",
         ],
-        linkopts = [
-                "-lVol",
-                "-lCoinUtils",
-        ],
+        copts = select({"//lib:coinor_build": ["-DCOINOR_FOUND"], "//conditions:default": []}),
+        linkopts = select({
+                "//lib:cplex_build": [
+                        "-lVol",
+                        "-lCoinUtils",
+                ],
+                "//conditions:default": [
+                ],
+        }),
         visibility = ["//visibility:public"],
         include_prefix = "gap/lb_lagrelax_volume/",
 )

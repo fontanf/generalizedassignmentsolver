@@ -1,3 +1,5 @@
+#if COINOR_FOUND
+
 #include "gap/ub_repair/repair.hpp"
 
 #include <set>
@@ -124,4 +126,6 @@ Solution gap::sol_repairlinrelax(const Instance& ins, const LinRelaxClpOutput& l
     repair(sol_curr);
     return algorithm_end(sol_curr, info);
 }
+
+#endif
 

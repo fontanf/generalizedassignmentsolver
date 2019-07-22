@@ -91,13 +91,48 @@ The same happens for the bound obtained by solving the lagrangian relaxation of 
 - it is very simple and the implementation is very short
 - it is available and free (MIT License)
 
-## Dependencies
+## Technical informations
 
-### Boost
-
+The only required dependency is Boost:
 ```shell
 sudo apt-get install libboost-all-dev
 ```
+
+Compile:
+```
+bazel build -- //...
+```
+
+However, most algorithms require additional libraries (see below).
+Compile with additional libraries:
+```
+bazel build \
+    --define coinor=true \
+    --define cplex=true \
+    --define gecode=true \
+    --define dlib=true \
+    --define localsolver=true \
+    -- //...
+```
+
+Solve:
+```
+./bazel-bin/lib/main -v -a mthg -i data/a05100 -o out.ini -c sol.txt
+```
+
+Unit tests:
+```
+bazel test --compilation_mode=dbg -- //...
+```
+
+Checker:
+```
+bazel build -- //lib:checker
+./bazel-bin/lib/checker instancefile solutionfile
+```
+
+
+## Optional dependencies
 
 ### COIN-OR (CLP, CBC, VOL, DIP)
 
@@ -172,7 +207,7 @@ LIB_DIR="/usr/lib/x86_64-linux-gnu/"
 sudo ln -s "${DLIB_HOME}/build/dlib/libdlib.a" "${LIB_DIR}"
 ```
 
-### CPLEX (optional)
+### CPLEX
 
 Update `.bashrc`:
 ```shell
@@ -191,14 +226,14 @@ export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:${CPOPTIMIZER_HOME}/include"
 Create symlinks for libraries:
 ```shell
 LIB_DIR="/usr/lib/x86_64-linux-gnu/"
-sudo ln -s "${CPLEX_HOME}/cplex/lib/x86-64_linux/static_pic/libcplex.a" "${LIB_DIR}"
-sudo ln -s "${CPLEX_HOME}/cplex/lib/x86-64_linux/static_pic/libcp.a" "${LIB_DIR}"
+sudo ln -s "${CPLEX_HOME}/cplex/lib/x86-64_linux/static_pic/libcplex.a"        "${LIB_DIR}"
+sudo ln -s "${CPLEX_HOME}/cplex/lib/x86-64_linux/static_pic/libcp.a"           "${LIB_DIR}"
 sudo ln -s "${CPLEX_HOME}/cplex/lib/x86-64_linux/static_pic/libcplexdistmip.a" "${LIB_DIR}"
-sudo ln -s "${CPLEX_HOME}/concert/lib/x86-64_linux/static_pic/libconcert.a" "${LIB_DIR}"
-sudo ln -s "${CPLEX_HOME}/cpoptimizer/lib/x86-64_linux/static_pic/libcp.a" "${LIB_DIR}"
+sudo ln -s "${CPLEX_HOME}/concert/lib/x86-64_linux/static_pic/libconcert.a"    "${LIB_DIR}"
+sudo ln -s "${CPLEX_HOME}/cpoptimizer/lib/x86-64_linux/static_pic/libcp.a"     "${LIB_DIR}"
 ```
 
-### LocalSolver (optional)
+### LocalSolver
 
 Update `.bashrc`:
 ```shell
@@ -213,28 +248,5 @@ LIB_DIR="/usr/lib/x86_64-linux-gnu/"
 for i in "${LOCALSOLVER_HOME}"/bin/*.so*; do
     sudo ln -f -s "$i" "${LIB_DIR}";
 done
-```
-
-## Technical informations
-
-Compile:
-```
-bazel build -- //...
-```
-
-Solve:
-```
-./bazel-bin/lib/main -v -a branchandcut_cbc -i data/a05100 -o out.ini -c sol.txt
-```
-
-Unit tests:
-```
-bazel test --compilation_mode=dbg -- //...
-```
-
-Checker:
-```
-bazel build -- //lib:checker
-./bazel-bin/lib/checker instancefile solutionfile
 ```
 

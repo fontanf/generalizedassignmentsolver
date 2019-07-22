@@ -1,3 +1,5 @@
+#if COINOR_FOUND
+
 #include "gap/lb_lagrelax_volume/lagrelax_volume.hpp"
 
 #include "knapsack/opt_minknap/minknap.hpp"
@@ -370,4 +372,6 @@ LagRelaxKnapsackVolumeOutput gap::lb_lagrelax_knapsack_volume(const Instance& in
     algorithm_end(output.lb, info);
     return output;
 }
+
+#endif
 

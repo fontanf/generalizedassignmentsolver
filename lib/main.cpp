@@ -3,23 +3,20 @@
 #include "gap/lb_lagrelax_bundle/lagrelax_bundle.hpp"
 #include "gap/lb_lagrelax_lbfgs/lagrelax_lbfgs.hpp"
 #include "gap/opt_branchandcut_cbc/branchandcut_cbc.hpp"
+#include "gap/opt_branchandcut_cplex/branchandcut_cplex.hpp"
 #include "gap/opt_constraintprogramming_gecode/constraintprogramming_gecode.hpp"
-//#include "gap/opt_constraintprogramming_cplex/constraintprogramming_cplex.hpp"
+#include "gap/opt_constraintprogramming_cplex/constraintprogramming_cplex.hpp"
 #include "gap/opt_dip/dip.hpp"
 #include "gap/ub_random/random.hpp"
 #include "gap/ub_greedy/greedy.hpp"
 #include "gap/ub_repair/repair.hpp"
 #include "gap/ub_ls_shiftswap/ls_shiftswap.hpp"
 #include "gap/ub_ls_ejectionchain/ls_ejectionchain.hpp"
-//#include "gap/ub_localsolver/localsolver.hpp"
+#include "gap/ub_localsolver/localsolver.hpp"
 #include "gap/ub_vdns_simple/vdns_simple.hpp"
 #include "gap/ub_vnsbranching_cbc/vnsbranching_cbc.hpp"
-//#include "gap/ub_vnsbranching_cplex/vnsbranching_cplex.hpp"
-//#include "gap/ub_vlsn_mbp/vlsn_mbp.hpp"
-
-#if CPLEX_FOUND
-#include "gap/opt_branchandcut_cplex/branchandcut_cplex.hpp"
-#endif
+#include "gap/ub_vnsbranching_cplex/vnsbranching_cplex.hpp"
+#include "gap/ub_vlsn_mbp/vlsn_mbp.hpp"
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
@@ -114,23 +111,39 @@ int main(int argc, char *argv[])
     /*
      * Lower bounds
      */
-    if (vstrings[0] == "linrelax_clp") {
+    if (vstrings[0] == "") {
+#if COINOR_FOUND
+    } else if (vstrings[0] == "linrelax_clp") {
         lb_linrelax_clp(ins, info);
+#endif
+#if COINOR_FOUND
     } else if (vstrings[0] == "lagrelax_knapsack_volume") {
         lb_lagrelax_knapsack_volume(ins, info);
+#endif
+#if COINOR_FOUND
     } else if (vstrings[0] == "lagrelax_knapsack_bundle") {
         lb_lagrelax_knapsack_bundle(ins, info);
+#endif
+#if DLIB_FOUND
     } else if (vstrings[0] == "lagrelax_knapsack_lbfgs") {
         lb_lagrelax_knapsack_lbfgs(ins, info);
+#endif
+#if COINOR_FOUND
     } else if (vstrings[0] == "lagrelax_assignment_volume") {
         lb_lagrelax_assignment_volume(ins, info);
+#endif
+#if COINOR_FOUND
     } else if (vstrings[0] == "lagrelax_assignment_bundle") {
         lb_lagrelax_assignment_bundle(ins, info);
+#endif
+#if DLIB_FOUND
     } else if (vstrings[0] == "lagrelax_assignment_lbfgs") {
         lb_lagrelax_assignment_lbfgs(ins, info);
+#endif
     /*
      * Exact
      */
+#if COINOR_FOUND
     } else if (vstrings[0] == "branchandcut_cbc") {
         sopt_branchandcut_cbc({
                 .ins = ins,
@@ -138,8 +151,11 @@ int main(int argc, char *argv[])
                 .stop_at_first_improvment = false,
                 .info = info,
                 });
+#endif
+#if COINOR_FOUND
     } else if (vstrings[0] == "branchandcut_dip") {
         sopt_branchandcut_dip(ins, info);
+#endif
 #if CPLEX_FOUND
     } else if (vstrings[0] == "branchandcut_cplex") {
         info.set_onlywriteattheend(false);
@@ -149,26 +165,34 @@ int main(int argc, char *argv[])
                 .info = info,
                 });
 #endif
+#if COINOR_FOUND
     } else if (vstrings[0] == "branchandpriceandcut_dip") {
         sopt_branchandpriceandcut_dip(ins, info);
+#endif
+#if COINOR_FOUND
     } else if (vstrings[0] == "relaxandcut_dip") {
         sopt_relaxandcut_dip(ins, info);
+#endif
+#if GECODE_FOUND
     } else if (vstrings[0] == "constraintprogramming_gecode") {
         sopt_constraintprogramming_gecode({
                 .ins = ins,
                 .sol = sol,
                 .info = info,
                 });
-    /*
+#endif
+#if CPLEX_FOUND
     } else if (vstrings[0] == "constraintprogramming_cplex") {
         sopt_constraintprogramming_cplex({
                 .ins = ins,
                 .sol = sol,
                 .info = info,
                 });
-    */
+#endif
+#if COINOR_FOUND
     } else if (vstrings[0] == "dip") {
         dip(ins);
+#endif
     /*
      * Upper bounds
      */
@@ -194,13 +218,19 @@ int main(int argc, char *argv[])
         std::string des_str = (it == args.end())? "cij": it->second;
         std::unique_ptr<Desirability> f = desirability(des_str, ins);
         sol = sol_mthgregret(ins, *f, info);
+#if COINOR_FOUND
     } else if (vstrings[0] == "repaircombrelax") {
         sol = sol_repaircombrelax(ins, info);
+#endif
+#if COINOR_FOUND
     } else if (vstrings[0] == "repairgreedy") {
         sol = sol_repairgreedy(ins, info);
+#endif
+#if COINOR_FOUND
     } else if (vstrings[0] == "repairlinrelax") {
         LinRelaxClpOutput linrelax_output = lb_linrelax_clp(ins);
         sol = sol_repairlinrelax(ins, linrelax_output, info);
+#endif
     } else if (vstrings[0] == "lsfirst_shift") {
         sol = sol_lsfirst_shift(LSFirstShiftSwapData{
                 .ins = ins,
@@ -249,23 +279,27 @@ int main(int argc, char *argv[])
                 .gen = gen,
                 .info = info
                 }.set_params(args));
-    /*
+#if LOCALSOLVER_FOUND
     } else if (vstrings[0] == "localsolver") {
         sol = ub_localsolver({ins, sol, info});
-    */
+#endif
+#if COINOR_FOUND
     } else if (vstrings[0] == "vdns_simple") {
         info.set_onlywriteattheend(false);
         sol = sol_vdns_simple(ins, sol, gen, info);
+#endif
+#if COINOR_FOUND
     } else if (vstrings[0] == "vnsbranching_cbc") {
         sol = sol_vnsbranching_cbc(ins, gen, info);
-    /*
+#endif
+#if CPLEX_FOUND
     } else if (vstrings[0] == "vnsbranching_cplex") {
         sol = sol_vnsbranching_cplex(ins, gen, info);
-    */
-    /*
+#endif
+#if CPLEX_FOUND
     } else if (vstrings[0] == "vlsn_mbp") {
         sol = sol_vlsn_mbp(ins, sol, gen, info);
-    */
+#endif
     } else {
         std::cout << "unknown algorithm" << std::endl;
     }

@@ -1,3 +1,5 @@
+#if CPLEX_FOUND
+
 #include "gap/ub_vnsbranching_cplex/vnsbranching_cplex.hpp"
 
 #include "gap/ub_random/random.hpp"
@@ -138,4 +140,6 @@ Solution gap::sol_vnsbranching_cplex(const Instance& ins, std::mt19937_64& gen, 
 
     return algorithm_end(sol_best, info);
 }
+
+#endif
 

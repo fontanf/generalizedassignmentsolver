@@ -1,5 +1,7 @@
 #pragma once
 
+#if COINOR_FOUND
+
 #include "gap/lib/instance.hpp"
 #include "gap/lib/solution.hpp"
 
@@ -13,4 +15,6 @@ Solution sol_repaircombrelax(const Instance& ins, Info info = Info());
 Solution sol_repairlinrelax(const Instance& ins, const LinRelaxClpOutput& linrelax_output, Info info = Info());
 
 }
+
+#endif
 

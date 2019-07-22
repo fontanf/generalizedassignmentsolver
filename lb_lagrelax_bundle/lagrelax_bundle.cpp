@@ -1,3 +1,5 @@
+#if COINOR_FOUND
+
 #include "gap/lb_lagrelax_bundle/lagrelax_bundle.hpp"
 
 #include "knapsack/opt_minknap/minknap.hpp"
@@ -165,4 +167,6 @@ LagRelaxKnapsackBundleOutput gap::lb_lagrelax_knapsack_bundle(const Instance& in
     (void)info;
     return out;
 }
+
+#endif
 

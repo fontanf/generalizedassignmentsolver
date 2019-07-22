@@ -1,5 +1,7 @@
 #include "gap/opt_constraintprogramming_cplex/constraintprogramming_cplex.hpp"
 
+#if CPLEX_FOUND
+
 #include <ilcp/cp.h>
 
 using namespace gap;
@@ -69,4 +71,6 @@ Solution gap::sopt_constraintprogramming_cplex(ConstraintProgrammingCplexData d)
 
     return algorithm_end(d.sol, d.info);
 }
+
+#endif
 

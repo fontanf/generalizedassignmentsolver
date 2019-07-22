@@ -6,11 +6,16 @@ cc_library(
                 "//lib:cpp",
                 "//opt_branchandcut_cbc:branchandcut_cbc",
         ],
-        linkopts = [
-                "-lClp",
-                "-lOsiClp",
-                "-lCoinUtils",
-        ],
+        copts = select({"//lib:coinor_build": ["-DCOINOR_FOUND"], "//conditions:default": []}),
+        linkopts = select({
+                "//lib:cplex_build": [
+                        "-lClp",
+                        "-lOsiClp",
+                        "-lCoinUtils",
+                ],
+                "//conditions:default": [
+                ],
+        }),
         visibility = ["//visibility:public"],
         include_prefix = "gap/lb_linrelax_clp/",
 )

@@ -128,7 +128,7 @@ DecompSolverStatus GAPDecompApp::solveRelaxed(
     std::vector<double> sol_els;
 
     // Build Knapsck Instance
-    Weight mult = 10000;
+    Weight mult = 1000;
     std::vector<ItemIdx> indices(n);
     knapsack::Instance ins_kp(n, ins.capacity(i));
     for (ItemIdx j=0; j<n; ++j) {
@@ -169,9 +169,9 @@ Cost gap::dip(const Instance& ins)
         utilParam.Add("DECOMP", "BranchEnforceInMaster", "1");
         utilParam.Add("DECOMP", "BranchEnforceInSubProb", "0");
 
-        bool doCut      = utilParam.GetSetting("doCut",      false);
-        bool doPriceCut = utilParam.GetSetting("doPriceCut", true);
-        bool doDirect   = utilParam.GetSetting("doDirect",   false);
+        bool doCut      = utilParam.GetSetting("doCut",      true);
+        bool doPriceCut = utilParam.GetSetting("doPriceCut", false);
+        bool doDirect   = utilParam.GetSetting("doDirect",   true);
 
         // create the user application (a DecompApp)
         GAPDecompApp gap(utilParam, ins);

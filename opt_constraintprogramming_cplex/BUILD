@@ -6,15 +6,19 @@ cc_library(
         copts = [
                 "-m64",
                 "-DIL_STD",
-        ],
-        linkopts = [
-                "-lcp",
-                "-lconcert",
-                "-lilocplex",
-                "-lcplex",
-                "-lm",
-                "-lpthread",
-        ],
+        ] + select({"//lib:cplex_build": ["-DCPLEX_FOUND"], "//conditions:default": []}),
+        linkopts = select({
+                "//lib:cplex_build": [
+                        "-lcp",
+                        "-lconcert",
+                        "-lilocplex",
+                        "-lcplex",
+                        "-lm",
+                        "-lpthread",
+                ],
+                "//conditions:default": [
+                ],
+        }),
         visibility = ["//visibility:public"],
         include_prefix = "gap/opt_constraintprogramming_cplex/",
 )

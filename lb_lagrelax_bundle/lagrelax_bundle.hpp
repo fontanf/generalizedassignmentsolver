@@ -1,5 +1,7 @@
 #pragma once
 
+#if COINOR_FOUND
+
 #include "gap/lib/instance.hpp"
 #include "gap/lib/solution.hpp"
 
@@ -31,4 +33,6 @@ struct LagRelaxKnapsackBundleOutput
 LagRelaxKnapsackBundleOutput lb_lagrelax_knapsack_bundle(const Instance& ins, Info info = Info());
 
 }
+
+#endif
 

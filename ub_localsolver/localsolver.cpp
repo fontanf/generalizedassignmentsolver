@@ -1,3 +1,5 @@
+#if LOCALSOLVER_FOUND
+
 #include "gap/ub_localsolver/localsolver.hpp"
 
 #include <localsolver.h>
@@ -95,4 +97,6 @@ Solution gap::ub_localsolver(LocalSolverData d)
 
     return algorithm_end(d.sol, d.info);
 }
+
+#endif
 

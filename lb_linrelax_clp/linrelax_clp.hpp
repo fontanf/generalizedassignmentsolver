@@ -1,5 +1,7 @@
 #pragma once
 
+#if COINOR_FOUND
+
 #include "gap/lib/instance.hpp"
 #include "gap/lib/solution.hpp"
 
@@ -15,4 +17,6 @@ struct LinRelaxClpOutput
 LinRelaxClpOutput lb_linrelax_clp(const Instance& ins, Info info = Info());
 
 }
+
+#endif
 

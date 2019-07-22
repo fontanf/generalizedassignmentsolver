@@ -1,3 +1,5 @@
+#if CPLEX_FOUND
+
 #include "gap/ub_vlsn_mbp/vlsn_mbp.hpp"
 
 #include "gap/lb_lagrelax_lbfgs/lagrelax_lbfgs.hpp"
@@ -195,4 +197,6 @@ Solution gap::sol_vlsn_mbp(const Instance& ins, Solution& sol_best, std::mt19937
 
     return algorithm_end(sol_best, info);
 }
+
+#endif
 
