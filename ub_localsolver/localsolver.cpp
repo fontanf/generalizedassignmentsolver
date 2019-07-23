@@ -84,7 +84,8 @@ Solution gap::ub_localsolver(LocalSolverData d)
     model.close();
 
     // Parameterizes the solver.
-    localsolver.getParam().setTimeLimit(d.info.timelimit);
+    if (d.info.timelimit != std::numeric_limits<double>::infinity())
+        localsolver.getParam().setTimeLimit(d.info.timelimit);
 
     localsolver.solve();
 

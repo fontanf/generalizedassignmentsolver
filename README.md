@@ -68,6 +68,7 @@ Others:
 - Variable-depth neighborhood search (see "Handbook of Metaheuristics", 4.5.1 Variable-Depth Methods)
   - k-agents reallocation neighborhood `-a vdns_simple` :heavy_check_mark:
 - Very large scale neighborhood search using Monotone Binary Program neighborhood, based on "Variable-fixing then subgradient optimization guided very large scale neighborhood search for the generalized assignment problem" (Haddadi, 2018) `-a vlsn_mbp` :x:
+- Local search with LocalSolver `-a localsolver` :heavy_check_mark:
 
 ## Exact algorithms
 

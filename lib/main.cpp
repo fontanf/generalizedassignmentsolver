@@ -19,9 +19,6 @@
 #include "gap/ub_vnsbranching_cplex/vnsbranching_cplex.hpp"
 #include "gap/ub_vlsn_mbp/vlsn_mbp.hpp"
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/fstream.hpp>
 #include <boost/program_options.hpp>
 
 using namespace gap;
@@ -69,18 +66,6 @@ int main(int argc, char *argv[])
     } catch (po::required_option e) {
         std::cout << desc << std::endl;;
         return 1;
-    }
-
-    if (!boost::filesystem::exists(instancefile)) {
-        std::cerr << instancefile << ": file not found." << std::endl;
-        return 1;
-    }
-    for (std::string file: {certfile, outputfile}) {
-        if (file == "")
-            continue;
-        boost::filesystem::path p(file);
-        if (p.parent_path() != "")
-            boost::filesystem::create_directories(p.parent_path());
     }
 
     Instance ins(instancefile, format);
