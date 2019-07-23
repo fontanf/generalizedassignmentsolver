@@ -72,6 +72,7 @@ cc_binary(
                 "//opt_dip:dip",
                 "//opt_constraintprogramming_gecode:constraintprogramming_gecode",
                 "//opt_constraintprogramming_cplex:constraintprogramming_cplex",
+                "//opt_constraintprogramming_ortools:constraintprogramming_ortools",
                 "//ub_random:random",
                 "//ub_greedy:greedy",
                 "//ub_repair:repair",

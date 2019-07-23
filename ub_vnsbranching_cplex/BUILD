@@ -5,7 +5,6 @@ cc_library(
         deps = [
                 "//lib:cpp",
                 "//ub_random:random",
-                "//ub_repair:repair",
                 "//ub_ls_shiftswap:ls_shiftswap",
         ],
         copts = [

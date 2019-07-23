@@ -3,7 +3,6 @@
 #include "gap/ub_vnsbranching_cplex/vnsbranching_cplex.hpp"
 
 #include "gap/ub_random/random.hpp"
-#include "gap/ub_repair/repair.hpp"
 #include "gap/ub_ls_shiftswap/ls_shiftswap.hpp"
 
 #include <ilcplex/ilocplex.h>
@@ -29,11 +28,8 @@ Solution gap::sol_vnsbranching_cplex(const Instance& ins, std::mt19937_64& gen, 
     init_display(info);
     Solution sol_best(ins);
 
-    LinRelaxClpOutput linrelax_output = lb_linrelax_clp(ins);
-    Cost lb = linrelax_output.lb;
-    Solution sol_curr = sol_repairlinrelax(ins, linrelax_output);
-    //Cost lb = 0;
-    //Solution sol_curr = sol_random(ins, gen);
+    Cost lb = 0;
+    Solution sol_curr = sol_random(ins, gen);
     sol_curr.update_penalties(std::vector<PCost>(m, 100));
 
     std::stringstream ss;

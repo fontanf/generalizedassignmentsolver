@@ -1,6 +1,7 @@
 #pragma once
 
 #if CPLEX_FOUND
+#if DLIB_FOUND
 
 #include "gap/lib/instance.hpp"
 #include "gap/lib/solution.hpp"
@@ -12,5 +13,6 @@ Solution sol_vlsn_mbp(const Instance& ins, Solution& sol, std::mt19937_64& gen, 
 
 }
 
+#endif
 #endif
 

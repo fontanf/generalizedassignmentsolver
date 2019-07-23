@@ -12,9 +12,10 @@ cc_library(
         copts = [
                 "-m64",
                 "-DIL_STD",
-        ] + select({"//lib:cplex_build": ["-DCPLEX_FOUND"], "//conditions:default": []}),
+        ] + select({"//lib:cplex_build": ["-DCPLEX_FOUND"], "//conditions:default": []}) +
+        select({"//lib:dlib_build": ["-DDLIB_FOUND"], "//conditions:default": []}),
         linkopts = select({
-                "//lib:cplex_build": [
+                "//lib:dlib_build": [
                         "-lconcert",
                         "-lilocplex",
                         "-lcplex",
