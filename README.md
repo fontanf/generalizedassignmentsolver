@@ -108,6 +108,7 @@ Compile with additional libraries:
 ```
 bazel build \
     --define coinor=true \
+    --define ortools=true \
     --define cplex=true \
     --define gecode=true \
     --define dlib=true \
@@ -160,7 +161,11 @@ for i in "${COINOR_HOME}"/build/lib/*.so*; do
 done
 ```
 
-### Gecode:
+### OR-Tools
+
+Already included, will be downloaded automatically if option `--define ortools=true` is used.
+
+### Gecode
 
 Download latest version: download https://www.gecode.org/download.html
 

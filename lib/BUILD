@@ -1,8 +1,9 @@
+config_setting(name = "coinor_build",      values = {"define": "coinor=true"},      visibility = ["//visibility:public"])
+config_setting(name = "ortools_build",     values = {"define": "ortools=true"},     visibility = ["//visibility:public"])
+config_setting(name = "dlib_build",        values = {"define": "dlib=true"},        visibility = ["//visibility:public"])
 config_setting(name = "cplex_build",       values = {"define": "cplex=true"},       visibility = ["//visibility:public"])
 config_setting(name = "localsolver_build", values = {"define": "localsolver=true"}, visibility = ["//visibility:public"])
 config_setting(name = "gecode_build",      values = {"define": "gecode=true"},      visibility = ["//visibility:public"])
-config_setting(name = "dlib_build",        values = {"define": "dlib=true"},        visibility = ["//visibility:public"])
-config_setting(name = "coinor_build",      values = {"define": "coinor=true"},      visibility = ["//visibility:public"])
 
 cc_library(
         name = "cpp",
