@@ -13,6 +13,42 @@
 using namespace gap;
 using namespace localsolver;
 
+class MyCallback: public LSCallback
+{
+
+public:
+
+    MyCallback(Solution& sol, Info& info, std::vector<LSExpression>& agents):
+        sol_(sol), info_(info), agents_(agents) { }
+
+    void callback(LocalSolver& ls, LSCallbackType type) {
+        LSSolutionStatus s = ls.getSolution().getStatus();
+        if (s == SS_Infeasible)
+            return;
+
+        LSExpression obj = ls.getModel().getObjective(0);
+        if(!sol_.feasible() || sol_.cost() > obj.getValue() + 0.5) {
+            Solution sol_curr(sol_.instance());
+            AgentIdx m = sol_.instance().agent_number();
+            for (AgentIdx i=0; i<m; ++i) {
+                LSCollection bin_collection = agents_[i].getCollectionValue();
+                for (ItemIdx j_pos=0; j_pos<bin_collection.count(); ++j_pos) {
+                    sol_curr.set(bin_collection[j_pos], i);
+                }
+            }
+            std::stringstream ss;
+            sol_.update(sol_curr, 0, ss, info_);
+        }
+    }
+
+private:
+
+    Solution& sol_;
+    Info& info_;
+    std::vector<LSExpression>& agents_;
+
+};
+
 Solution gap::ub_localsolver(LocalSolverData d)
 {
     VER(d.info, "*** localsolver ***" << std::endl);
@@ -22,6 +58,9 @@ Solution gap::ub_localsolver(LocalSolverData d)
     init_display(d.info);
 
     LocalSolver localsolver;
+
+    // Remove display
+    localsolver.getParam().setVerbosity(0);
 
     // Declares the optimization model.
     LSModel model = localsolver.getModel();
@@ -83,10 +122,15 @@ Solution gap::ub_localsolver(LocalSolverData d)
 
     model.close();
 
-    // Parameterizes the solver.
+    // Time limit
     if (d.info.timelimit != std::numeric_limits<double>::infinity())
         localsolver.getParam().setTimeLimit(d.info.timelimit);
 
+    // Custom callback
+    MyCallback cb(d.sol, d.info, agents);
+    localsolver.addCallback(CT_TimeTicked, &cb);
+
+    // Solve
     localsolver.solve();
 
     // Retrieve solution
