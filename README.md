@@ -24,7 +24,10 @@ GAP is interesting for several reasons:
 
 ## Lower bounds
 
-- Linear relaxation solved with CLP `-a linrelax_clp` :heavy_check_mark:
+- Linear relaxation
+  - solved with CLP `-a linrelax_clp` :heavy_check_mark:
+  - solved with OR-Tools `-a linrelax_ortools` :x:
+  - solved with CPLEX `-a linrelax_cplex` :x:
 - Lagrangian relaxation of knapsack constraints
   - solved with volume method `-a lagrelax_knapsack_volume` :heavy_check_mark:
   - solved with L-BFGS method `-a lagrelax_knapsack_lbfgs` :heavy_check_mark:
@@ -76,6 +79,7 @@ Others:
   - with CBC `-a branchandcut_cbc` :heavy_check_mark:
   - with CPLEX `-a branchandcut_cplex` :heavy_check_mark:
 - Constraint programming
+  - with OR-Tools `-a constraintprogramming_ortools` :x:
   - with Gecode `-a constraintprogramming_gecode` :heavy_check_mark:
   - with CPLEX `-a constraintprogramming_cplex` :heavy_check_mark:
 
