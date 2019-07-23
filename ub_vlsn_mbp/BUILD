@@ -15,7 +15,7 @@ cc_library(
         ] + select({"//lib:cplex_build": ["-DCPLEX_FOUND"], "//conditions:default": []}) +
         select({"//lib:dlib_build": ["-DDLIB_FOUND"], "//conditions:default": []}),
         linkopts = select({
-                "//lib:dlib_build": [
+                "//lib:cplex_build": [
                         "-lconcert",
                         "-lilocplex",
                         "-lcplex",

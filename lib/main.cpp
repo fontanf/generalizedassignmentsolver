@@ -95,11 +95,12 @@ int main(int argc, char *argv[])
         args[*it] = *std::next(it);
 
     std::mt19937_64 gen(seed);
+    if (vstrings[0] == "") {
+        std::cout << "missing algorithm" << std::endl;
+
     /*
      * Lower bounds
      */
-    if (vstrings[0] == "") {
-        std::cout << "missing algorithm" << std::endl;
 #if COINOR_FOUND
     } else if (vstrings[0] == "linrelax_clp") {
         lb_linrelax_clp(ins, info);
@@ -128,8 +129,9 @@ int main(int argc, char *argv[])
     } else if (vstrings[0] == "lagrelax_assignment_lbfgs") {
         lb_lagrelax_assignment_lbfgs(ins, info);
 #endif
+
     /*
-     * Exact
+     * Exact algorithms
      */
 #if COINOR_FOUND
     } else if (vstrings[0] == "branchandcut_cbc") {
@@ -146,7 +148,6 @@ int main(int argc, char *argv[])
 #endif
 #if CPLEX_FOUND
     } else if (vstrings[0] == "branchandcut_cplex") {
-        info.set_onlywriteattheend(false);
         sopt_branchandcut_cplex({
                 .ins = ins,
                 .sol = sol,
@@ -189,6 +190,7 @@ int main(int argc, char *argv[])
     } else if (vstrings[0] == "dip") {
         dip(ins);
 #endif
+
     /*
      * Upper bounds
      */
@@ -281,7 +283,6 @@ int main(int argc, char *argv[])
 #endif
 #if COINOR_FOUND
     } else if (vstrings[0] == "vdns_simple") {
-        info.set_onlywriteattheend(false);
         sol = sol_vdns_simple(ins, sol, gen, info);
 #endif
 #if COINOR_FOUND
