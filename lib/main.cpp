@@ -5,6 +5,7 @@
 #include "gap/opt_branchandcut_cbc/branchandcut_cbc.hpp"
 #include "gap/opt_branchandcut_cplex/branchandcut_cplex.hpp"
 #include "gap/opt_constraintprogramming_gecode/constraintprogramming_gecode.hpp"
+#include "gap/opt_constraintprogramming_ortools/constraintprogramming_ortools.hpp"
 #include "gap/opt_constraintprogramming_cplex/constraintprogramming_cplex.hpp"
 #include "gap/opt_dip/dip.hpp"
 #include "gap/ub_random/random.hpp"
@@ -113,6 +114,7 @@ int main(int argc, char *argv[])
      * Lower bounds
      */
     if (vstrings[0] == "") {
+        std::cout << "missing algorithm" << std::endl;
 #if COINOR_FOUND
     } else if (vstrings[0] == "linrelax_clp") {
         lb_linrelax_clp(ins, info);
@@ -173,6 +175,14 @@ int main(int argc, char *argv[])
 #if COINOR_FOUND
     } else if (vstrings[0] == "relaxandcut_dip") {
         sopt_relaxandcut_dip(ins, info);
+#endif
+#if ORTOOLS_FOUND
+    } else if (vstrings[0] == "constraintprogramming_ortools") {
+        sopt_constraintprogramming_ortools({
+                .ins = ins,
+                .sol = sol,
+                .info = info,
+                });
 #endif
 #if GECODE_FOUND
     } else if (vstrings[0] == "constraintprogramming_gecode") {
