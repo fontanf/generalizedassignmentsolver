@@ -1,3 +1,5 @@
+#if COINOR_FOUND
+
 #include "gap/lib/tester.hpp"
 #include "gap/opt_branchandcut_cbc/branchandcut_cbc.hpp"
 
@@ -15,4 +17,6 @@ std::vector<Cost (*)(Instance&)> f = {
 };
 
 TEST(BranchAndCutCbc, TEST) { test(TEST, f); }
+
+#endif
 

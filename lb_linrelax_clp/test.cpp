@@ -1,13 +1,13 @@
+#if COINOR_FOUND
+
 #include "gap/lib/tester.hpp"
-#include "gap/opt_branchandcut_cbc/branchandcut_cbc.hpp"
+#include "gap/lb_linrelax_clp/linrelax_clp.hpp"
 
 using namespace gap;
 
 Cost lb_linrelax_clp_test(Instance& ins)
 {
-    Solution sol(ins);
-    BranchAndCutCbcData d {.ins = ins, .sol = sol};
-    return sopt_branchandcut_cbc(d).cost();
+    return lb_linrelax_clp(ins).lb;
 }
 
 std::vector<Cost (*)(Instance&)> f = {
@@ -15,4 +15,6 @@ std::vector<Cost (*)(Instance&)> f = {
 };
 
 TEST(BranchAndCutCbc, TEST) { test(TEST, f, LB); }
+
+#endif
 

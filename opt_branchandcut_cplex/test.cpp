@@ -1,3 +1,5 @@
+#if CPLEX_FOUND
+
 #include "gap/lib/tester.hpp"
 #include "gap/opt_branchandcut_cplex/branchandcut_cplex.hpp"
 
@@ -15,4 +17,6 @@ std::vector<Cost (*)(Instance&)> f = {
 };
 
 TEST(MILP, TEST) { test(TEST, f); }
+
+#endif
 

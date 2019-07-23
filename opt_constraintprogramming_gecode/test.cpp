@@ -1,3 +1,5 @@
+#if GECODE_FOUND
+
 #include "gap/lib/tester.hpp"
 #include "gap/opt_constraintprogramming_gecode/constraintprogramming_gecode.hpp"
 
@@ -15,4 +17,6 @@ std::vector<Cost (*)(Instance&)> f = {
 };
 
 TEST(BranchAndCutCbc, TEST) { test(TEST, f); }
+
+#endif
 

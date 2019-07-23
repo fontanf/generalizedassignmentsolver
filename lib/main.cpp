@@ -89,13 +89,14 @@ int main(int argc, char *argv[])
 
     Info info = Info()
         .set_verbose(vm.count("verbose"))
+        .set_timelimit(time_limit)
+        .set_certfile(certfile)
+        .set_outputfile(outputfile)
+        .set_onlywriteattheend(false)
         .set_logfile(logfile)
         .set_log2stderr(vm.count("log2stderr"))
         .set_loglevelmax(loglevelmax)
-        .set_timelimit(time_limit)
-        .set_onlywriteattheend(false)
-        .set_certfile(certfile)
-        .set_outputfile(outputfile);
+        ;
 
     std::stringstream ss(algorithm);
     std::istream_iterator<std::string> begin(ss);
