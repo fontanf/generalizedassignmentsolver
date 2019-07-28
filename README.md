@@ -96,7 +96,7 @@ The same happens for the bound obtained by solving the lagrangian relaxation of 
 - it is very simple and the implementation is very short
 - it is available and free (MIT License)
 
-## Technical informations
+## Usage (command line)
 
 The only required dependency is Boost:
 ```shell
@@ -123,7 +123,7 @@ bazel build \
 
 Solve:
 ```
-./bazel-bin/lib/main -v -a mthg -i data/a05100 -o out.ini -c sol.txt
+./bazel-bin/lib/main -v -a 'mthg f -pij/wij' -i "data/a05100" -o "out.ini" -c "sol.txt"
 ```
 
 Unit tests:
@@ -134,7 +134,7 @@ bazel test --compilation_mode=dbg -- //...
 Checker:
 ```
 bazel build -- //lib:checker
-./bazel-bin/lib/checker instancefile solutionfile
+./bazel-bin/lib/checker "instancefile" "solutionfile"
 ```
 
 
