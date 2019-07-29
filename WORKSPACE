@@ -28,13 +28,13 @@ cc_library(
 git_repository(
     name = "knapsack",
     remote = "https://github.com/fontanf/knapsack.git",
-    commit = "c45720bd8f220d44863d0c8a6a4cc8aa6d5841c8",
+    commit = "abb80bd06abebe90639c3680f203854ebdaf83ec",
 )
 
 git_repository(
     name = "benchtools",
     remote = "https://github.com/fontanf/benchtools.git",
-    commit = "8a78dd897d84118bb2bb1bdc4c8ae66194ca2e2e",
+    commit = "05883deff50e329875ea1bd8ddd5f6076da9d7d4",
 )
 
 git_repository(

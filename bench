@@ -2,10 +2,9 @@
 
 import sys
 import os
+import os.path
 import configparser
 
-algo = sys.argv[1]
-t = 120;
 data = [
         "a05100", "a10100", "a20100",
         "a05200", "a10200", "a20200",
@@ -27,18 +26,31 @@ data = [
         "e15900", "e30900", "e60900",
         "e201600", "e401600", "e801600"]
 
-os.system('bazel build --cxxopt=\'-std=c++14\' --compilation_mode=opt -- //lib:main')
+algo = sys.argv[1]
+t = ""
+if (len(sys.argv) > 2):
+    t = sys.arg[2]
+
+os.system('bazel build -- //lib:main')
+suffix = algo.replace(" ", "_").replace("/", "_")
+if t == "":
+    outdir = os.path.join("out", suffix)
+    time_limit = ""
+else:
+    outdir = os.path.join("out", suffix + "_" + t)
+    time_limit = " -t " + str(t)
+os.makedirs(outdir, exist_ok=True)
 
 for i in data:
-    certfile = "out/solutions_" + algo + "_" + str(t) + "/" + i + "_solution.txt"
-    inifile  = "out/solutions_" + algo + "_" + str(t) + "/" + i + "_output.ini"
-    # print(i + ",", end="")
+    certfile = os.path.join(outdir, i + "_solution.txt")
+    inifile  = os.path.join(outdir, i + "_output.ini")
     os.system("./bazel-bin/lib/main"
         + " -a \"" + algo + "\""
-        + " -t " + str(t)
+        + time_limit
         + " -i \"data/" + i + "\""
-        + " -c \"" + certfile + "\""
+        # + " -c \"" + certfile + "\""
         + " -o \"" + inifile + "\"")
+
     ini = configparser.ConfigParser()
     ini.read(inifile)
     if ini.has_section("Solution"):
