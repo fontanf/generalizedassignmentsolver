@@ -72,6 +72,7 @@ int main(int argc, char *argv[])
     Solution sol(ins);
     if (initsolfile != "")
         sol.read(initsolfile);
+    Cost lb = 0;
 
     Info info = Info()
         .set_verbose(vm.count("verbose"))
@@ -151,6 +152,7 @@ int main(int argc, char *argv[])
         sopt_branchandcut_cplex({
                 .ins = ins,
                 .sol = sol,
+                .lb = lb,
                 .info = info,
                 });
 #endif

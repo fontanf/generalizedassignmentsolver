@@ -264,6 +264,35 @@ void gap::init_display(Info& info)
     VER(info, std::endl);
 }
 
+void gap::update(Cost& lb, Cost lb_new, Cost ub, const std::stringstream& s, Info& info)
+{
+    info.output->mutex_sol.lock();
+
+    if (lb < lb_new) {
+        info.output->sol_number++;
+        lb = lb_new;
+        double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
+        std::string sol_str = "Solution" + std::to_string(info.output->sol_number);
+        PUT(info, sol_str + ".Cost", ub);
+        PUT(info, sol_str + ".Time", t);
+
+        VER(info, std::left << std::setw(10) << t);
+        VER(info, std::left << std::setw(12) << ub);
+        VER(info, std::left << std::setw(12) << lb);
+        VER(info, std::left << std::setw(10) << ub - lb);
+        double gap = (lb == 0)? std::numeric_limits<double>::infinity():
+            (double)(10000 * (ub - lb) / lb) / 100;
+        VER(info, std::left << std::setw(10) << gap);
+        VER(info, s.str() << std::endl);
+
+        if (!info.output->onlywriteattheend) {
+            info.write_ini();
+        }
+    }
+
+    info.output->mutex_sol.unlock();
+}
+
 std::string Solution::to_string(AgentIdx i)
 {
     std::string s = "agent " + std::to_string(i) + ":";

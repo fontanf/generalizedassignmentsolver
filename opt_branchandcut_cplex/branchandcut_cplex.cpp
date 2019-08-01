@@ -11,12 +11,36 @@ ILOSTLBEGIN
 typedef IloArray<IloNumVarArray> NumVarMatrix;
 typedef IloArray<IloNumArray>    NumMatrix;
 
+ILOMIPINFOCALLBACK4(loggingCallback,
+                    IloNumVarArray, vars,
+                    Solution&,      sol,
+                    Cost&,          lb,
+                    Info&,          info)
+{
+    if (!hasIncumbent())
+        return;
+
+    if (!sol.feasible() || sol.cost() > getIncumbentObjValue() + 0.5) {
+        Solution sol_curr(sol.instance());
+        IloNumArray val(vars.getEnv());
+        getIncumbentValues(val, vars);
+        for (AltIdx k=0; k<sol.instance().alternative_number(); ++k)
+            if (val[k] > 0.5)
+                sol_curr.set(k);
+        sol.update(sol_curr, lb, std::stringstream(""), info);
+    }
+
+    if (lb < getBestObjValue() - 0.5)
+        update(lb, getBestObjValue(), sol.cost(), std::stringstream(""), info);
+}
+
 Solution gap::sopt_branchandcut_cplex(BranchAndCutCplexData d)
 {
     VER(d.info, "*** branchandcut_cplex ***" << std::endl);
 
     ItemIdx n = d.ins.item_number();
     AgentIdx m = d.ins.agent_number();
+    AltIdx o = d.ins.alternative_number();
 
     if (n == 0)
         return d.sol;
@@ -25,15 +49,13 @@ Solution gap::sopt_branchandcut_cplex(BranchAndCutCplexData d)
     IloModel model(env);
 
     // Variables
-    NumVarMatrix x(env, n);
-    for (ItemIdx j=0; j<n; ++j)
-        x[j] = IloNumVarArray(env, m, 0, 1, ILOBOOL);
+    IloNumVarArray x(env, o, 0, 1, ILOBOOL);
 
     // Objective
     IloExpr expr(env);
     for (ItemIdx j=0; j<n; j++)
         for (AgentIdx i=0; i<m; i++)
-            expr += x[j][i] * d.ins.alternative(j, i).c;
+            expr += x[d.ins.alternative_index(j, i)] * d.ins.alternative(j, i).c;
     IloObjective obj = IloMinimize(env, expr);
     model.add(obj);
 
@@ -41,7 +63,7 @@ Solution gap::sopt_branchandcut_cplex(BranchAndCutCplexData d)
     for (AgentIdx i=0; i<m; i++) {
         IloExpr lhs(env);
         for (ItemIdx j=0; j<n; j++)
-            lhs += x[j][i] * d.ins.alternative(j, i).w;
+            lhs += x[d.ins.alternative_index(j, i)] * d.ins.alternative(j, i).w;
         model.add(IloRange(env, 0, lhs, d.ins.capacity(i)));
     }
 
@@ -49,7 +71,7 @@ Solution gap::sopt_branchandcut_cplex(BranchAndCutCplexData d)
     for (ItemIdx j=0; j<n; j++) {
         IloExpr lhs(env);
         for (AgentIdx i=0; i<m; i++)
-            lhs += x[j][i];
+            lhs += x[d.ins.alternative_index(j, i)];
         model.add(IloRange(env, 1, lhs, 1));
     }
 
@@ -62,7 +84,7 @@ Solution gap::sopt_branchandcut_cplex(BranchAndCutCplexData d)
         for (ItemIdx j=0; j<n; ++j) {
             AgentIdx i_curr = d.sol.agent(j);
             for (AgentIdx i=0; i<m; ++i) {
-                startVar.add(x[j][i]);
+                startVar.add(x[d.ins.alternative_index(j, i)]);
                 startVal.add(((i == i_curr)? 1: 0));
             }
         }
@@ -72,8 +94,7 @@ Solution gap::sopt_branchandcut_cplex(BranchAndCutCplexData d)
     }
 
     // Display
-    if (!d.info.output->verbose)
-        cplex.setOut(env.getNullStream());
+    cplex.setOut(env.getNullStream());
 
     // Precision
     cplex.setParam(IloCplex::Param::MIP::Tolerances::MIPGap, 0.0);
@@ -82,12 +103,14 @@ Solution gap::sopt_branchandcut_cplex(BranchAndCutCplexData d)
     if (d.info.timelimit != std::numeric_limits<double>::infinity())
         cplex.setParam(IloCplex::TiLim, d.info.timelimit);
 
+    // Callback
+    cplex.use(loggingCallback(env, x, d.sol, d.lb, d.info));
+
     // Optimize
     if (cplex.solve())
-        for (AgentIdx i=0; i<m; i++)
-            for (ItemIdx j=0; j<n; j++)
-                if (cplex.getValue(x[j][i]) > 0.5)
-                    d.sol.set(j, i);
+        for (AltIdx k=0; k<o; ++k)
+            if (cplex.getValue(x[k]) > 0.5)
+                d.sol.set(k);
 
     env.end();
 

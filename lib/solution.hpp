@@ -100,6 +100,7 @@ ItemIdx distance(const Solution& sol1, const Solution& sol2);
 bool compare(const Solution& sol_best, const Solution& sol_curr);
 
 void init_display(Info& info);
+void update(Cost& lb, Cost lb_new, Cost ub, const std::stringstream& s, Info& info);
 
 std::ostream& operator<<(std::ostream& os, const Solution& solution);
 
