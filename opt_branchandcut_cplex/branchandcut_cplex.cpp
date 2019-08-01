@@ -38,6 +38,8 @@ Solution gap::sopt_branchandcut_cplex(BranchAndCutCplexData d)
 {
     VER(d.info, "*** branchandcut_cplex ***" << std::endl);
 
+    init_display(info);
+
     ItemIdx n = d.ins.item_number();
     AgentIdx m = d.ins.agent_number();
     AltIdx o = d.ins.alternative_number();
