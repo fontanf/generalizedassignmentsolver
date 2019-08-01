@@ -93,8 +93,8 @@ public:
 
 private:
 
-    void read_beasley(std::string filepath);
-    void read_standard(std::string filepath);
+    void read_beasley(std::ifstream& file);
+    void read_standard(std::ifstream& file);
     void read_standard_solution(std::string filepath);
 
     std::vector<Item> items_;

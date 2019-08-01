@@ -57,6 +57,9 @@ Solution gap::ub_localsolver(LocalSolverData d)
 
     init_display(d.info);
 
+    if (n == 0)
+        return algorithm_end(d.sol, d.info);
+
     LocalSolver localsolver;
 
     // Remove display

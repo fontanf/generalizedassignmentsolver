@@ -52,19 +52,25 @@ void Instance::set_alternative(ItemIdx j, AgentIdx i, Weight w, Cost v)
 
 Instance::Instance(std::string filepath, std::string format)
 {
-    if        (format == "gap_beasley") {
-        read_beasley(filepath);
-    } else if (format == "gap_standard") {
-        read_standard(filepath);
-    } else {
-        std::cout << format << ": Unknown instance format." << std::endl;
-        exit(1);
+    std::ifstream file(filepath);
+    if (!file.good()) {
+        std::cerr << "ERROR, unable to open file: \"" << filepath << "\"" << std::endl;
+        return;
     }
+
+    if (format == "gap_beasley") {
+        read_beasley(file);
+    } else if (format == "gap_standard") {
+        read_standard(file);
+    } else {
+        std::cerr << "ERROR, instance format unknown: " << format << std::endl;
+    }
+
+    file.close();
 }
 
-void Instance::read_beasley(std::string filepath)
+void Instance::read_beasley(std::ifstream& file)
 {
-    std::ifstream file(filepath);
     ItemIdx n;
     AgentIdx m;
     file >> m >> n;
@@ -83,13 +89,10 @@ void Instance::read_beasley(std::string filepath)
             set_alternative(j, i, alternatives_[alternative_index(j, i)].w, alternatives_[alternative_index(j, i)].c);
     for (AgentIdx i=0; i<m; ++i)
         file >> t_[i];
-
-    file.close();
 }
 
-void Instance::read_standard(std::string filepath)
+void Instance::read_standard(std::ifstream& file)
 {
-    std::ifstream file(filepath, std::ios_base::in);
     ItemIdx  n;
     AgentIdx m;
     file >> m >> n;
@@ -103,8 +106,6 @@ void Instance::read_standard(std::string filepath)
     for (ItemPos j=0; j<n; ++j)
         for (AgentIdx i=0; i<m; ++i)
             file >> alternatives_[items_[j].alt[i]].w >> alternatives_[items_[j].alt[i]].c;
-
-    file.close();
 }
 
 void Instance::read_standard_solution(std::string filepath)
