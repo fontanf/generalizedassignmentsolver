@@ -199,8 +199,12 @@ void Solution::write_cert(std::string filepath)
 {
     if (filepath == "")
         return;
-    std::ofstream cert;
-    cert.open(filepath);
+    std::ofstream cert(filepath);
+    if (!cert.good()) {
+        std::cerr << "\033[31m" << "ERROR, unable to open file \"" << filepath << "\"" << "\033[0m" << std::endl;
+        return;
+    }
+
     std::copy(x_.begin(), x_.end(), std::ostream_iterator<AgentIdx>(cert, " "));
     cert << std::endl;
     cert.close();

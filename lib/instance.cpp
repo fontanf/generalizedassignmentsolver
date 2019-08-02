@@ -54,7 +54,7 @@ Instance::Instance(std::string filepath, std::string format)
 {
     std::ifstream file(filepath);
     if (!file.good()) {
-        std::cerr << "ERROR, unable to open file: \"" << filepath << "\"" << std::endl;
+        std::cerr << "\033[31m" << "ERROR, unable to open file \"" << filepath << "\"" << "\033[0m" << std::endl;
         return;
     }
 

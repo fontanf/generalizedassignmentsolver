@@ -161,9 +161,7 @@ export CPLUS_INCLUDE_PATH="${CPLUS_INCLUDE_PATH}:${COINOR_HOME}/build/include"
 Create symlinks for libraries:
 ```shell
 LIB_DIR="/usr/lib/x86_64-linux-gnu/"
-for i in "${COINOR_HOME}"/build/lib/*.so*; do
-    sudo ln -f -s "$i" "${LIB_DIR}"
-done
+for i in "${COINOR_HOME}"/build/lib/*.so*; do sudo ln -f -s "$i" "${LIB_DIR}" done
 ```
 
 ### OR-Tools
@@ -190,9 +188,7 @@ export CPLUS_INCLUDE_PATH="${CPLUS_INCLUDE_PATH}:${GECODE_HOME}"
 Create symlinks for libraries:
 ```shell
 LIB_DIR="/usr/lib/x86_64-linux-gnu/"
-for i in "${GECODE_HOME}"/*.so*; do
-    sudo ln -f -s "$i" "${LIB_DIR}"
-done
+for i in "${GECODE_HOME}"/*.so*; do sudo ln -f -s "$i" "${LIB_DIR}" done
 ```
 
 ### DLib
@@ -255,8 +251,6 @@ export CPLUS_INCLUDE_PATH="${CPLUS_INCLUDE_PATH}:${LOCALSOLVER_HOME}/include"
 Create symlinks for libraries:
 ```shell
 LIB_DIR="/usr/lib/x86_64-linux-gnu/"
-for i in "${LOCALSOLVER_HOME}"/bin/*.so*; do
-    sudo ln -f -s "$i" "${LIB_DIR}";
-done
+for i in "${LOCALSOLVER_HOME}"/bin/*.so*; do sudo ln -f -s "$i" "${LIB_DIR}"; done
 ```
 
