@@ -56,18 +56,26 @@ class Instance
 
 public:
 
-    Instance(AgentIdx m, ItemIdx n=0);
+    /**
+     * Constructors and destructor
+     */
 
+    Instance(std::string filename, std::string format = "gap_beasley");
+
+    Instance(AgentIdx m, ItemIdx n=0);
     void add_items(ItemIdx n);
     ItemIdx add_item();
     void set_alternative(ItemIdx j, AgentIdx i, Weight w, Cost p);
     void set_capacity(AgentIdx i, Weight t) { t_[i] = t; }
     void set_optimal_solution(Solution& sol);
 
-    Instance(std::string filename, std::string format = "gap_beasley");
+    Instance(const Instance& ins);
+
     ~Instance();
 
-    Instance(const Instance& ins);
+    /**
+     * Getters
+     */
 
     const Item& item(ItemPos j) const { return items_[j]; }
     AltIdx alternative_index(ItemIdx j, AgentIdx i) const { return items_[j].alt[i]; } 
@@ -95,7 +103,6 @@ private:
 
     void read_beasley(std::ifstream& file);
     void read_standard(std::ifstream& file);
-    void read_standard_solution(std::string filepath);
 
     std::vector<Item> items_;
     std::vector<Alternative> alternatives_;
@@ -108,9 +115,6 @@ private:
 
 std::ostream& operator<<(std::ostream &os, const Alternative& alt);
 std::ostream& operator<<(std::ostream &os, const Instance& instance);
-
-Solution algorithm_end(const Solution& sol, Info& info);
-void algorithm_end(Cost lb, Info& info);
 
 }
 

@@ -18,9 +18,6 @@ cc_library(
                 "desirability.cpp",
         ],
         deps = ["@benchtools//:info"],
-        linkopts = [
-                "-lboost_program_options",
-        ],
         visibility = ["//visibility:public"],
         include_prefix = "gap/lib/",
 )
@@ -88,6 +85,7 @@ cc_binary(
             select({":gecode_build":      ["-DGECODE_FOUND"],      "//conditions:default": []}) +
             select({":coinor_build":      ["-DCOINOR_FOUND"],      "//conditions:default": []}) +
             select({":dlib_build":        ["-DDLIB_FOUND"],        "//conditions:default": []}),
+        linkopts = ["-lboost_program_options"],
 )
 
 cc_binary(
@@ -109,5 +107,6 @@ cc_binary(
         name = "generator_main",
         srcs = ["generator_main.cpp"],
         deps = [":generator"],
+        linkopts = ["-lboost_program_options"],
 )
 

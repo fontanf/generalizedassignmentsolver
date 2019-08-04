@@ -55,6 +55,7 @@ Instance::Instance(std::string filepath, std::string format)
     std::ifstream file(filepath);
     if (!file.good()) {
         std::cerr << "\033[31m" << "ERROR, unable to open file \"" << filepath << "\"" << "\033[0m" << std::endl;
+        assert(false);
         return;
     }
 
@@ -108,17 +109,7 @@ void Instance::read_standard(std::ifstream& file)
             file >> alternatives_[items_[j].alt[i]].w >> alternatives_[items_[j].alt[i]].c;
 }
 
-void Instance::read_standard_solution(std::string filepath)
-{
-    sol_opt_ = std::unique_ptr<Solution>(new Solution(*this));
-    std::ifstream file(filepath, std::ios_base::in);
-
-    int x = 0;
-    for (ItemPos j=0; j<item_number(); ++j) {
-        file >> x;
-        sol_opt_->set(j, x);
-    }
-}
+Instance::~Instance() {  }
 
 Instance::Instance(const Instance& ins)
 {
@@ -149,11 +140,6 @@ Cost Instance::optimum() const
     return optimal_solution()->cost();
 }
 
-Instance::~Instance()
-{
-
-}
-
 std::ostream& gap::operator<<(std::ostream& os, const Alternative& alt)
 {
     os << "(" << alt.i << " " << alt.c << " " << alt.w << " " << alt.efficiency() << ")";
@@ -175,30 +161,6 @@ std::ostream& gap::operator<<(std::ostream& os, const Instance& ins)
         os << std::endl;
     }
     return os;
-}
-
-Solution gap::algorithm_end(const Solution& sol, Info& info)
-{
-    double t = info.elapsed_time();
-    std::string feas = (sol.feasible())? "True": "False";
-    PUT(info, "Solution.Cost", sol.cost());
-    PUT(info, "Solution.Time", t);
-    PUT(info, "Solution.Feasible", feas);
-    VER(info, "---" << std::endl);
-    VER(info, "Feasible: " << feas << std::endl);
-    VER(info, "Cost: " << sol.cost() << std::endl);
-    VER(info, "Time (s): " << t << std::endl);
-    return sol;
-}
-
-void gap::algorithm_end(Cost lb, Info& info)
-{
-    double t = info.elapsed_time();
-    PUT(info, "Bound.Cost", lb);
-    PUT(info, "Bound.Time", t);
-    VER(info, "---" << std::endl);
-    VER(info, "Cost: " << lb << std::endl);
-    VER(info, "Time (s): " << t << std::endl);
 }
 
 void Instance::plot(std::string filename)

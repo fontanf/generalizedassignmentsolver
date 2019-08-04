@@ -5,20 +5,37 @@
 
 using namespace gap;
 
-Solution::Solution(const Instance& ins): instance_(ins),
-    x_(std::vector<AgentIdx>(ins.item_number(), -1)),
-    agents_(std::vector<SolutionAgent>(ins.agent_number())),
-    n_(0),
-    total_cost_(0),
-    total_weight_(0),
-    total_overcapacity_(0),
-    total_pcost_(0),
-    comp_(0)
+Solution::Solution(const Instance& ins):
+    instance_(ins),
+    x_(ins.item_number(), -1),
+    agents_(ins.agent_number())
 { }
+
+Solution::Solution(const Instance& ins, std::string filepath):
+    instance_(ins),
+    x_(ins.item_number(), -1),
+    agents_(ins.agent_number())
+{
+    if (filepath.empty())
+        return;
+    std::ifstream file(filepath);
+    if (!file.good()) {
+        std::cerr << "\033[31m" << "ERROR, unable to open file \"" << filepath << "\"" << "\033[0m" << std::endl;
+        return;
+    }
+
+    AgentIdx i = -1;
+    for (ItemPos j=0; j<instance().item_number(); ++j) {
+        file >> i;
+        set(j, i);
+    }
+}
 
 Solution::Solution(const Solution& sol):
     instance_(sol.instance_),
-    x_(sol.x_), agents_(sol.agents_), n_(sol.n_),
+    x_(sol.x_),
+    agents_(sol.agents_),
+    n_(sol.n_),
     total_cost_(sol.total_cost_),
     total_weight_(sol.total_weight_),
     total_overcapacity_(sol.total_overcapacity_),
@@ -184,20 +201,9 @@ void Solution::clear()
     total_pcost_ = 0;
 }
 
-void Solution::read(std::string filepath)
-{
-    std::ifstream file(filepath);
-    ItemIdx n = instance().item_number();
-    AgentIdx i = -1;
-    for (ItemPos j=0; j<n; ++j) {
-        file >> i;
-        set(j, i);
-    }
-}
-
 void Solution::write_cert(std::string filepath)
 {
-    if (filepath == "")
+    if (filepath.empty())
         return;
     std::ofstream cert(filepath);
     if (!cert.good()) {
@@ -295,6 +301,30 @@ void gap::update(Cost& lb, Cost lb_new, Cost ub, const std::stringstream& s, Inf
     }
 
     info.output->mutex_sol.unlock();
+}
+
+Solution gap::algorithm_end(const Solution& sol, Info& info)
+{
+    double t = info.elapsed_time();
+    std::string feas = (sol.feasible())? "True": "False";
+    PUT(info, "Solution.Cost", sol.cost());
+    PUT(info, "Solution.Time", t);
+    PUT(info, "Solution.Feasible", feas);
+    VER(info, "---" << std::endl);
+    VER(info, "Feasible: " << feas << std::endl);
+    VER(info, "Cost: " << sol.cost() << std::endl);
+    VER(info, "Time (s): " << t << std::endl);
+    return sol;
+}
+
+void gap::algorithm_end(Cost lb, Info& info)
+{
+    double t = info.elapsed_time();
+    PUT(info, "Bound.Cost", lb);
+    PUT(info, "Bound.Time", t);
+    VER(info, "---" << std::endl);
+    VER(info, "Cost: " << lb << std::endl);
+    VER(info, "Time (s): " << t << std::endl);
 }
 
 std::string Solution::to_string(AgentIdx i)

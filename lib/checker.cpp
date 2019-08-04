@@ -13,8 +13,7 @@ int main(int argc, char *argv[])
 
     Instance ins(instancefile);
 
-    Solution sol(ins);
-    sol.read(certfile);
+    Solution sol(ins, certfile);
 
     if (!sol.feasible()) {
         std::cout << "INFEASIBLE" << std::endl;

@@ -69,9 +69,7 @@ int main(int argc, char *argv[])
     }
 
     Instance ins(instancefile, format);
-    Solution sol(ins);
-    if (initsolfile != "")
-        sol.read(initsolfile);
+    Solution sol(ins, initsolfile);
     Cost lb = 0;
 
     Info info = Info()

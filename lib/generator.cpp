@@ -1,7 +1,5 @@
 #include "gap/lib/generator.hpp"
 
-#include "gap/lib/instance.hpp"
-
 #include <random>
 
 using namespace gap;

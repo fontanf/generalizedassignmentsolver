@@ -19,10 +19,11 @@ class Solution
 
 public:
 
-    Solution(const Instance& instance);
-    Solution(const Solution& solution);
-    Solution& operator=(const Solution& solution);
-    ~Solution() { };
+    Solution(const Instance& ins);
+    Solution(const Instance& ins, std::string filepath);
+    Solution(const Solution& sol);
+    Solution& operator=(const Solution& sol);
+    ~Solution() { }
     bool operator==(const Solution& sol);
 
     /**
@@ -71,7 +72,6 @@ public:
 
     void update(const Solution& sol, Cost lb, const std::stringstream& s, Info& info);
 
-    void read(std::string filepath);
     void write_cert(std::string filepath);
     std::string to_string(AgentIdx i);
 
@@ -86,7 +86,7 @@ private:
     Weight total_weight_ = 0;
     Weight total_overcapacity_ = 0;
     PCost total_pcost_ = 0;
-    double comp_;
+    double comp_ = 0;
 };
 
 /**
@@ -101,6 +101,9 @@ bool compare(const Solution& sol_best, const Solution& sol_curr);
 
 void init_display(Info& info);
 void update(Cost& lb, Cost lb_new, Cost ub, const std::stringstream& s, Info& info);
+
+Solution algorithm_end(const Solution& sol, Info& info);
+void algorithm_end(Cost lb, Info& info);
 
 std::ostream& operator<<(std::ostream& os, const Solution& solution);
 
