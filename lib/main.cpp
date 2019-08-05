@@ -28,6 +28,7 @@ int main(int argc, char *argv[])
     namespace po = boost::program_options;
 
     // Parse program options
+
     std::string algorithm = "branchandcut_cbc";
     std::string instancefile = "";
     std::string outputfile = "";
@@ -51,6 +52,7 @@ int main(int argc, char *argv[])
         ("time-limit,t", po::value<double>(&time_limit), "Time limit in seconds\n  ex: 3600")
         ("seed,s", po::value<int>(&seed), "seed")
         ("verbose,v", "")
+        ("update,u", "")
         ("log,l", po::value<std::string>(&logfile), "set log file")
         ("loglevelmax", po::value<int>(&loglevelmax), "set log max level")
         ("log2stderr", "write log in stderr")
@@ -69,6 +71,33 @@ int main(int argc, char *argv[])
     }
 
     Instance ins(instancefile, format);
+
+    // Read current solution and bound
+
+    Solution sol0(ins);
+    std::ifstream f_sol(instancefile + ".sol");
+    if (f_sol.good())
+        sol0 = Solution(ins, instancefile + ".sol");
+    f_sol.close();
+
+    Cost opt = -1;
+    std::ifstream f_opt(instancefile + ".opt");
+    if (f_opt.good())
+        f_opt >> opt;
+    f_opt.close();
+
+    Cost lb0 = 0;
+    std::ifstream f_bound(instancefile + ".bound");
+    if (f_bound.good())
+        f_bound >> lb0;
+    f_bound.close();
+
+    bool is_exact = false;
+    bool is_lb    = false;
+    bool is_ub    = false;
+
+    // Run algorithm
+
     Solution sol(ins, initsolfile);
     Cost lb = 0;
 
@@ -102,31 +131,45 @@ int main(int argc, char *argv[])
      */
 #if COINOR_FOUND
     } else if (vstrings[0] == "linrelax_clp") {
-        lb_linrelax_clp(ins, info);
+        auto res = lb_linrelax_clp(ins, info);
+        is_lb = true;
+        lb = res.lb;
 #endif
 #if COINOR_FOUND
     } else if (vstrings[0] == "lagrelax_knapsack_volume") {
-        lb_lagrelax_knapsack_volume(ins, info);
+        auto res = lb_lagrelax_knapsack_volume(ins, info);
+        lb = res.lb;
+        is_lb = true;
 #endif
 #if COINOR_FOUND
     } else if (vstrings[0] == "lagrelax_knapsack_bundle") {
-        lb_lagrelax_knapsack_bundle(ins, info);
+        auto res = lb_lagrelax_knapsack_bundle(ins, info);
+        lb = res.lb;
+        is_lb = true;
 #endif
 #if DLIB_FOUND
     } else if (vstrings[0] == "lagrelax_knapsack_lbfgs") {
-        lb_lagrelax_knapsack_lbfgs(ins, info);
+        auto res = lb_lagrelax_knapsack_lbfgs(ins, info);
+        lb = res.lb;
+        is_lb = true;
 #endif
 #if COINOR_FOUND
     } else if (vstrings[0] == "lagrelax_assignment_volume") {
-        lb_lagrelax_assignment_volume(ins, info);
+        auto res = lb_lagrelax_assignment_volume(ins, info);
+        lb = res.lb;
+        is_lb = true;
 #endif
 #if COINOR_FOUND
     } else if (vstrings[0] == "lagrelax_assignment_bundle") {
-        lb_lagrelax_assignment_bundle(ins, info);
+        auto res = lb_lagrelax_assignment_bundle(ins, info);
+        lb = res.lb;
+        is_lb = true;
 #endif
 #if DLIB_FOUND
     } else if (vstrings[0] == "lagrelax_assignment_lbfgs") {
-        lb_lagrelax_assignment_lbfgs(ins, info);
+        auto res = lb_lagrelax_assignment_lbfgs(ins, info);
+        lb = res.lb;
+        is_lb = true;
 #endif
 
     /*
@@ -140,6 +183,8 @@ int main(int argc, char *argv[])
                 .stop_at_first_improvment = false,
                 .info = info,
                 });
+        is_exact = info.check_time();
+        is_ub = !is_exact;
 #endif
 #if COINOR_FOUND
     } else if (vstrings[0] == "branchandcut_dip") {
@@ -153,6 +198,8 @@ int main(int argc, char *argv[])
                 .lb = lb,
                 .info = info,
                 });
+        is_exact = info.check_time();
+        is_ub = !is_exact;
 #endif
 #if COINOR_FOUND
     } else if (vstrings[0] == "branchandpriceandcut_dip") {
@@ -169,6 +216,8 @@ int main(int argc, char *argv[])
                 .sol = sol,
                 .info = info,
                 });
+        is_exact = info.check_time();
+        is_ub = !is_exact;
 #endif
 #if GECODE_FOUND
     } else if (vstrings[0] == "constraintprogramming_gecode") {
@@ -177,6 +226,8 @@ int main(int argc, char *argv[])
                 .sol = sol,
                 .info = info,
                 });
+        is_exact = info.check_time();
+        is_ub = !is_exact;
 #endif
 #if CPLEX_FOUND
     } else if (vstrings[0] == "constraintprogramming_cplex") {
@@ -185,6 +236,8 @@ int main(int argc, char *argv[])
                 .sol = sol,
                 .info = info,
                 });
+        is_exact = info.check_time();
+        is_ub = !is_exact;
 #endif
 #if COINOR_FOUND
     } else if (vstrings[0] == "dip") {
@@ -196,38 +249,46 @@ int main(int argc, char *argv[])
      */
     } else if (vstrings[0] == "random") {
         sol = sol_random(ins, gen, info);
+        is_ub = true;
     } else if (vstrings[0] == "greedy") {
         auto it = args.find("f");
         std::string des_str = (it == args.end())? "cij": it->second;
         std::unique_ptr<Desirability> f = desirability(des_str, ins);
         sol = sol_greedy(ins, *f, info);
+        is_ub = true;
     } else if (vstrings[0] == "greedyregret") {
         auto it = args.find("f");
         std::string des_str = (it == args.end())? "cij": it->second;
         std::unique_ptr<Desirability> f = desirability(des_str, ins);
         sol = sol_greedyregret(ins, *f, info);
+        is_ub = true;
     } else if (vstrings[0] == "mthg") {
         auto it = args.find("f");
         std::string des_str = (it == args.end())? "cij": it->second;
         std::unique_ptr<Desirability> f = desirability(des_str, ins);
         sol = sol_mthg(ins, *f, info);
+        is_ub = true;
     } else if (vstrings[0] == "mthgregret") {
         auto it = args.find("f");
         std::string des_str = (it == args.end())? "cij": it->second;
         std::unique_ptr<Desirability> f = desirability(des_str, ins);
         sol = sol_mthgregret(ins, *f, info);
+        is_ub = true;
 #if COINOR_FOUND
     } else if (vstrings[0] == "repaircombrelax") {
         sol = sol_repaircombrelax(ins, info);
+        is_ub = true;
 #endif
 #if COINOR_FOUND
     } else if (vstrings[0] == "repairgreedy") {
         sol = sol_repairgreedy(ins, info);
+        is_ub = true;
 #endif
 #if COINOR_FOUND
     } else if (vstrings[0] == "repairlinrelax") {
         LinRelaxClpOutput linrelax_output = lb_linrelax_clp(ins);
         sol = sol_repairlinrelax(ins, linrelax_output, info);
+        is_ub = true;
 #endif
     } else if (vstrings[0] == "lsfirst_shift") {
         sol = sol_lsfirst_shift(LSFirstShiftSwapData{
@@ -235,70 +296,134 @@ int main(int argc, char *argv[])
                 .gen = gen,
                 .info = info
                 }.set_params(args));
+        is_ub = true;
     } else if (vstrings[0] == "lsfirst_shiftswap") {
         sol = sol_lsfirst_shiftswap(LSFirstShiftSwapData{
                 .ins = ins,
                 .gen = gen,
                 .info = info
                 }.set_params(args));
+        is_ub = true;
     } else if (vstrings[0] == "lsfirst_shift_swap") {
         sol = sol_lsfirst_shift_swap(LSFirstShiftSwapData{
                 .ins = ins,
                 .gen = gen,
                 .info = info
                 }.set_params(args));
+        is_ub = true;
     } else if (vstrings[0] == "lsbest_shiftswap") {
         sol = sol_lsbest_shiftswap(LSBestShiftSwapData{
                 .ins = ins,
                 .gen = gen,
                 .info = info
                 }.set_params(args));
+        is_ub = true;
     } else if (vstrings[0] == "ts_shiftswap") {
         sol = sol_ts_shiftswap(TSShiftSwapData{
                 .ins = ins,
                 .gen = gen,
                 .info = info
                 }.set_params(args));
+        is_ub = true;
     } else if (vstrings[0] == "sa_shiftswap") {
         sol = sol_sa_shiftswap(SAShiftSwapData{
                 .ins = ins,
                 .gen = gen,
                 .info = info
                 }.set_params(args));
+        is_ub = true;
     } else if (vstrings[0] == "pr_shiftswap") {
         sol = sol_pr_shiftswap(PRShiftSwapData{
                 .ins = ins,
                 .gen = gen,
                 .info = info
                 }.set_params(args));
+        is_ub = true;
     } else if (vstrings[0] == "lsfirst_ejectionchain") {
         sol = sol_lsfirst_ejectionchain(LSFirstECData{
                 .ins = ins,
                 .gen = gen,
                 .info = info
                 }.set_params(args));
+        is_ub = true;
 #if LOCALSOLVER_FOUND
     } else if (vstrings[0] == "localsolver") {
         sol = ub_localsolver({ins, sol, info});
+        is_ub = true;
 #endif
 #if COINOR_FOUND
     } else if (vstrings[0] == "vdns_simple") {
         sol = sol_vdns_simple(ins, sol, gen, info);
+        is_ub = true;
 #endif
 #if COINOR_FOUND
     } else if (vstrings[0] == "vnsbranching_cbc") {
         sol = sol_vnsbranching_cbc(ins, gen, info);
+        is_ub = true;
 #endif
 #if CPLEX_FOUND
     } else if (vstrings[0] == "vnsbranching_cplex") {
         sol = sol_vnsbranching_cplex(ins, gen, info);
+        is_ub = true;
 #endif
 #if CPLEX_FOUND
     } else if (vstrings[0] == "vlsn_mbp") {
         sol = sol_vlsn_mbp(ins, sol, gen, info);
+        is_ub = true;
 #endif
+
     } else {
         std::cout << "unknown algorithm" << std::endl;
+    }
+
+    // Check
+
+    if (is_exact) {
+        if (!sol.feasible()) {
+            std::cerr << "\033[31m" << "ERROR, exact algorithm returns unfeasible solution." << "\033[0m" << std::endl;
+            assert(false);
+            return 1;
+        }
+        if (opt != -1 && sol.cost() > sol0.cost()) {
+            std::cerr << "\033[31m" << "ERROR, exact algorithm does not return optimal solution." << "\033[0m" << std::endl;
+            assert(false);
+            return 1;
+        }
+        if (opt != -1 && sol.cost() < opt) {
+            std::cerr << "\033[31m" << "WARNING, previous optimum was not optimal." << "\033[0m" << std::endl;
+        }
+    }
+    if (is_lb) {
+        if (opt != -1 && lb > opt) {
+            std::cerr << "\033[31m" << "ERROR, lower bound is greater than optimum." << "\033[0m" << std::endl;
+            assert(false);
+            return 1;
+        }
+    }
+    if (is_ub) {
+        if (opt != -1 && sol.feasible() && sol.cost() < opt) {
+            std::cerr << "\033[31m" << "WARNING, previous optimum was not optimal." << "\033[0m" << std::endl;
+        }
+    }
+
+    // Update best solution and bound
+
+    if (vm.count("update")) {
+        if (is_exact && (opt == -1 || sol.cost() < opt)) {
+            std::cerr << "\033[32m" << "New optimum found." << "\033[0m" << std::endl;
+            sol.write_cert(instancefile + ".sol");
+            std::ofstream f_opt(instancefile + ".opt");
+            f_opt << sol.cost();
+            std::ofstream f_bound(instancefile + ".bound");
+            f_bound << sol.cost();
+        } else if (is_lb && lb0 < lb) {
+            std::cerr << "\033[32m" << "New lower bound found." << "\033[0m" << std::endl;
+            std::ofstream f_opt(instancefile + ".bound");
+            f_opt << lb;
+        } else if (is_ub && sol.feasible() && (!sol0.feasible() || sol0.cost() > sol.cost())) {
+            std::cerr << "\033[32m" << "New upper bound found." << "\033[0m" << std::endl;
+            sol.write_cert(instancefile + ".sol");
+        }
     }
 
     info.write_ini(outputfile);

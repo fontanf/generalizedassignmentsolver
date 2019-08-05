@@ -87,6 +87,7 @@ private:
     Weight total_overcapacity_ = 0;
     PCost total_pcost_ = 0;
     double comp_ = 0;
+
 };
 
 /**
