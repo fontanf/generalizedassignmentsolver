@@ -8,7 +8,8 @@ using namespace gap;
 Cost opt_branchandcut_cplex_test(Instance& ins)
 {
     Solution sol(ins);
-    BranchAndCutCplexData d {.ins = ins, .sol = sol, .info = Info().set_verbose(true)};
+    Cost lb = 0;
+    BranchAndCutCplexData d {.ins = ins, .sol = sol, .lb = lb, .info = Info().set_verbose(true)};
     return sopt_branchandcut_cplex(d).cost();
 }
 

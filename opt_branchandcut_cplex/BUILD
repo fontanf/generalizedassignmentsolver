@@ -29,6 +29,7 @@ cc_test(
                 "//lib:tester",
                 "//opt_branchandcut_cplex:branchandcut_cplex",
         ],
+        copts = select({"//lib:cplex_build": ["-DCPLEX_FOUND"], "//conditions:default": []}),
         timeout = "moderate",
 )
 

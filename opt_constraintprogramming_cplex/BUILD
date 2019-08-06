@@ -30,6 +30,7 @@ cc_test(
                 "//lib:tester",
                 "//opt_constraintprogramming_cplex:constraintprogramming_cplex",
         ],
+        copts = select({"//lib:cplex_build": ["-DCPLEX_FOUND"], "//conditions:default": []}),
         timeout = "moderate",
 )
 

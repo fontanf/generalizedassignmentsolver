@@ -31,6 +31,7 @@ cc_test(
                 "//lib:tester",
                 "//opt_constraintprogramming_gecode:constraintprogramming_gecode",
         ],
+        copts = select({"//lib:gecode_build": ["-DGECODE_FOUND"], "//conditions:default": []}),
         timeout = "moderate",
 )
 
