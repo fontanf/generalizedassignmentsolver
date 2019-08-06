@@ -17,11 +17,11 @@ struct MilpMatrix
 {
     MilpMatrix(const Instance& ins);
     CoinPackedMatrix matrix;
-    std::vector<double> colLower;
-    std::vector<double> colUpper;
+    std::vector<double> col_lower;
+    std::vector<double> col_upper;
     std::vector<double> objective;
-    std::vector<double> rowLower;
-    std::vector<double> rowUpper;
+    std::vector<double> row_lower;
+    std::vector<double> row_upper;
 };
 
 struct BranchAndCutCbcData

@@ -22,8 +22,8 @@ LinRelaxClpOutput gap::lb_linrelax_clp(const Instance& ins, Info info)
     model.messageHandler()->setLogLevel(loglevel);
 
     // Load problem
-    model.loadProblem(mat.matrix, mat.colLower.data(), mat.colUpper.data(),
-              mat.objective.data(), mat.rowLower.data(), mat.rowUpper.data());
+    model.loadProblem(mat.matrix, mat.col_lower.data(), mat.col_upper.data(),
+              mat.objective.data(), mat.row_lower.data(), mat.row_upper.data());
 
     // Solve
     model.initialSolve();

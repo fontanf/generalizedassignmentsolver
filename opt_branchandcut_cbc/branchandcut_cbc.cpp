@@ -43,45 +43,58 @@ using namespace gap;
 
 MilpMatrix::MilpMatrix(const Instance& ins)
 {
-    int numberRows = ins.agent_number() + ins.item_number();
-    int numberColumns = ins.alternative_number();
-    int numberElements = 2 * ins.alternative_number();
+    ItemIdx  n = ins.item_number();
+    AgentIdx m = ins.agent_number();
 
-    // Matrix data - column ordered
-    std::vector<CoinBigIndex> start(numberColumns + 1);
-    for (AltIdx k=0; k<=numberColumns; ++k)
-        start[k] = 2 * k;
-    std::vector<int> length(numberColumns, 2);
+    // Variables
+    int col_number = ins.alternative_number();
+    col_lower.resize(col_number, 0);
+    col_upper.resize(col_number, 1);
 
-    std::vector<int> rows(numberElements);
-    std::vector<double> elements(numberElements);
-    for (AltIdx k=0; k<ins.alternative_number(); ++k) {
-            rows[2 * k] = ins.alternative(k).i;
-        elements[2 * k] = ins.alternative(k).w;
-            rows[2 * k + 1] = ins.agent_number() + ins.alternative(k).j;
-        elements[2 * k + 1] = 1;
-    }
-
-    matrix = CoinPackedMatrix(true, numberRows, numberColumns, numberElements,
-            elements.data(), rows.data(), start.data(), length.data());
-
-    // Rim data
-    objective = std::vector<double>(numberColumns);
-    for (AltIdx k=0; k<numberColumns; ++k)
+    // Objective
+    objective = std::vector<double>(col_number);
+    for (AltIdx k=0; k<col_number; ++k)
         objective[k] = ins.alternative(k).c;
 
-    rowLower = std::vector<double>(numberRows);
-    rowUpper = std::vector<double>(numberRows);
-    for (AgentIdx i=0; i<ins.agent_number(); ++i) {
-        rowLower[i] = 0;
-        rowUpper[i] = ins.capacity(i);
+    // Constraints
+    int row_number = 0; // will be increased each time we add a constraint
+    std::vector<CoinBigIndex> start;
+    std::vector<int> length;
+    std::vector<int> cols;
+    std::vector<double> elements;
+
+    // Every item needs to be assigned
+    // sum_i xij = 1 for all j
+    for (ItemIdx j=0; j<n; ++j) {
+        start.push_back(elements.size());
+        length.push_back(m);
+        for (AgentIdx i=0; i<m; ++i) {
+            elements.push_back(1);
+            cols.push_back(ins.alternative_index(j, i));
+        }
+        row_lower.push_back(1);
+        row_upper.push_back(1);
+        row_number++;
     }
-    for (ItemIdx j=0; j<ins.item_number(); ++j) {
-        rowLower[ins.agent_number() + j] = 1;
-        rowUpper[ins.agent_number() + j] = 1;
+
+    // Capacity constraint
+    // sum_j wj xij <= ci
+    for (AgentIdx i=0; i<m; ++i) {
+        start.push_back(elements.size());
+        length.push_back(n);
+        for (ItemIdx j=0; j<n; ++j) {
+            elements.push_back(ins.alternative(j, i).w);
+            cols.push_back(ins.alternative_index(j, i));
+        }
+        row_lower.push_back(0);
+        row_upper.push_back(ins.capacity(i));
+        row_number++;
     }
-    colLower = std::vector<double>(numberColumns, 0);
-    colUpper = std::vector<double>(numberColumns, 1);
+
+    // Create matrix
+    start.push_back(elements.size());
+    matrix = CoinPackedMatrix(false, col_number, row_number, elements.size(),
+            elements.data(), cols.data(), start.data(), length.data());
 }
 
 Solution gap::sopt_branchandcut_cbc(BranchAndCutCbcData d)
@@ -107,8 +120,8 @@ Solution gap::sopt_branchandcut_cbc(BranchAndCutCbcData d)
     solver1.messageHandler()->setLogLevel(loglevel);
 
     // Load problem
-    solver1.loadProblem(mat.matrix, mat.colLower.data(), mat.colUpper.data(),
-              mat.objective.data(), mat.rowLower.data(), mat.rowUpper.data());
+    solver1.loadProblem(mat.matrix, mat.col_lower.data(), mat.col_upper.data(),
+              mat.objective.data(), mat.row_lower.data(), mat.row_upper.data());
 
     // Mark integer
     for (AltIdx k=0; k<d.ins.alternative_number(); ++k)
