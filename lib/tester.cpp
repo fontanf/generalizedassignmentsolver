@@ -34,10 +34,13 @@ class Instances
 {
 public:
     virtual Instance next() = 0;
+    bool end = false;
 };
 
+typedef const std::vector<std::vector<ItemIdx>>& v;
 Instance gap::test_instance(Cpt i)
 {
+    std::cout << "i " << i << std::endl;
     switch (i) {
     case 0: { // 0 item
         Instance ins(0, 0);
@@ -46,124 +49,69 @@ Instance gap::test_instance(Cpt i)
         return ins;
     } case 1: { // 1 agent, 1 item, opt 10
         Instance ins(1, 1);
-        ins.add_items(1);
-        ins.set_capacity(0, 5);
-        ins.set_alternative(0, 0, 4, 10);
-        Solution sol(ins);
-        sol.set(0, 0);
+        ins.set_capacity({5});
+        ins.add_item({{4, 10}});
+        Solution sol(ins, v{{0}});
         ins.set_optimal_solution(sol);
         return ins;
     } case 2: { // 1 agent, 2 item, opt 18
         Instance ins(1, 2);
-        ins.add_items(2);
-        ins.set_capacity(0, 5);
-        ins.set_alternative(0, 0, 3, 10);
-        ins.set_alternative(1, 0, 2, 8);
-        Solution sol(ins);
-        sol.set(0, 0);
-        sol.set(1, 0);
+        ins.set_capacity({5});
+        ins.add_item({{3, 10}});
+        ins.add_item({{2, 8}});
+        Solution sol(ins, v{{0, 1}});
         ins.set_optimal_solution(sol);
         return ins;
     } case 3: { // 2 agent, 1 items, opt 10
         Instance ins(2, 1);
-        ins.add_items(1);
-        ins.set_capacity(0, 5);
-        ins.set_capacity(1, 7);
-        ins.set_alternative(0, 0, 5, 10);
-        ins.set_alternative(0, 1, 4, 11);
-        Solution sol(ins);
-        sol.set(0, 0);
+        ins.set_capacity({5, 7});
+        ins.add_item({{5, 10}, {4, 11}});
+        Solution sol(ins, v{{0}});
         ins.set_optimal_solution(sol);
         return ins;
     } case 4: { // 2 agent, 2 items, opt 15
         Instance ins(2, 2);
-        ins.add_items(2);
-        ins.set_capacity(0, 5);
-        ins.set_capacity(1, 7);
-        ins.set_alternative(0, 0, 3, 11);
-        ins.set_alternative(0, 1, 4, 10);
-        ins.set_alternative(1, 0, 2, 6);
-        ins.set_alternative(1, 1, 3, 5);
-        Solution sol(ins);
-        sol.set(0, 1);
-        sol.set(1, 1);
+        ins.set_capacity({5, 7});
+        ins.add_item({{3, 11}, {4, 10}});
+        ins.add_item({{2, 6}, {3, 5}});
+        Solution sol(ins, {{}, {0, 1}});
         ins.set_optimal_solution(sol);
         return ins;
     } case 5: { // 2 agents, 2 items, opt 16
         Instance ins(2, 2);
-        ins.add_items(2);
-        ins.set_capacity(0, 5);
-        ins.set_capacity(1, 7);
-        ins.set_alternative(0, 0, 3, 11);
-        ins.set_alternative(0, 1, 4, 10);
-        ins.set_alternative(1, 0, 4, 7);
-        ins.set_alternative(1, 1, 5, 5);
-        Solution sol(ins);
-        sol.set(0, 0);
-        sol.set(1, 1);
+        ins.set_capacity({5, 7});
+        ins.add_item({{3, 11}, {4, 10}});
+        ins.add_item({{4, 7}, {5, 5}});
+        Solution sol(ins, v{{0}, {1}});
         ins.set_optimal_solution(sol);
         return ins;
     } case 6: { // 2 agent, 3 items, opt 23
         Instance ins(2, 3);
-        ins.add_items(3);
-        ins.set_capacity(0, 6);
-        ins.set_capacity(1, 9);
-        ins.set_alternative(0, 0, 1, 13);
-        ins.set_alternative(0, 1, 2, 10);
-        ins.set_alternative(1, 0, 3, 9);
-        ins.set_alternative(1, 1, 4, 8);
-        ins.set_alternative(2, 0, 2, 7);
-        ins.set_alternative(2, 1, 3, 5);
-        Solution sol(ins);
-        sol.set(0, 1);
-        sol.set(1, 1);
-        sol.set(2, 1);
+        ins.set_capacity({6, 9});
+        ins.add_item({{1, 13}, {2, 10}});
+        ins.add_item({{3, 9}, {4, 8}});
+        ins.add_item({{2, 7}, {3, 5}});
+        Solution sol(ins, {{}, {0, 1, 2}});
         ins.set_optimal_solution(sol);
         return ins;
     } case 7: { // 2 agent, 3 items, opt 24
         Instance ins(2, 3);
-        ins.add_items(3);
-        ins.set_capacity(0, 5);
-        ins.set_capacity(1, 7);
-        ins.set_alternative(0, 0, 1, 13);
-        ins.set_alternative(0, 1, 2, 10);
-        ins.set_alternative(1, 0, 3, 9);
-        ins.set_alternative(1, 1, 4, 8);
-        ins.set_alternative(2, 0, 2, 7);
-        ins.set_alternative(2, 1, 3, 5);
-        Solution sol(ins);
-        sol.set(0, 1);
-        sol.set(1, 0);
-        sol.set(2, 1);
+        ins.set_capacity({5, 7});
+        ins.add_item({{1, 13}, {2, 10}});
+        ins.add_item({{3, 9}, {4, 8}});
+        ins.add_item({{2, 7}, {3, 5}});
+        Solution sol(ins, {{1}, {0, 2}});
         ins.set_optimal_solution(sol);
         return ins;
     } case 8: { // 3 agent, 5 items
         Instance ins(3, 5);
-        ins.add_items(5);
-        ins.set_capacity(0, 10);
-        ins.set_capacity(1, 12);
-        ins.set_capacity(2, 11);
-        ins.set_alternative(0, 0, 1, 4);
-        ins.set_alternative(0, 1, 2, 6);
-        ins.set_alternative(0, 2, 3, 7);
-        ins.set_alternative(1, 0, 2, 8);
-        ins.set_alternative(1, 1, 3, 6);
-        ins.set_alternative(1, 2, 4, 5);
-        ins.set_alternative(2, 0, 3, 10);
-        ins.set_alternative(2, 1, 4, 8);
-        ins.set_alternative(2, 2, 5, 6);
-        ins.set_alternative(3, 0, 4, 9);
-        ins.set_alternative(3, 1, 5, 8);
-        ins.set_alternative(3, 2, 6, 7);
-        ins.set_alternative(4, 0, 5, 12);
-        ins.set_alternative(4, 1, 6, 11);
-        ins.set_alternative(4, 2, 7, 9);
-        Solution sol(ins);
-        sol.set(0, 0);
-        sol.set(1, 2);
-        sol.set(2, 1);
-        sol.set(3, 1);
-        sol.set(4, 2);
+        ins.set_capacity({10, 12, 11});
+        ins.add_item({{1, 4}, {2, 6}, {3, 7}});
+        ins.add_item({{2, 8}, {3, 6}, {4, 5}});
+        ins.add_item({{3, 10}, {4, 8}, {5, 6}});
+        ins.add_item({{4, 9}, {5, 8}, {6, 7}});
+        ins.add_item({{5, 12}, {6, 11}, {7, 9}});
+        Solution sol(ins, {{0}, {2, 3}, {1, 4}});
         ins.set_optimal_solution(sol);
         return ins;
     } default: {
@@ -180,12 +128,14 @@ public:
     Instance next()
     {
         i++;
+        if (i == 8)
+            end = true;
         return test_instance(i);
     }
 
 private:
 
-    Cpt i = 0;
+    Cpt i = -1;
 
 };
 
@@ -198,7 +148,7 @@ void test(Instances& inss, std::vector<Cost (*)(Instance&)> fs, TestType tt)
             std::cout << "error" << std::endl;
             return;
         }
-        if (ins.item_number() == 0)
+        if (inss.end)
             break;
     }
     std::cout << "ok" << std::endl;

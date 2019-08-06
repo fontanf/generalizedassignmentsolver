@@ -63,10 +63,11 @@ public:
     Instance(std::string filename, std::string format = "gap_beasley");
 
     Instance(AgentIdx m, ItemIdx n=0);
-    void add_items(ItemIdx n);
+    void set_capacity(AgentIdx i, Weight t) { t_[i] = t; }
+    void set_capacity(const std::vector<Weight>& t);
     ItemIdx add_item();
     void set_alternative(ItemIdx j, AgentIdx i, Weight w, Cost p);
-    void set_capacity(AgentIdx i, Weight t) { t_[i] = t; }
+    void add_item(const std::vector<std::pair<Weight, Cost>>& a);
     void set_optimal_solution(Solution& sol);
 
     Instance(const Instance& ins);

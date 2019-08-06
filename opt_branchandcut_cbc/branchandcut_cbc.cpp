@@ -90,6 +90,14 @@ Solution gap::sopt_branchandcut_cbc(BranchAndCutCbcData d)
 
     int loglevel = (d.info.output->verbose)? 1: 0;
 
+    ItemIdx n = d.ins.item_number();
+    if (n == 0) {
+        Solution sol(d.ins);
+        if (compare(d.sol, sol))
+            d.sol.update(sol, 0, std::stringstream(""), d.info);
+        return algorithm_end(d.sol, d.info);
+    }
+
     MilpMatrix mat(d.ins);
 
     OsiCbcSolverInterface solver1;

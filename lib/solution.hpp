@@ -21,6 +21,7 @@ public:
 
     Solution(const Instance& ins);
     Solution(const Instance& ins, std::string filepath);
+    Solution(const Instance& ins, const std::vector<std::vector<ItemIdx>>& agents);
     Solution(const Solution& sol);
     Solution& operator=(const Solution& sol);
     ~Solution() { }

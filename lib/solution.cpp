@@ -31,6 +31,16 @@ Solution::Solution(const Instance& ins, std::string filepath):
     }
 }
 
+Solution::Solution(const Instance& ins, const std::vector<std::vector<ItemIdx>>& agents):
+    instance_(ins),
+    x_(ins.item_number(), -1),
+    agents_(ins.agent_number())
+{
+    for (AgentIdx i=0; i<(AgentIdx)agents.size(); i++)
+        for (ItemIdx j: agents[i])
+            set(j, i);
+}
+
 Solution::Solution(const Solution& sol):
     instance_(sol.instance_),
     x_(sol.x_),

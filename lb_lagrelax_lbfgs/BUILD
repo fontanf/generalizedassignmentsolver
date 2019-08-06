@@ -8,7 +8,7 @@ cc_library(
         ],
         copts = select({"//lib:dlib_build": ["-DDLIB_FOUND"], "//conditions:default": []}),
         linkopts = select({
-                "//lib:cplex_build": [
+                "//lib:dlib_build": [
                         "-ldlib",
                 ],
                 "//conditions:default": [
@@ -25,6 +25,7 @@ cc_test(
                 "//lib:tester",
                 ":lagrelax_lbfgs",
         ],
+        copts = select({"//lib:dlib_build": ["-DDLIB_FOUND"], "//conditions:default": []}),
         timeout = "moderate",
 )
 

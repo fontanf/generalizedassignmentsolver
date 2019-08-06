@@ -26,6 +26,7 @@ cc_test(
                 "//lib:tester",
                 "//opt_branchandcut_cbc:branchandcut_cbc",
         ],
+        copts = select({"//lib:coinor_build": ["-DCOINOR_FOUND"], "//conditions:default": []}),
         timeout = "moderate",
 )
 

@@ -10,6 +10,12 @@ Instance::Instance(AgentIdx m, ItemIdx n)
     t_.resize(m);
 }
 
+void Instance::set_capacity(const std::vector<Weight>& t)
+{
+    for (AgentIdx i=0; i<(AgentIdx)t.size(); ++i)
+        set_capacity(i, t[i]);
+}
+
 void Instance::set_optimal_solution(Solution& sol)
 {
     sol_opt_ = std::unique_ptr<Solution>(new Solution(sol));
@@ -28,10 +34,11 @@ ItemIdx Instance::add_item()
     return j;
 }
 
-void Instance::add_items(ItemIdx n)
+void Instance::add_item(const std::vector<std::pair<Weight, Cost>>& a)
 {
-    for (ItemPos j=0; j<n; ++j)
-        add_item();
+    ItemIdx j = add_item();
+    for (AgentIdx i=0; i<(AgentIdx)a.size(); ++i)
+        set_alternative(j, i, a[i].first, a[i].second);
 }
 
 void Instance::set_alternative(ItemIdx j, AgentIdx i, Weight w, Cost v)
@@ -78,7 +85,8 @@ void Instance::read_beasley(std::ifstream& file)
 
     t_.resize(m);
     items_.reserve(n);
-    add_items(n);
+    for (ItemPos j=0; j<n; ++j)
+        add_item();
     for (AgentIdx i=0; i<m; ++i)
         for (ItemPos j=0; j<n; ++j)
             file >> alternatives_[alternative_index(j, i)].c;
@@ -103,10 +111,15 @@ void Instance::read_standard(std::ifstream& file)
         file >> t_[i];
 
     items_.reserve(n);
-    add_items(n);
-    for (ItemPos j=0; j<n; ++j)
-        for (AgentIdx i=0; i<m; ++i)
-            file >> alternatives_[items_[j].alt[i]].w >> alternatives_[items_[j].alt[i]].c;
+    Weight w;
+    Cost c;
+    for (ItemPos j=0; j<n; ++j) {
+        add_item();
+        for (AgentIdx i=0; i<m; ++i) {
+            file >> w >> c;
+            set_alternative(j, i, w, c);
+        }
+    }
 }
 
 Instance::~Instance() {  }
