@@ -32,6 +32,7 @@ cc_test(
                 "//opt_constraintprogramming_gecode:constraintprogramming_gecode",
         ],
         copts = select({"//lib:gecode_build": ["-DGECODE_FOUND"], "//conditions:default": []}),
+        tags = ["requires-network"],
         timeout = "moderate",
 )
 

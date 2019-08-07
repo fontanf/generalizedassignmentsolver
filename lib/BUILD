@@ -85,7 +85,11 @@ cc_binary(
             select({":gurobi_build":      ["-DGUROBI_FOUND"],      "//conditions:default": []}) +
             select({":gecode_build":      ["-DGECODE_FOUND"],      "//conditions:default": []}) +
             select({":localsolver_build": ["-DLOCALSOLVER_FOUND"], "//conditions:default": []}),
-        linkopts = ["-lboost_program_options"],
+        linkopts = ["-lboost_program_options"] +
+            select({"//lib:gurobi_build": [
+                        "-lgurobi_c++",
+                        "-lgurobi81",
+                ], "//conditions:default": [ ], }),
 )
 
 cc_binary(
