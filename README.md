@@ -27,6 +27,7 @@ GAP is interesting for several reasons:
 - Linear relaxation
   - solved with CLP `-a linrelax_clp` :heavy_check_mark:
   - solved with CPLEX `-a linrelax_cplex` :x:
+  - solved with Gurobi `-a linrelax_gurobi` :x:
 - Lagrangian relaxation of knapsack constraints
   - solved with volume method `-a lagrelax_knapsack_volume` :heavy_check_mark:
   - solved with L-BFGS method `-a lagrelax_knapsack_lbfgs` :heavy_check_mark:
@@ -57,10 +58,6 @@ Classical meta-heuristics based on shift-swap neighborhood and fixed penalty of 
 - Simulated annealing `-a sa_shiftswap` :heavy_check_mark:
 - Path relinking `-a pr_shiftswap` :heavy_check_mark:
 
-Meta-heuristics based on ejection chain neighborhood and adaptative control of penalty weights:
-- Hill climbing, first improvment `-a lsfirst_ejectionchain` :x:
-- Path relinking `-a pr_ejectionchain` :x:
-
 Others:
 - Random feasible solution `-a random` :heavy_check_mark:
 - Repair linear relaxation solution `-a repairlinrelax` :heavy_check_mark:
@@ -69,7 +66,7 @@ Others:
   - with CPLEX `-a vnsbranching_cplex` :heavy_check_mark:
 - Variable-depth neighborhood search (see "Handbook of Metaheuristics", 4.5.1 Variable-Depth Methods)
   - k-agents reallocation neighborhood `-a vdns_simple` :heavy_check_mark:
-- Very large scale neighborhood search using Monotone Binary Program neighborhood, based on "Variable-fixing then subgradient optimization guided very large scale neighborhood search for the generalized assignment problem" (Haddadi, 2018) `-a vlsn_mbp` :x:
+- Path relinking with ejection chain neighborhood and adaptative control of penalty weights :x:
 - Local search with LocalSolver `-a localsolver` :heavy_check_mark:
 
 ## Exact algorithms
