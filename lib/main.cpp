@@ -79,12 +79,6 @@ int main(int argc, char *argv[])
         sol0 = Solution(ins, instancefile + ".sol");
     f_sol.close();
 
-    Cost opt = -1;
-    std::ifstream f_opt(instancefile + ".opt");
-    if (f_opt.good())
-        f_opt >> opt;
-    f_opt.close();
-
     Cost lb0 = 0;
     std::ifstream f_bound(instancefile + ".bound");
     if (f_bound.good())
@@ -379,24 +373,24 @@ int main(int argc, char *argv[])
             assert(false);
             return 1;
         }
-        if (opt != -1 && sol.cost() > sol0.cost()) {
+        if (sol0.feasible() && sol.cost() > sol0.cost()) {
             std::cerr << "\033[31m" << "ERROR, exact algorithm does not return optimal solution." << "\033[0m" << std::endl;
             assert(false);
             return 1;
         }
-        if (opt != -1 && sol.cost() < opt) {
-            std::cerr << "\033[31m" << "WARNING, previous optimum was not optimal." << "\033[0m" << std::endl;
+        if (sol.cost() < lb0) {
+            std::cerr << "\033[31m" << "WARNING, previous lower bound was wrong." << "\033[0m" << std::endl;
         }
     }
     if (is_lb) {
-        if (opt != -1 && lb > opt) {
-            std::cerr << "\033[31m" << "ERROR, lower bound is greater than optimum." << "\033[0m" << std::endl;
+        if (sol0.feasible() && lb > sol0.cost()) {
+            std::cerr << "\033[31m" << "ERROR, lower bound is greater upper bound." << "\033[0m" << std::endl;
             assert(false);
             return 1;
         }
     }
     if (is_ub) {
-        if (opt != -1 && sol.feasible() && sol.cost() < opt) {
+        if (sol.feasible() && sol.cost() < lb0) {
             std::cerr << "\033[31m" << "WARNING, previous optimum was not optimal." << "\033[0m" << std::endl;
             assert(false);
             return 1;
@@ -406,13 +400,11 @@ int main(int argc, char *argv[])
     // Update best solution and bound
 
     if (vm.count("update")) {
-        if (is_exact && (opt == -1 || sol.cost() < opt)) {
+        if (is_exact && (!sol0.feasible() || sol0.cost() > sol0.cost())) {
             std::cerr << "\033[32m" << "New optimum found." << "\033[0m" << std::endl;
             sol.write_cert(instancefile + ".sol");
-            std::ofstream f_opt(instancefile + ".opt");
+            std::ofstream f_opt(instancefile + ".bound");
             f_opt << sol.cost();
-            std::ofstream f_bound(instancefile + ".bound");
-            f_bound << sol.cost();
         } else if (is_lb && lb0 < lb) {
             std::cerr << "\033[32m" << "New lower bound found." << "\033[0m" << std::endl;
             std::ofstream f_opt(instancefile + ".bound");

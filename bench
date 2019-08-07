@@ -29,7 +29,7 @@ data = [
 algo = sys.argv[1]
 t = ""
 if (len(sys.argv) > 2):
-    t = sys.arg[2]
+    t = sys.argv[2]
 
 os.system('bazel build -- //lib:main')
 suffix = algo.replace(" ", "_").replace("/", "_")
@@ -44,7 +44,7 @@ os.makedirs(outdir, exist_ok=True)
 for i in data:
     certfile = os.path.join(outdir, i + "_solution.txt")
     inifile  = os.path.join(outdir, i + "_output.ini")
-    os.system("./bazel-bin/lib/main"
+    os.system("./bazel-bin/lib/main -u"
         + " -a \"" + algo + "\""
         + time_limit
         + " -i \"data/" + i + "\""
