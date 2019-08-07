@@ -26,7 +26,6 @@ GAP is interesting for several reasons:
 
 - Linear relaxation
   - solved with CLP `-a linrelax_clp` :heavy_check_mark:
-  - solved with OR-Tools `-a linrelax_ortools` :x:
   - solved with CPLEX `-a linrelax_cplex` :x:
 - Lagrangian relaxation of knapsack constraints
   - solved with volume method `-a lagrelax_knapsack_volume` :heavy_check_mark:
@@ -78,8 +77,8 @@ Others:
 - Branch-and-cut
   - with CBC `-a branchandcut_cbc` :heavy_check_mark:
   - with CPLEX `-a branchandcut_cplex` :heavy_check_mark:
+  - with Gurobi `-a branchandcut_gurobi` :heavy_check_mark:
 - Constraint programming
-  - with OR-Tools `-a constraintprogramming_ortools` :x:
   - with Gecode `-a constraintprogramming_gecode` :heavy_check_mark:
   - with CPLEX `-a constraintprogramming_cplex` :heavy_check_mark:
 
@@ -164,10 +163,6 @@ LIB_DIR="/usr/lib/x86_64-linux-gnu/"
 for i in "${COINOR_HOME}"/build/lib/*.so*; do sudo ln -f -s "$i" "${LIB_DIR}" done
 ```
 
-### OR-Tools
-
-Already included, will be downloaded automatically if option `--define ortools=true` is used.
-
 ### Gecode
 
 Download latest version: download https://www.gecode.org/download.html
@@ -210,7 +205,7 @@ export CPLUS_INCLUDE_PATH="${CPLUS_INCLUDE_PATH}:${DLIB_HOME}"
 Create symlinks for libraries:
 ```shell
 LIB_DIR="/usr/lib/x86_64-linux-gnu/"
-sudo ln -s "${DLIB_HOME}/build/dlib/libdlib.a" "${LIB_DIR}"
+sudo ln -f -s "${DLIB_HOME}/build/dlib/libdlib.a" "${LIB_DIR}"
 ```
 
 ### CPLEX
@@ -219,24 +214,47 @@ Update `.bashrc`:
 ```shell
 # CPlex
 export CPLEX_VERSION="126"
-export CPLEX_HOME="/opt/ibm/ILOG/CPLEX_Studio${CPLEX_VERSION}/cplex"
-export CONCERT_HOME="/opt/ibm/ILOG/CPLEX_Studio${CPLEX_VERSION}/concert"
-export CPOPTIMIZER_HOME="/opt/ibm/ILOG/CPLEX_Studio${CPLEX_VERSION}/cpoptimizer"
-export PATH="$PATH:${CPLEX_HOME}/bin/x86-64_linux"
-export CLASSPATH="$CLASSPATH:${CPLEX_HOME}/lib/cplex.jar"
-export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:${CPLEX_HOME}/include"
-export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:${CONCERT_HOME}/include"
-export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:${CPOPTIMIZER_HOME}/include"
+export CPLEX_HOME="/opt/ibm/ILOG/CPLEX_Studio${CPLEX_VERSION}"
+export PATH="$PATH:${CPLEX_HOME}/cplex/bin/x86-64_linux"
+export CLASSPATH="$CLASSPATH:${CPLEX_HOME}/cplex/lib/cplex.jar"
+export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:${CPLEX_HOME}/cplex/include"
+export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:${CPLEX_HOME}/concert/include"
+export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:${CPLEX_HOME}/cpoptimizer/include"
 ```
 
 Create symlinks for libraries:
 ```shell
 LIB_DIR="/usr/lib/x86_64-linux-gnu/"
-sudo ln -s "${CPLEX_HOME}/cplex/lib/x86-64_linux/static_pic/libcplex.a"        "${LIB_DIR}"
-sudo ln -s "${CPLEX_HOME}/cplex/lib/x86-64_linux/static_pic/libcp.a"           "${LIB_DIR}"
-sudo ln -s "${CPLEX_HOME}/cplex/lib/x86-64_linux/static_pic/libcplexdistmip.a" "${LIB_DIR}"
-sudo ln -s "${CPLEX_HOME}/concert/lib/x86-64_linux/static_pic/libconcert.a"    "${LIB_DIR}"
-sudo ln -s "${CPLEX_HOME}/cpoptimizer/lib/x86-64_linux/static_pic/libcp.a"     "${LIB_DIR}"
+sudo ln -f -s "${CPLEX_HOME}/cplex/lib/x86-64_linux/static_pic/libcplex.a"        "${LIB_DIR}"
+sudo ln -f -s "${CPLEX_HOME}/cplex/lib/x86-64_linux/static_pic/libilocplex.a"     "${LIB_DIR}"
+sudo ln -f -s "${CPLEX_HOME}/cplex/lib/x86-64_linux/static_pic/libcplexdistmip.a" "${LIB_DIR}"
+sudo ln -f -s "${CPLEX_HOME}/concert/lib/x86-64_linux/static_pic/libconcert.a"    "${LIB_DIR}"
+sudo ln -f -s "${CPLEX_HOME}/cpoptimizer/lib/x86-64_linux/static_pic/libcp.a"     "${LIB_DIR}"
+```
+
+### Gurobi
+
+Update `.bashrc`:
+```shell
+# Gurobi
+export GUROBI_HOME="/home/florian/Programmes/gurobi811"
+export GRB_LICENSE_FILE=/home/florian/gurobi.lic
+export PATH="${PATH}:${GUROBI_HOME}/linux64/bin"
+export CPLUS_INCLUDE_PATH="${CPLUS_INCLUDE_PATH}:${GUROBI_HOME}/linux64/include"
+```
+
+Execute the following commands:
+```shell
+cd ${GUROBI_HOME}/linux64/src/build/
+make
+cp libgurobi_c++.a ../../lib/
+```
+
+Create symlinks for libraries:
+```shell
+LIB_DIR="/usr/lib/x86_64-linux-gnu/"
+sudo ln -f -s "${GUROBI_HOME}/linux64/lib/libgurobi_c++.a" "${LIB_DIR}"
+sudo ln -f -s "${GUROBI_HOME}/linux64/lib/libgurobi81.so"  "${LIB_DIR}"
 ```
 
 ### LocalSolver

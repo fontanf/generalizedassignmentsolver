@@ -4,8 +4,8 @@
 #include "gap/lb_lagrelax_lbfgs/lagrelax_lbfgs.hpp"
 #include "gap/opt_branchandcut_cbc/branchandcut_cbc.hpp"
 #include "gap/opt_branchandcut_cplex/branchandcut_cplex.hpp"
+#include "gap/opt_branchandcut_gurobi/branchandcut_gurobi.hpp"
 #include "gap/opt_constraintprogramming_gecode/constraintprogramming_gecode.hpp"
-#include "gap/opt_constraintprogramming_ortools/constraintprogramming_ortools.hpp"
 #include "gap/opt_constraintprogramming_cplex/constraintprogramming_cplex.hpp"
 #include "gap/opt_dip/dip.hpp"
 #include "gap/ub_random/random.hpp"
@@ -201,6 +201,17 @@ int main(int argc, char *argv[])
         is_exact = info.check_time();
         is_ub = !is_exact;
 #endif
+#if GUROBI_FOUND
+    } else if (vstrings[0] == "branchandcut_gurobi") {
+        sopt_branchandcut_gurobi({
+                .ins = ins,
+                .sol = sol,
+                .lb = lb,
+                .info = info,
+                });
+        is_exact = info.check_time();
+        is_ub = !is_exact;
+#endif
 #if COINOR_FOUND
     } else if (vstrings[0] == "branchandpriceandcut_dip") {
         sopt_branchandpriceandcut_dip(ins, info);
@@ -208,16 +219,6 @@ int main(int argc, char *argv[])
 #if COINOR_FOUND
     } else if (vstrings[0] == "relaxandcut_dip") {
         sopt_relaxandcut_dip(ins, info);
-#endif
-#if ORTOOLS_FOUND
-    } else if (vstrings[0] == "constraintprogramming_ortools") {
-        sopt_constraintprogramming_ortools({
-                .ins = ins,
-                .sol = sol,
-                .info = info,
-                });
-        is_exact = info.check_time();
-        is_ub = !is_exact;
 #endif
 #if GECODE_FOUND
     } else if (vstrings[0] == "constraintprogramming_gecode") {
@@ -373,7 +374,7 @@ int main(int argc, char *argv[])
 #endif
 
     } else {
-        std::cout << "unknown algorithm" << std::endl;
+        std::cerr << "\033[31m" << "ERROR, unknown algorithm: " << algorithm << "\033[0m" << std::endl;
     }
 
     // Check
@@ -403,6 +404,8 @@ int main(int argc, char *argv[])
     if (is_ub) {
         if (opt != -1 && sol.feasible() && sol.cost() < opt) {
             std::cerr << "\033[31m" << "WARNING, previous optimum was not optimal." << "\033[0m" << std::endl;
+            assert(false);
+            return 1;
         }
     }
 

@@ -56,8 +56,8 @@ Solution gap::sol_vnsbranching_cbc(const Instance& ins, std::mt19937_64& gen, In
             }
             MilpMatrix mat(ins);
             mat.matrix.appendRow(o, vec_ind.data(), vec_elem.data());
-            mat.rowLower.push_back(- n);
-            mat.rowUpper.push_back(k_max - n);
+            mat.row_lower.push_back(- n);
+            mat.row_upper.push_back(k_max - n);
 
             OsiCbcSolverInterface solver1;
 
@@ -66,8 +66,8 @@ Solution gap::sol_vnsbranching_cbc(const Instance& ins, std::mt19937_64& gen, In
             solver1.messageHandler()->setLogLevel(0);
 
             // Load problem
-            solver1.loadProblem(mat.matrix, mat.colLower.data(), mat.colUpper.data(),
-                    mat.objective.data(), mat.rowLower.data(), mat.rowUpper.data());
+            solver1.loadProblem(mat.matrix, mat.col_lower.data(), mat.col_upper.data(),
+                    mat.objective.data(), mat.row_lower.data(), mat.row_upper.data());
 
             // Mark integer
             for (AltIdx k=0; k<o; ++k)

@@ -1,6 +1,6 @@
 #pragma once
 
-#if ORTOOLS_FOUND
+#if GUROBI_FOUND
 
 #include "gap/lib/instance.hpp"
 #include "gap/lib/solution.hpp"
@@ -8,14 +8,15 @@
 namespace gap
 {
 
-struct ConstraintProgrammingOrtoolsData
+struct BranchAndCutGurobiData
 {
     const Instance& ins;
     Solution& sol;
+    Cost& lb;
     Info info = Info();
 };
 
-Solution sopt_constraintprogramming_ortools(ConstraintProgrammingOrtoolsData d);
+Solution sopt_branchandcut_gurobi(BranchAndCutGurobiData d);
 
 }
 
