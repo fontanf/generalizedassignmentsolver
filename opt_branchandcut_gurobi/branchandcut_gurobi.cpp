@@ -59,7 +59,7 @@ Solution gap::sopt_branchandcut_gurobi(BranchAndCutGurobiData d)
     AltIdx o = d.ins.alternative_number();
 
     if (n == 0)
-        return algorithm_end(d.sol, d.info);
+        return algorithm_end(d.sol, d.lb, d.info);
 
     GRBModel model(env);
 
@@ -108,7 +108,7 @@ Solution gap::sopt_branchandcut_gurobi(BranchAndCutGurobiData d)
     model.optimize();
 
     if (model.get(GRB_DoubleAttr_ObjBound) == 0)
-        return algorithm_end(d.sol, d.info);
+        return algorithm_end(d.sol, d.lb, d.info);
 
     if (!d.sol.feasible() || d.sol.cost() > model.get(GRB_DoubleAttr_ObjVal) + 0.5) {
         Solution sol_curr(d.ins);
@@ -121,7 +121,7 @@ Solution gap::sopt_branchandcut_gurobi(BranchAndCutGurobiData d)
     if (d.lb < model.get(GRB_DoubleAttr_ObjBound) - 0.5)
         update_lb(d.lb, model.get(GRB_DoubleAttr_ObjBound), d.sol, std::stringstream(""), d.info);
 
-    return algorithm_end(d.sol, d.info);
+    return algorithm_end(d.sol, d.lb, d.info);
 }
 
 #endif

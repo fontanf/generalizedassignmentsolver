@@ -104,6 +104,7 @@ bool compare(const Solution& sol_best, const Solution& sol_curr);
 void init_display(Info& info);
 void update_lb(Cost& lb, Cost lb_new, const Solution& sol, const std::stringstream& s, Info& info);
 
+Solution algorithm_end(const Solution& sol, Cost& lb, Info& info);
 Solution algorithm_end(const Solution& sol, Info& info);
 void algorithm_end(Cost lb, Info& info);
 

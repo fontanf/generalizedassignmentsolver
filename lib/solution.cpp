@@ -211,6 +211,33 @@ void Solution::clear()
     total_pcost_ = 0;
 }
 
+std::string Solution::to_string(AgentIdx i)
+{
+    std::string s = "agent " + std::to_string(i) + ":";
+    for (ItemIdx j=0; j<instance().item_number(); ++j)
+        if (agent(j) == i)
+            s += " " + std::to_string(j);
+    return s;
+}
+
+ItemIdx gap::distance(const Solution& sol1, const Solution& sol2)
+{
+    ItemIdx dist = 0;
+    for (ItemIdx j=0; j<sol1.instance().item_number(); ++j)
+        if (sol1.agent(j) != sol2.agent(j))
+            dist++;
+    return dist;
+}
+
+bool gap::compare(const Solution& sol_best, const Solution& sol_curr)
+{
+    if (!sol_curr.feasible())
+        return false;
+    if (!sol_best.feasible())
+        return true;
+    return sol_best.cost() > sol_curr.cost();
+}
+
 void Solution::write_cert(std::string filepath)
 {
     if (filepath.empty())
@@ -243,6 +270,17 @@ std::ostream& gap::operator<<(std::ostream& os, const Solution& sol)
     return os;
 }
 
+void gap::init_display(Info& info)
+{
+    VER(info, std::left << std::setw(10) << "T (s)");
+    VER(info, std::left << std::setw(12) << "UB");
+    VER(info, std::left << std::setw(12) << "LB");
+    VER(info, std::left << std::setw(10) << "GAP");
+    VER(info, std::left << std::setw(10) << "GAP (%)");
+    VER(info, "");
+    VER(info, std::endl);
+}
+
 void Solution::update(const Solution& sol, Cost lb, const std::stringstream& s, Info& info)
 {
     info.output->mutex_sol.lock();
@@ -271,17 +309,6 @@ void Solution::update(const Solution& sol, Cost lb, const std::stringstream& s, 
     }
 
     info.output->mutex_sol.unlock();
-}
-
-void gap::init_display(Info& info)
-{
-    VER(info, std::left << std::setw(10) << "T (s)");
-    VER(info, std::left << std::setw(12) << "UB");
-    VER(info, std::left << std::setw(12) << "LB");
-    VER(info, std::left << std::setw(10) << "GAP");
-    VER(info, std::left << std::setw(10) << "GAP (%)");
-    VER(info, "");
-    VER(info, std::endl);
 }
 
 void gap::update_lb(Cost& lb, Cost lb_new, const Solution& sol, const std::stringstream& s, Info& info)
@@ -315,54 +342,43 @@ void gap::update_lb(Cost& lb, Cost lb_new, const Solution& sol, const std::strin
     info.output->mutex_sol.unlock();
 }
 
+Solution gap::algorithm_end(const Solution& sol, Cost& lb, Info& info)
+{
+    double ub = (!sol.feasible())? std::numeric_limits<double>::infinity(): sol.cost();
+    double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
+    double gap = (lb == 0 || !sol.feasible())? std::numeric_limits<double>::infinity():
+        (double)(10000 * (sol.cost() - lb) / lb) / 100;
+    PUT(info, "Solution.Cost", ub);
+    PUT(info, "Solution.Time", t);
+    PUT(info, "Bound.Cost", lb);
+    VER(info, "---" << std::endl);
+    VER(info, "Cost: " << ub << std::endl);
+    VER(info, "Bound: " << lb << std::endl);
+    VER(info, "GAP: " << ub - lb << std::endl);
+    VER(info, "GAP (%): " << gap << std::endl);
+    VER(info, "Time (s): " << t << std::endl);
+    return sol;
+}
+
 Solution gap::algorithm_end(const Solution& sol, Info& info)
 {
-    double t = info.elapsed_time();
-    std::string feas = (sol.feasible())? "True": "False";
-    PUT(info, "Solution.Cost", sol.cost());
+    double ub = (!sol.feasible())? std::numeric_limits<double>::infinity(): sol.cost();
+    double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
+    PUT(info, "Solution.Cost", ub);
     PUT(info, "Solution.Time", t);
-    PUT(info, "Solution.Feasible", feas);
     VER(info, "---" << std::endl);
-    VER(info, "Feasible: " << feas << std::endl);
-    VER(info, "Cost: " << sol.cost() << std::endl);
+    VER(info, "Cost: " << ub << std::endl);
     VER(info, "Time (s): " << t << std::endl);
     return sol;
 }
 
 void gap::algorithm_end(Cost lb, Info& info)
 {
-    double t = info.elapsed_time();
+    double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
     PUT(info, "Bound.Cost", lb);
     PUT(info, "Bound.Time", t);
     VER(info, "---" << std::endl);
     VER(info, "Cost: " << lb << std::endl);
     VER(info, "Time (s): " << t << std::endl);
-}
-
-std::string Solution::to_string(AgentIdx i)
-{
-    std::string s = "agent " + std::to_string(i) + ":";
-    for (ItemIdx j=0; j<instance().item_number(); ++j)
-        if (agent(j) == i)
-            s += " " + std::to_string(j);
-    return s;
-}
-
-ItemIdx gap::distance(const Solution& sol1, const Solution& sol2)
-{
-    ItemIdx dist = 0;
-    for (ItemIdx j=0; j<sol1.instance().item_number(); ++j)
-        if (sol1.agent(j) != sol2.agent(j))
-            dist++;
-    return dist;
-}
-
-bool gap::compare(const Solution& sol_best, const Solution& sol_curr)
-{
-    if (!sol_curr.feasible())
-        return false;
-    if (!sol_best.feasible())
-        return true;
-    return sol_best.cost() > sol_curr.cost();
 }
 

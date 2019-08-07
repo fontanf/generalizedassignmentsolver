@@ -45,7 +45,7 @@ Solution gap::sopt_branchandcut_cplex(BranchAndCutCplexData d)
     AltIdx o = d.ins.alternative_number();
 
     if (n == 0)
-        return algorithm_end(d.sol, d.info);
+        return algorithm_end(d.sol, d.lb, d.info);
 
     IloEnv env;
     IloModel model(env);
@@ -112,7 +112,7 @@ Solution gap::sopt_branchandcut_cplex(BranchAndCutCplexData d)
     cplex.solve();
 
     if (!cplex.isPrimalFeasible())
-        return algorithm_end(d.sol, d.info);
+        return algorithm_end(d.sol, d.lb, d.info);
 
     if (!d.sol.feasible() || d.sol.cost() > cplex.getObjValue() + 0.5) {
         Solution sol_curr(d.ins);
@@ -127,7 +127,7 @@ Solution gap::sopt_branchandcut_cplex(BranchAndCutCplexData d)
 
     env.end();
 
-    return algorithm_end(d.sol, d.info);
+    return algorithm_end(d.sol, d.lb, d.info);
 }
 
 #endif
