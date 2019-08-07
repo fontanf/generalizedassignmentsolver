@@ -15,8 +15,8 @@ class mycallback: public GRBCallback
 
 public:
 
-    mycallback(Solution& sol, Info& info, GRBVar* x):
-        sol_(sol), info_(info), x_(x) { }
+    mycallback(BranchAndCutGurobiData& d, GRBVar* x):
+        d_(d), x_(x) { }
 
 protected:
 
@@ -25,22 +25,24 @@ protected:
         if (where != GRB_CB_MIPSOL)
             return;
 
-        if(!sol_.feasible() || sol_.cost() > getDoubleInfo(GRB_CB_MIPSOL_OBJ) + 0.5) {
-            Solution sol_curr(sol_.instance());
-            AltIdx   o = sol_.instance().alternative_number();
+        if (d_.lb < getDoubleInfo(GRB_CB_MIPSOL_OBJBND) - 0.5)
+            update_lb(d_.lb, getDoubleInfo(GRB_CB_MIPSOL_OBJBND), d_.sol, std::stringstream(""), d_.info);
+
+        if(!d_.sol.feasible() || d_.sol.cost() > getDoubleInfo(GRB_CB_MIPSOL_OBJ) + 0.5) {
+            Solution sol_curr(d_.ins);
+            AltIdx o = d_.ins.alternative_number();
             double* x = getSolution(x_, o);
             for (AltIdx k=0; k<o; ++k)
                 if (x[k] > 0.5)
                     sol_curr.set(k);
             std::stringstream ss;
-            sol_.update(sol_curr, 0, ss, info_);
+            d_.sol.update(sol_curr, d_.lb, ss, d_.info);
         }
     }
 
 private:
 
-    Solution& sol_;
-    Info& info_;
+    BranchAndCutGurobiData& d_;
     GRBVar* x_;
 
 };
@@ -57,7 +59,7 @@ Solution gap::sopt_branchandcut_gurobi(BranchAndCutGurobiData d)
     AltIdx o = d.ins.alternative_number();
 
     if (n == 0)
-        return d.sol;
+        return algorithm_end(d.sol, d.info);
 
     GRBModel model(env);
 
@@ -99,15 +101,25 @@ Solution gap::sopt_branchandcut_gurobi(BranchAndCutGurobiData d)
         model.set(GRB_DoubleParam_TimeLimit, d.info.timelimit);
 
     // Callback
-    mycallback cb = mycallback(d.sol, d.info, x);
+    mycallback cb = mycallback(d, x);
     model.setCallback(&cb);
 
     // Optimize
     model.optimize();
 
-    for (AltIdx k=0; k<o; ++k)
-        if (x[k].get(GRB_DoubleAttr_X) > 0.5)
-            d.sol.set(k);
+    if (model.get(GRB_DoubleAttr_ObjBound) == 0)
+        return algorithm_end(d.sol, d.info);
+
+    if (!d.sol.feasible() || d.sol.cost() > model.get(GRB_DoubleAttr_ObjVal) + 0.5) {
+        Solution sol_curr(d.ins);
+        for (AltIdx k=0; k<o; ++k)
+            if (x[k].get(GRB_DoubleAttr_X) > 0.5)
+                sol_curr.set(k);
+        d.sol.update(sol_curr, d.lb, std::stringstream(""), d.info);
+    }
+
+    if (d.lb < model.get(GRB_DoubleAttr_ObjBound) - 0.5)
+        update_lb(d.lb, model.get(GRB_DoubleAttr_ObjBound), d.sol, std::stringstream(""), d.info);
 
     return algorithm_end(d.sol, d.info);
 }

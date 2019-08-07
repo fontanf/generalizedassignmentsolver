@@ -34,6 +34,6 @@ git_repository(
 git_repository(
     name = "benchtools",
     remote = "https://github.com/fontanf/benchtools.git",
-    commit = "05883deff50e329875ea1bd8ddd5f6076da9d7d4",
+    commit = "8ecca733fa9a0f61461a6d2d6487dc8ee7cba39a",
 )
 
