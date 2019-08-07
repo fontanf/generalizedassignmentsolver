@@ -85,10 +85,6 @@ int main(int argc, char *argv[])
         f_bound >> lb0;
     f_bound.close();
 
-    bool is_exact = false;
-    bool is_lb    = false;
-    bool is_ub    = false;
-
     // Run algorithm
 
     Solution sol(ins, initsolfile);
@@ -125,44 +121,37 @@ int main(int argc, char *argv[])
 #if COINOR_FOUND
     } else if (vstrings[0] == "linrelax_clp") {
         auto res = lb_linrelax_clp(ins, info);
-        is_lb = true;
         lb = res.lb;
 #endif
 #if COINOR_FOUND
     } else if (vstrings[0] == "lagrelax_knapsack_volume") {
         auto res = lb_lagrelax_knapsack_volume(ins, info);
         lb = res.lb;
-        is_lb = true;
 #endif
 #if COINOR_FOUND
     } else if (vstrings[0] == "lagrelax_knapsack_bundle") {
         auto res = lb_lagrelax_knapsack_bundle(ins, info);
         lb = res.lb;
-        is_lb = true;
 #endif
 #if DLIB_FOUND
     } else if (vstrings[0] == "lagrelax_knapsack_lbfgs") {
         auto res = lb_lagrelax_knapsack_lbfgs(ins, info);
         lb = res.lb;
-        is_lb = true;
 #endif
 #if COINOR_FOUND
     } else if (vstrings[0] == "lagrelax_assignment_volume") {
         auto res = lb_lagrelax_assignment_volume(ins, info);
         lb = res.lb;
-        is_lb = true;
 #endif
 #if COINOR_FOUND
     } else if (vstrings[0] == "lagrelax_assignment_bundle") {
         auto res = lb_lagrelax_assignment_bundle(ins, info);
         lb = res.lb;
-        is_lb = true;
 #endif
 #if DLIB_FOUND
     } else if (vstrings[0] == "lagrelax_assignment_lbfgs") {
         auto res = lb_lagrelax_assignment_lbfgs(ins, info);
         lb = res.lb;
-        is_lb = true;
 #endif
 
     /*
@@ -176,8 +165,6 @@ int main(int argc, char *argv[])
                 .stop_at_first_improvment = false,
                 .info = info,
                 });
-        is_exact = info.check_time();
-        is_ub = !is_exact;
 #endif
 #if COINOR_FOUND
     } else if (vstrings[0] == "branchandcut_dip") {
@@ -191,8 +178,6 @@ int main(int argc, char *argv[])
                 .lb = lb,
                 .info = info,
                 });
-        is_exact = info.check_time();
-        is_ub = !is_exact;
 #endif
 #if GUROBI_FOUND
     } else if (vstrings[0] == "branchandcut_gurobi") {
@@ -202,8 +187,6 @@ int main(int argc, char *argv[])
                 .lb = lb,
                 .info = info,
                 });
-        is_exact = info.check_time();
-        is_ub = !is_exact;
 #endif
 #if COINOR_FOUND
     } else if (vstrings[0] == "branchandpriceandcut_dip") {
@@ -220,8 +203,6 @@ int main(int argc, char *argv[])
                 .sol = sol,
                 .info = info,
                 });
-        is_exact = info.check_time();
-        is_ub = !is_exact;
 #endif
 #if CPLEX_FOUND
     } else if (vstrings[0] == "constraintprogramming_cplex") {
@@ -230,8 +211,6 @@ int main(int argc, char *argv[])
                 .sol = sol,
                 .info = info,
                 });
-        is_exact = info.check_time();
-        is_ub = !is_exact;
 #endif
 #if COINOR_FOUND
     } else if (vstrings[0] == "dip") {
@@ -243,46 +222,38 @@ int main(int argc, char *argv[])
      */
     } else if (vstrings[0] == "random") {
         sol = sol_random(ins, gen, info);
-        is_ub = true;
     } else if (vstrings[0] == "greedy") {
         auto it = args.find("f");
         std::string des_str = (it == args.end())? "cij": it->second;
         std::unique_ptr<Desirability> f = desirability(des_str, ins);
         sol = sol_greedy(ins, *f, info);
-        is_ub = true;
     } else if (vstrings[0] == "greedyregret") {
         auto it = args.find("f");
         std::string des_str = (it == args.end())? "cij": it->second;
         std::unique_ptr<Desirability> f = desirability(des_str, ins);
         sol = sol_greedyregret(ins, *f, info);
-        is_ub = true;
     } else if (vstrings[0] == "mthg") {
         auto it = args.find("f");
         std::string des_str = (it == args.end())? "cij": it->second;
         std::unique_ptr<Desirability> f = desirability(des_str, ins);
         sol = sol_mthg(ins, *f, info);
-        is_ub = true;
     } else if (vstrings[0] == "mthgregret") {
         auto it = args.find("f");
         std::string des_str = (it == args.end())? "cij": it->second;
         std::unique_ptr<Desirability> f = desirability(des_str, ins);
         sol = sol_mthgregret(ins, *f, info);
-        is_ub = true;
 #if COINOR_FOUND
     } else if (vstrings[0] == "repaircombrelax") {
         sol = sol_repaircombrelax(ins, info);
-        is_ub = true;
 #endif
 #if COINOR_FOUND
     } else if (vstrings[0] == "repairgreedy") {
         sol = sol_repairgreedy(ins, info);
-        is_ub = true;
 #endif
 #if COINOR_FOUND
     } else if (vstrings[0] == "repairlinrelax") {
         LinRelaxClpOutput linrelax_output = lb_linrelax_clp(ins);
         sol = sol_repairlinrelax(ins, linrelax_output, info);
-        is_ub = true;
 #endif
     } else if (vstrings[0] == "lsfirst_shift") {
         sol = sol_lsfirst_shift(LSFirstShiftSwapData{
@@ -290,56 +261,48 @@ int main(int argc, char *argv[])
                 .gen = gen,
                 .info = info
                 }.set_params(args));
-        is_ub = true;
     } else if (vstrings[0] == "lsfirst_shiftswap") {
         sol = sol_lsfirst_shiftswap(LSFirstShiftSwapData{
                 .ins = ins,
                 .gen = gen,
                 .info = info
                 }.set_params(args));
-        is_ub = true;
     } else if (vstrings[0] == "lsfirst_shift_swap") {
         sol = sol_lsfirst_shift_swap(LSFirstShiftSwapData{
                 .ins = ins,
                 .gen = gen,
                 .info = info
                 }.set_params(args));
-        is_ub = true;
     } else if (vstrings[0] == "lsbest_shiftswap") {
         sol = sol_lsbest_shiftswap(LSBestShiftSwapData{
                 .ins = ins,
                 .gen = gen,
                 .info = info
                 }.set_params(args));
-        is_ub = true;
     } else if (vstrings[0] == "ts_shiftswap") {
         sol = sol_ts_shiftswap(TSShiftSwapData{
                 .ins = ins,
                 .gen = gen,
                 .info = info
                 }.set_params(args));
-        is_ub = true;
     } else if (vstrings[0] == "sa_shiftswap") {
         sol = sol_sa_shiftswap(SAShiftSwapData{
                 .ins = ins,
                 .gen = gen,
                 .info = info
                 }.set_params(args));
-        is_ub = true;
     } else if (vstrings[0] == "pr_shiftswap") {
         sol = sol_pr_shiftswap(PRShiftSwapData{
                 .ins = ins,
                 .gen = gen,
                 .info = info
                 }.set_params(args));
-        is_ub = true;
     } else if (vstrings[0] == "lsfirst_ejectionchain") {
         sol = sol_lsfirst_ejectionchain(LSFirstECData{
                 .ins = ins,
                 .gen = gen,
                 .info = info
                 }.set_params(args));
-        is_ub = true;
 #if LOCALSOLVER_FOUND
     } else if (vstrings[0] == "localsolver") {
         sol = ub_localsolver({ins, sol, info});
@@ -348,17 +311,14 @@ int main(int argc, char *argv[])
 #if COINOR_FOUND
     } else if (vstrings[0] == "vdns_simple") {
         sol = sol_vdns_simple(ins, sol, gen, info);
-        is_ub = true;
 #endif
 #if COINOR_FOUND
     } else if (vstrings[0] == "vnsbranching_cbc") {
         sol = sol_vnsbranching_cbc(ins, gen, info);
-        is_ub = true;
 #endif
 #if CPLEX_FOUND
     } else if (vstrings[0] == "vnsbranching_cplex") {
         sol = sol_vnsbranching_cplex(ins, gen, info);
-        is_ub = true;
 #endif
 
     } else {
@@ -367,51 +327,25 @@ int main(int argc, char *argv[])
 
     // Check
 
-    if (is_exact) {
-        if (!sol.feasible()) {
-            std::cerr << "\033[31m" << "ERROR, exact algorithm returns unfeasible solution." << "\033[0m" << std::endl;
-            assert(false);
-            return 1;
-        }
-        if (sol0.feasible() && sol.cost() > sol0.cost()) {
-            std::cerr << "\033[31m" << "ERROR, exact algorithm does not return optimal solution." << "\033[0m" << std::endl;
-            assert(false);
-            return 1;
-        }
-        if (sol.cost() < lb0) {
-            std::cerr << "\033[31m" << "WARNING, previous lower bound was wrong." << "\033[0m" << std::endl;
-        }
-    }
-    if (is_lb) {
-        if (sol0.feasible() && lb > sol0.cost()) {
-            std::cerr << "\033[31m" << "ERROR, lower bound is greater upper bound." << "\033[0m" << std::endl;
-            assert(false);
-            return 1;
-        }
-    }
-    if (is_ub) {
-        if (sol.feasible() && sol.cost() < lb0) {
-            std::cerr << "\033[31m" << "WARNING, previous optimum was not optimal." << "\033[0m" << std::endl;
-            assert(false);
-            return 1;
-        }
+    if (sol.feasible() && sol.cost() < lb0)
+        std::cerr << "\033[31m" << "WARNING, previous lower bound was wrong." << "\033[0m" << std::endl;
+    if (sol0.feasible() && lb > sol0.cost()) {
+        std::cerr << "\033[31m" << "ERROR, lower bound is greater upper bound." << "\033[0m" << std::endl;
+        assert(false);
+        return 1;
     }
 
     // Update best solution and bound
 
     if (vm.count("update")) {
-        if (is_exact && (!sol0.feasible() || sol0.cost() > sol0.cost())) {
-            std::cerr << "\033[32m" << "New optimum found." << "\033[0m" << std::endl;
+        if (!sol0.feasible() || sol0.cost() > sol0.cost()) {
+            std::cerr << "\033[32m" << "New upper bound found." << "\033[0m" << std::endl;
             sol.write_cert(instancefile + ".sol");
-            std::ofstream f_opt(instancefile + ".bound");
-            f_opt << sol.cost();
-        } else if (is_lb && lb0 < lb) {
+        }
+        if (lb0 < lb) {
             std::cerr << "\033[32m" << "New lower bound found." << "\033[0m" << std::endl;
             std::ofstream f_opt(instancefile + ".bound");
             f_opt << lb;
-        } else if (is_ub && sol.feasible() && (!sol0.feasible() || sol0.cost() > sol.cost())) {
-            std::cerr << "\033[32m" << "New upper bound found." << "\033[0m" << std::endl;
-            sol.write_cert(instancefile + ".sol");
         }
     }
 

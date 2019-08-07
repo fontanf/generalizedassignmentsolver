@@ -17,6 +17,9 @@ ILOMIPINFOCALLBACK4(loggingCallback,
                     Cost&,          lb,
                     Info&,          info)
 {
+    if (lb < getBestObjValue() - 0.5)
+        update_lb(lb, getBestObjValue(), sol, std::stringstream(""), info);
+
     if (!hasIncumbent())
         return;
 
@@ -29,9 +32,6 @@ ILOMIPINFOCALLBACK4(loggingCallback,
                 sol_curr.set(k);
         sol.update(sol_curr, lb, std::stringstream(""), info);
     }
-
-    if (lb < getBestObjValue() - 0.5)
-        update(lb, getBestObjValue(), sol.cost(), std::stringstream(""), info);
 }
 
 Solution gap::sopt_branchandcut_cplex(BranchAndCutCplexData d)
@@ -44,10 +44,8 @@ Solution gap::sopt_branchandcut_cplex(BranchAndCutCplexData d)
     AgentIdx m = d.ins.agent_number();
     AltIdx o = d.ins.alternative_number();
 
-    if (n == 0) {
-        d.sol.update(Solution(d.ins), d.lb, std::stringstream(""), d.info);
+    if (n == 0)
         return algorithm_end(d.sol, d.info);
-    }
 
     IloEnv env;
     IloModel model(env);
@@ -111,10 +109,21 @@ Solution gap::sopt_branchandcut_cplex(BranchAndCutCplexData d)
     cplex.use(loggingCallback(env, x, d.sol, d.lb, d.info));
 
     // Optimize
-    if (cplex.solve())
+    cplex.solve();
+
+    if (!cplex.isPrimalFeasible())
+        return algorithm_end(d.sol, d.info);
+
+    if (!d.sol.feasible() || d.sol.cost() > cplex.getObjValue() + 0.5) {
+        Solution sol_curr(d.ins);
         for (AltIdx k=0; k<o; ++k)
             if (cplex.getValue(x[k]) > 0.5)
-                d.sol.set(k);
+                sol_curr.set(k);
+        d.sol.update(sol_curr, d.lb, std::stringstream(""), d.info);
+    }
+
+    if (d.lb < cplex.getBestObjValue())
+        update_lb(d.lb, cplex.getBestObjValue(), d.sol, std::stringstream(""), d.info);
 
     env.end();
 

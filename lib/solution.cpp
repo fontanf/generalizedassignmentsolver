@@ -284,11 +284,13 @@ void gap::init_display(Info& info)
     VER(info, std::endl);
 }
 
-void gap::update(Cost& lb, Cost lb_new, Cost ub, const std::stringstream& s, Info& info)
+void gap::update_lb(Cost& lb, Cost lb_new, const Solution& sol, const std::stringstream& s, Info& info)
 {
     info.output->mutex_sol.lock();
 
     if (lb < lb_new) {
+        double ub = (!sol.feasible())? std::numeric_limits<double>::infinity(): sol.cost();
+
         info.output->sol_number++;
         lb = lb_new;
         double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
