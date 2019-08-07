@@ -295,7 +295,7 @@ void gap::update_lb(Cost& lb, Cost lb_new, const Solution& sol, const std::strin
         lb = lb_new;
         double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
         std::string sol_str = "Bound" + std::to_string(info.output->bnd_number);
-        PUT(info, sol_str + ".Cost", ub);
+        PUT(info, sol_str + ".Cost", lb);
         PUT(info, sol_str + ".Time", t);
 
         VER(info, std::left << std::setw(10) << t);
