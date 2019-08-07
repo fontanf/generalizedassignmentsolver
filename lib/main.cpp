@@ -17,7 +17,6 @@
 #include "gap/ub_vdns_simple/vdns_simple.hpp"
 #include "gap/ub_vnsbranching_cbc/vnsbranching_cbc.hpp"
 #include "gap/ub_vnsbranching_cplex/vnsbranching_cplex.hpp"
-#include "gap/ub_vlsn_mbp/vlsn_mbp.hpp"
 
 #include <boost/program_options.hpp>
 
@@ -365,11 +364,6 @@ int main(int argc, char *argv[])
 #if CPLEX_FOUND
     } else if (vstrings[0] == "vnsbranching_cplex") {
         sol = sol_vnsbranching_cplex(ins, gen, info);
-        is_ub = true;
-#endif
-#if CPLEX_FOUND
-    } else if (vstrings[0] == "vlsn_mbp") {
-        sol = sol_vlsn_mbp(ins, sol, gen, info);
         is_ub = true;
 #endif
 

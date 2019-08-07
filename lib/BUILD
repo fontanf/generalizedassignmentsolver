@@ -77,7 +77,6 @@ cc_binary(
                 "//ub_vdns_simple:vdns_simple",
                 "//ub_vnsbranching_cbc:vnsbranching_cbc",
                 "//ub_vnsbranching_cplex:vnsbranching_cplex",
-                "//ub_vlsn_mbp:vlsn_mbp",
         ],
         copts = [] +
             select({":dlib_build":        ["-DDLIB_FOUND"],        "//conditions:default": []}) +
