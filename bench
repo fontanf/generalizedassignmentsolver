@@ -31,7 +31,6 @@ t = ""
 if (len(sys.argv) > 2):
     t = sys.argv[2]
 
-os.system('bazel build -- //lib:main')
 suffix = algo.replace(" ", "_").replace("/", "_")
 if t == "":
     outdir = os.path.join("out", suffix)
@@ -41,25 +40,25 @@ else:
     time_limit = " -t " + str(t)
 os.makedirs(outdir, exist_ok=True)
 
+os.system('bazel build -- //lib:main')
 for i in data:
-    certfile = os.path.join(outdir, i + "_solution.txt")
-    inifile  = os.path.join(outdir, i + "_output.ini")
-    os.system("./bazel-bin/lib/main -u"
+    print(i + "...", end="", flush=True)
+    instancepath = os.path.join("data", i)
+    outputpath   = os.path.join(outdir, i + ".ini")
+    os.system(os.path.join(".", "bazel-bin", "lib", "main") + " -u"
         + " -a \"" + algo + "\""
+        + " -i \"" + instancepath + "\""
+        + " -o \"" + outputpath + "\""
         + time_limit
-        + " -i \"data/" + i + "\""
-        # + " -c \"" + certfile + "\""
-        + " -o \"" + inifile + "\"")
+        )
 
     ini = configparser.ConfigParser()
-    ini.read(inifile)
+    ini.read(outputpath)
     if ini.has_section("Solution"):
-        if ini["Solution"]["Feasible"] == "True":
-            print(ini["Solution"]["Cost"], end="")
-        else:
-            print(-1, end="")
-        print("," + ini["Solution"]["Time"])
+        c = ini["Solution"]["Cost"] if ini["Solution"]["Feasible"] == "True" else "-1"
+        t = ini["Solution"]["Time"]
     else:
-        print(ini["Bound"]["Cost"], end="")
-        print("," + ini["Bound"]["Time"])
+        c = ini["Bound"]["Cost"]
+        t = ini["Bound"]["Time"]
+    print(" " + c + " (" + str(round(float(t), 2)) + ")")
 

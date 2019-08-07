@@ -44,8 +44,10 @@ Solution gap::sopt_branchandcut_cplex(BranchAndCutCplexData d)
     AgentIdx m = d.ins.agent_number();
     AltIdx o = d.ins.alternative_number();
 
-    if (n == 0)
-        return d.sol;
+    if (n == 0) {
+        d.sol.update(Solution(d.ins), d.lb, std::stringstream(""), d.info);
+        return algorithm_end(d.sol, d.info);
+    }
 
     IloEnv env;
     IloModel model(env);
