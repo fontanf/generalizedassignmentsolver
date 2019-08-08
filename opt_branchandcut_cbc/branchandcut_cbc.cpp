@@ -37,6 +37,7 @@
  * https://github.com/coin-or/Cgl/wiki
  * https://github.com/coin-or/Cbc/blob/master/Cbc/examples/sample2.cpp
  * https://github.com/coin-or/Cbc/blob/master/Cbc/examples/sample3.cpp
+ * Callback https://github.com/coin-or/Cbc/blob/master/Cbc/examples/inc.cpp
  */
 
 using namespace gap;
@@ -120,6 +121,7 @@ public:
 private:
 
     BranchAndCutCbcData& d_;
+
 };
 
 CbcEventHandler::CbcAction SolHandler::event(CbcEvent whichEvent)
@@ -276,18 +278,20 @@ Solution gap::sopt_branchandcut_cbc(BranchAndCutCbcData d)
     // Do complete search
     model.branchAndBound();
 
-    // Get solution
-    const double *solution = model.solver()->getColSolution();
-    Solution sol_curr(d.ins);
-    for (AltIdx k=0; k<d.ins.alternative_number(); ++k)
-        if (solution[k] > 0.5)
-            d.sol.set(k);
-
-    if (compare(d.sol, sol_curr))
-        d.sol.update(sol_curr, d.lb, std::stringstream(""), d.info);
-
     if (d.lb < model.getBestPossibleObjValue())
         update_lb(d.lb, model.getBestPossibleObjValue(), d.sol, std::stringstream(""), d.info);
+
+    // Get solution
+    if (model.bestSolution() != NULL) {
+        const double *solution = model.solver()->getColSolution();
+        Solution sol_curr(d.ins);
+        for (AltIdx k=0; k<d.ins.alternative_number(); ++k)
+            if (solution[k] > 0.5)
+                d.sol.set(k);
+
+        if (compare(d.sol, sol_curr))
+            d.sol.update(sol_curr, d.lb, std::stringstream(""), d.info);
+    }
 
     return algorithm_end(d.sol, d.lb, d.info);
 }
