@@ -129,7 +129,16 @@ Solution gap::sopt_constraintprogramming_gecode(ConstraintProgrammingGecodeData 
 
     GapGecode model(d.ins);
     //Gist::bab(&model);
-    BAB<GapGecode> engine(&model);
+
+    Search::Options options;
+
+    // Time limit
+    if (d.info.timelimit != std::numeric_limits<double>::infinity()) {
+        Search::Stop* stoptime = Search::Stop::time(d.info.timelimit * 1000);
+        options.stop = stoptime;
+    }
+
+    BAB<GapGecode> engine(&model, options);
     GapGecode* sol = NULL;
     Solution sol_best(d.ins);
     while ((sol = engine.next())) {
@@ -139,7 +148,11 @@ Solution gap::sopt_constraintprogramming_gecode(ConstraintProgrammingGecodeData 
         delete sol;
     }
 
-    return algorithm_end(d.sol, d.info);
+    if (d.info.check_time())
+        if (d.lb < d.sol.cost())
+            update_lb(d.lb, d.sol.cost(), d.sol, std::stringstream(""), d.info);
+
+    return algorithm_end(d.sol, d.lb, d.info);
 }
 
 #endif

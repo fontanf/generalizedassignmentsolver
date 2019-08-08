@@ -8,9 +8,6 @@ using namespace gap;
 
 ILOSTLBEGIN
 
-typedef IloArray<IloNumVarArray> NumVarMatrix;
-typedef IloArray<IloNumArray>    NumMatrix;
-
 ILOMIPINFOCALLBACK2(loggingCallback,
                     BranchAndCutCplexData&, d,
                     IloNumVarArray, vars)
