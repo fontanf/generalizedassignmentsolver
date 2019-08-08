@@ -210,6 +210,7 @@ int main(int argc, char *argv[])
         sopt_constraintprogramming_cplex({
                 .ins = ins,
                 .sol = sol,
+                .lb = lb,
                 .info = info,
                 });
 #endif

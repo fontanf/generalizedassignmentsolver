@@ -59,17 +59,30 @@ Solution gap::sopt_constraintprogramming_cplex(ConstraintProgrammingCplexData d)
 
     IloCP cp(model);
 
+    // Display
+    cp.setOut(env.getNullStream());
+
+    // Time limit
     if (d.info.timelimit != std::numeric_limits<double>::infinity())
         cp.setParameter(IloCP::TimeLimit, d.info.timelimit);
 
     // Solve
-    if (cp.solve())
+    cp.startNewSearch();
+    while (cp.next()) {
+        Solution sol_curr(d.ins);
         for (ItemIdx j=0; j<n; ++j)
-            d.sol.set(j, cp.getValue(xj[j]));
+            sol_curr.set(j, cp.getValue(xj[j]));
+        if (compare(d.sol, sol_curr))
+            d.sol.update(sol_curr, d.lb, std::stringstream(""), d.info);
+    }
+
+    if (d.info.check_time())
+        if (d.lb < d.sol.cost())
+            update_lb(d.lb, d.sol.cost(), d.sol, std::stringstream(""), d.info);
 
     env.end();
 
-    return algorithm_end(d.sol, d.info);
+    return algorithm_end(d.sol, d.lb, d.info);
 }
 
 #endif

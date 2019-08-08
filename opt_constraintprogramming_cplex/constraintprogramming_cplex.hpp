@@ -12,6 +12,7 @@ struct ConstraintProgrammingCplexData
 {
     const Instance& ins;
     Solution& sol;
+    Cost& lb;
     Info info = Info();
 };
 
