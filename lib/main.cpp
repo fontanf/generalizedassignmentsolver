@@ -162,6 +162,7 @@ int main(int argc, char *argv[])
         sopt_branchandcut_cbc({
                 .ins = ins,
                 .sol = sol,
+                .lb = lb,
                 .stop_at_first_improvment = false,
                 .info = info,
                 });

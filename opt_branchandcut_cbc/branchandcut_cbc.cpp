@@ -97,11 +97,63 @@ MilpMatrix::MilpMatrix(const Instance& ins)
             elements.data(), cols.data(), start.data(), length.data());
 }
 
+class SolHandler: public CbcEventHandler
+{
+
+public:
+
+    virtual CbcAction event(CbcEvent whichEvent);
+    SolHandler(BranchAndCutCbcData& d): CbcEventHandler(), d_(d) { }
+    SolHandler(CbcModel *model, BranchAndCutCbcData& d): CbcEventHandler(model), d_(d) { }
+    virtual ~SolHandler() { }
+    SolHandler(const SolHandler &rhs): CbcEventHandler(rhs), d_(rhs.d_) { }
+    SolHandler &operator=(const SolHandler &rhs)
+    {
+        if (this != &rhs) {
+            CbcEventHandler::operator=(rhs);
+            //this->d_ = rhs.d_;
+        }
+        return *this;
+    }
+    virtual CbcEventHandler *clone() const { return new SolHandler(*this); }
+
+private:
+
+    BranchAndCutCbcData& d_;
+};
+
+CbcEventHandler::CbcAction SolHandler::event(CbcEvent whichEvent)
+{
+    if ((model_->specialOptions() & 2048) != 0) // not in subtree
+        return noAction;
+
+    if (d_.lb < model_->getBestPossibleObjValue() - 0.5)
+        update_lb(d_.lb, model_->getBestPossibleObjValue(), d_.sol, std::stringstream(""), d_.info);
+
+    if ((whichEvent != solution && whichEvent != heuristicSolution)) // no solution found
+        return noAction;
+
+    OsiSolverInterface *origSolver = model_->solver();
+    const OsiSolverInterface *pps = model_->postProcessedSolver(1);
+    const OsiSolverInterface *solver = pps? pps: origSolver;
+
+    if (!d_.sol.feasible() || (d_.sol.cost() > solver->getObjValue() + 0.5)) {
+        const double *solution = solver->getColSolution();
+        Solution sol_curr(d_.ins);
+        for (AltIdx k=0; k<d_.ins.alternative_number(); ++k)
+            if (solution[k] > 0.5)
+                sol_curr.set(k);
+        d_.sol.update(sol_curr, d_.lb, std::stringstream(""), d_.info);
+    }
+
+    return noAction;
+}
+
 Solution gap::sopt_branchandcut_cbc(BranchAndCutCbcData d)
 {
     VER(d.info, "*** branchandcut_cbc ***" << std::endl);
 
-    int loglevel = (d.info.output->verbose)? 1: 0;
+    init_display(d.info);
 
     ItemIdx n = d.ins.item_number();
     if (n == 0) {
@@ -116,8 +168,8 @@ Solution gap::sopt_branchandcut_cbc(BranchAndCutCbcData d)
     OsiCbcSolverInterface solver1;
 
     // Reduce printout
-    solver1.getModelPtr()->setLogLevel(loglevel);
-    solver1.messageHandler()->setLogLevel(loglevel);
+    solver1.getModelPtr()->setLogLevel(0);
+    solver1.messageHandler()->setLogLevel(0);
 
     // Load problem
     solver1.loadProblem(mat.matrix, mat.col_lower.data(), mat.col_upper.data(),
@@ -133,8 +185,12 @@ Solution gap::sopt_branchandcut_cbc(BranchAndCutCbcData d)
     // Pass data and solver to CbcModel
     CbcModel model(solver1);
 
+    // Callback
+    SolHandler sh(d);
+    model.passInEventHandler(&sh);
+
     // Reduce printout
-    model.setLogLevel(loglevel);
+    model.setLogLevel(0);
     model.solver()->setHintParam(OsiDoReducePrint, true, OsiHintTry);
 
     // Heuristics
@@ -220,17 +276,20 @@ Solution gap::sopt_branchandcut_cbc(BranchAndCutCbcData d)
     // Do complete search
     model.branchAndBound();
 
-    if (d.sol.feasible() && d.sol.cost() <= model.getObjValue() + 0.5)
-        return algorithm_end(d.sol, d.info);
-
     // Get solution
     const double *solution = model.solver()->getColSolution();
+    Solution sol_curr(d.ins);
     for (AltIdx k=0; k<d.ins.alternative_number(); ++k)
         if (solution[k] > 0.5)
             d.sol.set(k);
-    if (!d.sol.feasible())
-        d.sol = Solution(d.ins);
-    return algorithm_end(d.sol, d.info);
+
+    if (compare(d.sol, sol_curr))
+        d.sol.update(sol_curr, d.lb, std::stringstream(""), d.info);
+
+    if (d.lb < model.getBestPossibleObjValue())
+        update_lb(d.lb, model.getBestPossibleObjValue(), d.sol, std::stringstream(""), d.info);
+
+    return algorithm_end(d.sol, d.lb, d.info);
 }
 
 #endif

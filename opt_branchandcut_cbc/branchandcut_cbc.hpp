@@ -28,6 +28,7 @@ struct BranchAndCutCbcData
 {
     const Instance& ins;
     Solution& sol;
+    Cost& lb;
     bool stop_at_first_improvment = false;
     Info info = Info();
 };
