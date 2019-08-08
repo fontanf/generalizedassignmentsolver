@@ -11,26 +11,24 @@ ILOSTLBEGIN
 typedef IloArray<IloNumVarArray> NumVarMatrix;
 typedef IloArray<IloNumArray>    NumMatrix;
 
-ILOMIPINFOCALLBACK4(loggingCallback,
-                    IloNumVarArray, vars,
-                    Solution&,      sol,
-                    Cost&,          lb,
-                    Info&,          info)
+ILOMIPINFOCALLBACK2(loggingCallback,
+                    BranchAndCutCplexData&, d,
+                    IloNumVarArray, vars)
 {
-    if (lb < getBestObjValue() - 0.5)
-        update_lb(lb, getBestObjValue(), sol, std::stringstream(""), info);
+    if (d.lb < getBestObjValue() - 0.5)
+        update_lb(d.lb, getBestObjValue(), d.sol, std::stringstream(""), d.info);
 
     if (!hasIncumbent())
         return;
 
-    if (!sol.feasible() || sol.cost() > getIncumbentObjValue() + 0.5) {
-        Solution sol_curr(sol.instance());
+    if (!d.sol.feasible() || d.sol.cost() > getIncumbentObjValue() + 0.5) {
+        Solution sol_curr(d.ins);
         IloNumArray val(vars.getEnv());
         getIncumbentValues(val, vars);
-        for (AltIdx k=0; k<sol.instance().alternative_number(); ++k)
+        for (AltIdx k=0; k<d.ins.alternative_number(); ++k)
             if (val[k] > 0.5)
                 sol_curr.set(k);
-        sol.update(sol_curr, lb, std::stringstream(""), info);
+        d.sol.update(sol_curr, d.lb, std::stringstream(""), d.info);
     }
 }
 
@@ -106,7 +104,7 @@ Solution gap::sopt_branchandcut_cplex(BranchAndCutCplexData d)
         cplex.setParam(IloCplex::TiLim, d.info.timelimit);
 
     // Callback
-    cplex.use(loggingCallback(env, x, d.sol, d.lb, d.info));
+    cplex.use(loggingCallback(env, d, x));
 
     // Optimize
     cplex.solve();

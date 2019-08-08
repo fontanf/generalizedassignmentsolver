@@ -229,15 +229,6 @@ ItemIdx gap::distance(const Solution& sol1, const Solution& sol2)
     return dist;
 }
 
-bool gap::compare(const Solution& sol_best, const Solution& sol_curr)
-{
-    if (!sol_curr.feasible())
-        return false;
-    if (!sol_best.feasible())
-        return true;
-    return sol_best.cost() > sol_curr.cost();
-}
-
 void Solution::write_cert(std::string filepath)
 {
     if (filepath.empty())
@@ -270,6 +261,17 @@ std::ostream& gap::operator<<(std::ostream& os, const Solution& sol)
     return os;
 }
 
+/******************************************************************************/
+
+bool gap::compare(const Solution& sol_best, const Solution& sol_curr)
+{
+    if (!sol_curr.feasible())
+        return false;
+    if (!sol_best.feasible())
+        return true;
+    return sol_best.cost() > sol_curr.cost();
+}
+
 void gap::init_display(Info& info)
 {
     VER(info, std::left << std::setw(10) << "T (s)");
@@ -285,20 +287,22 @@ void Solution::update(const Solution& sol, Cost lb, const std::stringstream& s, 
 {
     info.output->mutex_sol.lock();
 
-    if (!feasible() || cost() > sol.cost()) {
-        info.output->sol_number++;
+    if (compare(*this, sol)) {
         *this = sol;
+
+        double gap = (lb == 0)? std::numeric_limits<double>::infinity():
+            (double)(10000 * (cost() - lb) / lb) / 100;
         double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
+
+        info.output->sol_number++;
         std::string sol_str = "Solution" + std::to_string(info.output->sol_number);
-        PUT(info, sol_str + ".Cost", sol.cost());
+        PUT(info, sol_str + ".Cost", cost());
         PUT(info, sol_str + ".Time", t);
 
         VER(info, std::left << std::setw(10) << t);
         VER(info, std::left << std::setw(12) << sol.cost());
         VER(info, std::left << std::setw(12) << lb);
-        VER(info, std::left << std::setw(10) << sol.cost() - lb);
-        double gap = (lb == 0)? std::numeric_limits<double>::infinity():
-            (double)(10000 * (sol.cost() - lb) / lb) / 100;
+        VER(info, std::left << std::setw(10) << cost() - lb);
         VER(info, std::left << std::setw(10) << gap);
         VER(info, s.str() << std::endl);
 
@@ -316,11 +320,14 @@ void gap::update_lb(Cost& lb, Cost lb_new, const Solution& sol, const std::strin
     info.output->mutex_sol.lock();
 
     if (lb < lb_new) {
+        lb = lb_new;
+
         double ub = (!sol.feasible())? std::numeric_limits<double>::infinity(): sol.cost();
+        double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
+        double gap = (lb == 0 || !sol.feasible())? std::numeric_limits<double>::infinity():
+            (double)(10000 * (sol.cost() - lb) / lb) / 100;
 
         info.output->bnd_number++;
-        lb = lb_new;
-        double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
         std::string sol_str = "Bound" + std::to_string(info.output->bnd_number);
         PUT(info, sol_str + ".Cost", lb);
         PUT(info, sol_str + ".Time", t);
@@ -329,34 +336,31 @@ void gap::update_lb(Cost& lb, Cost lb_new, const Solution& sol, const std::strin
         VER(info, std::left << std::setw(12) << ub);
         VER(info, std::left << std::setw(12) << lb);
         VER(info, std::left << std::setw(10) << ub - lb);
-        double gap = (lb == 0 || !sol.feasible())? std::numeric_limits<double>::infinity():
-            (double)(10000 * (sol.cost() - lb) / lb) / 100;
         VER(info, std::left << std::setw(10) << gap);
         VER(info, s.str() << std::endl);
-
-        if (!info.output->onlywriteattheend) {
-            info.write_ini();
-        }
     }
 
     info.output->mutex_sol.unlock();
 }
 
-Solution gap::algorithm_end(const Solution& sol, Cost& lb, Info& info)
+Solution gap::algorithm_end(const Solution& sol, Cost lb, Info& info)
 {
     double ub = (!sol.feasible())? std::numeric_limits<double>::infinity(): sol.cost();
     double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
     double gap = (lb == 0 || !sol.feasible())? std::numeric_limits<double>::infinity():
         (double)(10000 * (sol.cost() - lb) / lb) / 100;
+
     PUT(info, "Solution.Cost", ub);
     PUT(info, "Solution.Time", t);
     PUT(info, "Bound.Cost", lb);
+
     VER(info, "---" << std::endl);
     VER(info, "Cost: " << ub << std::endl);
     VER(info, "Bound: " << lb << std::endl);
     VER(info, "GAP: " << ub - lb << std::endl);
     VER(info, "GAP (%): " << gap << std::endl);
     VER(info, "Time (s): " << t << std::endl);
+
     return sol;
 }
 
@@ -364,21 +368,28 @@ Solution gap::algorithm_end(const Solution& sol, Info& info)
 {
     double ub = (!sol.feasible())? std::numeric_limits<double>::infinity(): sol.cost();
     double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
+
     PUT(info, "Solution.Cost", ub);
     PUT(info, "Solution.Time", t);
+
     VER(info, "---" << std::endl);
     VER(info, "Cost: " << ub << std::endl);
     VER(info, "Time (s): " << t << std::endl);
+
     return sol;
 }
 
-void gap::algorithm_end(Cost lb, Info& info)
+Cost gap::algorithm_end(Cost lb, Info& info)
 {
     double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
+
     PUT(info, "Bound.Cost", lb);
     PUT(info, "Bound.Time", t);
+
     VER(info, "---" << std::endl);
     VER(info, "Cost: " << lb << std::endl);
     VER(info, "Time (s): " << t << std::endl);
+
+    return lb;
 }
 
