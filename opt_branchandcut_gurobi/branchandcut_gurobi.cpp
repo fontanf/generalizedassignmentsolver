@@ -93,11 +93,9 @@ Solution gap::sopt_branchandcut_gurobi(BranchAndCutGurobiData d)
             for (AgentIdx i=0; i<m; ++i)
                 x[d.ins.alternative_index(j, i)].set(GRB_DoubleAttr_Start, (d.sol.agent(j) == i)? 1: 0);
 
-    // Precision
-    model.set(GRB_DoubleParam_MIPGap, 0);
-
-    // Display
-    model.getEnv().set(GRB_IntParam_OutputFlag, 0);
+    model.getEnv().set(GRB_IntParam_OutputFlag, 0); // Remove standard output
+    model.set(GRB_DoubleParam_MIPGap, 0); // Fix precision issue
+    model.set(GRB_DoubleParam_NodefileStart, 0.5); // Avoid running out of memory
 
     // Time limit
     if (d.info.timelimit != std::numeric_limits<double>::infinity())

@@ -74,6 +74,10 @@ Solution gap::sopt_branchandcut_cplex(BranchAndCutCplexData d)
 
     IloCplex cplex(model);
 
+    cplex.setOut(env.getNullStream()); // Remove standard output
+    cplex.setParam(IloCplex::Param::MIP::Tolerances::MIPGap, 0.0); // Fix precision issue
+    cplex.setParam(IloCplex::Param::MIP::Strategy::File, 2); // Avoid running out of memory
+
     // Initial solution
     if (d.sol.feasible()) {
         IloNumVarArray startVar(env);
@@ -89,12 +93,6 @@ Solution gap::sopt_branchandcut_cplex(BranchAndCutCplexData d)
         startVal.end();
         startVar.end();
     }
-
-    // Display
-    cplex.setOut(env.getNullStream());
-
-    // Precision
-    cplex.setParam(IloCplex::Param::MIP::Tolerances::MIPGap, 0.0);
 
     // Time limit
     if (d.info.timelimit != std::numeric_limits<double>::infinity())
