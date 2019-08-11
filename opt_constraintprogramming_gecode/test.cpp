@@ -8,7 +8,8 @@ using namespace gap;
 Cost sopt_constraintprogramming_gecode_test(Instance& ins)
 {
     Solution sol(ins);
-    ConstraintProgrammingGecodeData d {.ins = ins, .sol = sol};
+    Cost lb = 0;
+    ConstraintProgrammingGecodeData d {.ins = ins, .sol = sol, .lb = lb};
     return sopt_constraintprogramming_gecode(d).cost();
 }
 

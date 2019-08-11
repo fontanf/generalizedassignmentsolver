@@ -11,7 +11,8 @@ Cost sopt_branchandcut_cbc_test(Instance& ins)
         .set_verbose(true)
         ;
     Solution sol(ins);
-    BranchAndCutCbcData d {.ins = ins, .sol = sol, .stop_at_first_improvment = false, .info = info};
+    Cost lb = 0;
+    BranchAndCutCbcData d {.ins = ins, .sol = sol, .lb = lb, .stop_at_first_improvment = false, .info = info};
     return sopt_branchandcut_cbc(d).cost();
 }
 

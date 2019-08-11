@@ -8,7 +8,8 @@ using namespace gap;
 Cost opt_constraintprogramming_cplex_test(Instance& ins)
 {
     Solution sol(ins);
-    ConstraintProgrammingCplexData d {.ins = ins, .sol = sol};
+    Cost lb = 0;
+    ConstraintProgrammingCplexData d {.ins = ins, .sol = sol, .lb = lb};
     return sopt_constraintprogramming_cplex(d).cost();
 }
 
