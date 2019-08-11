@@ -59,6 +59,7 @@ cc_binary(
         srcs = ["main.cpp"],
         deps = [
                 "//lb_linrelax_clp:linrelax_clp",
+                "//lb_linrelax_gurobi:linrelax_gurobi",
                 "//lb_lagrelax_volume:lagrelax_volume",
                 "//lb_lagrelax_bundle:lagrelax_bundle",
                 "//lb_lagrelax_lbfgs:lagrelax_lbfgs",

@@ -26,8 +26,7 @@ GAP is interesting for several reasons:
 
 - Linear relaxation
   - solved with CLP `-a linrelax_clp` :heavy_check_mark:
-  - solved with CPLEX `-a linrelax_cplex` :x:
-  - solved with Gurobi `-a linrelax_gurobi` :x:
+  - solved with Gurobi `-a linrelax_gurobi` :heavy_check_mark:
 - Lagrangian relaxation of knapsack constraints
   - solved with volume method `-a lagrelax_knapsack_volume` :heavy_check_mark:
   - solved with L-BFGS method `-a lagrelax_knapsack_lbfgs` :heavy_check_mark:

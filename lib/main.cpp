@@ -1,4 +1,5 @@
 #include "gap/lb_linrelax_clp/linrelax_clp.hpp"
+#include "gap/lb_linrelax_gurobi/linrelax_gurobi.hpp"
 #include "gap/lb_lagrelax_volume/lagrelax_volume.hpp"
 #include "gap/lb_lagrelax_bundle/lagrelax_bundle.hpp"
 #include "gap/lb_lagrelax_lbfgs/lagrelax_lbfgs.hpp"
@@ -121,6 +122,11 @@ int main(int argc, char *argv[])
 #if COINOR_FOUND
     } else if (vstrings[0] == "linrelax_clp") {
         auto res = lb_linrelax_clp(ins, info);
+        lb = res.lb;
+#endif
+#if GUROBI_FOUND
+    } else if (vstrings[0] == "linrelax_gurobi") {
+        auto res = lb_linrelax_gurobi(ins, info);
         lb = res.lb;
 #endif
 #if COINOR_FOUND
@@ -341,7 +347,7 @@ int main(int argc, char *argv[])
     // Update best solution and bound
 
     if (vm.count("update")) {
-        if (!sol0.feasible() || sol0.cost() > sol.cost()) {
+        if (sol.feasible() && (!sol0.feasible() || sol0.cost() > sol.cost())) {
             std::cerr << "\033[32m" << "New upper bound found." << "\033[0m" << std::endl;
             sol.write_cert(instancefile + ".sol");
         }
