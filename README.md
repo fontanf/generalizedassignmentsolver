@@ -36,19 +36,11 @@ GAP is interesting for several reasons:
 
 ## Upper bounds
 
-Polynomial algorithms:
-- Basic greedy:
-  - `-a "greedy f cij"` :heavy_check_mark: `-a "greedy f wij"` :heavy_check_mark:
-  - `-a "greedy f cij*wij"` :heavy_check_mark: `-a "greedy f -pij/wij"` :heavy_check_mark: `-a "greedy f wij/ti"` :heavy_check_mark:
-- Greedy with regret measure:
-  - `-a "greedyregret f cij"` :heavy_check_mark: `-a "greedyregret f wij"` :heavy_check_mark:
-  - `-a "greedyregret f cij*wij"` :heavy_check_mark: `-a "greedyregret f -pij/wij"` :heavy_check_mark: `-a "greedyregret f wij/ti"` :heavy_check_mark:
-- MTHG, basic greedy (+ n shifts):
-  - `-a "mthg f cij"` :heavy_check_mark: `-a "mthg f wij"` :heavy_check_mark:
-  - `-a "mthg f cij*wij"` :heavy_check_mark: `-a "mthg f -pij/wij"` :heavy_check_mark: `-a "mthg f wij/ti"` :heavy_check_mark:
-- MTHG, greedy with regret measure (+ n shifts):
-  - `-a "mthgregret f cij"` :heavy_check_mark: `-a "mthgregret f wij"` :heavy_check_mark:
-  - `-a "mthgregret f cij*wij"` :heavy_check_mark: `-a "mthgregret f -pij/wij"` :heavy_check_mark: `-a "mthgregret f wij/ti"` :heavy_check_mark:
+Polynomial algorithms (options `f cij` `f wij` `f cij*wij` `f -pij/wij` `f wij/ti`):
+- Basic greedy `-a "greedy f wij` :heavy_check_mark:
+- Greedy with regret measure `-a "greedyregret f wij"` :heavy_check_mark:
+- MTHG, basic greedy (+ n shifts) `-a "mthg f wij"` :heavy_check_mark:
+- MTHG, greedy with regret measure (+ n shifts) `-a "mthgregret f wij"` :heavy_check_mark:
 
 Classical meta-heuristics based on shift-swap neighborhood and fixed penalty of capacity constraint violation:
 - Hill climbing, first improvment `-a lsfirst_shiftswap` :heavy_check_mark:
@@ -57,7 +49,7 @@ Classical meta-heuristics based on shift-swap neighborhood and fixed penalty of 
 - Simulated annealing `-a sa_shiftswap` :heavy_check_mark:
 - Path relinking `-a pr_shiftswap` :heavy_check_mark:
 
-Others:
+Others heuristics and meta-heuristics:
 - Random feasible solution `-a random` :heavy_check_mark:
 - Repair linear relaxation solution
   - with CLP `-a repairlinrelax_clp` :heavy_check_mark:
@@ -67,7 +59,6 @@ Others:
   - with CPLEX `-a vnsbranching_cplex` :heavy_check_mark:
 - Variable-depth neighborhood search (see "Handbook of Metaheuristics", 4.5.1 Variable-Depth Methods)
   - k-agents reallocation neighborhood `-a vdns_simple` :heavy_check_mark:
-- Path relinking with ejection chain neighborhood and adaptative control of penalty weights :x:
 - Local search with LocalSolver `-a localsolver` :heavy_check_mark:
 
 ## Exact algorithms
