@@ -59,7 +59,9 @@ Classical meta-heuristics based on shift-swap neighborhood and fixed penalty of 
 
 Others:
 - Random feasible solution `-a random` :heavy_check_mark:
-- Repair linear relaxation solution `-a repairlinrelax` :heavy_check_mark:
+- Repair linear relaxation solution
+  - with CLP `-a repairlinrelax_clp` :heavy_check_mark:
+  - with Gurobi `-a repairlinrelax_gurobi` :heavy_check_mark:
 - Variable neighborhood branching (see "Handbook of Metaheuristics", 3.6.1 Variable Neighborhood Branching)
   - with CBC `-a vnsbranching_cbc` :heavy_check_mark:
   - with CPLEX `-a vnsbranching_cplex` :heavy_check_mark:

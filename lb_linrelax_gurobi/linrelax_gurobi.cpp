@@ -54,7 +54,7 @@ LinRelaxGurobiOutput gap::lb_linrelax_gurobi(const Instance& ins, Info info)
     out.lb = std::ceil(model.get(GRB_DoubleAttr_ObjVal));
     out.x = std::vector<double>(o, 0);
     for (AltIdx k=0; k<ins.alternative_number(); ++k)
-        out.x[k] = x[k].get(GRB_DoubleAttr_X) > 0.5;
+        out.x[k] = x[k].get(GRB_DoubleAttr_X);
 
     algorithm_end(out.lb, info);
     return out;

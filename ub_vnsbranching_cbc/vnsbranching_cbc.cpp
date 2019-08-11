@@ -25,7 +25,7 @@ Solution gap::sol_vnsbranching_cbc(const Instance& ins, std::mt19937_64& gen, In
 
     LinRelaxClpOutput linrelax_output = lb_linrelax_clp(ins);
     Cost lb = linrelax_output.lb;
-    Solution sol_curr = sol_repairlinrelax(ins, linrelax_output);
+    Solution sol_curr = sol_repairlinrelax_clp(ins, linrelax_output);
     //Cost lb = 0;
     //Solution sol_curr = sol_random(ins, gen);
     sol_curr.update_penalties(std::vector<PCost>(m, 100));

@@ -52,9 +52,11 @@ bool move_gap(const Instance& ins, Solution& sol,
     Solution sol_tmp(ins_tmp);
     for (ItemIdx j=0; j<(ItemIdx)pos.size(); ++j)
         sol_tmp.set(j, sol_vec[j]);
+    Cost lb = 0;
     sopt_branchandcut_cbc({
             .ins = ins_tmp,
             .sol = sol_tmp,
+            .lb = lb,
             .stop_at_first_improvment = false,
             .info = Info().set_timelimit(info.timelimit - info.elapsed_time()),
             });
@@ -185,7 +187,7 @@ Solution gap::sol_vdns_simple(const Instance& ins, Solution& sol_best, std::mt19
 
     LinRelaxClpOutput linrelax_output = lb_linrelax_clp(ins);
     Cost lb = linrelax_output.lb;
-    Solution sol_curr = sol_repairlinrelax(ins, linrelax_output);
+    Solution sol_curr = sol_repairlinrelax_clp(ins, linrelax_output);
     //Solution sol_curr = sol_random(ins, gen);
 
     std::stringstream ss;

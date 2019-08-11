@@ -5,9 +5,12 @@ cc_library(
         deps = [
                 "//lib:cpp",
                 "//lb_linrelax_clp:linrelax_clp",
+                "//lb_linrelax_gurobi:linrelax_gurobi",
                 "//ub_random:random",
         ],
-        copts = select({"//lib:coinor_build": ["-DCOINOR_FOUND"], "//conditions:default": []}),
+        copts = [] +
+            select({"//lib:coinor_build": ["-DCOINOR_FOUND"], "//conditions:default": []}) +
+            select({"//lib:gurobi_build": ["-DGUROBI_FOUND"], "//conditions:default": []}),
         visibility = ["//visibility:public"],
         include_prefix = "gap/ub_repair/",
 )
