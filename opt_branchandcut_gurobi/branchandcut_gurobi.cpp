@@ -107,19 +107,34 @@ Solution gap::sopt_branchandcut_gurobi(BranchAndCutGurobiData d)
     // Optimize
     model.optimize();
 
-    if (model.get(GRB_DoubleAttr_ObjBound) == 0)
-        return algorithm_end(d.sol, d.lb, d.info);
-
-    if (!d.sol.feasible() || d.sol.cost() > model.get(GRB_DoubleAttr_ObjVal) + 0.5) {
-        Solution sol_curr(d.ins);
-        for (AltIdx k=0; k<o; ++k)
-            if (x[k].get(GRB_DoubleAttr_X) > 0.5)
-                sol_curr.set(k);
-        d.sol.update(sol_curr, d.lb, std::stringstream(""), d.info);
+    int optimstatus = model.get(GRB_IntAttr_Status);
+    if (optimstatus == GRB_INFEASIBLE) {
+        if (d.lb < d.ins.bound())
+            update_lb(d.lb, d.ins.bound(), d.sol, std::stringstream(""), d.info);
+    } else if (optimstatus == GRB_OPTIMAL) {
+        if (!d.sol.feasible() || d.sol.cost() > model.get(GRB_DoubleAttr_ObjVal) + 0.5) {
+            Solution sol_curr(d.ins);
+            for (AltIdx k=0; k<o; ++k)
+                if (x[k].get(GRB_DoubleAttr_X) > 0.5)
+                    sol_curr.set(k);
+            d.sol.update(sol_curr, d.lb, std::stringstream(""), d.info);
+        }
+        if (d.lb < d.sol.cost())
+            update_lb(d.lb, d.sol.cost(), d.sol, std::stringstream(""), d.info);
+    } else if (model.get(GRB_IntAttr_SolCount) > 0) {
+        if (!d.sol.feasible() || d.sol.cost() > model.get(GRB_DoubleAttr_ObjVal) + 0.5) {
+            Solution sol_curr(d.ins);
+            for (AltIdx k=0; k<o; ++k)
+                if (x[k].get(GRB_DoubleAttr_X) > 0.5)
+                    sol_curr.set(k);
+            d.sol.update(sol_curr, d.lb, std::stringstream(""), d.info);
+        }
+        if (d.lb < model.get(GRB_DoubleAttr_ObjBound) + 0.5)
+            update_lb(d.lb, model.get(GRB_DoubleAttr_ObjBound), d.sol, std::stringstream(""), d.info);
+    } else {
+        if (d.lb < model.get(GRB_DoubleAttr_ObjBound) + 0.5)
+            update_lb(d.lb, model.get(GRB_DoubleAttr_ObjBound), d.sol, std::stringstream(""), d.info);
     }
-
-    if (d.lb < model.get(GRB_DoubleAttr_ObjBound) - 0.5)
-        update_lb(d.lb, model.get(GRB_DoubleAttr_ObjBound), d.sol, std::stringstream(""), d.info);
 
     return algorithm_end(d.sol, d.lb, d.info);
 }

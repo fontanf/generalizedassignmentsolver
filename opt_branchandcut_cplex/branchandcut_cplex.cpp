@@ -106,19 +106,33 @@ Solution gap::sopt_branchandcut_cplex(BranchAndCutCplexData d)
     // Optimize
     cplex.solve();
 
-    if (!cplex.isPrimalFeasible())
-        return algorithm_end(d.sol, d.lb, d.info);
-
-    if (!d.sol.feasible() || d.sol.cost() > cplex.getObjValue() + 0.5) {
-        Solution sol_curr(d.ins);
-        for (AltIdx k=0; k<o; ++k)
-            if (cplex.getValue(x[k]) > 0.5)
-                sol_curr.set(k);
-        d.sol.update(sol_curr, d.lb, std::stringstream(""), d.info);
+    if (cplex.getStatus() == IloAlgorithm::Infeasible) {
+        if (d.lb < d.ins.bound())
+            update_lb(d.lb, d.ins.bound(), d.sol, std::stringstream(""), d.info);
+    } else if (cplex.getStatus() == IloAlgorithm::Optimal) {
+        if (!d.sol.feasible() || d.sol.cost() > cplex.getObjValue() + 0.5) {
+            Solution sol_curr(d.ins);
+            for (AltIdx k=0; k<o; ++k)
+                if (cplex.getValue(x[k]) > 0.5)
+                    sol_curr.set(k);
+            d.sol.update(sol_curr, d.lb, std::stringstream(""), d.info);
+        }
+        if (d.lb < d.sol.cost())
+            update_lb(d.lb, d.sol.cost(), d.sol, std::stringstream(""), d.info);
+    } else if (cplex.isPrimalFeasible()) {
+        if (!d.sol.feasible() || d.sol.cost() > cplex.getObjValue() + 0.5) {
+            Solution sol_curr(d.ins);
+            for (AltIdx k=0; k<o; ++k)
+                if (cplex.getValue(x[k]) > 0.5)
+                    sol_curr.set(k);
+            d.sol.update(sol_curr, d.lb, std::stringstream(""), d.info);
+        }
+        if (d.lb < cplex.getBestObjValue() + 0.5)
+            update_lb(d.lb, cplex.getBestObjValue(), d.sol, std::stringstream(""), d.info);
+    } else {
+        if (d.lb < cplex.getBestObjValue() + 0.5)
+            update_lb(d.lb, cplex.getBestObjValue(), d.sol, std::stringstream(""), d.info);
     }
-
-    if (d.lb < cplex.getBestObjValue())
-        update_lb(d.lb, cplex.getBestObjValue(), d.sol, std::stringstream(""), d.info);
 
     env.end();
 
