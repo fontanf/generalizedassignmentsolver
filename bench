@@ -45,6 +45,10 @@ for i in data:
     print(i + "...", end="", flush=True)
     instancepath = os.path.join("data", i)
     outputpath   = os.path.join(outdir, i + ".ini")
+    if os.path.exists(outputpath):
+        print(" already done. ")
+        continue
+
     os.system(os.path.join(".", "bazel-bin", "lib", "main") + " -u"
         + " -a \"" + algo + "\""
         + " -i \"" + instancepath + "\""
@@ -55,7 +59,7 @@ for i in data:
     ini = configparser.ConfigParser()
     ini.read(outputpath)
     if ini.has_section("Solution"):
-        c = ini["Solution"]["Cost"] if ini["Solution"]["Feasible"] == "True" else "-1"
+        c = ini["Solution"]["Cost"]
         t = ini["Solution"]["Time"]
     else:
         c = ini["Bound"]["Cost"]

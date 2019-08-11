@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
         .set_timelimit(time_limit)
         .set_certfile(certfile)
         .set_outputfile(outputfile)
-        .set_onlywriteattheend(false)
+        .set_onlywriteattheend(true)
         .set_logfile(logfile)
         .set_log2stderr(vm.count("log2stderr"))
         .set_loglevelmax(loglevelmax)
@@ -341,7 +341,7 @@ int main(int argc, char *argv[])
     // Update best solution and bound
 
     if (vm.count("update")) {
-        if (!sol0.feasible() || sol0.cost() > sol0.cost()) {
+        if (!sol0.feasible() || sol0.cost() > sol.cost()) {
             std::cerr << "\033[32m" << "New upper bound found." << "\033[0m" << std::endl;
             sol.write_cert(instancefile + ".sol");
         }

@@ -353,6 +353,7 @@ Solution gap::algorithm_end(const Solution& sol, Cost lb, Info& info)
     PUT(info, "Solution.Cost", ub);
     PUT(info, "Solution.Time", t);
     PUT(info, "Bound.Cost", lb);
+    PUT(info, "Bound.Time", t);
 
     VER(info, "---" << std::endl);
     VER(info, "Cost: " << ub << std::endl);

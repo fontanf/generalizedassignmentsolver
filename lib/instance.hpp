@@ -96,6 +96,7 @@ public:
     Cost check(std::string filepath);
     const Solution* optimal_solution() const { return sol_opt_.get(); }
     Cost optimum() const;
+    Cost bound() const { return c_tot_ + 1; }
 
     void plot(std::string filename);
     void write(std::string filename);
@@ -109,6 +110,7 @@ private:
     std::vector<Alternative> alternatives_;
     std::vector<Weight> t_;
     Cost c_max_ = -1;
+    Cost c_tot_ = 0;
 
     std::unique_ptr<Solution> sol_opt_;
 
