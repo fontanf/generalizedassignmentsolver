@@ -22,6 +22,8 @@ GAP is interesting for several reasons:
 - it is also structured for decomposition techniques (Lagrangian relaxations, Column generation...)
 - it is well-studied, i.e. researchers have proposed many and various algorithms to solve it (branch-and-bound, cutting plane, large neighbourhood search, path relinking...)
 
+The first goal of this repository is for me to have reference implementations for classical algorithms and solvers. I'll also try to implement state of the art algorithms and provide free implementations.
+
 ## Lower bounds
 
 - Linear relaxation
@@ -51,9 +53,7 @@ Classical meta-heuristics based on shift-swap neighborhood and fixed penalty of 
 
 Others heuristics and meta-heuristics:
 - Random feasible solution `-a random` :heavy_check_mark:
-- Repair linear relaxation solution
-  - with CLP `-a repairlinrelax_clp` :heavy_check_mark:
-  - with Gurobi `-a repairlinrelax_gurobi` :heavy_check_mark:
+- Repair linear relaxation solution `-a repairlinrelax_clp` :heavy_check_mark:
 - Variable neighborhood branching (see "Handbook of Metaheuristics", 3.6.1 Variable Neighborhood Branching)
   - with CBC `-a vnsbranching_cbc` :heavy_check_mark:
   - with CPLEX `-a vnsbranching_cplex` :heavy_check_mark:
@@ -73,11 +73,17 @@ Others heuristics and meta-heuristics:
 
 ## Results
 
+### Linear relaxation gap
+
 The largest gap between the lower bound from the linear relaxation and the best known upper bound is 1.93%.
+
+### Lagrangian relaxation implementation
 
 The bound from the lagrangian relaxation of knapsack constraints is theoritically equal to the bound from the linear relaxation. The optimal bounds are found by the L-BGFS algorithm from DLib; however, the volume method stays rather far from it. 
 
 The same happens for the bound obtained by solving the lagrangian relaxation of assignment constraints; the Volume method give poor results while the L-BFGS algorithm returns the best known ones found in "An exact method with variable fixing for solving the generalized assignment problem" (Posta et al., 2011).
+
+### Others
 
 `vdns_simple` does not compete with state of the art meta-heuristics like the ones presented in "A path relinking approach with ejection chains for the generalized assignment problem" (Yagiura et al., 2006) or "Variable-fixing then subgradient optimization guided very large scale neighborhood search for the generalized assignment problem" (Haddadi, 2018) in terms of solution quality on long runs. However:
 - on short runs (2 minutes, Processor Intel® Core™ i5-8500 CPU @ 3.00GHz × 6), it provides solutions of good quality (less than 1% gap from optimal for all instances of the literature, and less than 0.5% for instances with more than 900 items)
@@ -101,8 +107,8 @@ Compile with additional libraries:
 ```
 bazel build \
     --define coinor=true \
-    --define ortools=true \
     --define cplex=true \
+    --define gurobi=true \
     --define gecode=true \
     --define dlib=true \
     --define localsolver=true \
@@ -125,6 +131,16 @@ bazel build -- //lib:checker
 ./bazel-bin/lib/checker "instancefile" "solutionfile"
 ```
 
+Display upper and lower bounds for each instance:
+```
+./show_bounds
+```
+
+Run benchmarks (results stored in `out/algorithm/`)
+```
+./bench "mthg f wij"             # no time limit
+./bench "branchandcut_cbc" 7200  # 2h time limit
+```
 
 ## Optional dependencies
 

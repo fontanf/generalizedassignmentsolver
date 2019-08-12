@@ -129,32 +129,3 @@ Solution gap::sol_repairlinrelax_clp(const Instance& ins, const LinRelaxClpOutpu
 
 #endif
 
-#if GUROBI_FOUND
-
-Solution gap::sol_repairlinrelax_gurobi(const Instance& ins, const LinRelaxGurobiOutput& linrelax_output, Info info)
-{
-    AgentIdx m = ins.agent_number();
-    ItemIdx n = ins.item_number();
-
-    // Initilize current solution
-    Solution sol_curr(ins);
-    for (ItemIdx j=0; j<n; ++j) {
-        AgentIdx i_best = -1;
-        Cost c_best = -1;
-        for (AgentIdx i=0; i<m; ++i) {
-            double x = linrelax_output.x.at(ins.alternative_index(j, i));
-            Cost c = ins.alternative(j, i).c;
-            if (x > 0 && (c_best == -1 || c_best > c)) {
-                i_best = i;
-                c_best = c;
-            }
-        }
-        sol_curr.set(j, i_best);
-    }
-
-    repair(sol_curr);
-    return algorithm_end(sol_curr, info);
-}
-
-#endif
-

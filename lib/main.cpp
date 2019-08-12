@@ -264,11 +264,6 @@ int main(int argc, char *argv[])
         LinRelaxClpOutput linrelax_output = lb_linrelax_clp(ins);
         sol = sol_repairlinrelax_clp(ins, linrelax_output, info);
 #endif
-#if GUROBI_FOUND
-    } else if (vstrings[0] == "repairlinrelax_gurobi") {
-        LinRelaxGurobiOutput linrelax_output = lb_linrelax_gurobi(ins);
-        sol = sol_repairlinrelax_gurobi(ins, linrelax_output, info);
-#endif
     } else if (vstrings[0] == "lsfirst_shift") {
         sol = sol_lsfirst_shift(LSFirstShiftSwapData{
                 .ins = ins,
