@@ -144,13 +144,15 @@ Solution gap::sopt_constraintprogramming_gecode(ConstraintProgrammingGecodeData 
     while ((sol = engine.next())) {
         for (ItemIdx j=0; j<d.ins.item_number(); j++)
             d.sol.set(j, sol->agent(j));
-        sol_best.update(d.sol, 0, std::stringstream(""), d.info);
+        sol_best.update(d.sol, d.lb, std::stringstream(""), d.info);
         delete sol;
     }
 
-    if (d.info.check_time())
-        if (d.lb < d.sol.cost())
-            update_lb(d.lb, d.sol.cost(), d.sol, std::stringstream(""), d.info);
+    if (d.info.check_time()) {
+        Cost lb = (d.sol.feasible())? d.sol.cost(): d.ins.bound();
+        if (d.lb < lb)
+            update_lb(d.lb, lb, d.sol, std::stringstream(""), d.info);
+    }
 
     return algorithm_end(d.sol, d.lb, d.info);
 }

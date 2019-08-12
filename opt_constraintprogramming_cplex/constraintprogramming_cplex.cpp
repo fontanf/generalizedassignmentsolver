@@ -76,9 +76,11 @@ Solution gap::sopt_constraintprogramming_cplex(ConstraintProgrammingCplexData d)
             d.sol.update(sol_curr, d.lb, std::stringstream(""), d.info);
     }
 
-    if (d.info.check_time())
-        if (d.lb < d.sol.cost())
-            update_lb(d.lb, d.sol.cost(), d.sol, std::stringstream(""), d.info);
+    if (d.info.check_time()) {
+        Cost lb = (d.sol.feasible())? d.sol.cost(): d.ins.bound();
+        if (d.lb < lb)
+            update_lb(d.lb, lb, d.sol, std::stringstream(""), d.info);
+    }
 
     env.end();
 
