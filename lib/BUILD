@@ -54,9 +54,10 @@ cc_library(
         include_prefix = "gap/lib/",
 )
 
-cc_binary(
-        name = "main",
-        srcs = ["main.cpp"],
+cc_library(
+        name = "algorithms",
+        hdrs = ["algorithms.hpp"],
+        srcs = ["algorithms.cpp"],
         deps = [
                 "//lb_linrelax_clp:linrelax_clp",
                 "//lb_linrelax_gurobi:linrelax_gurobi",
@@ -86,6 +87,14 @@ cc_binary(
             select({":gurobi_build":      ["-DGUROBI_FOUND"],      "//conditions:default": []}) +
             select({":gecode_build":      ["-DGECODE_FOUND"],      "//conditions:default": []}) +
             select({":localsolver_build": ["-DLOCALSOLVER_FOUND"], "//conditions:default": []}),
+        visibility = ["//visibility:public"],
+        include_prefix = "gap/lib/",
+)
+
+cc_binary(
+        name = "main",
+        srcs = ["main.cpp"],
+        deps = [":algorithms"],
         linkopts = ["-lboost_program_options"] +
             select({"//lib:gurobi_build": [
                         "-lgurobi_c++",
