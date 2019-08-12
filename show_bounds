@@ -27,7 +27,7 @@ data = [
         "e201600", "e401600", "e801600",
 ]
 
-os.system('bazel build -- //lib:main')
+os.system('bazel build -- //lib:checker')
 for i in data:
     print('{:12s}'.format(i), end="", flush=True)
     instancepath = os.path.join("data", i)

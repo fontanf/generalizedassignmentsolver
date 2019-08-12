@@ -22,23 +22,24 @@ int main(int argc, char *argv[])
         f_bound >> lb;
     f_bound.close();
 
-    if (!sol.feasible()) {
-        std::cout << "INFEASIBLE" << std::endl;
-    } else {
-        std::cout << std::left << std::setw(12) << "UB";
-        std::cout << std::left << std::setw(12) << "LB";
-        std::cout << std::left << std::setw(10) << "GAP";
-        std::cout << std::left << std::setw(10) << "GAP (%)";
-        std::cout << std::endl;
+    double ub = (!sol.feasible())? std::numeric_limits<double>::infinity(): sol.cost();
+    double gap = (lb == 0 || !sol.feasible())? std::numeric_limits<double>::infinity():
+        (double)(10000 * (sol.cost() - lb) / lb) / 100;
 
-        double gap = (lb == 0)? std::numeric_limits<double>::infinity():
-            (double)(10000 * (sol.cost() - lb) / lb) / 100;
-        std::cout << std::left << std::setw(12) << sol.cost();
-        std::cout << std::left << std::setw(12) << lb;
-        std::cout << std::left << std::setw(10) << sol.cost() - lb;
-        std::cout << std::left << std::setw(10) << gap;
-        std::cout << std::endl;
-    }
+    if (ub == lb)
+        std::cout << "\033[32m";
+    if (lb == ins.bound())
+        std::cout << "\033[31m";
+
+    std::cout << std::left << std::setw(3) << "UB";
+    std::cout << std::right << std::setw(8) << ub;
+    std::cout << std::left << std::setw(6) << " | LB";
+    std::cout << std::right << std::setw(8) << lb;
+    std::cout << std::left << std::setw(7) << " | GAP";
+    std::cout << std::right << std::setw(6) << ub - lb;
+    std::cout << std::left << std::setw(11) << " | GAP (%)";
+    std::cout << std::right << std::setw(6) << gap;
+    std::cout << "\033[0m" << std::endl;
     return 0;
 }
 
