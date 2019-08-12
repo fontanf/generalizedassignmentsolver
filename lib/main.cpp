@@ -354,7 +354,7 @@ int main(int argc, char *argv[])
         if (lb0 < lb) {
             std::cerr << "\033[32m" << "New lower bound found." << "\033[0m" << std::endl;
             std::ofstream f_opt(instancefile + ".bound");
-            f_opt << lb;
+            f_opt << lb << std::endl;
         }
     }
 

@@ -91,6 +91,7 @@ cc_binary(
                         "-lgurobi_c++",
                         "-lgurobi81",
                 ], "//conditions:default": [ ], }),
+        data = ["//data:data"],
 )
 
 cc_binary(
