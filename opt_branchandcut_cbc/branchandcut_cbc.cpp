@@ -287,7 +287,7 @@ Solution gap::sopt_branchandcut_cbc(BranchAndCutCbcData d)
             Solution sol_curr(d.ins);
             for (AltIdx k=0; k<d.ins.alternative_number(); ++k)
                 if (solution[k] > 0.5)
-                    d.sol.set(k);
+                    sol_curr.set(k);
             d.sol.update(sol_curr, d.lb, std::stringstream(""), d.info);
         }
         if (d.lb < d.sol.cost())
@@ -298,7 +298,7 @@ Solution gap::sopt_branchandcut_cbc(BranchAndCutCbcData d)
             Solution sol_curr(d.ins);
             for (AltIdx k=0; k<d.ins.alternative_number(); ++k)
                 if (solution[k] > 0.5)
-                    d.sol.set(k);
+                    sol_curr.set(k);
             d.sol.update(sol_curr, d.lb, std::stringstream(""), d.info);
         }
         if (d.lb < model.getBestPossibleObjValue() + 0.5)
