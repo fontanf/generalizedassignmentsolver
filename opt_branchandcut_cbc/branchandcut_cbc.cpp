@@ -42,6 +42,59 @@
 
 using namespace gap;
 
+class SolHandler: public CbcEventHandler
+{
+
+public:
+
+    virtual CbcAction event(CbcEvent whichEvent);
+    SolHandler(BranchAndCutCbcData& d): CbcEventHandler(), d_(d) { }
+    SolHandler(CbcModel *model, BranchAndCutCbcData& d): CbcEventHandler(model), d_(d) { }
+    virtual ~SolHandler() { }
+    SolHandler(const SolHandler &rhs): CbcEventHandler(rhs), d_(rhs.d_) { }
+    SolHandler &operator=(const SolHandler &rhs)
+    {
+        if (this != &rhs) {
+            CbcEventHandler::operator=(rhs);
+            //this->d_ = rhs.d_;
+        }
+        return *this;
+    }
+    virtual CbcEventHandler *clone() const { return new SolHandler(*this); }
+
+private:
+
+    BranchAndCutCbcData& d_;
+
+};
+
+CbcEventHandler::CbcAction SolHandler::event(CbcEvent whichEvent)
+{
+    if ((model_->specialOptions() & 2048) != 0) // not in subtree
+        return noAction;
+
+    if (d_.lb < model_->getBestPossibleObjValue() - 0.5)
+        update_lb(d_.lb, model_->getBestPossibleObjValue(), d_.sol, std::stringstream(""), d_.info);
+
+    if ((whichEvent != solution && whichEvent != heuristicSolution)) // no solution found
+        return noAction;
+
+    OsiSolverInterface *origSolver = model_->solver();
+    const OsiSolverInterface *pps = model_->postProcessedSolver(1);
+    const OsiSolverInterface *solver = pps? pps: origSolver;
+
+    if (!d_.sol.feasible() || (d_.sol.cost() > solver->getObjValue() + 0.5)) {
+        const double *solution = solver->getColSolution();
+        Solution sol_curr(d_.ins);
+        for (AltIdx k=0; k<d_.ins.alternative_number(); ++k)
+            if (solution[k] > 0.5)
+                sol_curr.set(k);
+        d_.sol.update(sol_curr, d_.lb, std::stringstream(""), d_.info);
+    }
+
+    return noAction;
+}
+
 MilpMatrix::MilpMatrix(const Instance& ins)
 {
     ItemIdx  n = ins.item_number();
@@ -96,59 +149,6 @@ MilpMatrix::MilpMatrix(const Instance& ins)
     start.push_back(elements.size());
     matrix = CoinPackedMatrix(false, col_number, row_number, elements.size(),
             elements.data(), cols.data(), start.data(), length.data());
-}
-
-class SolHandler: public CbcEventHandler
-{
-
-public:
-
-    virtual CbcAction event(CbcEvent whichEvent);
-    SolHandler(BranchAndCutCbcData& d): CbcEventHandler(), d_(d) { }
-    SolHandler(CbcModel *model, BranchAndCutCbcData& d): CbcEventHandler(model), d_(d) { }
-    virtual ~SolHandler() { }
-    SolHandler(const SolHandler &rhs): CbcEventHandler(rhs), d_(rhs.d_) { }
-    SolHandler &operator=(const SolHandler &rhs)
-    {
-        if (this != &rhs) {
-            CbcEventHandler::operator=(rhs);
-            //this->d_ = rhs.d_;
-        }
-        return *this;
-    }
-    virtual CbcEventHandler *clone() const { return new SolHandler(*this); }
-
-private:
-
-    BranchAndCutCbcData& d_;
-
-};
-
-CbcEventHandler::CbcAction SolHandler::event(CbcEvent whichEvent)
-{
-    if ((model_->specialOptions() & 2048) != 0) // not in subtree
-        return noAction;
-
-    if (d_.lb < model_->getBestPossibleObjValue() - 0.5)
-        update_lb(d_.lb, model_->getBestPossibleObjValue(), d_.sol, std::stringstream(""), d_.info);
-
-    if ((whichEvent != solution && whichEvent != heuristicSolution)) // no solution found
-        return noAction;
-
-    OsiSolverInterface *origSolver = model_->solver();
-    const OsiSolverInterface *pps = model_->postProcessedSolver(1);
-    const OsiSolverInterface *solver = pps? pps: origSolver;
-
-    if (!d_.sol.feasible() || (d_.sol.cost() > solver->getObjValue() + 0.5)) {
-        const double *solution = solver->getColSolution();
-        Solution sol_curr(d_.ins);
-        for (AltIdx k=0; k<d_.ins.alternative_number(); ++k)
-            if (solution[k] > 0.5)
-                sol_curr.set(k);
-        d_.sol.update(sol_curr, d_.lb, std::stringstream(""), d_.info);
-    }
-
-    return noAction;
 }
 
 Solution gap::sopt_branchandcut_cbc(BranchAndCutCbcData d)
@@ -278,19 +278,34 @@ Solution gap::sopt_branchandcut_cbc(BranchAndCutCbcData d)
     // Do complete search
     model.branchAndBound();
 
-    if (d.lb < model.getBestPossibleObjValue())
-        update_lb(d.lb, model.getBestPossibleObjValue(), d.sol, std::stringstream(""), d.info);
-
-    // Get solution
-    if (model.bestSolution() != NULL) {
-        const double *solution = model.solver()->getColSolution();
-        Solution sol_curr(d.ins);
-        for (AltIdx k=0; k<d.ins.alternative_number(); ++k)
-            if (solution[k] > 0.5)
-                d.sol.set(k);
-
-        if (compare(d.sol, sol_curr))
+    if (model.isProvenInfeasible()) {
+        if (d.lb < d.ins.bound())
+            update_lb(d.lb, d.ins.bound(), d.sol, std::stringstream(""), d.info);
+    } else if (model.isProvenOptimal()) {
+        if (!d.sol.feasible() || d.sol.cost() > model.getObjValue() + 0.5) {
+            const double *solution = model.solver()->getColSolution();
+            Solution sol_curr(d.ins);
+            for (AltIdx k=0; k<d.ins.alternative_number(); ++k)
+                if (solution[k] > 0.5)
+                    d.sol.set(k);
             d.sol.update(sol_curr, d.lb, std::stringstream(""), d.info);
+        }
+        if (d.lb < d.sol.cost())
+            update_lb(d.lb, d.sol.cost(), d.sol, std::stringstream(""), d.info);
+    } else if (model.bestSolution() != NULL) {
+        if (!d.sol.feasible() || d.sol.cost() > model.getObjValue() + 0.5) {
+            const double *solution = model.solver()->getColSolution();
+            Solution sol_curr(d.ins);
+            for (AltIdx k=0; k<d.ins.alternative_number(); ++k)
+                if (solution[k] > 0.5)
+                    d.sol.set(k);
+            d.sol.update(sol_curr, d.lb, std::stringstream(""), d.info);
+        }
+        if (d.lb < model.getBestPossibleObjValue() + 0.5)
+            update_lb(d.lb, model.getBestPossibleObjValue(), d.sol, std::stringstream(""), d.info);
+    } else {
+        if (d.lb < model.getBestPossibleObjValue() + 0.5)
+            update_lb(d.lb, model.getBestPossibleObjValue(), d.sol, std::stringstream(""), d.info);
     }
 
     return algorithm_end(d.sol, d.lb, d.info);
