@@ -58,6 +58,8 @@ int main(int argc, char *argv[])
             info.write_ini(outputfile);
 
             double ub = (!sol.feasible())? std::numeric_limits<double>::infinity(): sol.cost();
+            if (ub == lb)
+                std::cout << "\033[32m";
             double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
             std::cout << std::left << std::setw(6) << " | UB";
             std::cout << std::right << std::setw(8) << ub;
@@ -65,7 +67,7 @@ int main(int argc, char *argv[])
             std::cout << std::right << std::setw(8) << lb;
             std::cout << std::left << std::setw(8) << " | T (s)";
             std::cout << std::right << std::setw(10) << t;
-            std::cout << std::endl;
+            std::cout << "\033[0m" << std::endl;
         }
     }
 

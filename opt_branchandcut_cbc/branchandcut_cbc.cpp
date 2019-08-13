@@ -181,9 +181,6 @@ Solution gap::sopt_branchandcut_cbc(BranchAndCutCbcData d)
     for (AltIdx k=0; k<d.ins.alternative_number(); ++k)
         solver1.setInteger(k);
 
-    // Solve
-    solver1.initialSolve();
-
     // Pass data and solver to CbcModel
     CbcModel model(solver1);
 

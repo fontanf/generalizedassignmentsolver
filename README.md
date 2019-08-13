@@ -127,7 +127,7 @@ bazel test --compilation_mode=dbg -- //...
 
 Checker:
 ```
-bazel run -- //lib:checker                # show best bounds for each instances
+bazel run -- //lib:checker                # show best bounds for all instances
 bazel run -- //lib:checker "data/a05100"  # show best bounds for one instance
 bazel build -- //lib:checker              # check another solution file
 ./bazel-bin/lib/checker "instancefile" "solutionfile"
