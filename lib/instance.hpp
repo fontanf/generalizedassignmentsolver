@@ -63,6 +63,7 @@ public:
     Instance(std::string filename, std::string format = "gap_beasley");
 
     Instance(AgentIdx m, ItemIdx n=0);
+    void set_name(std::string name) { name_ = name; }
     void set_capacity(AgentIdx i, Weight t) { t_[i] = t; }
     void set_capacity(const std::vector<Weight>& t);
     ItemIdx add_item();
@@ -71,6 +72,7 @@ public:
     void set_optimal_solution(Solution& sol);
 
     Instance(const Instance& ins);
+    Instance& operator=(const Instance& ins);
 
     ~Instance();
 
@@ -78,6 +80,7 @@ public:
      * Getters
      */
 
+    std::string name() const { return name_; }
     const Item& item(ItemPos j) const { return items_[j]; }
     AltIdx alternative_index(ItemIdx j, AgentIdx i) const { return items_[j].alt[i]; } 
     const Alternative& alternative(AltPos k) const { return alternatives_[k]; }
@@ -106,6 +109,7 @@ private:
     void read_beasley(std::ifstream& file);
     void read_standard(std::ifstream& file);
 
+    std::string name_;
     std::vector<Item> items_;
     std::vector<Alternative> alternatives_;
     std::vector<Weight> t_;

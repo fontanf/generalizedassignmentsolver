@@ -11,6 +11,7 @@ cc_library(
                 "instance.hpp",
                 "solution.hpp",
                 "desirability.hpp",
+                "datasets.hpp",
         ],
         srcs = [
                 "instance.cpp",
@@ -107,6 +108,7 @@ cc_binary(
         name = "checker",
         srcs = ["checker.cpp"],
         deps = [":cpp"],
+        data = ["//data:data"],
 )
 
 cc_binary(

@@ -34,6 +34,11 @@ git_repository(
 git_repository(
     name = "benchtools",
     remote = "https://github.com/fontanf/benchtools.git",
-    commit = "8ecca733fa9a0f61461a6d2d6487dc8ee7cba39a",
+    commit = "6929755ae8a7a09edfebd0c31d950a51f4cafcee",
+)
+
+local_repository(
+    name = "benchtools_",
+    path = "/home/florian/Dev/benchtools/",
 )
 

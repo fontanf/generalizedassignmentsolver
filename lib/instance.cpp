@@ -58,7 +58,7 @@ void Instance::set_alternative(ItemIdx j, AgentIdx i, Weight w, Cost v)
     c_tot_ += v;
 }
 
-Instance::Instance(std::string filepath, std::string format)
+Instance::Instance(std::string filepath, std::string format): name_(filepath)
 {
     std::ifstream file(filepath);
     if (!file.good()) {
@@ -125,12 +125,29 @@ void Instance::read_standard(std::ifstream& file)
 
 Instance::~Instance() {  }
 
-Instance::Instance(const Instance& ins)
+Instance::Instance(const Instance& ins):
+    name_(ins.name_),
+    items_(ins.items_),
+    alternatives_(ins.alternatives_),
+    t_(ins.t_),
+    c_max_(ins.c_max_),
+    c_tot_(ins.c_tot_),
+    sol_opt_((ins.sol_opt_ == NULL)? NULL: std::unique_ptr<Solution>(new Solution(*ins.sol_opt_)))
 {
-    items_ = ins.items_;
-    alternatives_ = ins.alternatives_;
-    t_ = ins.t_;
-    sol_opt_ = (ins.sol_opt_ == NULL)? NULL: std::unique_ptr<Solution>(new Solution(*ins.sol_opt_));
+}
+
+Instance& Instance::operator=(const Instance& ins)
+{
+    if (this != &ins) {
+        name_         = ins.name_;
+        items_        = ins.items_;
+        alternatives_ = ins.alternatives_;
+        t_            = ins.t_;
+        c_max_        = ins.c_max_;
+        c_tot_        = ins.c_tot_;
+        sol_opt_      = (ins.sol_opt_ != NULL)? std::unique_ptr<Solution>(new Solution(*ins.sol_opt_)): NULL;
+    }
+    return *this;
 }
 
 Cost Instance::check(std::string cert_file)
