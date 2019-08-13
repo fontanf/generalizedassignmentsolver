@@ -103,7 +103,7 @@ bazel build -- //...
 ```
 
 However, most algorithms require additional libraries (see below).
-Compile with additional libraries:
+Compile with additional libraries (or just uncomment the corresponding lines in `.bazelrc`):
 ```
 bazel build \
     --define coinor=true \
@@ -127,20 +127,18 @@ bazel test --compilation_mode=dbg -- //...
 
 Checker:
 ```
-bazel build -- //lib:checker
+bazel run -- //lib:checker                # show best bounds for each instances
+bazel run -- //lib:checker "data/a05100"  # show best bounds for one instance
+bazel build -- //lib:checker              # check another solution file
 ./bazel-bin/lib/checker "instancefile" "solutionfile"
-```
-
-Display upper and lower bounds for each instance:
-```
-./show_bounds
 ```
 
 Run benchmarks (results stored in `out/algorithm/`)
 ```
-./bench "mthg f wij"             # no time limit
-./bench "branchandcut_cbc" 7200  # 2h time limit
+bazel run -- //lib:bench "mthg f wij"             # no time limit
+bazel run -- //lib:bench "branchandcut_cbc" 7200  # 2h time limit
 ```
+Output files can then be retrieved from `bazel-out/k8-opt/bin/lib/bench.runfiles/__main__/`.
 
 ## Optional dependencies
 

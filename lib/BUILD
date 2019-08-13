@@ -112,6 +112,18 @@ cc_binary(
 )
 
 cc_binary(
+        name = "bench",
+        srcs = ["bench.cpp"],
+        deps = [":algorithms"],
+        linkopts = ["-lstdc++fs"] +
+            select({"//lib:gurobi_build": [
+                        "-lgurobi_c++",
+                        "-lgurobi81",
+                ], "//conditions:default": [ ], }),
+        data = ["//data:data"],
+)
+
+cc_binary(
         name = "test_main",
         srcs = ["test_main.cpp"],
         deps = [

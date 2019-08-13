@@ -40,6 +40,13 @@ int main(int argc, char *argv[])
 {
     if (argc <= 1) {
         for (auto it = datasets.begin(); it != datasets.end(); ++it) {
+            // Print dataset name centered
+            std::string s = "--- " + it->first + " --- ";
+            int pos = (int)((80-s.length())/2);
+            for(int i=0; i<pos; i++)
+                std::cout << " ";
+            std::cout << s << std::endl;
+
             Dataset<Instance>* d = it->second.get();
             for (InsId i=0; i<d->size(); ++i) {
                 Instance ins = d->instance(i);

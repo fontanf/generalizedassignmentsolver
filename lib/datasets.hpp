@@ -60,7 +60,7 @@ const std::map<std::string, std::shared_ptr<Dataset<Instance>>> datasets = {
             "data/d401600",
             "data/d801600",
         }, "gap_beasley"))},
-    {"D", std::shared_ptr<Dataset<Instance>>(new DatasetFromFiles<Instance>({
+    {"E", std::shared_ptr<Dataset<Instance>>(new DatasetFromFiles<Instance>({
             "data/e05100",
             "data/e10100",
             "data/e20100",
