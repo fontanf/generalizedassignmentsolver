@@ -6,15 +6,6 @@
 
 using namespace gap;
 
-bool replace(std::string& str, const std::string& from, const std::string& to)
-{
-    size_t start_pos = str.find(from);
-    if(start_pos == std::string::npos)
-        return false;
-    str.replace(start_pos, from.length(), to);
-    return true;
-}
-
 int main(int argc, char *argv[])
 {
     if (argc < 2)
@@ -29,7 +20,7 @@ int main(int argc, char *argv[])
     auto func = get_algorithm(algorithm);
 
     std::string dir = algorithm;
-    replace(dir, " ", "_");
+    benchtools::replace(dir, " ", "_");
     if (time_limit != std::numeric_limits<double>::infinity())
         dir += "_" + std::to_string(time_limit);
     std::experimental::filesystem::create_directory(dir);
@@ -40,7 +31,7 @@ int main(int argc, char *argv[])
             Instance ins = d->instance(i);
 
             std::string s = ins.name();
-            replace(s, "data", dir);
+            benchtools::replace(s, "data", dir);
 
             std::string outputfile = s + ".ini";
             std::cout << std::left << std::setw(16) << ins.name() << std::flush;
