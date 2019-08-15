@@ -137,7 +137,7 @@ int LagRelaxAssignmentHook::solve_subproblem(const VOL_dvector& dual, const VOL_
                 indices[j_kp] = j;
             }
         }
-        knapsack::Solution sol = knapsack::Minknap(ins_kp, knapsack::MinknapParams::combo()).run();
+        knapsack::Solution sol = knapsack::sopt_minknap(ins_kp, knapsack::MinknapParams::combo());
         for (knapsack::ItemIdx j_kp=0; j_kp<ins_kp.total_item_number(); ++j_kp) {
             if (sol.contains_idx(j_kp)) {
                 ItemIdx j = indices[j_kp];

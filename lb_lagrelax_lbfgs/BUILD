@@ -5,6 +5,7 @@ cc_library(
         deps = [
                 "//lib:cpp",
                 "@knapsack//opt_minknap:minknap",
+                "@knapsack//opt_bellman:bellman",
         ],
         copts = select({"//lib:dlib_build": ["-DDLIB_FOUND"], "//conditions:default": []}),
         linkopts = select({

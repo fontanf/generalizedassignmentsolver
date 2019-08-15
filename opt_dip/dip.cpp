@@ -143,7 +143,7 @@ DecompSolverStatus GAPDecompApp::solveRelaxed(
     }
 
     // Solve Knapsack Instance
-    knapsack::Solution sol = knapsack::Minknap(ins_kp, knapsack::MinknapParams::combo()).run();
+    knapsack::Solution sol = knapsack::sopt_minknap(ins_kp, knapsack::MinknapParams::combo());
 
     // Retrieve Knapsack Solution
     for (knapsack::ItemIdx j_kp=0; j_kp<ins_kp.total_item_number(); ++j_kp) {

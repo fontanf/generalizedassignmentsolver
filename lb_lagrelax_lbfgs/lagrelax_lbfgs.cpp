@@ -3,6 +3,7 @@
 #include "gap/lb_lagrelax_lbfgs/lagrelax_lbfgs.hpp"
 
 #include "knapsack/opt_minknap/minknap.hpp"
+#include "knapsack/opt_bellman/bellman.hpp"
 
 #include <dlib/optimization.h>
 
@@ -58,8 +59,8 @@ double LagRelaxAssignmentLbfgsFunction::f(const column_vector& mu)
                 indices[j_kp] = j;
             }
         }
-        knapsack::Solution sol = knapsack::Minknap(ins_kp, knapsack::MinknapParams::combo()).run();
-        //knapsack::Solution sol = knapsack::Minknap(ins_kp, knapsack::MinknapParams::pure()).run();
+        //knapsack::Solution sol = knapsack::sopt_bellman_array_all(ins_kp, Info().set_verbose(false));
+        knapsack::Solution sol = knapsack::sopt_minknap(ins_kp, knapsack::MinknapParams());
         //std::cout << "i " << i << " opt " << sol.profit() << std::endl;
         for (knapsack::ItemIdx j_kp=0; j_kp<ins_kp.total_item_number(); ++j_kp) {
             if (sol.contains_idx(j_kp)) {
@@ -80,6 +81,8 @@ LagRelaxAssignmentLbfgsOutput gap::lb_lagrelax_assignment_lbfgs(const Instance& 
     LagRelaxAssignmentLbfgsOutput out;
     LagRelaxAssignmentLbfgsFunction func(ins);
     column_vector mu(n);
+    for (ItemIdx j=0; j<n; ++j)
+        mu(j) = 0;
     auto f   = [&func](const column_vector& x) { return func.f(x); };
     auto def = [&func](const column_vector& x) { return func.der(x); };
     auto stop_strategy = objective_delta_stop_strategy(0.0001);
@@ -184,7 +187,7 @@ LagRelaxKnapsackLbfgsOutput gap::lb_lagrelax_knapsack_lbfgs(const Instance& ins,
     column_vector mu(m);
     column_vector mu_lower(m);
     column_vector mu_upper(m);
-    for (ItemIdx i=0; i<m; ++i) {
+    for (AgentIdx i=0; i<m; ++i) {
         //mu_lower(i) = 0;
         //mu_upper(i) = std::numeric_limits<double>::max();
         mu(i) = 0;
