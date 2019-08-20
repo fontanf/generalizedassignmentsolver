@@ -61,17 +61,23 @@ public:
      * Constructors and destructor
      */
 
+    /** Create instance from file. */
     Instance(std::string filename, std::string format = "gap_beasley");
 
-    Instance(AgentIdx m, ItemIdx n=0);
+    /** Manual constructor. */
+    Instance(AgentIdx m);
     void set_name(std::string name) { name_ = name; }
     void set_capacity(AgentIdx i, Weight t) { t_[i] = t; }
-    void set_capacity(const std::vector<Weight>& t);
-    ItemIdx add_item();
+    void add_item();
     void set_alternative(ItemIdx j, AgentIdx i, Weight w, Cost p);
+    void clear();
+
+    /** Constructor for test instances. */
     void add_item(const std::vector<std::pair<Weight, Cost>>& a);
+    void set_capacities(const std::vector<Weight>& t);
     void set_optimal_solution(Solution& sol);
 
+    /** Copy constructor. */
     Instance(const Instance& ins);
     Instance& operator=(const Instance& ins);
 
@@ -97,7 +103,6 @@ public:
     AltIdx alternative_number() const { return alternatives_.size(); }
     Weight capacity(AgentIdx i) const { return t_[i]; }
 
-    Cost check(std::string filepath);
     const Solution* optimal_solution() const { return sol_opt_.get(); }
     Cost optimum() const;
     Cost bound() const { return c_tot_ + 1; }

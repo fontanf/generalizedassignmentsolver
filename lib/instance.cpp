@@ -4,24 +4,12 @@
 
 using namespace gap;
 
-Instance::Instance(AgentIdx m, ItemIdx n)
+Instance::Instance(AgentIdx m)
 {
-    items_.reserve(n);
     t_.resize(m);
 }
 
-void Instance::set_capacity(const std::vector<Weight>& t)
-{
-    for (AgentIdx i=0; i<(AgentIdx)t.size(); ++i)
-        set_capacity(i, t[i]);
-}
-
-void Instance::set_optimal_solution(Solution& sol)
-{
-    sol_opt_ = std::unique_ptr<Solution>(new Solution(sol));
-}
-
-ItemIdx Instance::add_item()
+void Instance::add_item()
 {
     ItemIdx j = items_.size();
     AltIdx k = alternatives_.size();
@@ -31,14 +19,6 @@ ItemIdx Instance::add_item()
         items_[j].alt.push_back(k);
         k++;
     }
-    return j;
-}
-
-void Instance::add_item(const std::vector<std::pair<Weight, Cost>>& a)
-{
-    ItemIdx j = add_item();
-    for (AgentIdx i=0; i<(AgentIdx)a.size(); ++i)
-        set_alternative(j, i, a[i].first, a[i].second);
 }
 
 void Instance::set_alternative(ItemIdx j, AgentIdx i, Weight w, Cost v)
@@ -56,6 +36,36 @@ void Instance::set_alternative(ItemIdx j, AgentIdx i, Weight w, Cost v)
     if (c_max_ < v)
         c_max_ = v;
     c_tot_ += v;
+}
+
+void Instance::set_capacities(const std::vector<Weight>& t)
+{
+    for (AgentIdx i=0; i<(AgentIdx)t.size(); ++i)
+        set_capacity(i, t[i]);
+}
+
+void Instance::clear()
+{
+    name_ = "";
+    items_.clear();
+    alternatives_.clear();
+    t_.clear();
+    c_max_ = 0;
+    c_tot_ = 0;
+    sol_opt_ = NULL;
+}
+
+void Instance::add_item(const std::vector<std::pair<Weight, Cost>>& a)
+{
+    ItemIdx j = item_number();
+    add_item();
+    for (AgentIdx i=0; i<(AgentIdx)a.size(); ++i)
+        set_alternative(j, i, a[i].first, a[i].second);
+}
+
+void Instance::set_optimal_solution(Solution& sol)
+{
+    sol_opt_ = std::unique_ptr<Solution>(new Solution(sol));
 }
 
 Instance::Instance(std::string filepath, std::string format): name_(filepath)
@@ -148,22 +158,6 @@ Instance& Instance::operator=(const Instance& ins)
         sol_opt_      = (ins.sol_opt_ != NULL)? std::unique_ptr<Solution>(new Solution(*ins.sol_opt_)): NULL;
     }
     return *this;
-}
-
-Cost Instance::check(std::string cert_file)
-{
-    std::ifstream file(cert_file, std::ios_base::in);
-    Solution sol(*this);
-    AgentIdx i;
-    for (ItemPos j=0; j<item_number(); ++j) {
-        file >> i;
-        if (i == -1)
-            return -1;
-        sol.set(j, i);
-    }
-    if (!sol.feasible())
-        return -1;
-    return sol.cost();
 }
 
 Cost Instance::optimum() const

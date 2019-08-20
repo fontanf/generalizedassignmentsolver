@@ -17,7 +17,7 @@ std::ostream& gap::operator<<(std::ostream& os, const GenerateData& data)
 Instance gap::generate(GenerateData data)
 {
     data.g.seed(data.s);
-    Instance ins(data.m, data.n);
+    Instance ins(data.m);
 
     std::uniform_int_distribution<Weight> d1(5, 25);
     std::uniform_int_distribution<Weight> d2(10, 50);
