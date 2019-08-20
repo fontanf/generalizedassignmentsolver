@@ -28,7 +28,7 @@ cc_library(
 git_repository(
     name = "knapsack",
     remote = "https://github.com/fontanf/knapsack.git",
-    commit = "18c13e8e7b56432dc85e445d2b23cf3dc83aebc1",
+    commit = "a16e77f0a838c29feb72b36b1b63c7cfa34e49ed",
 )
 
 git_repository(

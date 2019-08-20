@@ -126,14 +126,16 @@ int LagRelaxAssignmentHook::solve_subproblem(const VOL_dvector& dual, const VOL_
     Weight mult = 1000000;
     std::vector<ItemIdx> indices(ins.item_number());
     for (AgentIdx i=0; i<ins.agent_number(); ++i) {
-        knapsack::Instance ins_kp(ins.item_number(), ins.capacity(i));
+        knapsack::Instance ins_kp;
+        ins_kp.set_capacity(ins.capacity(i));
         for (ItemIdx j=0; j<ins.item_number(); ++j) {
             AltIdx k = ins.alternative_index(j, i);
             const Alternative& a = ins.alternative(k);
             x[k] = 0;
             knapsack::Profit p = std::ceil(mult * dual[j] - mult * a.c);
             if (p > 0) {
-                knapsack::ItemIdx j_kp = ins_kp.add_item(a.w, p);
+                ins_kp.add_item(a.w, p);
+                knapsack::ItemIdx j_kp = ins_kp.item_number() - 1;
                 indices[j_kp] = j;
             }
         }
