@@ -11,6 +11,8 @@
 #include <iomanip>
 #include <limits>
 
+#define TOL 0.0000001
+
 using namespace gap;
 using namespace dlib;
 
@@ -99,7 +101,7 @@ LagRelaxAssignmentLbfgsOutput gap::lb_lagrelax_assignment_lbfgs(const Instance& 
             mu,
             std::numeric_limits<double>::max());
 
-    out.lb = std::ceil(res);
+    out.lb = std::ceil(res - TOL);
     out.multipliers.resize(n);
     for (ItemIdx j=0; j<n; ++j)
         out.multipliers[j] = mu(j);
@@ -211,7 +213,7 @@ LagRelaxKnapsackLbfgsOutput gap::lb_lagrelax_knapsack_lbfgs(const Instance& ins,
             mu_lower,
             mu_upper);
 
-    out.lb = std::ceil(res);
+    out.lb = std::ceil(res - TOL);
     out.multipliers.resize(m);
     for (AgentIdx i=0; i<m; ++i)
         out.multipliers[i] = mu(i);
