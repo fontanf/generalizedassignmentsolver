@@ -4,63 +4,55 @@
 
 using namespace gap;
 
-std::ostream& gap::operator<<(std::ostream& os, const GenerateData& data)
+std::ostream& gap::operator<<(std::ostream& os, const Generator& data)
 {
-    os << "n " << data.n << " m " << data.m << " t " << data.t;
-    if (data.t == "f")
-        os << " r " << data.r;
-    if (data.s != 0)
-        os << " s " << data.s;
+    os << "n " << data.n
+        << " mx " << data.mx
+        << " t " << data.t
+        << " r " << data.r
+        << " x " << data.x
+        << " s " << data.s
+        ;
     return os;
 }
 
-Instance gap::generate(GenerateData data)
+Instance Generator::generate()
 {
-    data.g.seed(data.s);
-    Instance ins(data.m);
-
-    std::uniform_int_distribution<Weight> d1(5, 25);
-    std::uniform_int_distribution<Weight> d2(10, 50);
-    std::uniform_int_distribution<Weight> d3(1, 100);
-    std::uniform_int_distribution<Weight> d4(-10, 10);
-    std::normal_distribution<double> d_norm(0, data.r / 10);
-    Weight w = -1;
-    Cost v = -1;
-
-    std::vector<Weight> wsum(data.m, 0);
-    Weight wmax = 0;
-    for (ItemIdx j=0; j<data.n; ++j) {
+    g.seed(s);
+    AgentIdx m = n * mx;
+    Instance ins(m);
+    std::normal_distribution<double> d_wj(r / 2, r / 20);
+    Weight wsum_min = 0;
+    Weight wsum_max = 0;
+    for (ItemIdx j=0; j<n; ++j) {
         ins.add_item();
-        Weight wj = std::min(data.r, std::max((Weight)1, data.r / 2 + (Weight)d_norm(data.g)));
-        for (AgentIdx i=0; i<data.m; ++i) {
-            if (data.t == "a" || data.t == "b" || data.t == "c") {
-                w = d1(data.g);
-                v = d2(data.g);
-            } else if (data.t == "d") {
-                w =           d3(data.g);
-                v = 111 - w + d4(data.g);
-            } else if (data.t == "e") { // TODO
-            } else if (data.t == "f") {
-                w =              std::min(data.r, std::max((Weight)1, data.r / 2 + (Weight)d_norm(data.g)));
-                v = data.r + 1 - std::min(data.r, std::max((Cost)1,  w          + (Cost)d_norm(data.g)));
-            } else if (data.t == "g") {
-                w =              std::min(data.r, std::max((Weight)1, wj + (Weight)d_norm(data.g)));
-                v = data.r + 1 - std::min(data.r, std::max((Cost)1,  w  + (Cost)d_norm(data.g)));
-            } else {
-                exit(1);
-            }
-            ins.set_alternative(j, i, w, v);
-            wsum[i] += w;
-            wmax = std::max(wmax, w);
+        Weight wj = d_wj(g);
+        Weight wj_min = r;
+        Weight wj_max = 0;
+        std::normal_distribution<double> d_wij(wj, wj / 10);
+        for (AgentIdx i=0; i<m; ++i) {
+            Weight wij;
+            do {
+                wij = d_wij(g);
+            } while (wij <= 0 || wij > r);
+            std::normal_distribution<double> d_cij(r - wij, (r - wij) / 10);
+            Cost cij;
+            do {
+                cij = d_cij(g);
+            } while (cij <= 0 || cij > r);
+            ins.set_alternative(j, i, wij, cij);
+            if (wj_max < wij)
+                wj_max = wij;
+            if (wj_min > wij)
+                wj_min = wij;
         }
+        wsum_min += wj_min;
+        wsum_max += wj_max;
     }
-    for (AgentIdx i=0; i<data.m; ++i) {
-        // TODO capacity for types a b
-        if (data.t == "c" || data.t == "d" || data.t == "e")
-            ins.set_capacity(i, std::max(wmax, (Weight)(0.8 * wsum[i] / data.m)));
-        if (data.t == "f" || data.t == "g")
-            ins.set_capacity(i, std::max(wmax, wsum[i] / data.m));
-    }
+    double c = (double)(wsum_min) * (1 - x) + (double)wsum_max * x;
+    c = c / m;
+    for (AgentIdx i=0; i<m; ++i)
+        ins.set_capacity(i, std::ceil(c));
     return ins;
 }
 
