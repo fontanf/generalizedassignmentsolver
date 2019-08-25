@@ -218,7 +218,7 @@ LagRelaxAssignmentVolumeOutput gap::lb_lagrelax_assignment_volume(const Instance
         }
     }
 
-    algorithm_end(output.lb, info);
+    algorithm_end(ins, output.lb, info);
     return output;
 }
 
@@ -371,7 +371,7 @@ LagRelaxKnapsackVolumeOutput gap::lb_lagrelax_knapsack_volume(const Instance& in
         }
     }
 
-    algorithm_end(output.lb, info);
+    algorithm_end(ins, output.lb, info);
     return output;
 }
 

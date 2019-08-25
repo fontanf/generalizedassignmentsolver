@@ -345,20 +345,22 @@ void gap::update_lb(Cost& lb, Cost lb_new, const Solution& sol, const std::strin
 
 Solution gap::algorithm_end(const Solution& sol, Cost lb, Info& info)
 {
-    double ub = (!sol.feasible())? std::numeric_limits<double>::infinity(): sol.cost();
-    double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
+    std::string ub_str = (!sol.feasible())? "inf": std::to_string(sol.cost());
+    std::string lb_str = (lb == sol.instance().bound())? "inf": std::to_string(lb);
+    std::string gap_str = (lb == 0 || !sol.feasible())?  "inf": std::to_string(sol.cost() - lb);
     double gap = (lb == 0 || !sol.feasible())? std::numeric_limits<double>::infinity():
         (double)(10000 * (sol.cost() - lb) / lb) / 100;
+    double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
 
-    PUT(info, "Solution.Cost", ub);
+    PUT(info, "Solution.Cost", ub_str);
     PUT(info, "Solution.Time", t);
-    PUT(info, "Bound.Cost", lb);
+    PUT(info, "Bound.Cost", lb_str);
     PUT(info, "Bound.Time", t);
 
     VER(info, "---" << std::endl);
-    VER(info, "Cost: " << ub << std::endl);
-    VER(info, "Bound: " << lb << std::endl);
-    VER(info, "GAP: " << ub - lb << std::endl);
+    VER(info, "Cost: " << ub_str << std::endl);
+    VER(info, "Bound: " << lb_str << std::endl);
+    VER(info, "GAP: " << gap_str << std::endl);
     VER(info, "GAP (%): " << gap << std::endl);
     VER(info, "Time (s): " << t << std::endl);
 
@@ -367,28 +369,29 @@ Solution gap::algorithm_end(const Solution& sol, Cost lb, Info& info)
 
 Solution gap::algorithm_end(const Solution& sol, Info& info)
 {
-    double ub = (!sol.feasible())? std::numeric_limits<double>::infinity(): sol.cost();
+    std::string ub_str = (!sol.feasible())? "inf": std::to_string(sol.cost());
     double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
 
-    PUT(info, "Solution.Cost", ub);
+    PUT(info, "Solution.Cost", ub_str);
     PUT(info, "Solution.Time", t);
 
     VER(info, "---" << std::endl);
-    VER(info, "Cost: " << ub << std::endl);
+    VER(info, "Cost: " << ub_str << std::endl);
     VER(info, "Time (s): " << t << std::endl);
 
     return sol;
 }
 
-Cost gap::algorithm_end(Cost lb, Info& info)
+Cost gap::algorithm_end(const Instance& ins, Cost lb, Info& info)
 {
+    std::string lb_str = (lb == ins.bound())? "inf": std::to_string(lb);
     double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
 
-    PUT(info, "Bound.Cost", lb);
+    PUT(info, "Bound.Cost", lb_str);
     PUT(info, "Bound.Time", t);
 
     VER(info, "---" << std::endl);
-    VER(info, "Cost: " << lb << std::endl);
+    VER(info, "Cost: " << lb_str << std::endl);
     VER(info, "Time (s): " << t << std::endl);
 
     return lb;

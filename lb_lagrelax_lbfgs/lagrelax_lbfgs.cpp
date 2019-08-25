@@ -106,7 +106,7 @@ LagRelaxAssignmentLbfgsOutput gap::lb_lagrelax_assignment_lbfgs(const Instance& 
     for (ItemIdx j=0; j<n; ++j)
         out.multipliers[j] = mu(j);
 
-    algorithm_end(out.lb, info);
+    algorithm_end(ins, out.lb, info);
     return out;
 }
 
@@ -224,7 +224,7 @@ LagRelaxKnapsackLbfgsOutput gap::lb_lagrelax_knapsack_lbfgs(const Instance& ins,
     //std::cout << std::endl;
     //std::cout << "lb " << out.lb << std::endl;
 
-    algorithm_end(out.lb, info);
+    algorithm_end(ins, out.lb, info);
     return out;
 }
 

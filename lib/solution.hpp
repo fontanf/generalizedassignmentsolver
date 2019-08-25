@@ -106,7 +106,7 @@ void update_lb(Cost& lb, Cost lb_new, const Solution& sol, const std::stringstre
 
 Solution algorithm_end(const Solution& sol, Cost lb, Info& info);
 Solution algorithm_end(const Solution& sol, Info& info);
-Cost algorithm_end(Cost lb, Info& info);
+Cost algorithm_end(const Instance& ins, Cost lb, Info& info);
 
 std::ostream& operator<<(std::ostream& os, const Solution& solution);
 
