@@ -6,8 +6,10 @@ using namespace gap;
 
 std::ostream& gap::operator<<(std::ostream& os, const Generator& data)
 {
+    AgentIdx m = 10.0 * (1 - data.mx) + (double)data.n * data.mx;
     os << "n " << data.n
         << " mx " << data.mx
+        << " m " << m
         << " t " << data.t
         << " r " << data.r
         << " x " << data.x
@@ -19,7 +21,7 @@ std::ostream& gap::operator<<(std::ostream& os, const Generator& data)
 Instance Generator::generate()
 {
     g.seed(s);
-    AgentIdx m = n * mx;
+    AgentIdx m = 10.0 * (1 - mx) + (double)n * mx;
     Instance ins(m);
     std::normal_distribution<double> d_wj(r / 2, r / 20);
     Weight wsum_min = 0;

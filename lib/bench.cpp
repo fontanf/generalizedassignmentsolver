@@ -25,7 +25,7 @@ void bench_normal(
     data.t = "n";
     for (ItemIdx n: {100, 1000, 10000}) {
         data.n = n;
-        for (double mx: {0.05, 0.1, 0.25, 0.33, 0.5}) {
+        for (double mx: {0.0, 0.05, 0.1, 0.2, 0.33, 0.5}) {
             data.mx = mx;
             for (Weight r: {1000, 10000, 100000}) {
                 data.r = r;
