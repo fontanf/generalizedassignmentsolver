@@ -436,6 +436,7 @@ Solution gap::sol_sa_shiftswap(SAShiftSwapData d)
         for (AgentIdx i=0; i<m; ++i)
             if (t0 < d.ins.alternative(j, i).c)
                 t0 = d.ins.alternative(j, i).c;
+    t0 /= 100;
 
     Cpt it_max = 2 * (n * m + (n * (n + 1)) / 2);
     Cpt it_without_change = 0;
@@ -484,6 +485,7 @@ Solution gap::sol_sa_shiftswap(SAShiftSwapData d)
                 std::stringstream ss;
                 ss << "T " << t;
                 sol_best.update(sol_curr, 0, ss, d.info);
+                it = 0;
             }
 
             ++it;

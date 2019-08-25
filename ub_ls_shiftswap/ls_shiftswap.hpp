@@ -17,9 +17,8 @@ struct LSFirstShiftSwapData
 
     LSFirstShiftSwapData& set_params(const std::map<std::string, std::string>& args)
     {
-        auto it = args.find("alpha");
-        if (it != args.end())
-            alpha = std::stod(it->second);
+        auto it = args.end();
+        if ((it = args.find("alpha")) != args.end()) alpha = std::stod(it->second);
         return *this;
     }
 };
@@ -45,9 +44,8 @@ struct LSBestShiftSwapData
 
     LSBestShiftSwapData& set_params(const std::map<std::string, std::string>& args)
     {
-        auto it = args.find("alpha");
-        if (it != args.end())
-            alpha = std::stod(it->second);
+        auto it = args.end();
+        if ((it = args.find("alpha")) != args.end()) alpha = std::stod(it->second);
         return *this;
     }
 };
@@ -63,14 +61,9 @@ struct TSShiftSwapData
 
     TSShiftSwapData& set_params(const std::map<std::string, std::string>& args)
     {
-        auto it = args.find("alpha");
-        if (it != args.end())
-            alpha = std::stod(it->second);
-
-        it = args.find("tabusize");
-        if (it != args.end())
-            tabusize = std::stol(it->second);
-
+        auto it = args.end();
+        if ((it = args.find("alpha")) != args.end()) alpha = std::stod(it->second);
+        if ((it = args.find("tabusize")) != args.end()) tabusize = std::stol(it->second);
         return *this;
     }
 };
@@ -82,23 +75,15 @@ struct SAShiftSwapData
     std::mt19937_64& gen;
     Info info = Info();
     double alpha = 100;
-    double beta = 0.99;
-    Cpt l = 100000;
+    double beta = 0.999;
+    double l = 1000000;
 
     SAShiftSwapData& set_params(const std::map<std::string, std::string>& args)
     {
-        auto it = args.find("alpha");
-        if (it != args.end())
-            alpha = std::stod(it->second);
-
-        it = args.find("beta");
-        if (it != args.end())
-            beta = std::stol(it->second);
-
-        it = args.find("l");
-        if (it != args.end())
-            l = std::stol(it->second);
-
+        auto it = args.end();
+        if ((it = args.find("alpha")) != args.end()) alpha = std::stod(it->second);
+        if ((it = args.find("beta")) != args.end()) beta = std::stod(it->second);
+        if ((it = args.find("l")) != args.end()) l = std::stol(it->second);
         return *this;
     }
 };
@@ -115,18 +100,10 @@ struct PRShiftSwapData
 
     PRShiftSwapData& set_params(const std::map<std::string, std::string>& args)
     {
-        auto it = args.find("alpha");
-        if (it != args.end())
-            alpha = std::stod(it->second);
-
-        it = args.find("rho");
-        if (it != args.end())
-            rho = std::stol(it->second);
-
-        it = args.find("gamma");
-        if (it != args.end())
-            gamma = std::stol(it->second);
-
+        auto it = args.end();
+        if ((it = args.find("alpha")) != args.end()) alpha = std::stod(it->second);
+        if ((it = args.find("rho")) != args.end()) rho = std::stol(it->second);
+        if ((it = args.find("gamma")) != args.end()) gamma = std::stol(it->second);
         return *this;
     }
 };
