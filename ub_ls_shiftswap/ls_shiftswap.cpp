@@ -422,13 +422,10 @@ Solution gap::sol_sa_shiftswap(SAShiftSwapData d)
     std::uniform_int_distribution<Cpt> dis_ss(1, n * m + (n * (n + 1)) / 2);
     std::uniform_int_distribution<ItemIdx> dis_j(0, n - 1);
     std::uniform_int_distribution<ItemIdx> dis_j2(0, n - 2);
-    std::uniform_int_distribution<AgentIdx> dis_i(0, m - 1);
-    std::uniform_int_distribution<AgentIdx> dis_i1(0, m - 2);
-    std::uniform_int_distribution<AgentIdx> dis_i2(0, m - 3);
+    std::uniform_int_distribution<AgentIdx> dis_i(0, m - 2);
     std::uniform_real_distribution<double> dis(0, 1);
 
     Solution sol_curr = sol_random(d.ins, d.gen);
-    sol_curr.update_penalties(std::vector<PCost>(m, d.alpha));
 
     // Compute initial temperature
     double t0 = 0;
@@ -442,16 +439,17 @@ Solution gap::sol_sa_shiftswap(SAShiftSwapData d)
     Cpt it_without_change = 0;
     for (double t=t0; d.info.check_time(); t*=d.beta) {
         for (Cpt it=0; it<d.l;) {
-            PCost v = sol_curr.pcost();
+            Cost v = sol_curr.cost();
             Cpt p = dis_ss(d.gen);
             if (p <= m * n) { // shift
                 ItemIdx j = dis_j(d.gen);
-                AgentIdx i = dis_i1(d.gen);
+                AgentIdx i = dis_i(d.gen);
                 AgentIdx i_old = sol_curr.agent(j);
                 if (i >= i_old)
                     i++;
                 sol_curr.set(j, i);
-                if ((v < sol_curr.pcost() && dis(d.gen) > exp((double)(v - sol_curr.pcost()) / t))) {
+                if (!sol_curr.feasible() || (v < sol_curr.cost()
+                            && dis(d.gen) > exp(((double)v - sol_curr.cost()) / t))) {
                     sol_curr.set(j, i_old);
                 }
             } else { // swap
@@ -465,14 +463,15 @@ Solution gap::sol_sa_shiftswap(SAShiftSwapData d)
                     continue;
                 sol_curr.set(j1, i2);
                 sol_curr.set(j2, i1);
-                if ((v < sol_curr.pcost() && dis(d.gen) > exp((double)(v - sol_curr.pcost()) / t))) {
+                if (!sol_curr.feasible() || (v < sol_curr.cost()
+                            && dis(d.gen) > exp(((double)v - sol_curr.cost()) / t))) {
                     sol_curr.set(j1, i1);
                     sol_curr.set(j2, i2);
                 }
             }
 
             // Update it_without_change
-            if (sol_curr.pcost() == v) {
+            if (sol_curr.cost() == v) {
                 it_without_change++;
                 if (it_without_change > it_max)
                     return algorithm_end(sol_best, d.info);
