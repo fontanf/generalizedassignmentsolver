@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
     std::string dir = algorithm;
     benchtools::replace(dir, " ", "_");
     if (time_limit != std::numeric_limits<double>::infinity())
-        dir += "_" + std::to_string(time_limit);
+        dir += "_" + std::to_string((int)time_limit);
     std::experimental::filesystem::create_directory(dir);
 
     for (auto it = datasets.begin(); it != datasets.end(); ++it) {
