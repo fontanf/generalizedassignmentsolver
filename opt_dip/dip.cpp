@@ -132,12 +132,13 @@ DecompSolverStatus GAPDecompApp::solveRelaxed(
     // Build Knapsck Instance
     Weight mult = 1000;
     std::vector<ItemIdx> indices(n);
-    knapsack::Instance ins_kp(n, ins.capacity(i));
+    knapsack::Instance ins_kp;
+    ins_kp.set_capacity(ins.capacity(i));
     for (ItemIdx j=0; j<n; ++j) {
         AltIdx k = ins.alternative_index(j, i);
         if (rc[k] < 0) {
-            knapsack::ItemIdx j_kp = ins_kp.add_item(
-                    ins.alternative(k).w, std::ceil(- mult * rc[k]));
+            ins_kp.add_item(ins.alternative(k).w, std::ceil(- mult * rc[k]));
+            knapsack::ItemIdx j_kp = ins_kp.item_number() - 1;
             indices[j_kp] = j;
         }
     }

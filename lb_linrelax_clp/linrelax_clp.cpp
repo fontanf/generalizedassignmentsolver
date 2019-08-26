@@ -36,7 +36,7 @@ LinRelaxClpOutput gap::lb_linrelax_clp(const Instance& ins, Info info)
     for (AltIdx k=0; k<ins.alternative_number(); ++k)
         out.x[k] = solution[k];
 
-    algorithm_end(out.lb, info);
+    algorithm_end(ins, out.lb, info);
     return out;
 }
 

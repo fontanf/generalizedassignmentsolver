@@ -9,16 +9,17 @@ int main(int argc, char *argv[])
     namespace po = boost::program_options;
 
     // Parse program options
-    GenerateData data;
+    Generator data;
     std::string output_file = "";
     std::string plot_file = "";
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "produce help message")
-        (",t", po::value<std::string>(&data.t)->required(), "set instance type (a, b, c, d, e, f, g)")
-        (",n", po::value<ItemIdx>(&data.n)->required(), "set item number")
-        (",m", po::value<AgentIdx>(&data.m), "set agent number")
-        (",r", po::value<Weight>(&data.r), "set R")
+        (",t", po::value<std::string>(&data.t)->required(), "set t")
+        (",n", po::value<ItemIdx>(&data.n)->required(), "set n")
+        (",m", po::value<double>(&data.mx), "set mx")
+        (",r", po::value<Weight>(&data.r), "set r")
+        (",x", po::value<double>(&data.x), "set x")
         (",s", po::value<Seed>(&data.s), "set seed")
         (",o", po::value<std::string>(&output_file), "set output file")
         (",p", po::value<std::string>(&plot_file), "set plot file")
@@ -37,7 +38,7 @@ int main(int argc, char *argv[])
     }
 
     std::cout << data << std::endl;
-    Instance ins = generate(data);
+    Instance ins = data.generate();
 
     if (output_file != "")
         ins.write(output_file);

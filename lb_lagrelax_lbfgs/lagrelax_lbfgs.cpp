@@ -11,6 +11,8 @@
 #include <iomanip>
 #include <limits>
 
+#define TOL 0.0000001
+
 using namespace gap;
 using namespace dlib;
 
@@ -49,13 +51,15 @@ double LagRelaxAssignmentLbfgsFunction::f(const column_vector& mu)
     Weight mult = 1000000;
     std::vector<ItemIdx> indices(n);
     for (AgentIdx i=0; i<m; ++i) {
-        knapsack::Instance ins_kp(n, ins_.capacity(i));
+        knapsack::Instance ins_kp;
+        ins_kp.set_capacity(ins_.capacity(i));
         for (ItemIdx j=0; j<n; ++j) {
             AltIdx k = ins_.alternative_index(j, i);
             const Alternative& a = ins_.alternative(k);
             knapsack::Profit p = std::ceil(mult * mu(j) - mult * a.c);
             if (p > 0) {
-                knapsack::ItemIdx j_kp = ins_kp.add_item(a.w, p);
+                ins_kp.add_item(a.w, p);
+                knapsack::ItemIdx j_kp = ins_kp.item_number() - 1;
                 indices[j_kp] = j;
             }
         }
@@ -97,12 +101,12 @@ LagRelaxAssignmentLbfgsOutput gap::lb_lagrelax_assignment_lbfgs(const Instance& 
             mu,
             std::numeric_limits<double>::max());
 
-    out.lb = std::ceil(res);
+    out.lb = std::ceil(res - TOL);
     out.multipliers.resize(n);
     for (ItemIdx j=0; j<n; ++j)
         out.multipliers[j] = mu(j);
 
-    algorithm_end(out.lb, info);
+    algorithm_end(ins, out.lb, info);
     return out;
 }
 
@@ -209,7 +213,7 @@ LagRelaxKnapsackLbfgsOutput gap::lb_lagrelax_knapsack_lbfgs(const Instance& ins,
             mu_lower,
             mu_upper);
 
-    out.lb = std::ceil(res);
+    out.lb = std::ceil(res - TOL);
     out.multipliers.resize(m);
     for (AgentIdx i=0; i<m; ++i)
         out.multipliers[i] = mu(i);
@@ -220,7 +224,7 @@ LagRelaxKnapsackLbfgsOutput gap::lb_lagrelax_knapsack_lbfgs(const Instance& ins,
     //std::cout << std::endl;
     //std::cout << "lb " << out.lb << std::endl;
 
-    algorithm_end(out.lb, info);
+    algorithm_end(ins, out.lb, info);
     return out;
 }
 

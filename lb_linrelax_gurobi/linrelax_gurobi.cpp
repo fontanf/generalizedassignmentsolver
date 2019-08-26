@@ -56,7 +56,7 @@ LinRelaxGurobiOutput gap::lb_linrelax_gurobi(const Instance& ins, Info info)
     for (AltIdx k=0; k<ins.alternative_number(); ++k)
         out.x[k] = x[k].get(GRB_DoubleAttr_X);
 
-    algorithm_end(out.lb, info);
+    algorithm_end(ins, out.lb, info);
     return out;
 }
 

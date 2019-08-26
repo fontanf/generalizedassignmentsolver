@@ -43,51 +43,51 @@ Instance gap::test_instance(Cpt i)
     std::cout << "i " << i << std::endl;
     switch (i) {
     case 0: { // 0 item
-        Instance ins(0, 0);
+        Instance ins(0);
         Solution sol(ins);
         ins.set_optimal_solution(sol);
         return ins;
     } case 1: { // 1 agent, 1 item, opt 10
-        Instance ins(1, 1);
-        ins.set_capacity({5});
+        Instance ins(1);
+        ins.set_capacities({5});
         ins.add_item({{4, 10}});
         Solution sol(ins, v{{0}});
         ins.set_optimal_solution(sol);
         return ins;
     } case 2: { // 1 agent, 2 item, opt 18
-        Instance ins(1, 2);
-        ins.set_capacity({5});
+        Instance ins(1);
+        ins.set_capacities({5});
         ins.add_item({{3, 10}});
         ins.add_item({{2, 8}});
         Solution sol(ins, v{{0, 1}});
         ins.set_optimal_solution(sol);
         return ins;
     } case 3: { // 2 agent, 1 items, opt 10
-        Instance ins(2, 1);
-        ins.set_capacity({5, 7});
+        Instance ins(2);
+        ins.set_capacities({5, 7});
         ins.add_item({{5, 10}, {4, 11}});
         Solution sol(ins, v{{0}});
         ins.set_optimal_solution(sol);
         return ins;
     } case 4: { // 2 agent, 2 items, opt 15
-        Instance ins(2, 2);
-        ins.set_capacity({5, 7});
+        Instance ins(2);
+        ins.set_capacities({5, 7});
         ins.add_item({{3, 11}, {4, 10}});
         ins.add_item({{2, 6}, {3, 5}});
         Solution sol(ins, {{}, {0, 1}});
         ins.set_optimal_solution(sol);
         return ins;
     } case 5: { // 2 agents, 2 items, opt 16
-        Instance ins(2, 2);
-        ins.set_capacity({5, 7});
+        Instance ins(2);
+        ins.set_capacities({5, 7});
         ins.add_item({{3, 11}, {4, 10}});
         ins.add_item({{4, 7}, {5, 5}});
         Solution sol(ins, v{{0}, {1}});
         ins.set_optimal_solution(sol);
         return ins;
     } case 6: { // 2 agent, 3 items, opt 23
-        Instance ins(2, 3);
-        ins.set_capacity({6, 9});
+        Instance ins(2);
+        ins.set_capacities({6, 9});
         ins.add_item({{1, 13}, {2, 10}});
         ins.add_item({{3, 9}, {4, 8}});
         ins.add_item({{2, 7}, {3, 5}});
@@ -95,8 +95,8 @@ Instance gap::test_instance(Cpt i)
         ins.set_optimal_solution(sol);
         return ins;
     } case 7: { // 2 agent, 3 items, opt 24
-        Instance ins(2, 3);
-        ins.set_capacity({5, 7});
+        Instance ins(2);
+        ins.set_capacities({5, 7});
         ins.add_item({{1, 13}, {2, 10}});
         ins.add_item({{3, 9}, {4, 8}});
         ins.add_item({{2, 7}, {3, 5}});
@@ -104,8 +104,8 @@ Instance gap::test_instance(Cpt i)
         ins.set_optimal_solution(sol);
         return ins;
     } case 8: { // 3 agent, 5 items
-        Instance ins(3, 5);
-        ins.set_capacity({10, 12, 11});
+        Instance ins(3);
+        ins.set_capacities({10, 12, 11});
         ins.add_item({{1, 4}, {2, 6}, {3, 7}});
         ins.add_item({{2, 8}, {3, 6}, {4, 5}});
         ins.add_item({{3, 10}, {4, 8}, {5, 6}});
@@ -115,7 +115,7 @@ Instance gap::test_instance(Cpt i)
         ins.set_optimal_solution(sol);
         return ins;
     } default: {
-        return Instance(0, 0);
+        return Instance(0);
     }
     }
 }

@@ -29,13 +29,15 @@ double lb_lagrelax_assignment_bundle_subproblem(
     Weight mult = 10000;
     std::vector<ItemIdx> indices(n);
     for (AgentIdx i=0; i<m; ++i) {
-        knapsack::Instance ins_kp(n, ins.capacity(i));
+        knapsack::Instance ins_kp;
+        ins_kp.set_capacity(ins.capacity(i));
         for (ItemIdx j=0; j<n; ++j) {
             AltIdx k = ins.alternative_index(j, i);
             const Alternative& a = ins.alternative(k);
             knapsack::Profit p = std::ceil(mult * mu[j] - mult * a.c);
             if (p > 0) {
-                knapsack::ItemIdx j_kp = ins_kp.add_item(a.w, p);
+                ins_kp.add_item(a.w, p);
+                knapsack::ItemIdx j_kp = ins_kp.item_number() - 1;
                 indices[j_kp] = j;
             }
         }

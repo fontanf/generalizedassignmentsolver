@@ -20,7 +20,7 @@ bool move_gap(const Instance& ins, Solution& sol,
     std::vector<Weight> c(m, 0);
     for (AgentIdx i=0; i<m; ++i)
         c[i] = ins.capacity(agents[i]);
-    Instance ins_tmp(m, n);
+    Instance ins_tmp(m);
     std::vector<AgentIdx> sol_vec;
     Cost v = 0;
     std::vector<ItemIdx> pos;
@@ -39,7 +39,8 @@ bool move_gap(const Instance& ins, Solution& sol,
             continue;
         }
         v += ins.alternative(j, sol.agent(j)).c;
-        ItemIdx j_tmp = ins_tmp.add_item();
+        ins_tmp.add_item();
+        ItemIdx j_tmp = ins_tmp.item_number() - 1;
         sol_vec.push_back(i);
         for (AgentPos i_pos=0; i_pos<m; ++i_pos)
             ins_tmp.set_alternative(j_tmp, i_pos,

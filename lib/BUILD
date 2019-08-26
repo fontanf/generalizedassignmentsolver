@@ -114,9 +114,14 @@ cc_binary(
 cc_binary(
         name = "bench",
         srcs = ["bench.cpp"],
-        deps = [":algorithms"],
-        linkopts = ["-lstdc++fs"] +
-            select({"//lib:gurobi_build": [
+        deps = [
+                ":algorithms",
+                ":generator",
+        ],
+        linkopts = [
+                "-lstdc++fs",
+                "-lboost_program_options",
+            ] + select({"//lib:gurobi_build": [
                         "-lgurobi_c++",
                         "-lgurobi81",
                 ], "//conditions:default": [ ], }),
