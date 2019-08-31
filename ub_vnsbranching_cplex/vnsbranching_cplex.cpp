@@ -37,11 +37,11 @@ Solution gap::sol_vnsbranching_cplex(const Instance& ins, std::mt19937_64& gen, 
     IloEnv env;
 
     std::stringstream ss_tmp;
-    auto moves = moves_shiftswap(ins);
+    //auto moves = moves_shiftswap(ins);
     for (AltIdx k_max=4; k_max<o; k_max+=4) {
         bool improved = false;
         if (k_max == 4) {
-            improved = shiftswap_iter(sol_curr, moves, gen, ss_tmp);
+            //improved = shiftswap_iter(sol_curr, moves, gen, ss_tmp);
         } else {
             IloModel model(env);
 

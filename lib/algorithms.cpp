@@ -240,33 +240,9 @@ std::function<void (Instance&, Solution&, Cost&, std::mt19937_64&, Info)> gap::g
             sol = sol_repairlinrelax_clp(ins, linrelax_output, info);
         };
 #endif
-    } else if (algo.name == "lsfirst_shift") {
+    } else if (algo.name == "ls_shiftswap") {
         return [algo](Instance& ins, Solution& sol, Cost&, std::mt19937_64& gen, Info info) {
-            sol = sol_lsfirst_shift(LSFirstShiftSwapData{
-                    .ins = ins,
-                    .gen = gen,
-                    .info = info
-                    }.set_params(algo.args));
-        };
-    } else if (algo.name == "lsfirst_shiftswap") {
-        return [algo](Instance& ins, Solution& sol, Cost&, std::mt19937_64& gen, Info info) {
-            sol = sol_lsfirst_shiftswap(LSFirstShiftSwapData{
-                    .ins = ins,
-                    .gen = gen,
-                    .info = info
-                    }.set_params(algo.args));
-        };
-    } else if (algo.name == "lsfirst_shift_swap") {
-        return [algo](Instance& ins, Solution& sol, Cost&, std::mt19937_64& gen, Info info) {
-            sol = sol_lsfirst_shift_swap(LSFirstShiftSwapData{
-                    .ins = ins,
-                    .gen = gen,
-                    .info = info
-                    }.set_params(algo.args));
-        };
-    } else if (algo.name == "lsbest_shiftswap") {
-        return [algo](Instance& ins, Solution& sol, Cost&, std::mt19937_64& gen, Info info) {
-            sol = sol_lsbest_shiftswap(LSBestShiftSwapData{
+            sol = sol_ls_shiftswap(LSShiftSwapData{
                     .ins = ins,
                     .gen = gen,
                     .info = info
@@ -283,14 +259,6 @@ std::function<void (Instance&, Solution&, Cost&, std::mt19937_64&, Info)> gap::g
     } else if (algo.name == "sa_shiftswap") {
         return [algo](Instance& ins, Solution& sol, Cost&, std::mt19937_64& gen, Info info) {
             sol = sol_sa_shiftswap(SAShiftSwapData{
-                    .ins = ins,
-                    .gen = gen,
-                    .info = info
-                    }.set_params(algo.args));
-        };
-    } else if (algo.name == "pr_shiftswap") {
-        return [algo](Instance& ins, Solution& sol, Cost&, std::mt19937_64& gen, Info info) {
-            sol = sol_pr_shiftswap(PRShiftSwapData{
                     .ins = ins,
                     .gen = gen,
                     .info = info

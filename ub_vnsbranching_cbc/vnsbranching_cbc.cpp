@@ -34,11 +34,11 @@ Solution gap::sol_vnsbranching_cbc(const Instance& ins, std::mt19937_64& gen, In
     sol_best.update(sol_curr, lb, ss, info);
 
     std::stringstream ss_tmp;
-    auto moves = moves_shiftswap(ins);
+    //auto moves = moves_shiftswap(ins);
     for (AltIdx k_max=4; k_max<o; k_max+=4) {
         bool improved = false;
         if (k_max == 4) {
-            improved = shiftswap_iter(sol_curr, moves, gen, ss_tmp);
+            //improved = shiftswap_iter(sol_curr, moves, gen, ss_tmp);
         } else {
             std::vector<int> vec_ind(o, 0);
             std::vector<double> vec_elem(o, 0);

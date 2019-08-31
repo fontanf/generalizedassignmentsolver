@@ -99,7 +99,8 @@ void gap::sol_lsfirst_ejectionchain(LSFirstECData d, Solution& sol_best)
     sol_curr.update_penalties(std::vector<PCost>(m, d.alpha));
     std::vector<ItemIdx> items(n);
     std::iota(items.begin(), items.end(), 0);
-    auto moves_ss = moves_shiftswap(d.ins);
+    //auto moves_ss = moves_shiftswap(d.ins);
+    /*
     for (; d.info.check_time();) {
         std::stringstream ss;
         if (shiftswap_iter(sol_curr, moves_ss, d.gen, ss)) {
@@ -111,6 +112,7 @@ void gap::sol_lsfirst_ejectionchain(LSFirstECData d, Solution& sol_best)
             sol_best.update(sol_curr, 0, ss, d.info);
         }
     }
+    */
 }
 
 Solution gap::sol_lsfirst_ejectionchain(LSFirstECData d)
