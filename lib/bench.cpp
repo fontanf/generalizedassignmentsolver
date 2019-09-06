@@ -15,59 +15,108 @@ void bench_normal(
 {
     auto func = get_algorithm(algorithm);
 
-    std::string dir = algorithm;
-    while(benchtools::replace(dir, " ", "_"));
-    if (time_limit != std::numeric_limits<double>::infinity())
-        dir += "_" + std::to_string(time_limit);
-    std::experimental::filesystem::create_directory(dir);
+    std::vector<ItemIdx> ns {100, 1000, 10000};
+    std::vector<Weight> rs {1000, 10000, 100000};
+    std::vector<double> mxs {0.0, 0.05, 0.1, 0.2, 0.33, 0.5};
+    std::vector<double> xs {0.0, 0.2, 0.4, 0.6, 0.8, 1};
+
+    nlohmann::json json;
+    json["lab"][0] = {"n", ns};
+    json["lab"][1] = {"r", rs};
+    json["lab"][2] = {"mx", mxs};
+    json["lab"][3] = {"x", xs};
+
+    int val_max_r = 255 - 52;
+    int val_max_g = 255 - 101;
+    int val_max_b = 255 - 164;
+    int col_r = 0;
+    int col_g = 0;
+    int col_b = 0;
 
     Generator data;
     data.t = "n";
-    for (ItemIdx n: {100, 1000, 10000}) {
-        data.n = n;
-        for (double mx: {0.0, 0.05, 0.1, 0.2, 0.33, 0.5}) {
-            data.mx = mx;
-            for (Weight r: {1000, 10000, 100000}) {
-                data.r = r;
-                for (double x: {0.0, 0.2, 0.4, 0.6, 0.8}) {
-                    data.x = x;
-                    data.s = n + r + n * mx + x * 10;
-                    Instance ins = data.generate();
-                    std::ostringstream ss;
-                    ss << data;
-                    std::cout << std::left << std::setw(50) << ss.str() << std::flush;
+    data.s = 0;
 
+    for (Cpt in = 0; in < (Cpt)ns.size(); ++in) {
+        ItemIdx n = ns[in];
+        data.n = n;
+
+        for (Cpt ir = 0; ir < (Cpt)rs.size(); ++ir) {
+            Weight r = rs[ir];
+            data.r = r;
+
+            for (Cpt mix = 0; mix < (Cpt)mxs.size(); ++mix) {
+                double mx = mxs[mix];
+                data.mx = mx;
+
+                // Standard output
+                std::stringstream ss;
+                ss << "--- n " << n << " r " << r << " mx " << mx << " --- ";
+                int pos = (int)((80 - ss.str().length())/2);
+                for(int i=0; i<pos; i++)
+                    std::cout << " ";
+                std::cout << ss.str() << std::endl;
+
+                for (Cpt ix = 0; ix < (Cpt)xs.size(); ++ix) {
+                    double x = xs[ix];
+                    data.x = x;
+                    data.s++;
+
+                    // Standard output
+                    std::cout << "x " << std::right << std::setw(6) << x << std::flush;
+
+                    Instance ins = data.generate();
                     Solution sol(ins);
                     Cost lb = 0;
-                    Info info = Info()
-                        .set_verbose(false)
-                        .set_timelimit(time_limit)
-                        .set_onlywriteattheend(true)
-                        ;
+                    double t = time_limit + 1;
+                    try {
+                        Info info = Info()
+                            .set_timelimit(time_limit)
+                            //.set_verbose(true)
+                            ;
+                        func(ins, sol, lb, gen, info);
+                        t = info.elapsed_time();
+                    } catch (...) {
+                    }
 
-                    func(ins, sol, lb, gen, info);
-
-                    std::string ub_str = (!sol.feasible())? "inf": std::to_string(sol.cost());
-                    std::string lb_str = (lb == ins.bound())? "inf": std::to_string(lb);
-                    if ((sol.feasible() && sol.cost() == lb)
-                            || (!sol.feasible() && lb == ins.bound()))
+                    std::stringstream t_str;
+                    if (t <= time_limit && (lb == ins.bound() || (sol.feasible() && lb == sol.cost()))) {
+                        t_str << (double)std::round(t * 10) / 10;
+                        col_r = 255 - (int)(val_max_r * cbrt(t / time_limit));
+                        col_g = 255 - (int)(val_max_g * cbrt(t / time_limit));
+                        col_b = 255 - (int)(val_max_b * cbrt(t / time_limit));
                         std::cout << "\033[32m";
-                    double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
-                    std::cout << std::fixed << std::noshowpoint;
-                    std::cout << std::left << std::setw(6) << " | UB";
-                    std::cout << std::right << std::setw(10) << ub_str;
-                    std::cout << std::left << std::setw(6) << " | LB";
-                    std::cout << std::right << std::setw(10) << lb_str;
-                    std::cout << std::left << std::setw(8) << " | T (s)";
-                    std::cout << std::right << std::setw(10) << t;
+                    } else {
+                        t_str << "> " << time_limit;
+                        col_r = 0;
+                        col_g = 0;
+                        col_b = 0;
+                    }
+
+                    // Json
+                    std::string rgb_str = "rgb("
+                        + std::to_string(col_r) + ","
+                        + std::to_string(col_g) + ","
+                        + std::to_string(col_b) + ")";
+                    json["tab"][in][ir][ix][0]["c"] = rgb_str;
+                    json["tab"][in][ir][ix][0]["t"] = t_str.str();
+
+                    // Standard output
+                    double ub = (!sol.feasible())? std::numeric_limits<double>::infinity(): sol.cost();
+                    std::cout << " | UB" << std::right << std::setw(20) << ub;
+                    std::cout << " | LB" << std::right << std::setw(20) << lb;
+                    std::cout << " | T (s)" << std::right << std::setw(8) << t_str.str();
                     std::cout << "\033[0m" << std::endl;
                 }
             }
         }
     }
+
+    std::ofstream o(algorithm + ".json");
+    o << std::setw(4) << json << std::endl;
 }
 
-void bench_hard(
+void bench_literature(
         std::string algorithm,
         std::mt19937_64& gen,
         double time_limit)
@@ -142,7 +191,6 @@ int main(int argc, char *argv[])
         ("algorithm,a", po::value<std::vector<std::string>>(&algorithms)->multitoken(), "algorithms (bestfitdecreasing, martello...)")
         ("datasets,d", po::value<std::vector<std::string>>(&datasets)->multitoken(), "datasets (normal, hard)")
         ("time-limit,t", po::value<double>(&time_limit), "time limit in seconds")
-        ("verbose,v", "")
         ;
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -159,16 +207,17 @@ int main(int argc, char *argv[])
 
     Seed seed = 0;
     std::mt19937_64 gen(seed);
-    //bool verbose = vm.count("verbose");
 
     for (std::string algorithm: algorithms) {
-        std::cout << "*** " << algorithm << " ***" << std::endl;
         for (std::string dataset: datasets) {
-            if (dataset == "normal") {
+            std::cout << "*** " << algorithm << " / " << dataset << " ***" << std::endl;
+
+            if (dataset == "normal")
                 bench_normal(algorithm, gen, time_limit);
-            } else if (dataset == "hard") {
-                bench_hard(algorithm, gen, time_limit);
-            }
+
+            if (dataset == "literature")
+                bench_literature(algorithm, gen, time_limit);
+
         }
     }
 
