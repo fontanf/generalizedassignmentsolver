@@ -44,7 +44,7 @@ Polynomial algorithms (options `f cij` `f wij` `f cij*wij` `f -pij/wij` `f wij/t
 - MTHG, basic greedy (+ n shifts) `-a "mthg f wij"` :heavy_check_mark:
 - MTHG, greedy with regret measure (+ n shifts) `-a "mthgregret f wij"` :heavy_check_mark:
 
-Classical meta-heuristics based on shift-swap neighborhood:
+Classical meta-heuristics based on shift-swap neighborhood optimized for large instances:
 - Local search `-a ls_shiftswap` :heavy_check_mark:
 - Tabu search `-a ts_shiftswap` :heavy_check_mark:
 - Simulated annealing `-a sa_shiftswap` :heavy_check_mark:

@@ -299,8 +299,8 @@ void Solution::update(const Solution& sol, Cost lb, const std::stringstream& s, 
 
         info.output->sol_number++;
         std::string sol_str = "Solution" + std::to_string(info.output->sol_number);
-        PUT(info, sol_str + ".Cost", cost());
-        PUT(info, sol_str + ".Time", t);
+        PUT(info, sol_str, "Cost", cost());
+        PUT(info, sol_str, "Time", t);
 
         VER(info, std::left << std::setw(10) << t);
         VER(info, std::left << std::setw(12) << ub_str);
@@ -334,8 +334,8 @@ void gap::update_lb(Cost& lb, Cost lb_new, const Solution& sol, const std::strin
 
         info.output->bnd_number++;
         std::string sol_str = "Bound" + std::to_string(info.output->bnd_number);
-        PUT(info, sol_str + ".Cost", lb);
-        PUT(info, sol_str + ".Time", t);
+        PUT(info, sol_str, "Cost", lb);
+        PUT(info, sol_str, "Time", t);
 
         VER(info, std::left << std::setw(10) << t);
         VER(info, std::left << std::setw(12) << ub_str);
@@ -357,10 +357,10 @@ Solution gap::algorithm_end(const Solution& sol, Cost lb, Info& info)
         (double)(10000 * (sol.cost() - lb) / lb) / 100;
     double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
 
-    PUT(info, "Solution.Cost", ub_str);
-    PUT(info, "Solution.Time", t);
-    PUT(info, "Bound.Cost", lb_str);
-    PUT(info, "Bound.Time", t);
+    PUT(info, "Solution", "Cost", ub_str);
+    PUT(info, "Solution", "Time", t);
+    PUT(info, "Bound", "Cost", lb_str);
+    PUT(info, "Bound", "Time", t);
 
     VER(info, "---" << std::endl);
     VER(info, "Cost: " << ub_str << std::endl);
@@ -377,8 +377,8 @@ Solution gap::algorithm_end(const Solution& sol, Info& info)
     std::string ub_str = (!sol.feasible())? "inf": std::to_string(sol.cost());
     double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
 
-    PUT(info, "Solution.Cost", ub_str);
-    PUT(info, "Solution.Time", t);
+    PUT(info, "Solution", "Cost", ub_str);
+    PUT(info, "Solution", "Time", t);
 
     VER(info, "---" << std::endl);
     VER(info, "Cost: " << ub_str << std::endl);
@@ -392,8 +392,8 @@ Cost gap::algorithm_end(const Instance& ins, Cost lb, Info& info)
     std::string lb_str = (lb == ins.bound())? "inf": std::to_string(lb);
     double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
 
-    PUT(info, "Bound.Cost", lb_str);
-    PUT(info, "Bound.Time", t);
+    PUT(info, "Bound", "Cost", lb_str);
+    PUT(info, "Bound", "Time", t);
 
     VER(info, "---" << std::endl);
     VER(info, "Cost: " << lb_str << std::endl);
