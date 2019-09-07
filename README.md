@@ -24,7 +24,9 @@ GAP is interesting for several reasons:
 
 The first goal of this repository is for me to have reference implementations for classical algorithms and solvers. I'll also try to implement state of the art algorithms and provide free implementations.
 
-## Lower bounds
+## Implemented algorithms
+
+### Lower bounds
 
 - Linear relaxation
   - solved with CLP `-a linrelax_clp` :heavy_check_mark:
@@ -36,9 +38,9 @@ The first goal of this repository is for me to have reference implementations fo
   - solved with volume method `-a lagrelax_assignment_volume` :heavy_check_mark:
   - solved with L-BFGS method `-a lagrelax_assignment_lbfgs` :heavy_check_mark:
 
-## Upper bounds
+### Upper bounds
 
-Polynomial algorithms (options `f cij` `f wij` `f cij*wij` `f -pij/wij` `f wij/ti`):
+Polynomial algorithms from "Generalized Assignment Problems" (Martello et al., 1992), options `f cij` `f wij` `f cij*wij` `f -pij/wij` `f wij/ti`:
 - Basic greedy `-a "greedy f wij` :heavy_check_mark:
 - Greedy with regret measure `-a "greedyregret f wij"` :heavy_check_mark:
 - MTHG, basic greedy (+ n shifts) `-a "mthg f wij"` :heavy_check_mark:
@@ -59,7 +61,7 @@ Others heuristics and meta-heuristics:
   - k-agents reallocation neighborhood `-a vdns_simple` :heavy_check_mark:
 - Local search with LocalSolver `-a localsolver` :heavy_check_mark:
 
-## Exact algorithms
+### Exact algorithms
 
 - Branch-and-cut
   - with CBC `-a branchandcut_cbc` :heavy_check_mark:
