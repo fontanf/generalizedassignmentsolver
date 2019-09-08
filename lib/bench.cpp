@@ -15,15 +15,16 @@ void bench_normal(
 {
     auto func = get_algorithm(algorithm);
 
-    std::vector<ItemIdx> ns {100, 1000, 10000};
-    std::vector<Weight> rs {1000, 10000, 100000};
-    std::vector<double> mxs {0.0, 0.05, 0.1, 0.2, 0.33, 0.5};
+    std::vector<std::pair<ItemIdx, AgentIdx>> nms {
+        {100, 10}, {100, 33},
+        {1000, 10}, {1000, 100}, {1000, 333},
+        {10000, 10}, {10000, 100}, {10000, 1000}, {10000, 3333}};
+    std::vector<Weight> rs {100, 1000, 10000};
     std::vector<double> xs {0.0, 0.2, 0.4, 0.6, 0.8, 1};
 
     nlohmann::json json;
-    json["lab"][0] = {"n", ns};
+    json["lab"][0] = {"(n,m)", nms};
     json["lab"][1] = {"r", rs};
-    json["lab"][2] = {"mx", mxs};
     json["lab"][3] = {"x", xs};
 
     int val_max_r = 255 - 52;
@@ -37,77 +38,75 @@ void bench_normal(
     data.t = "n";
     data.s = 0;
 
-    for (Cpt in = 0; in < (Cpt)ns.size(); ++in) {
-        ItemIdx n = ns[in];
+    for (Cpt inm = 0; inm < (Cpt)nms.size(); ++inm) {
+        ItemIdx n = nms[inm].first;
+        ItemIdx m = nms[inm].second;
         data.n = n;
+        data.m = m;
 
         for (Cpt ir = 0; ir < (Cpt)rs.size(); ++ir) {
             Weight r = rs[ir];
             data.r = r;
 
-            for (Cpt mix = 0; mix < (Cpt)mxs.size(); ++mix) {
-                double mx = mxs[mix];
-                data.mx = mx;
+            // Standard output
+            std::stringstream ss;
+            ss << "--- n " << n << " m " << m << " r " << r << " --- ";
+            int pos = (int)((80 - ss.str().length())/2);
+            for(int i=0; i<pos; i++)
+                std::cout << " ";
+            std::cout << ss.str() << std::endl;
+
+            for (Cpt ix = 0; ix < (Cpt)xs.size(); ++ix) {
+                double x = xs[ix];
+                data.x = x;
+                data.s++;
 
                 // Standard output
-                std::stringstream ss;
-                ss << "--- n " << n << " r " << r << " mx " << mx << " --- ";
-                int pos = (int)((80 - ss.str().length())/2);
-                for(int i=0; i<pos; i++)
-                    std::cout << " ";
-                std::cout << ss.str() << std::endl;
+                std::cout << "x " << std::right << std::setw(6) << x << std::flush;
 
-                for (Cpt ix = 0; ix < (Cpt)xs.size(); ++ix) {
-                    double x = xs[ix];
-                    data.x = x;
-                    data.s++;
-
-                    // Standard output
-                    std::cout << "x " << std::right << std::setw(6) << x << std::flush;
-
-                    Instance ins = data.generate();
-                    Solution sol(ins);
-                    Cost lb = 0;
-                    double t = time_limit + 1;
-                    try {
-                        Info info = Info()
-                            .set_timelimit(time_limit)
-                            //.set_verbose(true)
-                            ;
-                        func(ins, sol, lb, gen, info);
-                        t = info.elapsed_time();
-                    } catch (...) {
-                    }
-
-                    std::stringstream t_str;
-                    if (t <= time_limit && (lb == ins.bound() || (sol.feasible() && lb == sol.cost()))) {
-                        t_str << (double)std::round(t * 10) / 10;
-                        col_r = 255 - (int)(val_max_r * cbrt(t / time_limit));
-                        col_g = 255 - (int)(val_max_g * cbrt(t / time_limit));
-                        col_b = 255 - (int)(val_max_b * cbrt(t / time_limit));
-                        std::cout << "\033[32m";
-                    } else {
-                        t_str << "> " << time_limit;
-                        col_r = 0;
-                        col_g = 0;
-                        col_b = 0;
-                    }
-
-                    // Json
-                    std::string rgb_str = "rgb("
-                        + std::to_string(col_r) + ","
-                        + std::to_string(col_g) + ","
-                        + std::to_string(col_b) + ")";
-                    json["tab"][in][ir][ix][0]["c"] = rgb_str;
-                    json["tab"][in][ir][ix][0]["t"] = t_str.str();
-
-                    // Standard output
-                    double ub = (!sol.feasible())? std::numeric_limits<double>::infinity(): sol.cost();
-                    std::cout << " | UB" << std::right << std::setw(20) << ub;
-                    std::cout << " | LB" << std::right << std::setw(20) << lb;
-                    std::cout << " | T (s)" << std::right << std::setw(8) << t_str.str();
-                    std::cout << "\033[0m" << std::endl;
+                Instance ins = data.generate();
+                Solution sol(ins);
+                Cost lb = 0;
+                double t = time_limit + 1;
+                try {
+                    Info info = Info()
+                        .set_timelimit(time_limit)
+                        //.set_verbose(true)
+                        ;
+                    func(ins, sol, lb, gen, info);
+                    t = info.elapsed_time();
+                } catch (...) {
                 }
+
+                std::stringstream t_str;
+                if (t <= time_limit && (lb == ins.bound() || (sol.feasible() && lb == sol.cost()))) {
+                    t_str << (double)std::round(t * 10) / 10;
+                    col_r = 255 - (int)(val_max_r * cbrt(t / time_limit));
+                    col_g = 255 - (int)(val_max_g * cbrt(t / time_limit));
+                    col_b = 255 - (int)(val_max_b * cbrt(t / time_limit));
+                    std::cout << "\033[32m";
+                } else {
+                    t_str << "> " << time_limit;
+                    col_r = 0;
+                    col_g = 0;
+                    col_b = 0;
+                }
+
+                // Json
+                std::string rgb_str = "rgb("
+                    + std::to_string(col_r) + ","
+                    + std::to_string(col_g) + ","
+                    + std::to_string(col_b) + ")";
+                json["tab"][inm][ir][ix][0]["c"] = rgb_str;
+                json["tab"][inm][ir][ix][0]["t"] = t_str.str();
+
+                // Standard output
+                std::string ub_str = (!sol.feasible())? "inf": std::to_string(sol.cost());
+                std::string lb_str = (lb == ins.bound())? "inf": std::to_string(lb);
+                std::cout << " | UB" << std::right << std::setw(20) << ub_str;
+                std::cout << " | LB" << std::right << std::setw(20) << lb_str;
+                std::cout << " | T (s)" << std::right << std::setw(8) << t_str.str();
+                std::cout << "\033[0m" << std::endl;
             }
         }
     }
@@ -165,12 +164,9 @@ void bench_literature(
                     || (!sol.feasible() && lb == ins.bound()))
                 std::cout << "\033[32m";
             double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
-            std::cout << std::left << std::setw(6) << " | UB";
-            std::cout << std::right << std::setw(5) << ub_str;
-            std::cout << std::left << std::setw(6) << " | LB";
-            std::cout << std::right << std::setw(5) << lb_str;
-            std::cout << std::left << std::setw(8) << " | T (s)";
-            std::cout << std::right << std::setw(8) << t;
+            std::cout << " | UB" << std::right << std::setw(5) << ub_str;
+            std::cout << " | LB" << std::setw(5) << lb_str;
+            std::cout << " | T (s)" << std::right << std::setw(8) << t;
             std::cout << "\033[0m" << std::endl;
         }
     }

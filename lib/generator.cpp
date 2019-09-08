@@ -6,10 +6,8 @@ using namespace gap;
 
 std::ostream& gap::operator<<(std::ostream& os, const Generator& data)
 {
-    AgentIdx m = 10.0 * (1 - data.mx) + (double)data.n * data.mx;
     os << "n " << data.n
-        << " mx " << data.mx
-        << " m " << m
+        << " m " << data.m
         << " t " << data.t
         << " r " << data.r
         << " x " << data.x
@@ -21,26 +19,30 @@ std::ostream& gap::operator<<(std::ostream& os, const Generator& data)
 Instance Generator::generate()
 {
     g.seed(s);
-    AgentIdx m = 10.0 * (1 - mx) + (double)n * mx;
-    Instance ins(m);
-    std::normal_distribution<double> d_wj(r / 2, r / 20);
+    std::normal_distribution<double> d_n(n, n / 10);
+    std::normal_distribution<double> d_m(m, m / 10);
+    ItemIdx  n_eff = std::round(d_n(g));
+    AgentIdx m_eff = std::round(d_m(g));
+
+    Instance ins(m_eff);
+    std::normal_distribution<double> d_wj(r / 2, r / 10);
     Weight wsum_min = 0;
     Weight wsum_max = 0;
-    for (ItemIdx j=0; j<n; ++j) {
+    for (ItemIdx j=0; j<n_eff; ++j) {
         ins.add_item();
         Weight wj = d_wj(g);
         Weight wj_min = r;
         Weight wj_max = 0;
         std::normal_distribution<double> d_wij(wj, wj / 10);
-        for (AgentIdx i=0; i<m; ++i) {
+        for (AgentIdx i=0; i<m_eff; ++i) {
             Weight wij;
             do {
-                wij = d_wij(g);
+                wij = std::round(d_wij(g));
             } while (wij <= 0 || wij > r);
             std::normal_distribution<double> d_cij(r - wij, (r - wij) / 10);
             Cost cij;
             do {
-                cij = d_cij(g);
+                cij = std::round(d_cij(g));
             } while (cij <= 0 || cij > r);
             ins.set_alternative(j, i, wij, cij);
             if (wj_max < wij)
@@ -52,8 +54,8 @@ Instance Generator::generate()
         wsum_max += wj_max;
     }
     double c = (double)(wsum_min) * (1 - x) + (double)wsum_max * x;
-    c = c / m;
-    for (AgentIdx i=0; i<m; ++i)
+    c = c / m_eff;
+    for (AgentIdx i=0; i<m_eff; ++i)
         ins.set_capacity(i, std::ceil(c));
     return ins;
 }

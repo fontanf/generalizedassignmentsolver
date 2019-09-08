@@ -202,7 +202,7 @@ Solution gap::sol_sa_shiftswap(SAShiftSwapData d)
     Cpt it_max = 2 * (n * m + (n * (n + 1)) / 2);
     Cpt it_without_change = 0;
     for (double t=t0; d.info.check_time(); t*=d.beta) {
-        for (Cpt it=0; it<d.l;) {
+        for (Cpt it=0; it<d.l && d.info.check_time();) {
             Cost v = sol_curr.cost();
             Cpt p = dis_ss(d.gen);
             if (p <= m * n) { // shift
