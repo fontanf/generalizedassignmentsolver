@@ -180,6 +180,11 @@ Solution gap::sol_ts_shiftswap(TSShiftSwapData d)
 Solution gap::sol_sa_shiftswap(SAShiftSwapData d)
 {
     init_display(d.info);
+
+    Solution sol_curr = sol_random(d.ins, d.gen, Info().set_timelimit(d.info.remaining_time()));
+    if (!sol_curr.feasible())
+        return algorithm_end(sol_curr, d.info);
+
     Solution sol_best(d.ins);
     AgentIdx m = d.ins.agent_number();
     ItemIdx n = d.ins.item_number();
@@ -188,8 +193,6 @@ Solution gap::sol_sa_shiftswap(SAShiftSwapData d)
     std::uniform_int_distribution<ItemIdx> dis_j2(0, n - 2);
     std::uniform_int_distribution<AgentIdx> dis_i(0, m - 2);
     std::uniform_real_distribution<double> dis(0, 1);
-
-    Solution sol_curr = sol_random(d.ins, d.gen);
 
     // Compute initial temperature
     double t0 = 0;

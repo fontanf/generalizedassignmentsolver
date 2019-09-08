@@ -31,6 +31,8 @@ Solution gap::sol_random(const Instance& ins, std::mt19937_64& gen, Info info)
     Cpt it_without_change = 0;
 
     while (it_without_change < it_max) {
+        if (!info.check_time())
+            return algorithm_end(Solution(ins), info);
         Weight wf = sol.overcapacity();
         Cpt p = dis_ss(gen);
         if (p <= m * n) { // shift

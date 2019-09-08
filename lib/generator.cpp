@@ -16,34 +16,38 @@ std::ostream& gap::operator<<(std::ostream& os, const Generator& data)
     return os;
 }
 
+double truncated_normal(double mean, double stddev, double min, double max, std::mt19937_64& gen)
+{
+    std::normal_distribution<double> d(mean, stddev);
+    for (;;) {
+        double res = d(gen);
+        if (min <= res && res <= max)
+            return res;
+    }
+}
+
 Instance Generator::generate()
 {
     g.seed(s);
-    std::normal_distribution<double> d_n(n, n / 10);
-    std::normal_distribution<double> d_m(m, m / 10);
-    ItemIdx  n_eff = std::round(d_n(g));
-    AgentIdx m_eff = std::round(d_m(g));
+
+    // Item and machine number
+    AgentIdx m_eff = std::round(truncated_normal(m, (double)m / 10, 2, 2 * m - 2, g));
+    ItemIdx  n_eff = std::round(truncated_normal(n, (double)n / 10, m_eff, 2 * n - m_eff, g));
 
     Instance ins(m_eff);
-    std::normal_distribution<double> d_wj(r / 2, r / 10);
+
+    // Weights and profits
     Weight wsum_min = 0;
     Weight wsum_max = 0;
     for (ItemIdx j=0; j<n_eff; ++j) {
         ins.add_item();
-        Weight wj = d_wj(g);
+        Weight wj = std::round(truncated_normal(r / 2, (double)r / 10, 1, r - 1, g));
         Weight wj_min = r;
         Weight wj_max = 0;
         std::normal_distribution<double> d_wij(wj, wj / 10);
         for (AgentIdx i=0; i<m_eff; ++i) {
-            Weight wij;
-            do {
-                wij = std::round(d_wij(g));
-            } while (wij <= 0 || wij > r);
-            std::normal_distribution<double> d_cij(r - wij, (r - wij) / 10);
-            Cost cij;
-            do {
-                cij = std::round(d_cij(g));
-            } while (cij <= 0 || cij > r);
+            Weight wij = std::round(truncated_normal(wj,      (double)wj        / 10, 1, r - 1, g));
+            Cost   cij = std::round(truncated_normal(r - wij, (double)(r - wij) / 10, 1, r - 1, g));
             ins.set_alternative(j, i, wij, cij);
             if (wj_max < wij)
                 wj_max = wij;
@@ -53,10 +57,16 @@ Instance Generator::generate()
         wsum_min += wj_min;
         wsum_max += wj_max;
     }
-    double c = (double)(wsum_min) * (1 - x) + (double)wsum_max * x;
-    c = c / m_eff;
-    for (AgentIdx i=0; i<m_eff; ++i)
-        ins.set_capacity(i, std::ceil(c));
+
+    // Capacities
+    double t = (double)(wsum_min) * (1 - x) + (double)wsum_max * x;
+    t = t / m_eff;
+    std::normal_distribution<double> d_ti(t, t / 10);
+    for (AgentIdx i=0; i<m_eff; ++i) {
+        Weight ti = std::ceil(truncated_normal(t, (double)t / 10, 1, 2 * t - 1, g));
+        ins.set_capacity(i, ti);
+    }
+
     return ins;
 }
 

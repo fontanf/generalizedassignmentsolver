@@ -62,7 +62,9 @@ void bench_normal(
                 data.s++;
 
                 // Standard output
-                std::cout << "x " << std::right << std::setw(6) << x << std::flush;
+                std::cout << "x " << std::right << std::setw(4) << x
+                    << " s " << std::right << std::setw(4) << data.s
+                    << std::flush;
 
                 Instance ins = data.generate();
                 Solution sol(ins);
