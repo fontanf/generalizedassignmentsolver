@@ -81,7 +81,7 @@ Solution gap::sol_repairgreedy(const Instance& ins, Info info)
     // Initilize current solution
     Solution sol_curr(ins);
     for (ItemIdx j=0; j<n; ++j) {
-        sol_curr.set(j, ins.item(j).i_best);
+        sol_curr.set(j, ins.item(j).i_cmin);
         repair(sol_curr);
     }
     return algorithm_end(sol_curr, info);
@@ -94,7 +94,7 @@ Solution gap::sol_repaircombrelax(const Instance& ins, Info info)
     // Initilize current solution
     Solution sol_curr(ins);
     for (ItemIdx j=0; j<n; ++j)
-        sol_curr.set(j, ins.item(j).i_best);
+        sol_curr.set(j, ins.item(j).i_cmin);
 
     repair(sol_curr);
     return algorithm_end(sol_curr, info);

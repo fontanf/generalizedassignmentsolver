@@ -27,14 +27,26 @@ void Instance::set_alternative(ItemIdx j, AgentIdx i, Weight w, Cost v)
     alternatives_[items_[j].alt[i]].c = v;
     items_[j].w += w;
     items_[j].c += v;
-    if (items_[j].i_best == -1 || items_[j].c_min > v) {
-        items_[j].i_best = i;
+    if (items_[j].i_cmin == -1 || items_[j].c_min > v) {
+        items_[j].i_cmin = i;
         items_[j].c_min = v;
     }
-    if (items_[j].c_max < v)
+    if (items_[j].i_wmin == -1 || items_[j].w_min > w) {
+        items_[j].i_wmin = i;
+        items_[j].w_min = w;
+    }
+    if (items_[j].c_max < v) {
+        items_[j].i_cmax = i;
         items_[j].c_max = v;
+    }
+    if (items_[j].w_max < w) {
+        items_[j].i_wmax = i;
+        items_[j].w_max = w;
+    }
     if (c_max_ < v)
         c_max_ = v;
+    if (w_max_ < w)
+        w_max_ = w;
     c_tot_ += v;
 }
 

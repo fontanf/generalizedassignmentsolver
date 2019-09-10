@@ -81,14 +81,18 @@ void bench_normal(
                 }
 
                 std::stringstream t_str;
-                if (t <= time_limit && (lb == ins.bound() || (sol.feasible() && lb == sol.cost()))) {
+                if (t <= time_limit) {
                     t_str << (double)std::round(t * 10) / 10;
+                } else {
+                    t_str << "> " << time_limit;
+                }
+
+                if (t <= time_limit && (lb == ins.bound() || (sol.feasible() && lb == sol.cost()))) {
                     col_r = 255 - (int)(val_max_r * cbrt(t / time_limit));
                     col_g = 255 - (int)(val_max_g * cbrt(t / time_limit));
                     col_b = 255 - (int)(val_max_b * cbrt(t / time_limit));
                     std::cout << "\033[32m";
                 } else {
-                    t_str << "> " << time_limit;
                     col_r = 0;
                     col_g = 0;
                     col_b = 0;

@@ -47,9 +47,16 @@ struct Item
     std::vector<AltIdx> alt;
     Weight w; // total weight
     Cost c; // total cost
+
     Cost c_min = -1; // minimum cost
     Cost c_max = -1; // maximum cost
-    AgentIdx i_best = -1; // lowest cost agent
+    AgentIdx i_cmin = -1; // min cost agent
+    AgentIdx i_cmax = -1; // max cost agent
+
+    Weight w_min = -1; // minimum weight
+    Weight w_max = -1; // maximum weight
+    AgentIdx i_wmin = -1; // min weight agent
+    AgentIdx i_wmax = -1; // max weight agent
 };
 
 class Instance
@@ -93,7 +100,8 @@ public:
     const Alternative& alternative(AltPos k) const { return alternatives_[k]; }
     const Alternative& alternative(ItemIdx j, AgentIdx i) const { return alternatives_[items_[j].alt[i]]; } 
 
-    inline Cost cost_max() const { return c_max_; }
+    inline Cost cost_max()   const { return c_max_; }
+    inline Cost weight_max() const { return w_max_; }
     inline Cost profit(const Alternative& a)  const { return c_max_ - a.c; }
     inline Cost profit(AltIdx k)              const { return profit(alternative(k)); }
     inline Cost profit(ItemIdx j, AgentIdx i) const { return profit(alternative_index(i, j)); }
@@ -121,6 +129,7 @@ private:
     std::vector<Weight> t_;
     Cost c_max_ = -1;
     Cost c_tot_ = 0;
+    Cost w_max_ = -1;
 
     std::unique_ptr<Solution> sol_opt_;
 

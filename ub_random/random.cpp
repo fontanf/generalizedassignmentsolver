@@ -18,14 +18,16 @@ Solution gap::sol_random_infeasible(const Instance& ins, std::mt19937_64& gen, I
 
 Solution gap::sol_random(const Instance& ins, std::mt19937_64& gen, Info info)
 {
+    VER(info, "*** random ***" << std::endl);
+
     Solution sol = sol_random_infeasible(ins, gen);
     AgentIdx m = ins.agent_number();
     ItemIdx n = ins.item_number();
     std::uniform_int_distribution<Cpt> dis_ss(1, n * m + (n * (n + 1)) / 2);
     std::uniform_int_distribution<ItemIdx> dis_j(0, n - 1);
     std::uniform_int_distribution<ItemIdx> dis_j2(0, n - 2);
-    std::uniform_int_distribution<AgentIdx> dis_i1(0, m - 2);
-    std::uniform_int_distribution<AgentIdx> dis_i2(0, m - 3);
+    std::uniform_int_distribution<AgentIdx> dis_i(0, m - 2);
+    std::uniform_real_distribution<double> dis(0, 1);
 
     Cpt it_max = 2 * (n * m + (n * (n + 1)) / 2);
     Cpt it_without_change = 0;
@@ -37,7 +39,7 @@ Solution gap::sol_random(const Instance& ins, std::mt19937_64& gen, Info info)
         Cpt p = dis_ss(gen);
         if (p <= m * n) { // shift
             ItemIdx j = dis_j(gen);
-            AgentIdx i = dis_i1(gen);
+            AgentIdx i = dis_i(gen);
             AgentIdx i_old = sol.agent(j);
             if (i >= i_old)
                 i++;
@@ -52,6 +54,8 @@ Solution gap::sol_random(const Instance& ins, std::mt19937_64& gen, Info info)
                 j2++;
             AgentIdx i1 = sol.agent(j1);
             AgentIdx i2 = sol.agent(j2);
+            if (i1 == i2)
+                continue;
             sol.set(j1, i2);
             sol.set(j2, i1);
             if (sol.overcapacity() > wf) {
