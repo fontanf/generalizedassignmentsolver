@@ -8,6 +8,14 @@
 
 using namespace gap;
 
+const std::string forbidden_chars = " \\/:?\"<>|";
+static char clear_forbidden(char to_check)
+{
+    if (forbidden_chars.find(to_check) != std::string::npos)
+         return '_';
+    return to_check;
+}
+
 void bench_normal(
         std::string algorithm,
         std::mt19937_64& gen,
@@ -82,7 +90,8 @@ void bench_normal(
 
                 std::stringstream t_str;
                 if (t <= time_limit) {
-                    t_str << (double)std::round(t * 10) / 10;
+                    t_str.precision(4);
+                    t_str << std::round(t * 10000) / 10000;
                 } else {
                     t_str << "> " << time_limit;
                 }
@@ -117,7 +126,10 @@ void bench_normal(
         }
     }
 
-    std::ofstream o(algorithm + ".json");
+    std::string filename = algorithm + ".json";
+    std::transform(filename.begin(), filename.end(), filename.begin(), clear_forbidden);
+    std::cout << filename << std::endl;
+    std::ofstream o(filename);
     o << std::setw(4) << json << std::endl;
 }
 

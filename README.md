@@ -83,6 +83,11 @@ The bound from the lagrangian relaxation of knapsack constraints is theoriticall
 
 The same happens for the bound obtained by solving the lagrangian relaxation of assignment constraints; the Volume method give poor results while the L-BFGS algorithm returns the best known ones found in "An exact method with variable fixing for solving the generalized assignment problem" (Posta et al., 2011).
 
+### Finding a feasible solution
+
+* [mthgregret f wij/tij](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/generalizedassignment/master/bench/mthgregret_f_wij_tij.json)
+* [random](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/generalizedassignment/master/bench/random.json)
+
 ### Others
 
 `vdns_simple` does not compete with state of the art meta-heuristics like the ones presented in "A path relinking approach with ejection chains for the generalized assignment problem" (Yagiura et al., 2006) or "Variable-fixing then subgradient optimization guided very large scale neighborhood search for the generalized assignment problem" (Haddadi, 2018) in terms of solution quality on long runs. However:

@@ -29,7 +29,7 @@ Solution gap::sol_random(const Instance& ins, std::mt19937_64& gen, Info info)
     std::uniform_int_distribution<AgentIdx> dis_i(0, m - 2);
     std::uniform_real_distribution<double> dis(0, 1);
 
-    Cpt it_max = 2 * (n * m + (n * (n + 1)) / 2);
+    Cpt it_max = 10000;
     Cpt it_without_change = 0;
 
     while (it_without_change < it_max && info.check_time()) {
