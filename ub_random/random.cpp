@@ -32,9 +32,7 @@ Solution gap::sol_random(const Instance& ins, std::mt19937_64& gen, Info info)
     Cpt it_max = 2 * (n * m + (n * (n + 1)) / 2);
     Cpt it_without_change = 0;
 
-    while (it_without_change < it_max) {
-        if (!info.check_time())
-            return algorithm_end(Solution(ins), info);
+    while (it_without_change < it_max && info.check_time()) {
         Weight wf = sol.overcapacity();
         Cpt p = dis_ss(gen);
         if (p <= m * n) { // shift
@@ -46,6 +44,9 @@ Solution gap::sol_random(const Instance& ins, std::mt19937_64& gen, Info info)
             sol.set(j, i);
             if (sol.overcapacity() > wf) {
                 sol.set(j, i_old);
+                it_without_change++;
+            } else {
+                it_without_change = 0;
             }
         } else { // swap
             ItemIdx j1 = dis_j(gen);
@@ -61,12 +62,15 @@ Solution gap::sol_random(const Instance& ins, std::mt19937_64& gen, Info info)
             if (sol.overcapacity() > wf) {
                 sol.set(j1, i1);
                 sol.set(j2, i2);
+                it_without_change++;
+            } else {
+                it_without_change = 0;
             }
         }
         if (sol.overcapacity() == 0)
             return algorithm_end(sol, info);
     }
 
-    return sol_random(ins, gen, info);
+    return algorithm_end(Solution(ins), info);
 }
 

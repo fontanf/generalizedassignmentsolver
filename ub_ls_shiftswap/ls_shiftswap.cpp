@@ -11,15 +11,21 @@ using namespace gap;
 Solution gap::sol_ls_shiftswap(LSShiftSwapData d)
 {
     init_display(d.info);
+
     Solution sol_best(d.ins);
+    Solution sol_curr(d.ins);
+    while (!sol_curr.feasible()) {
+        if (!d.info.check_time())
+            return algorithm_end(sol_best, d.info);
+        sol_curr = sol_random(d.ins, d.gen, Info().set_timelimit(d.info.remaining_time()));
+    }
+
     AgentIdx m = d.ins.agent_number();
     ItemIdx n = d.ins.item_number();
     std::uniform_int_distribution<Cpt> dis_ss(1, n * m + (n * (n + 1)) / 2);
     std::uniform_int_distribution<ItemIdx> dis_j(0, n - 1);
     std::uniform_int_distribution<ItemIdx> dis_j2(0, n - 2);
     std::uniform_int_distribution<AgentIdx> dis_i(0, m - 2);
-
-    Solution sol_curr = sol_random(d.ins, d.gen);
 
     Cost v_curr = sol_curr.cost();
     for (; d.info.check_time();) {
@@ -63,7 +69,15 @@ Solution gap::sol_ls_shiftswap(LSShiftSwapData d)
 Solution gap::sol_ts_shiftswap(TSShiftSwapData d)
 {
     init_display(d.info);
+
     Solution sol_best(d.ins);
+    Solution sol_curr(d.ins);
+    while (!sol_curr.feasible()) {
+        if (!d.info.check_time())
+            return algorithm_end(sol_best, d.info);
+        sol_curr = sol_random(d.ins, d.gen, Info().set_timelimit(d.info.remaining_time()));
+    }
+
     AgentIdx m = d.ins.agent_number();
     ItemIdx n = d.ins.item_number();
     std::uniform_int_distribution<Cpt> dis_ss(1, n * m + (n * (n + 1)) / 2);
@@ -71,9 +85,7 @@ Solution gap::sol_ts_shiftswap(TSShiftSwapData d)
     std::uniform_int_distribution<ItemIdx> dis_j2(0, n - 2);
     std::uniform_int_distribution<AgentIdx> dis_i(0, m - 2);
 
-    Solution sol_curr = sol_random(d.ins, d.gen);
     Cpt l = std::min(d.l, n * m + n * (n + 1) / 4);
-
     Cost v_curr = sol_curr.cost();
     Cost v_best = -1;
     ItemIdx j_best = -1;
@@ -181,11 +193,14 @@ Solution gap::sol_sa_shiftswap(SAShiftSwapData d)
 {
     init_display(d.info);
 
-    Solution sol_curr = sol_random(d.ins, d.gen, Info().set_timelimit(d.info.remaining_time()));
-    if (!sol_curr.feasible())
-        return algorithm_end(sol_curr, d.info);
-
     Solution sol_best(d.ins);
+    Solution sol_curr(d.ins);
+    while (!sol_curr.feasible()) {
+        if (!d.info.check_time())
+            return algorithm_end(sol_best, d.info);
+        sol_curr = sol_random(d.ins, d.gen, Info().set_timelimit(d.info.remaining_time()));
+    }
+
     AgentIdx m = d.ins.agent_number();
     ItemIdx n = d.ins.item_number();
     std::uniform_int_distribution<Cpt> dis_ss(1, n * m + (n * (n + 1)) / 2);
