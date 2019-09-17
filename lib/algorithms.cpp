@@ -5,7 +5,7 @@
 #include "gap/lb_lagrelax_volume/lagrelax_volume.hpp"
 #include "gap/lb_lagrelax_bundle/lagrelax_bundle.hpp"
 #include "gap/lb_lagrelax_lbfgs/lagrelax_lbfgs.hpp"
-#include "gap/lb_colgen/colgen.hpp"
+#include "gap/lb_colgen_clp/colgen_clp.hpp"
 #include "gap/opt_branchandcut_cbc/branchandcut_cbc.hpp"
 #include "gap/opt_branchandcut_cplex/branchandcut_cplex.hpp"
 #include "gap/opt_branchandcut_gurobi/branchandcut_gurobi.hpp"
@@ -93,17 +93,16 @@ std::function<void (Instance&, Solution&, Cost&, std::mt19937_64&, Info)> gap::g
             lb = res.lb;
         };
 #endif
-    } else if (algo.name == "colgen") {
+    } else if (algo.name == "colgen_clp") {
         return [algo](Instance& ins, Solution&, Cost& lb, std::mt19937_64&, Info info) {
-            std::vector<std::vector<std::vector<uint8_t>>> columns;
+            std::vector<std::vector<std::vector<AgentIdx>>> column_elts;
             std::vector<AltIdx> fixed_alt;
-            lb_colgen(ColGenData{
+            lb_colgen(ColGenClpData{
                     .ins = ins,
                     .lb = lb,
-                    .columns = columns,
+                    .column_elts = column_elts,
                     .fixed_alt = fixed_alt,
-                    .info = info}
-                    .set_params(algo.args));
+                    .info = info});
         };
 
     /*
