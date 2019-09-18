@@ -10,10 +10,8 @@ cc_library(
         copts = select({"//lib:coinor_build": ["-DCOINOR_FOUND"], "//conditions:default": []}),
         linkopts = [] +
             select({"//lib:coinor_build": [
-                        "-lCbcSolver",
-                        "-lCbc",
-                        "-lCgl",
-                        "-lOsiCbc",
+                        "-lClp",
+                        "-lOsiClp",
                         "-lCoinUtils",
                 ], "//conditions:default": []}),
         visibility = ["//visibility:public"],

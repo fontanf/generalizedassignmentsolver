@@ -15,11 +15,11 @@ struct ColGenClpData
 {
     const Instance& ins;
     Cost lb = 0;
-    std::vector<std::vector<std::vector<ItemIdx>>>& column_elts;
+    std::vector<std::vector<std::vector<ItemIdx>>>& columns;
     std::vector<AltIdx>& fixed_alt; // -1: unfixed, 0: fixed to 0, 1: fixed to 1.
     Info info = Info();
 };
-void lb_colgen(ColGenClpData d);
+void lb_colgen_clp(ColGenClpData d);
 
 }
 

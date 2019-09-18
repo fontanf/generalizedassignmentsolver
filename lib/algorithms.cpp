@@ -93,17 +93,20 @@ std::function<void (Instance&, Solution&, Cost&, std::mt19937_64&, Info)> gap::g
             lb = res.lb;
         };
 #endif
+#if COINOR_FOUND
     } else if (algo.name == "colgen_clp") {
         return [algo](Instance& ins, Solution&, Cost& lb, std::mt19937_64&, Info info) {
-            std::vector<std::vector<std::vector<AgentIdx>>> column_elts;
-            std::vector<AltIdx> fixed_alt;
-            lb_colgen(ColGenClpData{
+            std::vector<std::vector<std::vector<ItemIdx>>> columns;
+            std::vector<AltIdx> fixed_alt(ins.alternative_number());
+            std::fill(fixed_alt.begin(), fixed_alt.end(), -1);
+            lb_colgen_clp(ColGenClpData{
                     .ins = ins,
                     .lb = lb,
-                    .column_elts = column_elts,
+                    .columns = columns,
                     .fixed_alt = fixed_alt,
                     .info = info});
         };
+#endif
 
     /*
      * Exact algorithms
