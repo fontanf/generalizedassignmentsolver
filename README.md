@@ -85,7 +85,7 @@ The same happens for the bound obtained by solving the lagrangian relaxation of 
 
 ### Finding a feasible solution
 
-* [mthgregret f wij/tij](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/generalizedassignment/master/bench/mthgregret_f_wij_tij.json)
+* [mthgregret f wij/ti](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/generalizedassignment/master/bench/mthgregret_f_wij_ti.json)
 * [random](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/generalizedassignment/master/bench/random.json)
 
 ### Others
