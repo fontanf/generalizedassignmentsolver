@@ -16,6 +16,7 @@ void add_column(ColGenClpData& d, ClpSimplex& model, AgentIdx i, std::vector<Ite
     std::vector<int> rows;
     rows.push_back(i);
     Cost c = 0;
+    Weight w = 0;
     ItemIdx j_prec = 0;
     for (ItemIdx j: col) {
         // Check fixed variables
@@ -31,8 +32,9 @@ void add_column(ColGenClpData& d, ClpSimplex& model, AgentIdx i, std::vector<Ite
 
         rows.push_back(m + j);
         c += d.ins.alternative(k).c;
+        w += d.ins.alternative(k).w;
     }
-    std::cout << "add column for agent " << i << " of cost " << c << std::endl;
+    std::cout << "add column for agent " << i << " of cost " << c << " and weight " << w << "/" << d.ins.capacity(i) << std::endl;
     model.addColumn(col.size() + 1, rows.data(), ones.data(), 0.0, 1, c);
 }
 
@@ -74,13 +76,13 @@ void gap::lb_colgen_clp(ColGenClpData d)
 
         // Find and add new columns
         found = false;
-        Weight mult = 10000;
+        Weight mult = 1000000;
         std::vector<ItemIdx> indices(n);
         for (AgentIdx i=0; i<m; ++i) {
             //std::cout << "knapsack " << i << std::endl;
             knapsack::Instance ins_kp;
             knapsack::Weight capacity_kp = d.ins.capacity(i);
-            knapsack::Profit profit_kp = 0;
+            double rc = dual_sol[i];
             ItemIdx j_kp = 0;
             for (ItemIdx j=0; j<n; ++j) {
                 AltIdx k = d.ins.alternative_index(j, i);
@@ -90,7 +92,7 @@ void gap::lb_colgen_clp(ColGenClpData d)
                 knapsack::Profit p = std::ceil(mult * dual_sol[m + j] - mult * a.c);
                 if (d.fixed_alt[k] == 1) {
                     capacity_kp -= a.w;
-                    profit_kp += p;
+                    rc += dual_sol[m + j] - a.c;
                     continue;
                 }
                 if (p <= 0)
@@ -101,10 +103,10 @@ void gap::lb_colgen_clp(ColGenClpData d)
             }
             ins_kp.set_capacity(capacity_kp);
             knapsack::Solution sol = knapsack::sopt_minknap(ins_kp, knapsack::MinknapParams::combo());
-            profit_kp += sol.profit();
-            if (profit_kp <= 0)
+            rc += (double)sol.profit() / mult;
+            if (rc <= 0)
                 continue;
-            std::cout << "profit " << profit_kp << std::endl;
+            std::cout << "rc " << rc << std::endl;
 
             found = true;
             d.columns[i].push_back({});
