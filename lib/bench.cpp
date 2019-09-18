@@ -19,7 +19,8 @@ static char clear_forbidden(char to_check)
 void bench_normal(
         std::string algorithm,
         std::mt19937_64& gen,
-        double time_limit)
+        double time_limit,
+        std::string type) // exact, feasible
 {
     auto func = get_algorithm(algorithm);
 
@@ -33,11 +34,14 @@ void bench_normal(
     nlohmann::json json;
     json["lab"][0] = {"(n,m)", nms};
     json["lab"][1] = {"r", rs};
-    json["lab"][3] = {"x", xs};
+    json["lab"][2] = {"x", xs};
 
     int val_max_r = 255 - 52;
     int val_max_g = 255 - 101;
     int val_max_b = 255 - 164;
+    int val_max_2_r = 255 - 154;
+    int val_max_2_g = 255 - 53;
+    int val_max_2_b = 255 - 52;
     int col_r = 0;
     int col_g = 0;
     int col_b = 0;
@@ -96,15 +100,34 @@ void bench_normal(
                     t_str << "> " << time_limit;
                 }
 
-                if (t <= time_limit && (lb == ins.bound() || (sol.feasible() && lb == sol.cost()))) {
-                    col_r = 255 - (int)(val_max_r * cbrt(t / time_limit));
-                    col_g = 255 - (int)(val_max_g * cbrt(t / time_limit));
-                    col_b = 255 - (int)(val_max_b * cbrt(t / time_limit));
-                    std::cout << "\033[32m";
+                if (type == "feasible") {
+                    if (t <= time_limit) {
+                        if (sol.feasible()) {
+                            col_r = 255 - (int)(val_max_r * cbrt(t / time_limit));
+                            col_g = 255 - (int)(val_max_g * cbrt(t / time_limit));
+                            col_b = 255 - (int)(val_max_b * cbrt(t / time_limit));
+                            std::cout << "\033[32m";
+                        } else {
+                            col_r = 255 - (int)(val_max_2_r * cbrt(t / time_limit));
+                            col_g = 255 - (int)(val_max_2_g * cbrt(t / time_limit));
+                            col_b = 255 - (int)(val_max_2_b * cbrt(t / time_limit));
+                        }
+                    } else {
+                        col_r = 0;
+                        col_g = 0;
+                        col_b = 0;
+                    }
                 } else {
-                    col_r = 0;
-                    col_g = 0;
-                    col_b = 0;
+                    if (t <= time_limit && (lb == ins.bound() || (sol.feasible() && lb == sol.cost()))) {
+                        col_r = 255 - (int)(val_max_r * cbrt(t / time_limit));
+                        col_g = 255 - (int)(val_max_g * cbrt(t / time_limit));
+                        col_b = 255 - (int)(val_max_b * cbrt(t / time_limit));
+                        std::cout << "\033[32m";
+                    } else {
+                        col_r = 0;
+                        col_g = 0;
+                        col_b = 0;
+                    }
                 }
 
                 // Json
@@ -128,7 +151,6 @@ void bench_normal(
 
     std::string filename = algorithm + ".json";
     std::transform(filename.begin(), filename.end(), filename.begin(), clear_forbidden);
-    std::cout << filename << std::endl;
     std::ofstream o(filename);
     o << std::setw(4) << json << std::endl;
 }
@@ -198,6 +220,7 @@ int main(int argc, char *argv[])
     std::vector<std::string> algorithms;
     std::vector<std::string> datasets;
     double time_limit = std::numeric_limits<double>::infinity();
+    std::string type = "exact";
 
     po::options_description desc("Allowed options");
     desc.add_options()
@@ -205,6 +228,7 @@ int main(int argc, char *argv[])
         ("algorithm,a", po::value<std::vector<std::string>>(&algorithms)->multitoken(), "algorithms (bestfitdecreasing, martello...)")
         ("datasets,d", po::value<std::vector<std::string>>(&datasets)->multitoken(), "datasets (normal, hard)")
         ("time-limit,t", po::value<double>(&time_limit), "time limit in seconds")
+        ("type", po::value<std::string>(&type), "feasible, exact")
         ;
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -227,7 +251,7 @@ int main(int argc, char *argv[])
             std::cout << "*** " << algorithm << " / " << dataset << " ***" << std::endl;
 
             if (dataset == "normal")
-                bench_normal(algorithm, gen, time_limit);
+                bench_normal(algorithm, gen, time_limit, type);
 
             if (dataset == "literature")
                 bench_literature(algorithm, gen, time_limit);
