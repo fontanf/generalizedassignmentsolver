@@ -37,6 +37,7 @@ The first goal of this repository is for me to have reference implementations fo
 - Lagrangian relaxation of assignment constraints
   - solved with volume method `-a lagrelax_assignment_volume` :heavy_check_mark:
   - solved with L-BFGS method `-a lagrelax_assignment_lbfgs` :heavy_check_mark:
+- Column generation with CLP `-a colgen_clp` :heavy_check_mark:
 
 ### Upper bounds
 

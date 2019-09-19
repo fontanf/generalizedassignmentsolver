@@ -34,11 +34,11 @@ void add_column(ColGenClpData& d, ClpSimplex& model, AgentIdx i, std::vector<Ite
         c += d.ins.alternative(k).c;
         w += d.ins.alternative(k).w;
     }
-    std::cout << "add column for agent " << i << " of cost " << c << " and weight " << w << "/" << d.ins.capacity(i) << std::endl;
+    //std::cout << "add column for agent " << i << " of cost " << c << " and weight " << w << "/" << d.ins.capacity(i) << std::endl;
     model.addColumn(col.size() + 1, rows.data(), ones.data(), 0.0, 1, c);
 }
 
-void gap::lb_colgen_clp(ColGenClpData d)
+Cost gap::lb_colgen_clp(ColGenClpData d)
 {
     VER(d.info, "*** colgen_clp ***" << std::endl);
 
@@ -47,6 +47,7 @@ void gap::lb_colgen_clp(ColGenClpData d)
 
     // Initialize solver
     ClpSimplex model;
+    model.messageHandler()->setLogLevel(0);
     for (AgentIdx i=0; i<m; ++i)
         model.addRow(0, NULL, NULL, 0, 1);
     for (ItemIdx j=0; j<n; ++j)
@@ -72,7 +73,6 @@ void gap::lb_colgen_clp(ColGenClpData d)
         // Solve LP
         model.primal();
         double* dual_sol = model.dualRowSolution();
-        std::cout << model.objectiveValue() << std::endl;
 
         // Find and add new columns
         found = false;
@@ -103,10 +103,17 @@ void gap::lb_colgen_clp(ColGenClpData d)
             }
             ins_kp.set_capacity(capacity_kp);
             knapsack::Solution sol = knapsack::sopt_minknap(ins_kp, knapsack::MinknapParams::combo());
-            rc += (double)sol.profit() / mult;
-            if (rc <= 0)
+
+            for (knapsack::ItemIdx j_kp=0; j_kp<ins_kp.total_item_number(); ++j_kp) {
+                if (sol.contains_idx(j_kp)) {
+                    ItemIdx j = indices[j_kp];
+                    const Alternative& a = d.ins.alternative(j, i);
+                    rc += dual_sol[m + j] - a.c;
+                }
+            }
+            if (rc <= 1e-5)
                 continue;
-            std::cout << "rc " << rc << std::endl;
+            //std::cout << "rc " << rc << std::endl;
 
             found = true;
             d.columns[i].push_back({});
@@ -120,6 +127,8 @@ void gap::lb_colgen_clp(ColGenClpData d)
         }
     }
 
+    d.lb = std::ceil(model.objectiveValue() - TOL);
+    return algorithm_end(d.ins, d.lb, d.info);
 }
 
 #endif

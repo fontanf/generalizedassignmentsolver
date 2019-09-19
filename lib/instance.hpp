@@ -12,6 +12,8 @@
 #include <memory>
 #include <map>
 
+#define TOL 0.0000001
+
 namespace gap
 {
 
