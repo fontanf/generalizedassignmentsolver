@@ -69,30 +69,48 @@ Cost gap::lb_colgen_clp(ColGenClpData d)
     }
 
     bool found = true;
+    Weight mult = 1000000;
     while (found) {
         // Solve LP
         model.primal();
+        //std::cout << model.objectiveValue() << std::endl;
         double* dual_sol = model.dualRowSolution();
 
         // Find and add new columns
         found = false;
-        Weight mult = 1000000;
         std::vector<ItemIdx> indices(n);
         for (AgentIdx i=0; i<m; ++i) {
-            //std::cout << "knapsack " << i << std::endl;
+            // uᵢ: dual value associated with agent constraints (uᵢ ≤ 0).
+            // vⱼ: dual value associated with item constraints.
+            // xᵢⱼᵏ = 1 if yᵢᵏ contains item j
+            //      = 0 otherwise
+            // Reduced cost rcᵢᵏ = ∑ⱼ xᵢⱼᵏ cᵢⱼ - (uᵢ + ∑ⱼ xᵢⱼᵏ vⱼ)
+            //                   = ∑ⱼ xᵢⱼᵏ (cᵢⱼ - vⱼ) - uᵢ
+            // The algorithm that solves KP takes positive integers as input.
+            // * positive => the profit in KP are vⱼ - cᵢⱼ and its optimum is
+            //   > 0.
+            // * integers => we round down the profits to get an upper bound of
+            //   the minimum reduced cost.
+            // We need an upper bound on the minimum reduced cost in order to
+            // know when to stop.
+            // At the end, we will need a lower bound on the minimum reduced
+            // cost in order to compute the bound.
+            // Upper bound on the reduced cost rcubᵢᵏ = - opt(KPfloor) + ⌈-uᵢ⌉
+            // Lower bound on the reduced cost rclbᵢᵏ = - opt(KPceil)  + ⌊-uᵢ⌋
+
             knapsack::Instance ins_kp;
             knapsack::Weight capacity_kp = d.ins.capacity(i);
-            double rc = dual_sol[i];
+            Cost rc_ub = std::ceil((mult * (- dual_sol[i])));
             ItemIdx j_kp = 0;
             for (ItemIdx j=0; j<n; ++j) {
                 AltIdx k = d.ins.alternative_index(j, i);
                 if (d.fixed_alt[k] == 0)
                     continue;
                 const Alternative& a = d.ins.alternative(k);
-                knapsack::Profit p = std::ceil(mult * dual_sol[m + j] - mult * a.c);
+                knapsack::Profit p = std::floor(mult * (dual_sol[m + j] - a.c));
                 if (d.fixed_alt[k] == 1) {
                     capacity_kp -= a.w;
-                    rc += dual_sol[m + j] - a.c;
+                    rc_ub -= std::floor(mult * (dual_sol[m + j] - a.c));
                     continue;
                 }
                 if (p <= 0)
@@ -104,16 +122,10 @@ Cost gap::lb_colgen_clp(ColGenClpData d)
             ins_kp.set_capacity(capacity_kp);
             knapsack::Solution sol = knapsack::sopt_minknap(ins_kp, knapsack::MinknapParams::combo());
 
-            for (knapsack::ItemIdx j_kp=0; j_kp<ins_kp.total_item_number(); ++j_kp) {
-                if (sol.contains_idx(j_kp)) {
-                    ItemIdx j = indices[j_kp];
-                    const Alternative& a = d.ins.alternative(j, i);
-                    rc += dual_sol[m + j] - a.c;
-                }
-            }
-            if (rc <= 1e-5)
+            rc_ub -= sol.profit();
+            //std::cout << "rc_ub " << rc_ub << std::endl;
+            if (rc_ub >= 0)
                 continue;
-            //std::cout << "rc " << rc << std::endl;
 
             found = true;
             d.columns[i].push_back({});
@@ -127,7 +139,44 @@ Cost gap::lb_colgen_clp(ColGenClpData d)
         }
     }
 
-    d.lb = std::ceil(model.objectiveValue() - TOL);
+    // Compute the bound
+    // Solve LP
+    model.primal();
+    double* dual_sol = model.dualRowSolution();
+
+    std::vector<ItemIdx> indices(n);
+    Cost lb = std::floor(mult * model.objectiveValue());
+    for (AgentIdx i=0; i<m; ++i) {
+        knapsack::Instance ins_kp;
+        knapsack::Weight capacity_kp = d.ins.capacity(i);
+        Cost rc_lb = std::floor((mult * (- dual_sol[i])));
+        ItemIdx j_kp = 0;
+        for (ItemIdx j=0; j<n; ++j) {
+            AltIdx k = d.ins.alternative_index(j, i);
+            if (d.fixed_alt[k] == 0)
+                continue;
+            const Alternative& a = d.ins.alternative(k);
+            knapsack::Profit p = std::ceil(mult * (dual_sol[m + j] - a.c));
+            if (d.fixed_alt[k] == 1) {
+                capacity_kp -= a.w;
+                rc_lb -= std::ceil(mult * (dual_sol[m + j] - a.c));
+                continue;
+            }
+            if (p <= 0)
+                continue;
+            ins_kp.add_item(a.w, p);
+            indices[j_kp] = j;
+            j_kp++;
+        }
+        ins_kp.set_capacity(capacity_kp);
+        knapsack::Solution sol = knapsack::sopt_minknap(ins_kp, knapsack::MinknapParams::combo());
+
+        rc_lb -= sol.profit();
+        lb += rc_lb;
+        //std::cout << rc_lb << std::endl;
+    }
+
+    d.lb = std::ceil((double)lb / mult);
     return algorithm_end(d.ins, d.lb, d.info);
 }
 

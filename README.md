@@ -42,7 +42,7 @@ The first goal of this repository is for me to have reference implementations fo
 ### Upper bounds
 
 Polynomial algorithms from "Generalized Assignment Problems" (Martello et al., 1992), options `f cij` `f wij` `f cij*wij` `f -pij/wij` `f wij/ti`:
-- Basic greedy `-a "greedy f wij` :heavy_check_mark:
+- Basic greedy `-a "greedy f wij"` :heavy_check_mark:
 - Greedy with regret measure `-a "greedyregret f wij"` :heavy_check_mark:
 - MTHG, basic greedy (+ n shifts) `-a "mthg f wij"` :heavy_check_mark:
 - MTHG, greedy with regret measure (+ n shifts) `-a "mthgregret f wij"` :heavy_check_mark:
@@ -53,7 +53,7 @@ Classical meta-heuristics based on shift-swap neighborhood optimized for large i
 - Simulated annealing `-a sa_shiftswap` :heavy_check_mark:
 
 Others heuristics and meta-heuristics:
-- Random feasible solution `-a random` :heavy_check_mark:
+- Random feasible solution found with a Local search `-a random` :heavy_check_mark:
 - Repair linear relaxation solution `-a repairlinrelax_clp` :heavy_check_mark:
 - Variable neighborhood branching (see "Handbook of Metaheuristics", 3.6.1 Variable Neighborhood Branching)
   - with CBC `-a vnsbranching_cbc` :heavy_check_mark:
