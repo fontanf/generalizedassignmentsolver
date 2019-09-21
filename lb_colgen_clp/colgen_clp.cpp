@@ -2,6 +2,8 @@
 
 #include "gap/lb_colgen_clp/colgen_clp.hpp"
 
+#include "gap/ub_ls_shiftswap/ls_shiftswap.hpp"
+
 #include <coin/ClpModel.hpp>
 #include <coin/OsiClpSolverInterface.hpp>
 
@@ -51,17 +53,44 @@ Cost gap::lb_colgen_clp(ColGenClpData d)
     for (AgentIdx i=0; i<m; ++i)
         model.addRow(0, NULL, NULL, 0, 1);
     for (ItemIdx j=0; j<n; ++j)
-        model.addRow(0, NULL, NULL, 1, n); // or 1?
+        model.addRow(0, NULL, NULL, 1, n);
     std::vector<double> ones(m + n, 1);
 
     // Add dummy column to ensure feasible solution
     std::vector<int> rows(m + n);
     std::iota(rows.begin(), rows.begin() + n, m);
-    model.addColumn(n, rows.data(), ones.data(), 0.0, 1.0, 10 * d.ins.bound());
+    model.addColumn(n, rows.data(), ones.data(), 0.0, 1.0, 1000 * d.ins.bound());
+
+    // KP utils
+    std::vector<ItemIdx> indices(n);
+    knapsack::Instance ins_kp;
 
     // Add initial columns
     if (d.columns.empty()) {
         d.columns.resize(m);
+
+        /*
+        for (AgentIdx i=0; i<m; ++i) {
+            knapsack::Instance ins_kp;
+            ItemIdx j_kp = 0;
+            for (ItemIdx j=0; j<n; ++j) {
+                const Alternative& a = d.ins.alternative(j, i);
+                ins_kp.add_item(a.w, d.ins.profit(a));
+                indices[j_kp] = j;
+                j_kp++;
+            }
+            ins_kp.set_capacity(d.ins.capacity(i));
+            knapsack::Solution sol = knapsack::sopt_minknap(ins_kp, knapsack::MinknapParams::combo());
+            d.columns[i].push_back({});
+            for (knapsack::ItemIdx j_kp=0; j_kp<ins_kp.total_item_number(); ++j_kp) {
+                if (sol.contains_idx(j_kp)) {
+                    ItemIdx j = indices[j_kp];
+                    d.columns[i].back().push_back(j);
+                }
+            }
+            add_column(d, model, i, d.columns[i].back(), ones);
+        }
+        */
     } else {
         for (AgentIdx i=0; i<m; ++i)
             for (const std::vector<ItemIdx>& column: d.columns[i])
@@ -73,12 +102,11 @@ Cost gap::lb_colgen_clp(ColGenClpData d)
     while (found) {
         // Solve LP
         model.primal();
-        //std::cout << model.objectiveValue() << std::endl;
+        //std::cout << d.info.elapsed_time() << " " << model.objectiveValue() << std::endl;
         double* dual_sol = model.dualRowSolution();
 
         // Find and add new columns
         found = false;
-        std::vector<ItemIdx> indices(n);
         for (AgentIdx i=0; i<m; ++i) {
             // uᵢ: dual value associated with agent constraints (uᵢ ≤ 0).
             // vⱼ: dual value associated with item constraints.
@@ -98,7 +126,7 @@ Cost gap::lb_colgen_clp(ColGenClpData d)
             // Upper bound on the reduced cost rcubᵢᵏ = - opt(KPfloor) + ⌈-uᵢ⌉
             // Lower bound on the reduced cost rclbᵢᵏ = - opt(KPceil)  + ⌊-uᵢ⌋
 
-            knapsack::Instance ins_kp;
+            ins_kp.clear();
             knapsack::Weight capacity_kp = d.ins.capacity(i);
             Cost rc_ub = std::ceil((mult * (- dual_sol[i])));
             ItemIdx j_kp = 0;
@@ -144,10 +172,9 @@ Cost gap::lb_colgen_clp(ColGenClpData d)
     model.primal();
     double* dual_sol = model.dualRowSolution();
 
-    std::vector<ItemIdx> indices(n);
     Cost lb = std::floor(mult * model.objectiveValue());
     for (AgentIdx i=0; i<m; ++i) {
-        knapsack::Instance ins_kp;
+        ins_kp.clear();
         knapsack::Weight capacity_kp = d.ins.capacity(i);
         Cost rc_lb = std::floor((mult * (- dual_sol[i])));
         ItemIdx j_kp = 0;
