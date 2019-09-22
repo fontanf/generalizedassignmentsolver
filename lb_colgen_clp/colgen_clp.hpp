@@ -11,6 +11,8 @@
 namespace gap
 {
 
+typedef int64_t ColIdx;
+
 struct ColGenClpData
 {
     const Instance& ins;
@@ -18,6 +20,7 @@ struct ColGenClpData
     std::mt19937_64& gen;
     std::vector<std::vector<std::vector<ItemIdx>>>& columns;
     std::vector<AltIdx>& fixed_alt; // -1: unfixed, 0: fixed to 0, 1: fixed to 1.
+    std::vector<double>& x;
     Info info = Info();
 };
 Cost lb_colgen_clp(ColGenClpData d);

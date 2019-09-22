@@ -9,6 +9,7 @@
 #include "gap/opt_branchandcut_cbc/branchandcut_cbc.hpp"
 #include "gap/opt_branchandcut_cplex/branchandcut_cplex.hpp"
 #include "gap/opt_branchandcut_gurobi/branchandcut_gurobi.hpp"
+#include "gap/opt_branchandprice_clp/branchandprice_clp.hpp"
 #include "gap/opt_constraintprogramming_gecode/constraintprogramming_gecode.hpp"
 #include "gap/opt_constraintprogramming_cplex/constraintprogramming_cplex.hpp"
 #include "gap/opt_dip/dip.hpp"
@@ -99,12 +100,14 @@ std::function<void (Instance&, Solution&, Cost&, std::mt19937_64&, Info)> gap::g
             std::vector<std::vector<std::vector<ItemIdx>>> columns;
             std::vector<AltIdx> fixed_alt(ins.alternative_number());
             std::fill(fixed_alt.begin(), fixed_alt.end(), -1);
+            std::vector<double> x(ins.alternative_number());
             lb_colgen_clp(ColGenClpData{
                     .ins = ins,
                     .lb = lb,
                     .gen = gen,
                     .columns = columns,
                     .fixed_alt = fixed_alt,
+                    .x = x,
                     .info = info});
         };
 #endif
@@ -150,6 +153,18 @@ std::function<void (Instance&, Solution&, Cost&, std::mt19937_64&, Info)> gap::g
                     .ins = ins,
                     .sol = sol,
                     .lb = lb,
+                    .info = info,
+                    });
+        };
+#endif
+#if COINOR_FOUND
+    } else if (algo.name == "branchandprice_clp") {
+        return [](Instance& ins, Solution& sol, Cost& lb, std::mt19937_64& gen, Info info) {
+            sopt_branchandprice_clp({
+                    .ins = ins,
+                    .sol = sol,
+                    .lb = lb,
+                    .gen = gen,
                     .info = info,
                     });
         };

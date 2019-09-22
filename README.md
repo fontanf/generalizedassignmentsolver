@@ -68,6 +68,7 @@ Others heuristics and meta-heuristics:
   - with CBC `-a branchandcut_cbc` :heavy_check_mark:
   - with CPLEX `-a branchandcut_cplex` :heavy_check_mark:
   - with Gurobi `-a branchandcut_gurobi` :heavy_check_mark:
+- Branch-and-price with CLP (currently very basic implementation) `branchandprice_clp` :heavy_check_mark:
 - Constraint programming
   - with Gecode `-a constraintprogramming_gecode` :heavy_check_mark:
   - with CPLEX `-a constraintprogramming_cplex` :heavy_check_mark:

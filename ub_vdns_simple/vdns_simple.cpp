@@ -186,10 +186,11 @@ Solution gap::sol_vdns_simple(const Instance& ins, Solution& sol_best, std::mt19
 
     init_display(info);
 
-    LinRelaxClpOutput linrelax_output = lb_linrelax_clp(ins);
-    Cost lb = linrelax_output.lb;
-    Solution sol_curr = sol_repairlinrelax_clp(ins, linrelax_output);
-    //Solution sol_curr = sol_random(ins, gen);
+    //LinRelaxClpOutput linrelax_output = lb_linrelax_clp(ins);
+    //Cost lb = linrelax_output.lb;
+    //Solution sol_curr = sol_repairlinrelax_clp(ins, linrelax_output);
+    Cost lb = 0;
+    Solution sol_curr = sol_random(ins, gen);
 
     std::stringstream ss;
     if (compare(sol_best, sol_curr))

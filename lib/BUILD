@@ -69,6 +69,7 @@ cc_library(
                 "//opt_branchandcut_cbc:branchandcut_cbc",
                 "//opt_branchandcut_cplex:branchandcut_cplex",
                 "//opt_branchandcut_gurobi:branchandcut_gurobi",
+                "//opt_branchandprice_clp:branchandprice_clp",
                 "//opt_dip:dip",
                 "//opt_constraintprogramming_gecode:constraintprogramming_gecode",
                 "//opt_constraintprogramming_cplex:constraintprogramming_cplex",
