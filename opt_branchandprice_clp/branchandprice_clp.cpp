@@ -11,7 +11,6 @@ void sopt_branchandprice_clp_rec(BranchAndPriceClpData& d0, Solution sol_curr, C
     ItemIdx  n = d.ins.item_number();
     AgentIdx m = d.ins.agent_number();
 
-    //std::cout << sol_curr.item_number() << std::endl;
     //std::cout << sol_curr << std::endl;
 
     //for (ItemIdx j = 0; j < n; ++j) {
