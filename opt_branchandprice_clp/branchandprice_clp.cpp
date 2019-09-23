@@ -8,6 +8,18 @@ using namespace gap;
 
 void sopt_branchandprice_clp_rec(BranchAndPriceClpData& d0, Solution sol_curr, ColGenClpData& d)
 {
+    ItemIdx  n = d.ins.item_number();
+    AgentIdx m = d.ins.agent_number();
+
+    //std::cout << sol_curr.item_number() << std::endl;
+    //std::cout << sol_curr << std::endl;
+
+    //for (ItemIdx j = 0; j < n; ++j) {
+        //for (AgentIdx i = 0; i < m; ++i)
+            //std::cout << d.fixed_alt[d.ins.alternative_index(j, i)] << " ";
+        //std::cout << std::endl;
+    //}
+
     if (d0.sol.feasible() && d0.sol.cost() == d0.lb)
         return;
     if (sol_curr.feasible()) {
@@ -20,9 +32,6 @@ void sopt_branchandprice_clp_rec(BranchAndPriceClpData& d0, Solution sol_curr, C
     lb_colgen_clp(d);
     if (d0.sol.feasible() && d.lb >= d0.sol.cost())
         return;
-
-    ItemIdx  n = d.ins.item_number();
-    AgentIdx m = d.ins.agent_number();
 
     ItemIdx  j_best = -1;
     AgentIdx i_best = -1;
@@ -45,13 +54,16 @@ void sopt_branchandprice_clp_rec(BranchAndPriceClpData& d0, Solution sol_curr, C
     }
     if (j_best == -1)
         return;
-    AltIdx k = d.ins.alternative_index(j_best, i_best);
+    //std::cout << "j_best " << j_best << " i_best " << i_best << " x_best " << x_best << std::endl;
+    AltIdx k_best = d.ins.alternative_index(j_best, i_best);
 
     std::vector<std::pair<AltIdx, int>> changes;
-    changes.push_back({k, 1});
-    for (AgentIdx i = 0; i < m; ++i)
-        if (i != i_best && d.fixed_alt[i] == -1)
-            changes.push_back({d.ins.alternative_index(j_best, i), 0});
+    changes.push_back({k_best, 1});
+    for (AgentIdx i = 0; i < m; ++i) {
+        AltIdx k = d.ins.alternative_index(j_best, i);
+        if (i != i_best && d.fixed_alt[k] == -1)
+            changes.push_back({k, 0});
+    }
 
     sol_curr.set(j_best, i_best);
     for (auto p: changes)
@@ -60,10 +72,10 @@ void sopt_branchandprice_clp_rec(BranchAndPriceClpData& d0, Solution sol_curr, C
 
     for (auto p: changes)
         d.fixed_alt[p.first] = -1;
-    d.fixed_alt[k] = 0;
+    d.fixed_alt[k_best] = 0;
     sol_curr.set(j_best, -1);
     sopt_branchandprice_clp_rec(d0, sol_curr, d);
-    d.fixed_alt[k] = -1;
+    d.fixed_alt[k_best] = -1;
 }
 
 Solution gap::sopt_branchandprice_clp(BranchAndPriceClpData d)

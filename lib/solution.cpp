@@ -246,7 +246,7 @@ void Solution::write_cert(std::string filepath)
 
 std::ostream& gap::operator<<(std::ostream& os, const Solution& sol)
 {
-    os <<  "n " << sol.instance().item_number()
+    os <<  "n " << sol.item_number() << "/" << sol.instance().item_number()
         << " cost " << sol.cost()
         << " overcapacity " << sol.overcapacity()
         << std::endl;

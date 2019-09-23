@@ -12,7 +12,6 @@ using namespace gap;
 void add_column(ColGenClpData& d, ClpSimplex& model, AgentIdx i, ColIdx col_idx,
         std::vector<std::pair<AgentIdx, ColIdx>>& col_indices, std::vector<double>& ones)
 {
-    //std::cout << "add_column" << std::endl;
     AgentIdx m = d.ins.agent_number();
 
     std::vector<int> rows;
@@ -74,29 +73,6 @@ Cost gap::lb_colgen_clp(ColGenClpData d)
         d.columns.resize(m);
         model.addColumn(n, rows.data(), ones.data(), 0.0, 1.0, 10 * d.ins.bound());
         column_indices.push_back({-1, -1});
-
-        /*
-        for (AgentIdx i=0; i<m; ++i) {
-            knapsack::Instance ins_kp;
-            ItemIdx j_kp = 0;
-            for (ItemIdx j=0; j<n; ++j) {
-                const Alternative& a = d.ins.alternative(j, i);
-                ins_kp.add_item(a.w, d.ins.profit(a));
-                indices[j_kp] = j;
-                j_kp++;
-            }
-            ins_kp.set_capacity(d.ins.capacity(i));
-            knapsack::Solution sol = knapsack::sopt_minknap(ins_kp, knapsack::MinknapParams::combo());
-            d.columns[i].push_back({});
-            for (knapsack::ItemIdx j_kp=0; j_kp<ins_kp.total_item_number(); ++j_kp) {
-                if (sol.contains_idx(j_kp)) {
-                    ItemIdx j = indices[j_kp];
-                    d.columns[i].back().push_back(j);
-                }
-            }
-            add_column(d, model, i, d.columns[i].back(), ones);
-        }
-        */
     } else {
         for (AgentIdx i=0; i<m; ++i)
             for (ColIdx col_idx = 0; col_idx < (ColIdx)d.columns[i].size(); ++ col_idx)
@@ -138,19 +114,16 @@ Cost gap::lb_colgen_clp(ColGenClpData d)
             ItemIdx j_kp = 0;
             for (ItemIdx j=0; j<n; ++j) {
                 AltIdx k = d.ins.alternative_index(j, i);
-                if (d.fixed_alt[k] == 0) {
-                    indices[j] = -1;
-                    continue;
-                }
                 const Alternative& a = d.ins.alternative(k);
-                knapsack::Profit p = std::floor(mult * (dual_sol[m + j] - a.c));
+                //knapsack::Profit p = std::floor(mult * (dual_sol[m + j] - a.c));
+                knapsack::Profit p = std::floor(mult * dual_sol[m + j]) - std::ceil(mult * a.c);
                 if (d.fixed_alt[k] == 1) {
                     capacity_kp -= a.w;
-                    rc_ub -= std::floor(mult * (dual_sol[m + j] - a.c));
+                    rc_ub -= p;
                     indices[j] = -2;
                     continue;
                 }
-                if (p <= 0) {
+                if (d.fixed_alt[k] == 0 || p <= 0) {
                     indices[j] = -1;
                     continue;
                 }
@@ -160,7 +133,6 @@ Cost gap::lb_colgen_clp(ColGenClpData d)
             }
             ins_kp.set_capacity(capacity_kp);
             knapsack::Solution sol = knapsack::sopt_minknap(ins_kp, knapsack::MinknapParams::combo());
-
             rc_ub -= sol.profit();
             //std::cout << "rc_ub " << rc_ub << " opt(kp) " << sol.profit() << " vi " << (Cost)std::ceil((mult * (- dual_sol[i]))) << std::endl;
             if (rc_ub >= 0)
@@ -187,22 +159,20 @@ Cost gap::lb_colgen_clp(ColGenClpData d)
         Cost rc_lb = std::floor((mult * (- dual_sol[i])));
         for (ItemIdx j=0; j<n; ++j) {
             AltIdx k = d.ins.alternative_index(j, i);
-            if (d.fixed_alt[k] == 0)
-                continue;
             const Alternative& a = d.ins.alternative(k);
-            knapsack::Profit p = std::ceil(mult * (dual_sol[m + j] - a.c));
+            //knapsack::Profit p = std::ceil(mult * (dual_sol[m + j] - a.c));
+            knapsack::Profit p = std::ceil(mult * dual_sol[m + j]) - std::floor(mult * a.c);
             if (d.fixed_alt[k] == 1) {
                 capacity_kp -= a.w;
-                rc_lb -= std::ceil(mult * (dual_sol[m + j] - a.c));
+                rc_lb -= p;
                 continue;
             }
-            if (p <= 0)
+            if (d.fixed_alt[k] == 0 || p <= 0)
                 continue;
             ins_kp.add_item(a.w, p);
         }
         ins_kp.set_capacity(capacity_kp);
         knapsack::Solution sol = knapsack::sopt_minknap(ins_kp, knapsack::MinknapParams::combo());
-
         rc_lb -= sol.profit();
         lb += rc_lb;
         //std::cout << rc_lb << std::endl;
@@ -210,21 +180,12 @@ Cost gap::lb_colgen_clp(ColGenClpData d)
 
     d.lb = std::ceil((double)lb / mult);
     const double *solution = model.getColSolution();
+    std::fill(d.x.begin(), d.x.end(), 0);
     for (ColIdx col_idx = 1; col_idx < model.numberColumns(); ++col_idx) {
-        //std::cout << "col_idx " << col_idx << std::flush;
         AgentIdx i = column_indices[col_idx].first;
-        //std::cout << " i " << i << " x " << solution[col_idx] << std::flush;
-        for (ItemIdx j: d.columns[i][column_indices[col_idx].second]) {
-            //std::cout << " j "  << j << std::flush;
+        for (ItemIdx j: d.columns[i][column_indices[col_idx].second])
             d.x[d.ins.alternative_index(j, i)] += solution[col_idx];
-        }
-        //std::cout << std::endl;
     }
-    //for (ItemIdx j = 0; j < n; ++j) {
-        //for (AgentIdx i = 0; i < m; ++i)
-            //std::cout << d.x[d.ins.alternative_index(j, i)] << " ";
-        //std::cout << std::endl;
-    //}
     return algorithm_end(d.ins, d.lb, d.info);
 }
 
