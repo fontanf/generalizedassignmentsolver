@@ -91,12 +91,23 @@ Cost gap::lb_colgen_clp(ColGenClpData d)
     //            == -1: item j is not in KP and does not belong to the column.
     //            >=  0: item j is the item of index indices[j] in KP.
     std::vector<knapsack::ItemIdx> indices(n);
+    std::vector<knapsack::Weight> kp_capacities(m);
+    for (AgentIdx i=0; i<m; ++i) {
+        kp_capacities[i] = d.ins.capacity(i);
+        for (ItemIdx j=0; j<n; ++j) {
+            AltIdx k = d.ins.alternative_index(j, i);
+            if (d.fixed_alt[k] == 1)
+                kp_capacities[i] -= d.ins.alternative(k).w;
+        }
+        if (kp_capacities[i] < 0)
+            std::cout << "ERROR i " << i << " c " << kp_capacities[i] << std::endl;
+    }
 
     // Add initial columns
+    model.addColumn(model.numberRows() - m, rows.data(), ones.data(), 0.0, 1.0, 10 * d.ins.bound());
+    column_indices.push_back({-1, -1});
     if (d.columns.empty()) {
         d.columns.resize(m);
-        model.addColumn(model.numberRows() - m, rows.data(), ones.data(), 0.0, 1.0, 10 * d.ins.bound());
-        column_indices.push_back({-1, -1});
     } else {
         for (AgentIdx i=0; i<m; ++i)
             for (ColIdx col_idx = 0; col_idx < (ColIdx)d.columns[i].size(); ++ col_idx)
@@ -133,7 +144,7 @@ Cost gap::lb_colgen_clp(ColGenClpData d)
             // Lower bound on the reduced cost rclbᵢᵏ = - opt(KPceil)  + ⌊-uᵢ⌋
 
             ins_kp.clear();
-            knapsack::Weight capacity_kp = d.ins.capacity(i);
+            ins_kp.set_capacity(kp_capacities[i]);
             Cost rc_ub = std::ceil((mult * (- dual_sol[i])));
             ItemIdx j_kp = 0;
             for (ItemIdx j=0; j<n; ++j) {
@@ -142,11 +153,10 @@ Cost gap::lb_colgen_clp(ColGenClpData d)
                 //knapsack::Profit p = std::floor(mult * (dual_sol[m + j] - a.c));
                 knapsack::Profit p = std::floor(mult * dual_sol[row[j]]) - std::ceil(mult * a.c);
                 if (d.fixed_alt[k] == 1) {
-                    capacity_kp -= a.w;
                     indices[j] = -2;
                     continue;
                 }
-                if (d.fixed_alt[k] == 0 || p <= 0) {
+                if (d.fixed_alt[k] == 0 || p <= 0 || a.w > kp_capacities[i]) {
                     indices[j] = -1;
                     continue;
                 }
@@ -154,7 +164,6 @@ Cost gap::lb_colgen_clp(ColGenClpData d)
                 indices[j] = j_kp;
                 j_kp++;
             }
-            ins_kp.set_capacity(capacity_kp);
             knapsack::Solution sol = knapsack::sopt_minknap(ins_kp, knapsack::MinknapParams::combo());
             rc_ub -= sol.profit();
             //std::cout << "rc_ub " << rc_ub << " opt(kp) " << sol.profit() << " vi " << (Cost)std::ceil((mult * (- dual_sol[i]))) << std::endl;
@@ -178,22 +187,19 @@ Cost gap::lb_colgen_clp(ColGenClpData d)
     Cost lb = std::floor(mult * model.objectiveValue());
     for (AgentIdx i=0; i<m; ++i) {
         ins_kp.clear();
-        knapsack::Weight capacity_kp = d.ins.capacity(i);
+        ins_kp.set_capacity(kp_capacities[i]);
         Cost rc_lb = std::floor((mult * (- dual_sol[i])));
         for (ItemIdx j=0; j<n; ++j) {
             AltIdx k = d.ins.alternative_index(j, i);
             const Alternative& a = d.ins.alternative(k);
             //knapsack::Profit p = std::ceil(mult * (dual_sol[m + j] - a.c));
             knapsack::Profit p = std::ceil(mult * dual_sol[row[j]]) - std::floor(mult * a.c);
-            if (d.fixed_alt[k] == 1) {
-                capacity_kp -= a.w;
+            if (d.fixed_alt[k] == 1)
                 continue;
-            }
-            if (d.fixed_alt[k] == 0 || p <= 0)
+            if (d.fixed_alt[k] == 0 || p <= 0 || a.w > kp_capacities[i])
                 continue;
             ins_kp.add_item(a.w, p);
         }
-        ins_kp.set_capacity(capacity_kp);
         knapsack::Solution sol = knapsack::sopt_minknap(ins_kp, knapsack::MinknapParams::combo());
         rc_lb -= sol.profit();
         lb += rc_lb;

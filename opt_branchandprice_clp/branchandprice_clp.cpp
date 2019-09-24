@@ -28,10 +28,13 @@ struct BranchAndPriceClpRecData
 
 void sopt_branchandprice_clp_rec(BranchAndPriceClpRecData& d)
 {
+    if (!d.info.check_time())
+        return;
+
     ItemIdx  n = d.ins.item_number();
     AgentIdx m = d.ins.agent_number();
 
-    //std::cout << sol_curr << std::endl;
+    //std::cout << d.sol_curr << std::endl;
 
     //for (ItemIdx j = 0; j < n; ++j) {
         //for (AgentIdx i = 0; i < m; ++i)
