@@ -54,20 +54,39 @@ Solution gap::sol_greedy(const Instance& ins, const Desirability& f, Info info)
 
 /******************************************************************************/
 
-void gap::sol_greedyregret(Solution& sol, const Desirability& f)
+std::vector<std::vector<AgentIdx>> gap::sol_greedyregret_init(const Instance& ins,
+        const Desirability& f,
+        const std::vector<int>& fixed_alt)
+{
+    ItemIdx n = ins.item_number();
+    AgentIdx m = ins.agent_number();
+
+    std::vector<std::vector<AgentIdx>> agents(n);
+    for (ItemIdx j=0; j<n; ++j) {
+        if (fixed_alt.empty()) {
+            agents[j].resize(m);
+            std::iota(agents[j].begin(), agents[j].end(), 0);
+        } else {
+            for (ItemIdx i=0; i<m; ++i)
+                if (fixed_alt[i] == -1)
+                    agents[j].push_back(i);
+        }
+
+        sort(agents[j].begin(), agents[j].end(), [&f, &j](
+                    AgentIdx i1, AgentIdx i2) -> bool {
+                return f(j, i1) < f(j, i2); });
+    }
+
+    return agents;
+}
+
+void gap::sol_greedyregret(Solution& sol, const Desirability& f,
+        const std::vector<std::vector<AgentIdx>>& agents)
 {
     const Instance& ins = sol.instance();
     ItemIdx n = ins.item_number();
     AgentIdx m = ins.agent_number();
     std::vector<std::pair<AgentIdx, AgentIdx>> bests(n, {0, 1});
-
-    std::vector<std::vector<AgentIdx>> agents(n, std::vector<AgentIdx>(m));
-    for (ItemIdx j=0; j<n; ++j) {
-        std::iota(agents[j].begin(), agents[j].end(), 0);
-        sort(agents[j].begin(), agents[j].end(), [&f, &j](
-                    AgentIdx i1, AgentIdx i2) -> bool {
-                return f(j, i1) < f(j, i2); });
-    }
 
     while (!sol.full()) {
         ItemIdx j_best = -1;
@@ -117,7 +136,8 @@ Solution gap::sol_greedyregret(const Instance& ins, const Desirability& f, Info 
 {
     VER(info, "*** greedyregret " << f.to_string() << " ***" << std::endl);
     Solution sol(ins);
-    sol_greedyregret(sol, f);
+    auto agents = sol_greedyregret_init(ins, f, {});
+    sol_greedyregret(sol, f, agents);
     return algorithm_end(sol, info);
 }
 
@@ -163,9 +183,9 @@ Solution gap::sol_mthg(const Instance& ins, const Desirability& f, Info info)
     return algorithm_end(sol, info);
 }
 
-void gap::sol_mthgregret(Solution& sol, const Desirability& f)
+void gap::sol_mthgregret(Solution& sol, const Desirability& f, const std::vector<std::vector<AgentIdx>>& agents)
 {
-    sol_greedyregret(sol, f);
+    sol_greedyregret(sol, f, agents);
     if (sol.feasible())
         nshift(sol);
 }
@@ -174,7 +194,8 @@ Solution gap::sol_mthgregret(const Instance& ins, const Desirability& f, Info in
 {
     VER(info, "*** mthgregret " << f.to_string() << " ***" << std::endl);
     Solution sol(ins);
-    sol_mthgregret(sol, f);
+    auto agents = sol_greedyregret_init(ins, f, {});
+    sol_mthgregret(sol, f, agents);
     return algorithm_end(sol, info);
 }
 
