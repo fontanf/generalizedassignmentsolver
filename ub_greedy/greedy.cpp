@@ -92,7 +92,7 @@ void gap::sol_greedyregret(Solution& sol, const Desirability& f,
             while (i_first < m) {
                 AgentIdx i = agents[j][i_first];
                 if (ins.alternative(j, i).w > sol.remaining_capacity(i) ||
-                        (!fixed_alt.empty() && fixed_alt[ins.alternative_index(j, i) != -1])) {
+                        (!fixed_alt.empty() && fixed_alt[ins.alternative_index(j, i)] != -1)) {
                     i_first++;
                     if (i_first == i_second)
                         i_second++;
@@ -106,7 +106,7 @@ void gap::sol_greedyregret(Solution& sol, const Desirability& f,
             while (i_second < m) {
                 AgentIdx i = agents[j][i_second];
                 if (ins.alternative(j, i).w > sol.remaining_capacity(i) ||
-                        (!fixed_alt.empty() && fixed_alt[ins.alternative_index(j, i) != -1])) {
+                        (!fixed_alt.empty() && fixed_alt[ins.alternative_index(j, i)] != -1)) {
                     i_second++;
                 } else {
                     break;

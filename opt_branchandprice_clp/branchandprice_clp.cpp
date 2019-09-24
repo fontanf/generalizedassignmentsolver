@@ -60,14 +60,14 @@ void sopt_branchandprice_clp_rec(BranchAndPriceClpRecData& d)
     }
 
     { // Primal heuristic 2
-        Solution sol(d.ins);
+        Solution sol(d.sol_curr);
         sol_mthgregret(sol, *d.f1, d.agents1, d.fixed_alt);
         if (compare(d.sol_best, sol))
             d.sol_best.update(sol, d.lb, std::stringstream("mthgregret wij/ti"), d.info);
     }
 
     { // Primal heuristic 3
-        Solution sol(d.ins);
+        Solution sol(d.sol_curr);
         sol_mthgregret(sol, *d.f2, d.agents2, d.fixed_alt);
         if (compare(d.sol_best, sol))
             d.sol_best.update(sol, d.lb, std::stringstream("mthgregret -pij/wij"), d.info);
