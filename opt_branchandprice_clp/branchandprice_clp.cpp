@@ -22,6 +22,8 @@ struct BranchAndPriceClpRecData
     std::vector<std::vector<AgentIdx>> agents1;
     std::unique_ptr<Desirability> f2;
     std::vector<std::vector<AgentIdx>> agents2;
+    std::unique_ptr<Desirability> f3;
+    std::vector<std::vector<AgentIdx>> agents3;
 };
 
 void sopt_branchandprice_clp_rec(BranchAndPriceClpRecData& d)
@@ -50,7 +52,7 @@ void sopt_branchandprice_clp_rec(BranchAndPriceClpRecData& d)
     if (d.sol_best.feasible() && d.colgen_data.lb >= d.sol_best.cost())
         return;
 
-    { // Primal heuristic 1
+    { // Primal heuristic 0
         Solution sol(d.ins);
         for (AltIdx k = 0; k < d.ins.alternative_number(); ++k)
             if (d.colgen_data.x[k] > 0.5)
@@ -59,18 +61,25 @@ void sopt_branchandprice_clp_rec(BranchAndPriceClpRecData& d)
             d.sol_best.update(sol, d.lb, std::stringstream("primal heuristic 1"), d.info);
     }
 
-    { // Primal heuristic 2
+    { // Primal heuristic 1
         Solution sol(d.sol_curr);
         sol_mthgregret(sol, *d.f1, d.agents1, d.fixed_alt);
         if (compare(d.sol_best, sol))
             d.sol_best.update(sol, d.lb, std::stringstream("mthgregret wij/ti"), d.info);
     }
 
-    { // Primal heuristic 3
+    { // Primal heuristic 2
         Solution sol(d.sol_curr);
         sol_mthgregret(sol, *d.f2, d.agents2, d.fixed_alt);
         if (compare(d.sol_best, sol))
             d.sol_best.update(sol, d.lb, std::stringstream("mthgregret -pij/wij"), d.info);
+    }
+
+    { // Primal heuristic 3
+        Solution sol(d.sol_curr);
+        sol_mthgregret(sol, *d.f3, d.agents3, d.fixed_alt);
+        if (compare(d.sol_best, sol))
+            d.sol_best.update(sol, d.lb, std::stringstream("mthgregret cij"), d.info);
     }
 
 
@@ -86,10 +95,12 @@ void sopt_branchandprice_clp_rec(BranchAndPriceClpRecData& d)
                 continue;
             if (d.sol_curr.remaining_capacity(i) < d.ins.alternative(k).w)
                 continue;
-            if (j_best == -1 || x_best < d.colgen_data.x[k]) {
+            double x = - d.colgen_data.x[k];
+            //double x = std::abs(d.colgen_data.x[k] - 0.5);
+            if (j_best == -1 || x_best > x) {
                 j_best = j;
                 i_best = i;
-                x_best = d.colgen_data.x[k];
+                x_best = x;
             }
         }
     }
@@ -150,6 +161,8 @@ Solution gap::sopt_branchandprice_clp(BranchAndPriceClpData d)
         .agents1 = sol_greedyregret_init(d.ins, *d_rec.f1),
         .f2 = desirability("-pij/wij", d.ins),
         .agents2 = sol_greedyregret_init(d.ins, *d_rec.f2),
+        .f3 = desirability("cij", d.ins),
+        .agents3 = sol_greedyregret_init(d.ins, *d_rec.f3),
     };
 
     lb_colgen_clp(d_rec.colgen_data);
