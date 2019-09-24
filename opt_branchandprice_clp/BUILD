@@ -2,7 +2,10 @@ cc_library(
         name = "branchandprice_clp",
         hdrs = ["branchandprice_clp.hpp"],
         srcs = ["branchandprice_clp.cpp"],
-        deps = ["//lb_colgen_clp:colgen_clp"],
+        deps = [
+                "//lb_colgen_clp:colgen_clp",
+                "//ub_greedy:greedy",
+        ],
         copts = select({"//lib:coinor_build": ["-DCOINOR_FOUND"], "//conditions:default": []}),
         visibility = ["//visibility:public"],
         include_prefix = "gap/opt_branchandprice_clp/",

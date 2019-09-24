@@ -98,7 +98,7 @@ std::function<void (Instance&, Solution&, Cost&, std::mt19937_64&, Info)> gap::g
     } else if (algo.name == "colgen_clp") {
         return [algo](Instance& ins, Solution&, Cost& lb, std::mt19937_64& gen, Info info) {
             std::vector<std::vector<std::vector<ItemIdx>>> columns;
-            std::vector<AltIdx> fixed_alt(ins.alternative_number());
+            std::vector<int> fixed_alt(ins.alternative_number());
             std::fill(fixed_alt.begin(), fixed_alt.end(), -1);
             std::vector<double> x(ins.alternative_number());
             lb_colgen_clp(ColGenClpData{
