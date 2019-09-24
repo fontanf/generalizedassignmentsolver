@@ -163,14 +163,14 @@ Update `.bashrc`:
 ```shell
 # COIN-OR
 export COINOR_HOME="/home/florian/Programmes/coinbrew"
-export PATH="${PATH}:${COINOR_HOME}/build/bin"
-export CPLUS_INCLUDE_PATH="${CPLUS_INCLUDE_PATH}:${COINOR_HOME}/build/include"
+export PATH="${PATH}:${COINOR_HOME}/dist/bin"
+export CPLUS_INCLUDE_PATH="${CPLUS_INCLUDE_PATH}:${COINOR_HOME}/dist/include"
 ```
 
 Create symlinks for libraries:
 ```shell
 LIB_DIR="/usr/lib/x86_64-linux-gnu/"
-for i in "${COINOR_HOME}"/build/lib/*.so*; do sudo ln -f -s "$i" "${LIB_DIR}" done
+for i in "${COINOR_HOME}"/dist/lib/*.so*; do sudo ln -f -s "$i" "${LIB_DIR}"; done
 ```
 
 ### Gecode
@@ -193,7 +193,7 @@ export CPLUS_INCLUDE_PATH="${CPLUS_INCLUDE_PATH}:${GECODE_HOME}"
 Create symlinks for libraries:
 ```shell
 LIB_DIR="/usr/lib/x86_64-linux-gnu/"
-for i in "${GECODE_HOME}"/*.so*; do sudo ln -f -s "$i" "${LIB_DIR}" done
+for i in "${GECODE_HOME}"/*.so*; do sudo ln -f -s "$i" "${LIB_DIR}"; done
 ```
 
 ### DLib

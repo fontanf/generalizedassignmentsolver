@@ -27,6 +27,7 @@ cc_test(
                 "//lib:tester",
                 ":lagrelax_bundle",
         ],
+        copts = select({"//lib:coinor_build": ["-DCOINOR_FOUND"], "//conditions:default": []}),
         timeout = "moderate",
 )
 

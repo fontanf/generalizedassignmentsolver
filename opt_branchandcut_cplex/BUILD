@@ -14,6 +14,7 @@ cc_library(
                         "-lcplex",
                         "-lm",
                         "-lpthread",
+                        "-ldl",
                 ],
                 "//conditions:default": [
                 ],
