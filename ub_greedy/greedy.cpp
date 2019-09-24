@@ -54,24 +54,14 @@ Solution gap::sol_greedy(const Instance& ins, const Desirability& f, Info info)
 
 /******************************************************************************/
 
-std::vector<std::vector<AgentIdx>> gap::sol_greedyregret_init(const Instance& ins,
-        const Desirability& f,
-        const std::vector<int>& fixed_alt)
+std::vector<std::vector<AgentIdx>> gap::sol_greedyregret_init(const Instance& ins, const Desirability& f)
 {
     ItemIdx n = ins.item_number();
     AgentIdx m = ins.agent_number();
 
-    std::vector<std::vector<AgentIdx>> agents(n);
+    std::vector<std::vector<AgentIdx>> agents(n, std::vector<AgentIdx>(m));
     for (ItemIdx j=0; j<n; ++j) {
-        if (fixed_alt.empty()) {
-            agents[j].resize(m);
-            std::iota(agents[j].begin(), agents[j].end(), 0);
-        } else {
-            for (ItemIdx i=0; i<m; ++i)
-                if (fixed_alt[i] == -1)
-                    agents[j].push_back(i);
-        }
-
+        std::iota(agents[j].begin(), agents[j].end(), 0);
         sort(agents[j].begin(), agents[j].end(), [&f, &j](
                     AgentIdx i1, AgentIdx i2) -> bool {
                 return f(j, i1) < f(j, i2); });
@@ -81,7 +71,8 @@ std::vector<std::vector<AgentIdx>> gap::sol_greedyregret_init(const Instance& in
 }
 
 void gap::sol_greedyregret(Solution& sol, const Desirability& f,
-        const std::vector<std::vector<AgentIdx>>& agents)
+        const std::vector<std::vector<AgentIdx>>& agents,
+        const std::vector<int>& fixed_alt)
 {
     const Instance& ins = sol.instance();
     ItemIdx n = ins.item_number();
@@ -100,7 +91,8 @@ void gap::sol_greedyregret(Solution& sol, const Desirability& f,
 
             while (i_first < m) {
                 AgentIdx i = agents[j][i_first];
-                if (ins.alternative(j, i).w > sol.remaining_capacity(i)) {
+                if (ins.alternative(j, i).w > sol.remaining_capacity(i) ||
+                        (!fixed_alt.empty() && fixed_alt[ins.alternative_index(j, i) != -1])) {
                     i_first++;
                     if (i_first == i_second)
                         i_second++;
@@ -113,7 +105,8 @@ void gap::sol_greedyregret(Solution& sol, const Desirability& f,
 
             while (i_second < m) {
                 AgentIdx i = agents[j][i_second];
-                if (ins.alternative(j, i).w > sol.remaining_capacity(i)) {
+                if (ins.alternative(j, i).w > sol.remaining_capacity(i) ||
+                        (!fixed_alt.empty() && fixed_alt[ins.alternative_index(j, i) != -1])) {
                     i_second++;
                 } else {
                     break;
@@ -136,8 +129,8 @@ Solution gap::sol_greedyregret(const Instance& ins, const Desirability& f, Info 
 {
     VER(info, "*** greedyregret " << f.to_string() << " ***" << std::endl);
     Solution sol(ins);
-    auto agents = sol_greedyregret_init(ins, f, {});
-    sol_greedyregret(sol, f, agents);
+    auto agents = sol_greedyregret_init(ins, f);
+    sol_greedyregret(sol, f, agents, {});
     return algorithm_end(sol, info);
 }
 
@@ -183,9 +176,11 @@ Solution gap::sol_mthg(const Instance& ins, const Desirability& f, Info info)
     return algorithm_end(sol, info);
 }
 
-void gap::sol_mthgregret(Solution& sol, const Desirability& f, const std::vector<std::vector<AgentIdx>>& agents)
+void gap::sol_mthgregret(Solution& sol, const Desirability& f,
+        const std::vector<std::vector<AgentIdx>>& agents,
+        const std::vector<int>& fixed_alt)
 {
-    sol_greedyregret(sol, f, agents);
+    sol_greedyregret(sol, f, agents, fixed_alt);
     if (sol.feasible())
         nshift(sol);
 }
@@ -194,8 +189,8 @@ Solution gap::sol_mthgregret(const Instance& ins, const Desirability& f, Info in
 {
     VER(info, "*** mthgregret " << f.to_string() << " ***" << std::endl);
     Solution sol(ins);
-    auto agents = sol_greedyregret_init(ins, f, {});
-    sol_mthgregret(sol, f, agents);
+    auto agents = sol_greedyregret_init(ins, f);
+    sol_mthgregret(sol, f, agents, {});
     return algorithm_end(sol, info);
 }
 
