@@ -68,7 +68,7 @@ Others heuristics and meta-heuristics:
   - with CBC `-a branchandcut_cbc` :heavy_check_mark:
   - with CPLEX `-a branchandcut_cplex` :heavy_check_mark:
   - with Gurobi `-a branchandcut_gurobi` :heavy_check_mark:
-- Branch-and-price with CLP (currently very basic implementation) `branchandprice_clp` :heavy_check_mark:
+- Branch-and-price with CLP `-a branchandprice_clp` :heavy_check_mark:
 - Constraint programming
   - with Gecode `-a constraintprogramming_gecode` :heavy_check_mark:
   - with CPLEX `-a constraintprogramming_cplex` :heavy_check_mark:
@@ -89,13 +89,6 @@ The same happens for the bound obtained by solving the lagrangian relaxation of 
 
 * [mthgregret f wij/ti](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/generalizedassignment/master/bench/mthgregret_f_wij_ti.json)
 * [random](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/generalizedassignment/master/bench/random.json)
-
-### Others
-
-`vdns_simple` does not compete with state of the art meta-heuristics like the ones presented in "A path relinking approach with ejection chains for the generalized assignment problem" (Yagiura et al., 2006) or "Variable-fixing then subgradient optimization guided very large scale neighborhood search for the generalized assignment problem" (Haddadi, 2018) in terms of solution quality on long runs. However:
-- on short runs (2 minutes, Processor Intel® Core™ i5-8500 CPU @ 3.00GHz × 6), it provides solutions of good quality (less than 1% gap from optimal for all instances of the literature, and less than 0.5% for instances with more than 900 items)
-- it is very simple and the implementation is very short
-- it is available and free (MIT License)
 
 ## Usage (command line)
 
