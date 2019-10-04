@@ -12,9 +12,9 @@ namespace gap
  * Relax assignment constraints.
  */
 
-struct LagRelaxAssignmentVolumeOutput
+struct LagRelaxAssignmentVolumeOutput: Output
 {
-    Cost lb;
+    LagRelaxAssignmentVolumeOutput(const Instance& ins, Info& info): Output(ins, info) { }
     std::vector<double> x; // vector of size ins.alternative_number()
     std::vector<double> multipliers; // vector of size ins.item_number()
 };
@@ -24,9 +24,9 @@ LagRelaxAssignmentVolumeOutput lb_lagrelax_assignment_volume(const Instance& ins
  * Relax knapsack constraints.
  */
 
-struct LagRelaxKnapsackVolumeOutput
+struct LagRelaxKnapsackVolumeOutput: Output
 {
-    Cost lb;
+    LagRelaxKnapsackVolumeOutput(const Instance& ins, Info& info): Output(ins, info) { }
     std::vector<double> x; // vector of size ins.alternative_number()
     std::vector<double> multipliers; // vector of size ins.agent_number()
 };

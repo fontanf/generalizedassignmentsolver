@@ -8,15 +8,17 @@
 namespace gap
 {
 
-struct BranchAndCutCplexData
+struct BranchAndCutCplexOptionalParameters
 {
-    const Instance& ins;
-    Solution& sol;
-    Cost& lb;
     Info info = Info();
 };
 
-Solution sopt_branchandcut_cplex(BranchAndCutCplexData d);
+struct BranchAndCutCplexOutput: Output
+{
+    BranchAndCutCplexOutput(const Instance& ins, Info& info): Output(ins, info) { }
+};
+
+BranchAndCutCplexOutput sopt_branchandcut_cplex(const Instance& ins, BranchAndCutCplexOptionalParameters p = {});
 
 }
 

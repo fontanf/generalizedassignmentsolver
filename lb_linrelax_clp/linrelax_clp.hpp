@@ -8,9 +8,9 @@
 namespace gap
 {
 
-struct LinRelaxClpOutput
+struct LinRelaxClpOutput: Output
 {
-    Cost lb;
+    LinRelaxClpOutput(const Instance& ins, Info& info): Output(ins, info) { }
     std::vector<double> x;
 };
 

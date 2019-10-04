@@ -8,46 +8,55 @@
 namespace gap
 {
 
-struct LSShiftSwapData
-{
-    const Instance& ins;
-    std::mt19937_64& gen;
-    Info info = Info();
+/******************************** Local search ********************************/
 
-    LSShiftSwapData& set_params(const std::map<std::string, std::string>& args)
-    {
-        auto it = args.end();
-        (void)it;
-        return *this;
-    }
+struct LSShiftSwapOptionalParameters
+{
+    Info info = Info();
 };
-Solution sol_ls_shiftswap(LSShiftSwapData d);
 
-struct TSShiftSwapData
+struct LSShiftSwapOutput: Output
 {
-    const Instance& ins;
-    std::mt19937_64& gen;
+    LSShiftSwapOutput(const Instance& ins, Info& info): Output(ins, info) { }
+    Cpt it = 0;
+};
+
+LSShiftSwapOutput sol_ls_shiftswap(const Instance& ins, std::mt19937_64& gen, LSShiftSwapOptionalParameters p = {});
+
+/******************************** Tabu search *********************************/
+
+struct TSShiftSwapOptionalParameters
+{
     Info info = Info();
+
     Cpt l = 10000;
 
-    TSShiftSwapData& set_params(const std::map<std::string, std::string>& args)
+    TSShiftSwapOptionalParameters& set_params(const std::map<std::string, std::string>& args)
     {
         auto it = args.end();
         if ((it = args.find("l")) != args.end()) l = std::stod(it->second);
         return *this;
     }
 };
-Solution sol_ts_shiftswap(TSShiftSwapData d);
 
-struct SAShiftSwapData
+struct TSShiftSwapOutput: Output
 {
-    const Instance& ins;
-    std::mt19937_64& gen;
+    TSShiftSwapOutput(const Instance& ins, Info& info): Output(ins, info) { }
+    Cpt it = 0;
+};
+
+TSShiftSwapOutput sol_ts_shiftswap(const Instance& ins, std::mt19937_64& gen, TSShiftSwapOptionalParameters p = {});
+
+/**************************** Simulated annealing *****************************/
+
+struct SAShiftSwapOptionalParameters
+{
     Info info = Info();
+
     double beta = 0.999;
     double l = 1000000;
 
-    SAShiftSwapData& set_params(const std::map<std::string, std::string>& args)
+    SAShiftSwapOptionalParameters& set_params(const std::map<std::string, std::string>& args)
     {
         auto it = args.end();
         if ((it = args.find("beta")) != args.end()) beta = std::stod(it->second);
@@ -55,7 +64,14 @@ struct SAShiftSwapData
         return *this;
     }
 };
-Solution sol_sa_shiftswap(SAShiftSwapData d);
+
+struct SAShiftSwapOutput: Output
+{
+    SAShiftSwapOutput(const Instance& ins, Info& info): Output(ins, info) { }
+    Cpt it = 0;
+};
+
+SAShiftSwapOutput sol_sa_shiftswap(const Instance& ins, std::mt19937_64& gen, SAShiftSwapOptionalParameters p = {});
 
 }
 

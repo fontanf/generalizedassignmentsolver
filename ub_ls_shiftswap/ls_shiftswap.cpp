@@ -8,31 +8,33 @@
 
 using namespace gap;
 
-Solution gap::sol_ls_shiftswap(LSShiftSwapData d)
-{
-    init_display(d.info);
+/******************************** Local search ********************************/
 
-    Solution sol_best(d.ins);
-    Solution sol_curr(d.ins);
+LSShiftSwapOutput gap::sol_ls_shiftswap(const Instance& ins, std::mt19937_64& gen, LSShiftSwapOptionalParameters p)
+{
+    LSShiftSwapOutput output(ins, p.info);
+
+    Solution sol_curr(ins);
     while (!sol_curr.feasible()) {
-        if (!d.info.check_time())
-            return algorithm_end(sol_best, d.info);
-        sol_curr = sol_random(d.ins, d.gen, Info().set_timelimit(d.info.remaining_time()));
+        if (!p.info.check_time())
+            return output.algorithm_end(p.info);
+        auto output_random = sol_random(ins, gen, Info().set_timelimit(p.info.remaining_time()));
+        sol_curr = output_random.solution;
     }
 
-    AgentIdx m = d.ins.agent_number();
-    ItemIdx n = d.ins.item_number();
+    AgentIdx m = ins.agent_number();
+    ItemIdx n = ins.item_number();
     std::uniform_int_distribution<Cpt> dis_ss(1, n * m + (n * (n + 1)) / 2);
     std::uniform_int_distribution<ItemIdx> dis_j(0, n - 1);
     std::uniform_int_distribution<ItemIdx> dis_j2(0, n - 2);
     std::uniform_int_distribution<AgentIdx> dis_i(0, m - 2);
 
     Cost v_curr = sol_curr.cost();
-    for (; d.info.check_time();) {
-        Cpt p = dis_ss(d.gen);
-        if (p <= m * n) { // shift
-            ItemIdx j = dis_j(d.gen);
-            AgentIdx i = dis_i(d.gen);
+    for (; p.info.check_time();) {
+        Cpt x = dis_ss(gen);
+        if (x <= m * n) { // shift
+            ItemIdx j = dis_j(gen);
+            AgentIdx i = dis_i(gen);
             AgentIdx i_old = sol_curr.agent(j);
             if (i >= i_old)
                 i++;
@@ -41,9 +43,9 @@ Solution gap::sol_ls_shiftswap(LSShiftSwapData d)
                 sol_curr.set(j, i_old);
             }
         } else { // swap
-            ItemIdx j1 = dis_j(d.gen);
+            ItemIdx j1 = dis_j(gen);
             AgentIdx i1 = sol_curr.agent(j1);
-            ItemIdx j2 = dis_j2(d.gen);
+            ItemIdx j2 = dis_j2(gen);
             if (j2 >= j1)
                 j2++;
             AgentIdx i2 = sol_curr.agent(j2);
@@ -56,17 +58,19 @@ Solution gap::sol_ls_shiftswap(LSShiftSwapData d)
                 sol_curr.set(j2, i2);
             }
         }
-        if (compare(sol_best, sol_curr)) {
+        output.it++;
+        if (compare(output.solution, sol_curr)) {
             std::stringstream ss;
-            sol_best.update(sol_curr, 0, ss, d.info);
+            ss << "it " << output.it;
+            output.update_solution(sol_curr, ss, p.info);
         }
     }
-    return algorithm_end(sol_best, d.info);
+    return output.algorithm_end(p.info);
 }
 
-/******************************************************************************/
+/******************************** Tabu search *********************************/
 
-Solution gap::sol_ts_shiftswap(TSShiftSwapData d)
+TSShiftSwapOutput sol_ts_shiftswap(const Instance& ins, std::mt19937_64& gen, TSShiftSwapOptionalParameters)
 {
     init_display(d.info);
 
@@ -187,9 +191,9 @@ Solution gap::sol_ts_shiftswap(TSShiftSwapData d)
     return algorithm_end(sol_best, d.info);
 }
 
-/******************************************************************************/
+/**************************** Simulated annealing *****************************/
 
-Solution gap::sol_sa_shiftswap(SAShiftSwapData d)
+SAShiftSwapOutput sol_sa_shiftswap(const Instance& ins, std::mt19937_64& gen, SAShiftSwapOptionalParameters p)
 {
     init_display(d.info);
 

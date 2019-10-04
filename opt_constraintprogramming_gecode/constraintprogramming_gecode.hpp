@@ -8,15 +8,17 @@
 namespace gap
 {
 
-struct ConstraintProgrammingGecodeData
+struct ConstraintProgrammingGecodeOptionalParameters
 {
-    const Instance& ins;
-    Solution& sol;
-    Cost& lb;
     Info info = Info();
 };
 
-Solution sopt_constraintprogramming_gecode(ConstraintProgrammingGecodeData d);
+struct ConstraintProgrammingGecodeOutput: Output
+{
+    ConstraintProgrammingGecodeOutput(const Instance& ins, Info& info): Output(ins, info) { }
+};
+
+ConstraintProgrammingGecodeOutput sopt_constraintprogramming_gecode(const Instance& ins, ConstraintProgrammingGecodeOptionalParameters p = {});
 
 }
 

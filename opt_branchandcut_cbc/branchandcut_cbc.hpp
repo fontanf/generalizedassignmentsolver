@@ -24,16 +24,19 @@ struct MilpMatrix
     std::vector<double> row_upper;
 };
 
-struct BranchAndCutCbcData
+struct BranchAndCutCbcOptionalParameters
 {
-    const Instance& ins;
-    Solution& sol;
-    Cost& lb;
-    bool stop_at_first_improvment = false;
     Info info = Info();
+
+    bool stop_at_first_improvment = false;
 };
 
-Solution sopt_branchandcut_cbc(BranchAndCutCbcData d);
+struct BranchAndCutCbcOutput: Output
+{
+    BranchAndCutCbcOutput(const Instance& ins, Info& info): Output(ins, info) { }
+};
+
+BranchAndCutCbcOutput sopt_branchandcut_cbc(const Instance& ins, BranchAndCutCbcOptionalParameters p = {});
 
 }
 

@@ -8,15 +8,17 @@
 namespace gap
 {
 
-struct BranchAndCutGurobiData
+struct BranchAndCutGurobiOptionalParameters
 {
-    const Instance& ins;
-    Solution& sol;
-    Cost& lb;
     Info info = Info();
 };
 
-Solution sopt_branchandcut_gurobi(BranchAndCutGurobiData d);
+struct BranchAndCutGurobiOutput: Output
+{
+    BranchAndCutGurobiOutput(const Instance& ins, Info& info): Output(ins, info) { }
+};
+
+BranchAndCutGurobiOutput sopt_branchandcut_gurobi(const Instance& ins, BranchAndCutGurobiOptionalParameters p = {});
 
 }
 

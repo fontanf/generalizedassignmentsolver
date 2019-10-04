@@ -17,6 +17,8 @@
 namespace gap
 {
 
+using benchtools::Info;
+
 typedef int64_t Cost;
 typedef double  PCost;
 typedef int64_t Weight;

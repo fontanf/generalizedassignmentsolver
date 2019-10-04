@@ -6,7 +6,7 @@
 namespace gap
 {
 
-std::function<void (Instance&, Solution&, Cost&, std::mt19937_64&, Info)> get_algorithm(std::string str);
+std::function<Output (Instance&, std::mt19937_64&, Info)> get_algorithm(std::string str);
 
 }
 

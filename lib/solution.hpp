@@ -71,8 +71,6 @@ public:
 
     void clear();
 
-    void update(const Solution& sol, Cost lb, const std::stringstream& s, Info& info);
-
     void write_cert(std::string filepath);
     std::string to_string(AgentIdx i);
 
@@ -101,19 +99,30 @@ ItemIdx distance(const Solution& sol1, const Solution& sol2);
  */
 bool compare(const Solution& sol_best, const Solution& sol_curr);
 
-void init_display(Info& info);
-void update_lb(Cost& lb, Cost lb_new, const Solution& sol, const std::stringstream& s, Info& info);
-
-Solution algorithm_end(const Solution& sol, Cost lb, Info& info);
-Solution algorithm_end(const Solution& sol, Info& info);
-Cost algorithm_end(const Instance& ins, Cost lb, Info& info);
-
 std::ostream& operator<<(std::ostream& os, const Solution& solution);
 
 struct SolutionCompare
 {
     bool operator()(const Solution& s1, const Solution& s2) { return s1.comp() < s2.comp(); }
 };
+
+/*********************************** Output ***********************************/
+
+struct Output
+{
+    Output(const Instance& ins, Info& info);
+    Solution solution;
+    Cost lower_bound = 0;
+
+    void print(Info& info, const std::stringstream& s) const;
+
+    void update_solution(const Solution& sol, const std::stringstream& s, Info& info);
+    void update_lower_bound(Cost lb, const std::stringstream& s, Info& info);
+
+    Output& algorithm_end(Info& info);
+};
+
+void algorithm_end(Cost lower_bound, Info& info);
 
 }
 

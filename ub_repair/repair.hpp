@@ -10,10 +10,10 @@
 namespace gap
 {
 
-Solution sol_repairgreedy(const Instance& ins, Info info = Info());
-Solution sol_repaircombrelax(const Instance& ins, Info info = Info());
+Output sol_repairgreedy(const Instance& ins, Info info = Info());
+Output sol_repaircombrelax(const Instance& ins, Info info = Info());
 #if COINOR_FOUND
-Solution sol_repairlinrelax_clp(const Instance& ins, const LinRelaxClpOutput& linrelax_output, Info info = Info());
+Output sol_repairlinrelax_clp(const Instance& ins, const LinRelaxClpOutput& linrelax_output, Info info = Info());
 #endif
 
 }

@@ -8,15 +8,17 @@
 namespace gap
 {
 
-struct ConstraintProgrammingCplexData
+struct ConstraintProgrammingCplexOptionalParameters
 {
-    const Instance& ins;
-    Solution& sol;
-    Cost& lb;
     Info info = Info();
 };
 
-Solution sopt_constraintprogramming_cplex(ConstraintProgrammingCplexData d);
+struct ConstraintProgrammingCplexOutput: Output
+{
+    ConstraintProgrammingCplexOutput(const Instance& ins, Info& info): Output(ins, info) { }
+};
+
+ConstraintProgrammingCplexOutput sopt_constraintprogramming_cplex(const Instance& ins, ConstraintProgrammingCplexOptionalParameters p);
 
 }
 

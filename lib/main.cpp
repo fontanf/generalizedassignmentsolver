@@ -72,9 +72,6 @@ int main(int argc, char *argv[])
 
     // Run algorithm
 
-    Solution sol(ins, initsolfile);
-    Cost lb = 0;
-
     Info info = Info()
         .set_verbose(vm.count("verbose"))
         .set_timelimit(time_limit)
@@ -86,13 +83,13 @@ int main(int argc, char *argv[])
         .set_loglevelmax(loglevelmax)
         ;
 
-    func(ins, sol, lb, gen, info);
+    Output output = func(ins, gen, info);
 
     // Check
 
-    if (sol.feasible() && sol.cost() < lb0)
+    if (output.solution.feasible() && output.solution.cost() < lb0)
         std::cerr << "\033[31m" << "WARNING, previous lower bound was wrong." << "\033[0m" << std::endl;
-    if (sol0.feasible() && lb > sol0.cost()) {
+    if (sol0.feasible() && output.lower_bound > sol0.cost()) {
         std::cerr << "\033[31m" << "ERROR, lower bound is greater upper bound." << "\033[0m" << std::endl;
         assert(false);
         return 1;
@@ -101,19 +98,17 @@ int main(int argc, char *argv[])
     // Update best solution and bound
 
     if (vm.count("update")) {
-        if (sol.feasible() && (!sol0.feasible() || sol0.cost() > sol.cost())) {
+        if (output.solution.feasible() && (!sol0.feasible() || sol0.cost() > output.solution.cost())) {
             std::cerr << "\033[32m" << "New upper bound found." << "\033[0m" << std::endl;
-            sol.write_cert(instancefile + ".sol");
+            output.solution.write_cert(instancefile + ".sol");
         }
-        if (lb0 < lb) {
+        if (lb0 < output.lower_bound) {
             std::cerr << "\033[32m" << "New lower bound found." << "\033[0m" << std::endl;
             std::ofstream f_opt(instancefile + ".bound");
-            f_opt << lb << std::endl;
+            f_opt << output.lower_bound << std::endl;
         }
     }
 
-    info.write_ini(outputfile);
-    sol.write_cert(certfile);
     return 0;
 }
 

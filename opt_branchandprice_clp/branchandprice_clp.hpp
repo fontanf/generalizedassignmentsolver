@@ -8,15 +8,17 @@
 namespace gap
 {
 
-struct BranchAndPriceClpData
+struct BranchAndPriceClpOptionalParameters
 {
-    const Instance& ins;
-    Solution& sol;
-    Cost& lb;
-    std::mt19937_64& gen;
     Info info = Info();
 };
-Solution sopt_branchandprice_clp(BranchAndPriceClpData d);
+
+struct BranchAndPriceClpOutput: Output
+{
+    BranchAndPriceClpOutput(const Instance& ins, Info& info): Output(ins, info) { }
+};
+
+BranchAndPriceClpOutput sopt_branchandprice_clp(const Instance& ins, BranchAndPriceClpOptionalParameters p = {});
 
 }
 

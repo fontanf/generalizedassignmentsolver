@@ -8,14 +8,17 @@
 namespace gap
 {
 
-struct LocalSolverData
+struct LocalSolverOptionalParameters
 {
-    const Instance& ins;
-    Solution& sol;
     Info info = Info();
 };
 
-Solution ub_localsolver(LocalSolverData d);
+struct LocalSolverOutput: Output
+{
+    LocalSolverOutput(const Instance& ins, Info& info): Output(ins, info) { }
+};
+
+LocalSolverOutput sol_localsolver(const Instance& ins, LocalSolverOptionalParameters p = {});
 
 }
 
