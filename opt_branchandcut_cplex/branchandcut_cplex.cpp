@@ -8,39 +8,49 @@ using namespace gap;
 
 ILOSTLBEGIN
 
-ILOMIPINFOCALLBACK2(loggingCallback,
-                    BranchAndCutCplexData&, d,
+BranchAndCutCplexOutput& BranchAndCutCplexOutput::algorithm_end(Info& info)
+{
+    Output::algorithm_end(info);
+    //PUT(info, "Algorithm", "Iterations", it);
+    //VER(info, "Iterations: " << it << std::endl);
+    return *this;
+}
+
+ILOMIPINFOCALLBACK4(loggingCallback,
+                    const Instance&, ins,
+                    BranchAndCutCplexOptionalParameters&, p,
+                    BranchAndCutCplexOutput&, output,
                     IloNumVarArray, vars)
 {
-    if (d.lb < getBestObjValue() - 0.5)
-        update_lb(d.lb, getBestObjValue(), d.sol, std::stringstream(""), d.info);
+    Cost lb = std::ceil(getBestObjValue() - TOL);
+    output.update_lower_bound(lb, std::stringstream(""), p.info);
 
     if (!hasIncumbent())
         return;
 
-    if (!d.sol.feasible() || d.sol.cost() > getIncumbentObjValue() + 0.5) {
-        Solution sol_curr(d.ins);
+    if (!output.solution.feasible() || output.solution.cost() > getIncumbentObjValue() + 0.5) {
+        Solution sol_curr(ins);
         IloNumArray val(vars.getEnv());
         getIncumbentValues(val, vars);
-        for (AltIdx k=0; k<d.ins.alternative_number(); ++k)
+        for (AltIdx k=0; k<ins.alternative_number(); ++k)
             if (val[k] > 0.5)
                 sol_curr.set(k);
-        d.sol.update(sol_curr, d.lb, std::stringstream(""), d.info);
+        output.update_solution(sol_curr, std::stringstream(""), p.info);
     }
 }
 
-Solution gap::sopt_branchandcut_cplex(BranchAndCutCplexData d)
+BranchAndCutCplexOutput gap::sopt_branchandcut_cplex(const Instance& ins, BranchAndCutCplexOptionalParameters p)
 {
-    VER(d.info, "*** branchandcut_cplex ***" << std::endl);
+    VER(p.info, "*** branchandcut_cplex ***" << std::endl);
 
-    init_display(d.info);
+    BranchAndCutCplexOutput output(ins, p.info);
 
-    ItemIdx n = d.ins.item_number();
-    AgentIdx m = d.ins.agent_number();
-    AltIdx o = d.ins.alternative_number();
+    ItemIdx n = ins.item_number();
+    AgentIdx m = ins.agent_number();
+    AltIdx o = ins.alternative_number();
 
     if (n == 0)
-        return algorithm_end(d.sol, d.lb, d.info);
+        return output.algorithm_end(p.info);
 
     IloEnv env;
     IloModel model(env);
@@ -52,7 +62,7 @@ Solution gap::sopt_branchandcut_cplex(BranchAndCutCplexData d)
     IloExpr expr(env);
     for (ItemIdx j=0; j<n; j++)
         for (AgentIdx i=0; i<m; i++)
-            expr += x[d.ins.alternative_index(j, i)] * d.ins.alternative(j, i).c;
+            expr += x[ins.alternative_index(j, i)] * ins.alternative(j, i).c;
     IloObjective obj = IloMinimize(env, expr);
     model.add(obj);
 
@@ -60,15 +70,15 @@ Solution gap::sopt_branchandcut_cplex(BranchAndCutCplexData d)
     for (AgentIdx i=0; i<m; i++) {
         IloExpr lhs(env);
         for (ItemIdx j=0; j<n; j++)
-            lhs += x[d.ins.alternative_index(j, i)] * d.ins.alternative(j, i).w;
-        model.add(IloRange(env, 0, lhs, d.ins.capacity(i)));
+            lhs += x[ins.alternative_index(j, i)] * ins.alternative(j, i).w;
+        model.add(IloRange(env, 0, lhs, ins.capacity(i)));
     }
 
     // One alternative per item constraint
     for (ItemIdx j=0; j<n; j++) {
         IloExpr lhs(env);
         for (AgentIdx i=0; i<m; i++)
-            lhs += x[d.ins.alternative_index(j, i)];
+            lhs += x[ins.alternative_index(j, i)];
         model.add(IloRange(env, 1, lhs, 1));
     }
 
@@ -79,13 +89,13 @@ Solution gap::sopt_branchandcut_cplex(BranchAndCutCplexData d)
     cplex.setParam(IloCplex::Param::MIP::Strategy::File, 2); // Avoid running out of memory
 
     // Initial solution
-    if (d.sol.feasible()) {
+    if (p.initial_solution != NULL && p.initial_solution->feasible()) {
         IloNumVarArray startVar(env);
         IloNumArray startVal(env);
         for (ItemIdx j=0; j<n; ++j) {
-            AgentIdx i_curr = d.sol.agent(j);
+            AgentIdx i_curr = p.initial_solution->agent(j);
             for (AgentIdx i=0; i<m; ++i) {
-                startVar.add(x[d.ins.alternative_index(j, i)]);
+                startVar.add(x[ins.alternative_index(j, i)]);
                 startVal.add(((i == i_curr)? 1: 0));
             }
         }
@@ -95,46 +105,44 @@ Solution gap::sopt_branchandcut_cplex(BranchAndCutCplexData d)
     }
 
     // Time limit
-    if (d.info.timelimit != std::numeric_limits<double>::infinity())
-        cplex.setParam(IloCplex::TiLim, d.info.timelimit);
+    if (p.info.timelimit != std::numeric_limits<double>::infinity())
+        cplex.setParam(IloCplex::TiLim, p.info.remaining_time());
 
     // Callback
-    cplex.use(loggingCallback(env, d, x));
+    cplex.use(loggingCallback(env, ins, p, output, x));
 
     // Optimize
     cplex.solve();
 
     if (cplex.getStatus() == IloAlgorithm::Infeasible) {
-        if (d.lb < d.ins.bound())
-            update_lb(d.lb, d.ins.bound(), d.sol, std::stringstream(""), d.info);
+        output.update_lower_bound(ins.bound(), std::stringstream(""), p.info);
     } else if (cplex.getStatus() == IloAlgorithm::Optimal) {
-        if (!d.sol.feasible() || d.sol.cost() > cplex.getObjValue() + 0.5) {
-            Solution sol_curr(d.ins);
+        if (!output.solution.feasible() || output.solution.cost() > cplex.getObjValue() + 0.5) {
+            Solution sol_curr(ins);
             for (AltIdx k=0; k<o; ++k)
                 if (cplex.getValue(x[k]) > 0.5)
                     sol_curr.set(k);
-            d.sol.update(sol_curr, d.lb, std::stringstream(""), d.info);
+            output.update_solution(sol_curr, std::stringstream(""), p.info);
         }
-        if (d.lb < d.sol.cost())
-            update_lb(d.lb, d.sol.cost(), d.sol, std::stringstream(""), d.info);
+        output.update_lower_bound(output.solution.cost(), std::stringstream(""), p.info);
     } else if (cplex.isPrimalFeasible()) {
-        if (!d.sol.feasible() || d.sol.cost() > cplex.getObjValue() + 0.5) {
-            Solution sol_curr(d.ins);
+        if (!output.solution.feasible() || output.solution.cost() > cplex.getObjValue() + 0.5) {
+            Solution sol_curr(ins);
             for (AltIdx k=0; k<o; ++k)
                 if (cplex.getValue(x[k]) > 0.5)
                     sol_curr.set(k);
-            d.sol.update(sol_curr, d.lb, std::stringstream(""), d.info);
+            output.update_solution(sol_curr, std::stringstream(""), p.info);
         }
-        if (d.lb < cplex.getBestObjValue() + 0.5)
-            update_lb(d.lb, cplex.getBestObjValue(), d.sol, std::stringstream(""), d.info);
+        Cost lb = std::ceil(cplex.getBestObjValue() - TOL);
+        output.update_lower_bound(lb, std::stringstream(""), p.info);
     } else {
-        if (d.lb < cplex.getBestObjValue() + 0.5)
-            update_lb(d.lb, cplex.getBestObjValue(), d.sol, std::stringstream(""), d.info);
+        Cost lb = std::ceil(cplex.getBestObjValue() - TOL);
+        output.update_lower_bound(lb, std::stringstream(""), p.info);
     }
 
     env.end();
 
-    return algorithm_end(d.sol, d.lb, d.info);
+    return output.algorithm_end(p.info);
 }
 
 #endif
