@@ -18,6 +18,8 @@ struct LSShiftSwapOptionalParameters
 struct LSShiftSwapOutput: Output
 {
     LSShiftSwapOutput(const Instance& ins, Info& info): Output(ins, info) { }
+    LSShiftSwapOutput& algorithm_end(Info& info);
+
     Cpt it = 0;
 };
 
@@ -42,7 +44,11 @@ struct TSShiftSwapOptionalParameters
 struct TSShiftSwapOutput: Output
 {
     TSShiftSwapOutput(const Instance& ins, Info& info): Output(ins, info) { }
+    TSShiftSwapOutput& algorithm_end(Info& info);
+
     Cpt it = 0;
+    Cpt improving_move_number = 0;
+    Cpt degrading_move_number = 0;
 };
 
 TSShiftSwapOutput sol_ts_shiftswap(const Instance& ins, std::mt19937_64& gen, TSShiftSwapOptionalParameters p = {});
@@ -68,6 +74,8 @@ struct SAShiftSwapOptionalParameters
 struct SAShiftSwapOutput: Output
 {
     SAShiftSwapOutput(const Instance& ins, Info& info): Output(ins, info) { }
+    SAShiftSwapOutput& algorithm_end(Info& info);
+
     Cpt it = 0;
 };
 

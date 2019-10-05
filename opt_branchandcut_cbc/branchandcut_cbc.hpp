@@ -13,27 +13,31 @@
 namespace gap
 {
 
-struct MilpMatrix
+struct CoinLP
 {
-    MilpMatrix(const Instance& ins);
-    CoinPackedMatrix matrix;
+    CoinLP(const Instance& ins);
+
     std::vector<double> col_lower;
     std::vector<double> col_upper;
     std::vector<double> objective;
+
     std::vector<double> row_lower;
     std::vector<double> row_upper;
+    CoinPackedMatrix matrix;
 };
 
 struct BranchAndCutCbcOptionalParameters
 {
     Info info = Info();
 
+    const Solution* initial_solution = NULL;
     bool stop_at_first_improvment = false;
 };
 
 struct BranchAndCutCbcOutput: Output
 {
     BranchAndCutCbcOutput(const Instance& ins, Info& info): Output(ins, info) { }
+    BranchAndCutCbcOutput& algorithm_end(Info& info);
 };
 
 BranchAndCutCbcOutput sopt_branchandcut_cbc(const Instance& ins, BranchAndCutCbcOptionalParameters p = {});
