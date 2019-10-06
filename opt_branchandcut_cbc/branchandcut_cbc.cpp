@@ -153,7 +153,7 @@ CbcEventHandler::CbcAction SolHandler::event(CbcEvent whichEvent)
     const OsiSolverInterface *pps = model_->postProcessedSolver(1);
     const OsiSolverInterface *solver = pps? pps: origSolver;
 
-    if (!output_.solution.feasible() || (output_.solution.cost() > solver->getObjValue() + 0.5)) {
+    if (!output_.solution.feasible() || output_.solution.cost() > solver->getObjValue() + 0.5) {
         const double *solution = solver->getColSolution();
         Solution sol_curr(ins_);
         for (AltIdx k=0; k<ins_.alternative_number(); ++k)

@@ -122,7 +122,7 @@ struct Output
     Output& algorithm_end(Info& info);
 };
 
-void algorithm_end(Cost lower_bound, Info& info);
+Cost algorithm_end(Cost lower_bound, Info& info);
 
 }
 

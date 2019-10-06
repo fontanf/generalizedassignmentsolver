@@ -393,7 +393,7 @@ Output& Output::algorithm_end(Info& info)
     return *this;
 }
 
-void gap::algorithm_end(Cost lower_bound, Info& info)
+Cost gap::algorithm_end(Cost lower_bound, Info& info)
 {
     double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
     PUT(info, "Bound", "Value", lower_bound);
@@ -403,5 +403,6 @@ void gap::algorithm_end(Cost lower_bound, Info& info)
             << "Time (s): " << t << std::endl);
 
     info.write_ini();
+    return lower_bound;
 }
 
