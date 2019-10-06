@@ -20,6 +20,16 @@ using namespace gap;
  * https://www.coin-or.org/Doxygen/Osi/structVOL__parms.html
  */
 
+/*********************** lb_lagrelax_assignment_volume ************************/
+
+LagRelaxAssignmentVolumeOutput& LagRelaxAssignmentVolumeOutput::algorithm_end(Info& info)
+{
+    Output::algorithm_end(info);
+    //PUT(info, "Algorithm", "Iterations", it);
+    //VER(info, "Iterations: " << it << std::endl);
+    return *this;
+}
+
 class LagRelaxAssignmentHook: public VOL_user_hooks
 {
 
@@ -139,9 +149,9 @@ int LagRelaxAssignmentHook::solve_subproblem(const VOL_dvector& dual, const VOL_
                 indices[j_kp] = j;
             }
         }
-        knapsack::Solution sol = knapsack::sopt_minknap(ins_kp, knapsack::MinknapParams::combo());
+        auto output_kp = knapsack::sopt_minknap(ins_kp);
         for (knapsack::ItemIdx j_kp=0; j_kp<ins_kp.total_item_number(); ++j_kp) {
-            if (sol.contains_idx(j_kp)) {
+            if (output_kp.solution.contains_idx(j_kp)) {
                 ItemIdx j = indices[j_kp];
                 AltIdx k = ins.alternative_index(j, i);
                 x[k] = 1;
@@ -178,6 +188,7 @@ int LagRelaxAssignmentHook::solve_subproblem(const VOL_dvector& dual, const VOL_
 LagRelaxAssignmentVolumeOutput gap::lb_lagrelax_assignment_volume(const Instance& ins, Info info)
 {
     VER(info, "*** lagrelax_assignment_volume ***" << std::endl);
+    LagRelaxAssignmentVolumeOutput output(ins, info);
 
     VOL_problem volprob;
     volprob.parm.printflag = (info.output->verbose)? 1: 0;
@@ -202,9 +213,9 @@ LagRelaxAssignmentVolumeOutput gap::lb_lagrelax_assignment_volume(const Instance
     volprob.solve(hook, false /* no warmstart */);
 
     // Extract solution
-    LagRelaxAssignmentVolumeOutput output;
 
-    output.lb = std::ceil(volprob.value); // bound
+    Cost lb = std::ceil(volprob.value - TOL); // bound
+    output.update_lower_bound(lb, std::stringstream(""), info);
 
     output.multipliers.resize(ins.item_number()); // multipliers
     for (ItemIdx j=0; j<ins.item_number(); ++j)
@@ -218,11 +229,18 @@ LagRelaxAssignmentVolumeOutput gap::lb_lagrelax_assignment_volume(const Instance
         }
     }
 
-    algorithm_end(ins, output.lb, info);
-    return output;
+    return output.algorithm_end(info);
 }
 
-/*****************************************************************************/
+/************************ lb_lagrelax_knapsack_volume *************************/
+
+LagRelaxKnapsackVolumeOutput& LagRelaxKnapsackVolumeOutput::algorithm_end(Info& info)
+{
+    Output::algorithm_end(info);
+    //PUT(info, "Algorithm", "Iterations", it);
+    //VER(info, "Iterations: " << it << std::endl);
+    return *this;
+}
 
 class LagRelaxKnapsackHook: public VOL_user_hooks
 {
@@ -337,6 +355,7 @@ int LagRelaxKnapsackHook::solve_subproblem(const VOL_dvector& dual, const VOL_dv
 LagRelaxKnapsackVolumeOutput gap::lb_lagrelax_knapsack_volume(const Instance& ins, Info info)
 {
     VER(info, "*** lagrelax_knapsack_volume ***" << std::endl);
+    LagRelaxKnapsackVolumeOutput output(ins, info);
 
     VOL_problem volprob;
     volprob.parm.printflag = (info.output->verbose)? 1: 0;
@@ -355,9 +374,9 @@ LagRelaxKnapsackVolumeOutput gap::lb_lagrelax_knapsack_volume(const Instance& in
     volprob.solve(hook, false /* no warmstart */);
 
     // Extract solution
-    LagRelaxKnapsackVolumeOutput output;
 
-    output.lb = std::ceil(volprob.value); // bound
+    Cost lb = std::ceil(volprob.value - TOL); // bound
+    output.update_lower_bound(lb, std::stringstream(""), info);
 
     output.multipliers.resize(ins.agent_number()); // multipliers
     for (AgentIdx i=0; i<ins.agent_number(); ++i)
@@ -371,8 +390,7 @@ LagRelaxKnapsackVolumeOutput gap::lb_lagrelax_knapsack_volume(const Instance& in
         }
     }
 
-    algorithm_end(ins, output.lb, info);
-    return output;
+    return output.algorithm_end(info);
 }
 
 #endif

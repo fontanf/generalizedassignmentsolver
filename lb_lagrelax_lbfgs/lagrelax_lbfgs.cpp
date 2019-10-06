@@ -16,6 +16,16 @@ using namespace dlib;
 
 typedef matrix<double,0,1> column_vector;
 
+/************************ lb_lagrelax_assignment_lbfgs ************************/
+
+LagRelaxAssignmentLbfgsOutput& LagRelaxAssignmentLbfgsOutput::algorithm_end(Info& info)
+{
+    Output::algorithm_end(info);
+    //PUT(info, "Algorithm", "Iterations", it);
+    //VER(info, "Iterations: " << it << std::endl);
+    return *this;
+}
+
 class LagRelaxAssignmentLbfgsFunction
 {
 
@@ -62,10 +72,10 @@ double LagRelaxAssignmentLbfgsFunction::f(const column_vector& mu)
             }
         }
         //knapsack::Solution sol = knapsack::sopt_bellman_array_all(ins_kp, Info().set_verbose(false));
-        knapsack::Solution sol = knapsack::sopt_minknap(ins_kp, knapsack::MinknapParams());
+        auto output_kp = knapsack::sopt_minknap(ins_kp);
         //std::cout << "i " << i << " opt " << sol.profit() << std::endl;
         for (knapsack::ItemIdx j_kp=0; j_kp<ins_kp.total_item_number(); ++j_kp) {
-            if (sol.contains_idx(j_kp)) {
+            if (output_kp.solution.contains_idx(j_kp)) {
                 ItemIdx j = indices[j_kp];
                 AltIdx k = ins_.alternative_index(j, i);
                 grad_(j)--;
@@ -79,8 +89,10 @@ double LagRelaxAssignmentLbfgsFunction::f(const column_vector& mu)
 
 LagRelaxAssignmentLbfgsOutput gap::lb_lagrelax_assignment_lbfgs(const Instance& ins, Info info)
 {
+    VER(info, "*** lagrelax_assignment_lbfgs ***" << std::endl);
+    LagRelaxAssignmentLbfgsOutput output(ins, info);
+
     ItemIdx n = ins.item_number();
-    LagRelaxAssignmentLbfgsOutput out;
     LagRelaxAssignmentLbfgsFunction func(ins);
     column_vector mu(n);
     for (ItemIdx j=0; j<n; ++j)
@@ -99,16 +111,24 @@ LagRelaxAssignmentLbfgsOutput gap::lb_lagrelax_assignment_lbfgs(const Instance& 
             mu,
             std::numeric_limits<double>::max());
 
-    out.lb = std::ceil(res - TOL);
-    out.multipliers.resize(n);
+    Cost lb = std::ceil(res - TOL);
+    output.update_lower_bound(lb, std::stringstream(""), info);
+    output.multipliers.resize(n);
     for (ItemIdx j=0; j<n; ++j)
-        out.multipliers[j] = mu(j);
+        output.multipliers[j] = mu(j);
 
-    algorithm_end(ins, out.lb, info);
-    return out;
+    return output.algorithm_end(info);
 }
 
-/******************************************************************************/
+/************************* lb_lagrelax_knapsack_lbfgs *************************/
+
+LagRelaxKnapsackLbfgsOutput& LagRelaxKnapsackLbfgsOutput::algorithm_end(Info& info)
+{
+    Output::algorithm_end(info);
+    //PUT(info, "Algorithm", "Iterations", it);
+    //VER(info, "Iterations: " << it << std::endl);
+    return *this;
+}
 
 class LagRelaxKnapsackLbfgsFunction
 {
@@ -183,7 +203,9 @@ double LagRelaxKnapsackLbfgsFunction::f(const column_vector& mu)
 
 LagRelaxKnapsackLbfgsOutput gap::lb_lagrelax_knapsack_lbfgs(const Instance& ins, Info info)
 {
-    LagRelaxKnapsackLbfgsOutput out;
+    VER(info, "*** lagrelax_knapsack_lbfgs ***" << std::endl);
+    LagRelaxKnapsackLbfgsOutput output(ins, info);
+
     AgentIdx m = ins.agent_number();
     LagRelaxKnapsackLbfgsFunction func(ins);
     column_vector mu(m);
@@ -211,10 +233,11 @@ LagRelaxKnapsackLbfgsOutput gap::lb_lagrelax_knapsack_lbfgs(const Instance& ins,
             mu_lower,
             mu_upper);
 
-    out.lb = std::ceil(res - TOL);
-    out.multipliers.resize(m);
+    Cost lb = std::ceil(res - TOL);
+    output.update_lower_bound(lb, std::stringstream(""), info);
+    output.multipliers.resize(m);
     for (AgentIdx i=0; i<m; ++i)
-        out.multipliers[i] = mu(i);
+        output.multipliers[i] = mu(i);
 
     //std::cout << "mu";
     //for (AgentIdx i=0; i<ins.agent_number(); ++i)
@@ -222,8 +245,7 @@ LagRelaxKnapsackLbfgsOutput gap::lb_lagrelax_knapsack_lbfgs(const Instance& ins,
     //std::cout << std::endl;
     //std::cout << "lb " << out.lb << std::endl;
 
-    algorithm_end(ins, out.lb, info);
-    return out;
+    return output.algorithm_end(info);
 }
 
 #endif
