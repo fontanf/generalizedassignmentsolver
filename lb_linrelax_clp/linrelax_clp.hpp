@@ -11,6 +11,8 @@ namespace gap
 struct LinRelaxClpOutput: Output
 {
     LinRelaxClpOutput(const Instance& ins, Info& info): Output(ins, info) { }
+    LinRelaxClpOutput& algorithm_end(Info& info);
+
     std::vector<double> x;
 };
 

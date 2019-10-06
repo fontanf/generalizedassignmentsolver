@@ -11,6 +11,8 @@ namespace gap
 struct LinRelaxGurobiOutput: Output
 {
     LinRelaxGurobiOutput(const Instance& ins, Info& info): Output(ins, info) { }
+    LinRelaxGurobiOutput& algorithm_end(Info& info);
+
     std::vector<double> x;
 };
 

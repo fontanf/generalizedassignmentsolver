@@ -6,9 +6,19 @@
 
 using namespace gap;
 
+LinRelaxGurobiOutput& LinRelaxGurobiOutput::algorithm_end(Info& info)
+{
+    Output::algorithm_end(info);
+    //PUT(info, "Algorithm", "Iterations", it);
+    //VER(info, "Iterations: " << it << std::endl);
+    return *this;
+}
+
 LinRelaxGurobiOutput gap::lb_linrelax_gurobi(const Instance& ins, Info info)
 {
     VER(info, "*** linrelax_gurobi ***" << std::endl);
+
+    LinRelaxGurobiOutput output(ins, info);
 
     ItemIdx n = ins.item_number();
     AgentIdx m = ins.agent_number();
@@ -50,14 +60,13 @@ LinRelaxGurobiOutput gap::lb_linrelax_gurobi(const Instance& ins, Info info)
     model.optimize();
 
     // Get solution
-    LinRelaxGurobiOutput out;
-    out.lb = std::ceil(model.get(GRB_DoubleAttr_ObjVal));
-    out.x = std::vector<double>(o, 0);
+    Cost lb = std::ceil(model.get(GRB_DoubleAttr_ObjVal) - TOL);
+    output.update_lower_bound(lb, std::stringstream(""), info);
+    output.x = std::vector<double>(o, 0);
     for (AltIdx k=0; k<ins.alternative_number(); ++k)
-        out.x[k] = x[k].get(GRB_DoubleAttr_X);
+        output.x[k] = x[k].get(GRB_DoubleAttr_X);
 
-    algorithm_end(ins, out.lb, info);
-    return out;
+    return output.algorithm_end(info);
 }
 
 #endif
