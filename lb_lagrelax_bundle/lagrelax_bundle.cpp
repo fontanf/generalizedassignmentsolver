@@ -14,6 +14,16 @@
 
 using namespace gap;
 
+/*********************** lb_lagrelax_assignment_bundle ************************/
+
+LagRelaxAssignmentBundleOutput& LagRelaxAssignmentBundleOutput::algorithm_end(Info& info)
+{
+    Output::algorithm_end(info);
+    //PUT(info, "Algorithm", "Iterations", it);
+    //VER(info, "Iterations: " << it << std::endl);
+    return *this;
+}
+
 double lb_lagrelax_assignment_bundle_subproblem(
         const Instance& ins, const std::vector<double>& mu, std::vector<double>& grad)
 {
@@ -41,9 +51,9 @@ double lb_lagrelax_assignment_bundle_subproblem(
                 indices[j_kp] = j;
             }
         }
-        knapsack::Solution sol = knapsack::sopt_minknap(ins_kp, knapsack::MinknapParams::combo());
+        auto output_kp = knapsack::sopt_minknap(ins_kp);
         for (knapsack::ItemIdx j_kp=0; j_kp<ins_kp.total_item_number(); ++j_kp) {
-            if (sol.contains_idx(j_kp)) {
+            if (output_kp.solution.contains_idx(j_kp)) {
                 ItemIdx j = indices[j_kp];
                 AltIdx k = ins.alternative_index(j, i);
                 grad[j]--;
@@ -82,10 +92,9 @@ LagRelaxAssignmentBundleOutput gap::lb_lagrelax_assignment_bundle(const Instance
      *
      */
 
-    (void)info;
+    VER(info, "*** lagrelax_assignment_bundle ***" << std::endl);
+    LagRelaxAssignmentBundleOutput output(ins, info);
     ItemIdx n = ins.item_number();
-
-    LagRelaxAssignmentBundleOutput out;
 
     // Initilze LP
     std::vector<int> vec_ind(n + 1);
@@ -136,9 +145,11 @@ LagRelaxAssignmentBundleOutput gap::lb_lagrelax_assignment_bundle(const Instance
         std::cout << l << std::endl;
 
         // Update lower bound
-        if (out.lb < l) {
-            out.lb = std::ceil(l);
-            std::cout <<  "it " << it << " lb " << l << std::endl;
+        Cost lb = std::ceil(l - TOL);
+        if (output.lower_bound < lb) {
+            std::stringstream ss;
+            ss <<  "it " << it;
+            output.update_lower_bound(lb, ss, info);
         }
 
         // Avoid adding useless rows
@@ -159,15 +170,26 @@ LagRelaxAssignmentBundleOutput gap::lb_lagrelax_assignment_bundle(const Instance
         model.addRow(n + 1, vec_ind.data(), vec_elem.data(), lower, DBL_MAX);
     }
 
-    return out;
+    return output;
+}
+
+/************************ lb_lagrelax_knapsack_bundle *************************/
+
+LagRelaxKnapsackBundleOutput& LagRelaxKnapsackBundleOutput::algorithm_end(Info& info)
+{
+    Output::algorithm_end(info);
+    //PUT(info, "Algorithm", "Iterations", it);
+    //VER(info, "Iterations: " << it << std::endl);
+    return *this;
 }
 
 LagRelaxKnapsackBundleOutput gap::lb_lagrelax_knapsack_bundle(const Instance& ins, Info info)
 {
-    LagRelaxKnapsackBundleOutput out;
+    VER(info, "*** lagrelax_knapsack_bundle ***" << std::endl);
+    LagRelaxKnapsackBundleOutput output(ins, info);
     (void)ins;
     (void)info;
-    return out;
+    return output.algorithm_end(info);
 }
 
 #endif
