@@ -16,6 +16,7 @@ struct BranchAndPriceClpOptionalParameters
 struct BranchAndPriceClpOutput: Output
 {
     BranchAndPriceClpOutput(const Instance& ins, Info& info): Output(ins, info) { }
+    BranchAndPriceClpOutput& algorithm_end(Info& info);
 };
 
 BranchAndPriceClpOutput sopt_branchandprice_clp(const Instance& ins, BranchAndPriceClpOptionalParameters p = {});

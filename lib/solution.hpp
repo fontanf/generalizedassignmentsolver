@@ -114,6 +114,7 @@ struct Output
     Solution solution;
     Cost lower_bound = 0;
 
+    bool optimal() const { return (solution.feasible() && solution.profit() == lower_bound); }
     void print(Info& info, const std::stringstream& s) const;
 
     void update_solution(const Solution& sol, const std::stringstream& s, Info& info);

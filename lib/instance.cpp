@@ -77,7 +77,7 @@ void Instance::add_item(const std::vector<std::pair<Weight, Cost>>& a)
 
 void Instance::set_optimal_solution(Solution& sol)
 {
-    sol_opt_ = std::unique_ptr<Solution>(new Solution(sol));
+    sol_opt_ = std::make_unique<Solution>(sol);
 }
 
 Instance::Instance(std::string filepath, std::string format): name_(filepath)
@@ -154,7 +154,7 @@ Instance::Instance(const Instance& ins):
     t_(ins.t_),
     c_max_(ins.c_max_),
     c_tot_(ins.c_tot_),
-    sol_opt_((ins.sol_opt_ == NULL)? NULL: std::unique_ptr<Solution>(new Solution(*ins.sol_opt_)))
+    sol_opt_((ins.sol_opt_ == NULL)? NULL: std::make_unique<Solution>(*ins.sol_opt_))
 {
 }
 
@@ -167,7 +167,7 @@ Instance& Instance::operator=(const Instance& ins)
         t_            = ins.t_;
         c_max_        = ins.c_max_;
         c_tot_        = ins.c_tot_;
-        sol_opt_      = (ins.sol_opt_ != NULL)? std::unique_ptr<Solution>(new Solution(*ins.sol_opt_)): NULL;
+        sol_opt_      = (ins.sol_opt_ != NULL)? std::make_unique<Solution>(*ins.sol_opt_): NULL;
     }
     return *this;
 }

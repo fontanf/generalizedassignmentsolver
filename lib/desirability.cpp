@@ -10,18 +10,18 @@ using namespace gap;
 std::unique_ptr<Desirability> gap::desirability(std::string str, const Instance& ins)
 {
     if (str == "cij") {
-        return std::unique_ptr<Desirability>(new DesirabilityCost(ins));
+        return std::make_unique<DesirabilityCost>(ins);
     } else if (str == "wij") {
-        return std::unique_ptr<Desirability>(new DesirabilityWeight(ins));
+        return std::make_unique<DesirabilityWeight>(ins);
     } else if (str == "cij*wij") {
-        return std::unique_ptr<Desirability>(new DesirabilityCostWeight(ins));
+        return std::make_unique<DesirabilityCostWeight>(ins);
     } else if (str == "-pij/wij") {
-        return std::unique_ptr<Desirability>(new DesirabilityEfficiency(ins));
+        return std::make_unique<DesirabilityEfficiency>(ins);
     } else if (str == "wij/ti") {
-        return std::unique_ptr<Desirability>(new DesirabilityWeightCapacity(ins));
+        return std::make_unique<DesirabilityWeightCapacity>(ins);
     } else {
         std::cout << "unknown desirability function" << std::endl;
-        return std::unique_ptr<Desirability>(new DesirabilityCost(ins));
+        return std::make_unique<DesirabilityCost>(ins);
     }
 }
 
