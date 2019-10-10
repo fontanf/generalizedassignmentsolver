@@ -232,7 +232,7 @@ ColGenClpOutput gap::lb_colgen_clp(const Instance& ins, ColGenClpOptionalParamet
 
     // Compute x
     const double *solution = model.getColSolution();
-    std::fill(output.x.begin(), output.x.end(), 0);
+    output.x.resize(ins.alternative_number(), 0);
     for (ColIdx col_idx = 1; col_idx < model.numberColumns(); ++col_idx) {
         AgentIdx i = column_indices[col_idx].first;
         for (ItemIdx j: (*columns)[i][column_indices[col_idx].second])
