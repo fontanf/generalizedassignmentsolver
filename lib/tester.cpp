@@ -7,8 +7,8 @@ using namespace gap;
 
 bool test(const Instance& ins, std::vector<Output (*)(Instance&)> fs, TestType tt)
 {
-    bool feasible = false;
-    Cost opt = -1;
+    bool feasible = (ins.optimal_solution() == NULL)? false: ins.optimal_solution()->feasible();
+    Cost opt = (ins.optimal_solution() == NULL)? -1: ins.optimum();
     for (auto f: fs) {
         Instance ins_tmp = ins;
         Output output = f(ins_tmp);

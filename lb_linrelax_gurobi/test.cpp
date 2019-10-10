@@ -5,6 +5,7 @@
 
 using namespace gap;
 
+/*
 Output lb_linrelax_gurobi_test(Instance& ins)
 {
     return lb_linrelax_gurobi(ins);
@@ -15,6 +16,7 @@ std::vector<Output (*)(Instance&)> f = {
 };
 
 TEST(LinRelaxGurobi, TEST) { test(TEST, f, LB); }
+*/
 
 #endif
 
