@@ -15,6 +15,12 @@ using namespace Gecode;
  * https://www.gecode.org/doc-latest/MPG.pdf
  */
 
+ConstraintProgrammingGecodeOutput& ConstraintProgrammingGecodeOutput::algorithm_end(Info& info)
+{
+    Output::algorithm_end(info);
+    return *this;
+}
+
 class GapGecode: public IntMinimizeSpace
 {
 
@@ -118,43 +124,42 @@ private:
 
 };
 
-Solution gap::sopt_constraintprogramming_gecode(ConstraintProgrammingGecodeData d)
+ConstraintProgrammingGecodeOutput gap::sopt_constraintprogramming_gecode(const Instance& ins, ConstraintProgrammingGecodeOptionalParameters p)
 {
-    VER(d.info, "*** constraintprogramming_gecode ***" << std::endl);
+    VER(p.info, "*** constraintprogramming_gecode ***" << std::endl);
+    ConstraintProgrammingGecodeOutput output(ins, p.info);
 
-    init_display(d.info);
+    if (ins.item_number() == 0)
+        return output.algorithm_end(p.info);
 
-    if (d.ins.item_number() == 0)
-        return d.sol;
-
-    GapGecode model(d.ins);
+    GapGecode model(ins);
     //Gist::bab(&model);
 
     Search::Options options;
 
     // Time limit
-    if (d.info.timelimit != std::numeric_limits<double>::infinity()) {
-        Search::Stop* stoptime = Search::Stop::time(d.info.timelimit * 1000);
+    if (p.info.timelimit != std::numeric_limits<double>::infinity()) {
+        Search::Stop* stoptime = Search::Stop::time(p.info.timelimit * 1000);
         options.stop = stoptime;
     }
 
     BAB<GapGecode> engine(&model, options);
-    GapGecode* sol = NULL;
-    Solution sol_best(d.ins);
-    while ((sol = engine.next())) {
-        for (ItemIdx j=0; j<d.ins.item_number(); j++)
-            d.sol.set(j, sol->agent(j));
-        sol_best.update(d.sol, d.lb, std::stringstream(""), d.info);
-        delete sol;
+    GapGecode* sol_ptr = NULL;
+    Solution sol_best(ins);
+    while ((sol_ptr = engine.next())) {
+        Solution sol_curr(ins);
+        for (ItemIdx j=0; j<ins.item_number(); j++)
+            sol_curr.set(j, sol_ptr->agent(j));
+        output.update_solution(sol_curr, std::stringstream(""), p.info);
+        delete sol_ptr;
     }
 
-    if (d.info.check_time()) {
-        Cost lb = (d.sol.feasible())? d.sol.cost(): d.ins.bound();
-        if (d.lb < lb)
-            update_lb(d.lb, lb, d.sol, std::stringstream(""), d.info);
+    if (p.info.check_time()) {
+        Cost lb = (output.solution.feasible())? output.solution.cost(): ins.bound();
+        output.update_lower_bound(lb, std::stringstream(""), p.info);
     }
 
-    return algorithm_end(d.sol, d.lb, d.info);
+    return output.algorithm_end(p.info);
 }
 
 #endif

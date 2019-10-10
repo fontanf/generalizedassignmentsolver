@@ -16,6 +16,7 @@ struct ConstraintProgrammingGecodeOptionalParameters
 struct ConstraintProgrammingGecodeOutput: Output
 {
     ConstraintProgrammingGecodeOutput(const Instance& ins, Info& info): Output(ins, info) { }
+    ConstraintProgrammingGecodeOutput& algorithm_end(Info& info);
 };
 
 ConstraintProgrammingGecodeOutput sopt_constraintprogramming_gecode(const Instance& ins, ConstraintProgrammingGecodeOptionalParameters p = {});

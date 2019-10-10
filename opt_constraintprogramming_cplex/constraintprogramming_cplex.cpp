@@ -8,12 +8,19 @@ using namespace gap;
 
 ILOSTLBEGIN
 
-Solution gap::sopt_constraintprogramming_cplex(ConstraintProgrammingCplexData d)
+ConstraintProgrammingCplexOutput& ConstraintProgrammingCplexOutput::algorithm_end(Info& info)
 {
-    VER(d.info, "*** constraintprogramming_cplex ***" << std::endl);
+    Output::algorithm_end(info);
+    return *this;
+}
 
-    ItemIdx n = d.ins.item_number();
-    AgentIdx m = d.ins.agent_number();
+ConstraintProgrammingCplexOutput gap::sopt_constraintprogramming_cplex(const Instance& ins, ConstraintProgrammingCplexOptionalParameters p)
+{
+    VER(p.info, "*** constraintprogramming_cplex ***" << std::endl);
+    ConstraintProgrammingCplexOutput output(ins, p.info);
+
+    ItemIdx n = ins.item_number();
+    AgentIdx m = ins.agent_number();
     IloEnv env;
     IloModel model(env);
 
@@ -33,7 +40,7 @@ Solution gap::sopt_constraintprogramming_cplex(ConstraintProgrammingCplexData d)
     for(ItemIdx j=0; j<n; j++) {
         cost.add(IloIntArray(env, m));
         for(AgentIdx i=0; i<m; i++)
-            cost[j][i] = d.ins.alternative(j, i).c;
+            cost[j][i] = ins.alternative(j, i).c;
     }
 
     // Cost variables
@@ -50,10 +57,10 @@ Solution gap::sopt_constraintprogramming_cplex(ConstraintProgrammingCplexData d)
     // Load variables (and capacity constraint)
     IloIntVarArray load(env, m);
     for(AgentIdx i=0; i<m; i++) {
-        load[i] = IloIntVar(env, 0, d.ins.capacity(i));
+        load[i] = IloIntVar(env, 0, ins.capacity(i));
         IloExpr sum(env);
         for (ItemIdx j=0; j<n; ++j)
-            sum += d.ins.alternative(j, i).w * xij[j][i];
+            sum += ins.alternative(j, i).w * xij[j][i];
         model.add(load[i] == sum);
     }
 
@@ -63,28 +70,26 @@ Solution gap::sopt_constraintprogramming_cplex(ConstraintProgrammingCplexData d)
     cp.setOut(env.getNullStream());
 
     // Time limit
-    if (d.info.timelimit != std::numeric_limits<double>::infinity())
-        cp.setParameter(IloCP::TimeLimit, d.info.timelimit);
+    if (p.info.timelimit != std::numeric_limits<double>::infinity())
+        cp.setParameter(IloCP::TimeLimit, p.info.timelimit);
 
     // Solve
     cp.startNewSearch();
     while (cp.next()) {
-        Solution sol_curr(d.ins);
+        Solution sol_curr(ins);
         for (ItemIdx j=0; j<n; ++j)
             sol_curr.set(j, cp.getValue(xj[j]));
-        if (compare(d.sol, sol_curr))
-            d.sol.update(sol_curr, d.lb, std::stringstream(""), d.info);
+        output.update_solution(sol_curr, std::stringstream(""), p.info);
     }
 
-    if (d.info.check_time()) {
-        Cost lb = (d.sol.feasible())? d.sol.cost(): d.ins.bound();
-        if (d.lb < lb)
-            update_lb(d.lb, lb, d.sol, std::stringstream(""), d.info);
+    if (p.info.check_time()) {
+        Cost lb = (output.solution.feasible())? output.solution.cost(): ins.bound();
+        output.update_lower_bound(lb, std::stringstream(""), p.info);
     }
 
     env.end();
 
-    return algorithm_end(d.sol, d.lb, d.info);
+    return output.algorithm_end(p.info);
 }
 
 #endif
