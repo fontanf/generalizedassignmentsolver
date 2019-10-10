@@ -113,9 +113,15 @@ struct Output
     Output(const Instance& ins, Info& info);
     Solution solution;
     Cost lower_bound = 0;
+    double time = -1;
 
     bool optimal() const { return (solution.feasible() && solution.profit() == lower_bound); }
     bool feasible() const { return lower_bound < solution.instance().bound(); }
+
+    std::string ub_str() const;
+    std::string lb_str() const;
+    std::string gap_str() const;
+    double gap() const;
     void print(Info& info, const std::stringstream& s) const;
 
     void update_solution(const Solution& sol, const std::stringstream& s, Info& info);

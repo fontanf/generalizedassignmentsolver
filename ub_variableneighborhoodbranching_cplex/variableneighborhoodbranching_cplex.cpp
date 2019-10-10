@@ -11,10 +11,17 @@ ILOSTLBEGIN
 typedef IloArray<IloNumVarArray> NumVarMatrix;
 typedef IloArray<IloNumArray>    NumMatrix;
 
+VariableNeighborhoodBranchingOutput& VariableNeighborhoodBranchingOutput::algorithm_end(Info& info)
+{
+    Output::algorithm_end(info);
+    return *this;
+}
+
 VariableNeighborhoodBranchingOutput gap::sol_variableneighborhoodbranching_cplex(
         const Instance& ins, std::mt19937_64& gen,
         VariableNeighborhoodBranchingOptionalParameters p)
 {
+    (void)gen;
     VER(p.info, "*** variableneighborhoodbranching_cplex ***" << std::endl);
     VariableNeighborhoodBranchingOutput output(ins, p.info);
 

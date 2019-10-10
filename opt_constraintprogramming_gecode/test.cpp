@@ -5,19 +5,17 @@
 
 using namespace gap;
 
-Cost sopt_constraintprogramming_gecode_test(Instance& ins)
+Output sopt_constraintprogramming_gecode_test(Instance& ins)
 {
-    Solution sol(ins);
-    Cost lb = 0;
-    ConstraintProgrammingGecodeData d {.ins = ins, .sol = sol, .lb = lb};
-    return sopt_constraintprogramming_gecode(d).cost();
+    ConstraintProgrammingGecodeOptionalParameters p;
+    return sopt_constraintprogramming_gecode(ins, p);
 }
 
-std::vector<Cost (*)(Instance&)> f = {
+std::vector<Output (*)(Instance&)> f = {
         sopt_constraintprogramming_gecode_test,
 };
 
-TEST(BranchAndCutCbc, TEST) { test(TEST, f); }
+TEST(BranchAndCutCbc, TEST) { test(TEST, f, SOPT); }
 
 #endif
 

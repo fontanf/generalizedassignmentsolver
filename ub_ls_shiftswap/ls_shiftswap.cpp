@@ -91,7 +91,7 @@ TSShiftSwapOutput& TSShiftSwapOutput::algorithm_end(Info& info)
     return *this;
 }
 
-TSShiftSwapOutput sol_ts_shiftswap(const Instance& ins, std::mt19937_64& gen, TSShiftSwapOptionalParameters p)
+TSShiftSwapOutput gap::sol_ts_shiftswap(const Instance& ins, std::mt19937_64& gen, TSShiftSwapOptionalParameters p)
 {
     TSShiftSwapOutput output(ins, p.info);
 
@@ -230,7 +230,7 @@ SAShiftSwapOutput& SAShiftSwapOutput::algorithm_end(Info& info)
     return *this;
 }
 
-SAShiftSwapOutput sol_sa_shiftswap(const Instance& ins, std::mt19937_64& gen, SAShiftSwapOptionalParameters p)
+SAShiftSwapOutput gap::sol_sa_shiftswap(const Instance& ins, std::mt19937_64& gen, SAShiftSwapOptionalParameters p)
 {
     SAShiftSwapOutput output(ins, p.info);
 

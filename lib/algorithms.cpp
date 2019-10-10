@@ -226,7 +226,9 @@ std::function<Output (Instance&, std::mt19937_64&, Info)> gap::get_algorithm(std
 #if CPLEX_FOUND
     } else if (algo.name == "variableneighborhoodbranching_cplex") {
         return [](Instance& ins, std::mt19937_64& gen, Info info) {
-            return sol_variableneighborhoodbranching_cplex(ins, gen, info);
+            VariableNeighborhoodBranchingOptionalParameters p;
+            p.info = info;
+            return sol_variableneighborhoodbranching_cplex(ins, gen, p);
         };
 #endif
 

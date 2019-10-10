@@ -5,19 +5,17 @@
 
 using namespace gap;
 
-Cost opt_constraintprogramming_cplex_test(Instance& ins)
+Output sopt_constraintprogramming_cplex_test(Instance& ins)
 {
-    Solution sol(ins);
-    Cost lb = 0;
-    ConstraintProgrammingCplexData d {.ins = ins, .sol = sol, .lb = lb};
-    return sopt_constraintprogramming_cplex(d).cost();
+    ConstraintProgrammingCplexOptionalParameters p;
+    return sopt_constraintprogramming_cplex(ins, p);
 }
 
-std::vector<Cost (*)(Instance&)> f = {
-        opt_constraintprogramming_cplex_test,
+std::vector<Output (*)(Instance&)> f = {
+        sopt_constraintprogramming_cplex_test,
 };
 
-TEST(MILP, TEST) { test(TEST, f); }
+TEST(MILP, TEST) { test(TEST, f, SOPT); }
 
 #endif
 

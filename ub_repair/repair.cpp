@@ -74,8 +74,9 @@ void repair(Solution& sol_curr)
     }
 }
 
-Solution gap::sol_repairgreedy(const Instance& ins, Info info)
+Output gap::sol_repairgreedy(const Instance& ins, Info info)
 {
+    Output output(ins, info);
     ItemIdx n = ins.item_number();
 
     // Initilize current solution
@@ -84,11 +85,13 @@ Solution gap::sol_repairgreedy(const Instance& ins, Info info)
         sol_curr.set(j, ins.item(j).i_cmin);
         repair(sol_curr);
     }
-    return algorithm_end(sol_curr, info);
+    output.update_solution(sol_curr, std::stringstream(""), info);
+    return output.algorithm_end(info);
 }
 
-Solution gap::sol_repaircombrelax(const Instance& ins, Info info)
+Output gap::sol_repaircombrelax(const Instance& ins, Info info)
 {
+    Output output(ins, info);
     ItemIdx n = ins.item_number();
 
     // Initilize current solution
@@ -97,13 +100,15 @@ Solution gap::sol_repaircombrelax(const Instance& ins, Info info)
         sol_curr.set(j, ins.item(j).i_cmin);
 
     repair(sol_curr);
-    return algorithm_end(sol_curr, info);
+    output.update_solution(sol_curr, std::stringstream(""), info);
+    return output.algorithm_end(info);
 }
 
 #if COINOR_FOUND
 
-Solution gap::sol_repairlinrelax_clp(const Instance& ins, const LinRelaxClpOutput& linrelax_output, Info info)
+Output gap::sol_repairlinrelax_clp(const Instance& ins, const LinRelaxClpOutput& linrelax_output, Info info)
 {
+    Output output(ins, info);
     AgentIdx m = ins.agent_number();
     ItemIdx n = ins.item_number();
 
@@ -124,7 +129,8 @@ Solution gap::sol_repairlinrelax_clp(const Instance& ins, const LinRelaxClpOutpu
     }
 
     repair(sol_curr);
-    return algorithm_end(sol_curr, info);
+    output.update_solution(sol_curr, std::stringstream(""), info);
+    return output.algorithm_end(info);
 }
 
 #endif

@@ -10,6 +10,12 @@
 
 using namespace gap;
 
+BranchAndCutGurobiOutput& BranchAndCutGurobiOutput::algorithm_end(Info& info)
+{
+    Output::algorithm_end(info);
+    return *this;
+}
+
 class mycallback: public GRBCallback
 {
 

@@ -79,38 +79,35 @@ void bench_normal(
                     << std::flush;
 
                 Instance ins = data.generate();
-                Solution sol(ins);
-                Cost lb = 0;
-                double t = time_limit + 1;
+                Info info = Info()
+                    .set_timelimit(time_limit)
+                    //.set_verbose(true)
+                    ;
+                Output output(ins, info);
                 try {
-                    Info info = Info()
-                        .set_timelimit(time_limit)
-                        //.set_verbose(true)
-                        ;
-                    func(ins, sol, lb, gen, info);
-                    t = info.elapsed_time();
+                    auto output = func(ins, gen, info);
                 } catch (...) {
                 }
 
                 std::stringstream t_str;
-                if (t <= time_limit) {
+                if (output.time >= 0 && output.time <= time_limit) {
                     t_str.precision(4);
-                    t_str << std::round(t * 10000) / 10000;
+                    t_str << output.time;
                 } else {
                     t_str << "> " << time_limit;
                 }
 
                 if (type == "feasible") {
-                    if (t <= time_limit) {
-                        if (sol.feasible()) {
-                            col_r = 255 - (int)(val_max_r * cbrt(t / time_limit));
-                            col_g = 255 - (int)(val_max_g * cbrt(t / time_limit));
-                            col_b = 255 - (int)(val_max_b * cbrt(t / time_limit));
+                    if (output.time >= 0 && output.time <= time_limit) {
+                        if (output.solution.feasible()) {
+                            col_r = 255 - (int)(val_max_r * cbrt(output.time / time_limit));
+                            col_g = 255 - (int)(val_max_g * cbrt(output.time / time_limit));
+                            col_b = 255 - (int)(val_max_b * cbrt(output.time / time_limit));
                             std::cout << "\033[32m";
                         } else {
-                            col_r = 255 - (int)(val_max_2_r * cbrt(t / time_limit));
-                            col_g = 255 - (int)(val_max_2_g * cbrt(t / time_limit));
-                            col_b = 255 - (int)(val_max_2_b * cbrt(t / time_limit));
+                            col_r = 255 - (int)(val_max_2_r * cbrt(output.time / time_limit));
+                            col_g = 255 - (int)(val_max_2_g * cbrt(output.time / time_limit));
+                            col_b = 255 - (int)(val_max_2_b * cbrt(output.time / time_limit));
                         }
                     } else {
                         col_r = 0;
@@ -118,10 +115,10 @@ void bench_normal(
                         col_b = 0;
                     }
                 } else {
-                    if (t <= time_limit && (lb == ins.bound() || (sol.feasible() && lb == sol.cost()))) {
-                        col_r = 255 - (int)(val_max_r * cbrt(t / time_limit));
-                        col_g = 255 - (int)(val_max_g * cbrt(t / time_limit));
-                        col_b = 255 - (int)(val_max_b * cbrt(t / time_limit));
+                    if (output.time >= 0 && output.time <= time_limit && output.optimal()) {
+                        col_r = 255 - (int)(val_max_r * cbrt(output.time / time_limit));
+                        col_g = 255 - (int)(val_max_g * cbrt(output.time / time_limit));
+                        col_b = 255 - (int)(val_max_b * cbrt(output.time / time_limit));
                         std::cout << "\033[32m";
                     } else {
                         col_r = 0;
@@ -139,10 +136,8 @@ void bench_normal(
                 json["tab"][inm][ir][ix][0]["t"] = t_str.str();
 
                 // Standard output
-                std::string ub_str = (!sol.feasible())? "inf": std::to_string(sol.cost());
-                std::string lb_str = (lb == ins.bound())? "inf": std::to_string(lb);
-                std::cout << " | UB" << std::right << std::setw(20) << ub_str;
-                std::cout << " | LB" << std::right << std::setw(20) << lb_str;
+                std::cout << " | UB" << std::right << std::setw(20) << output.ub_str();
+                std::cout << " | LB" << std::right << std::setw(20) << output.lb_str();
                 std::cout << " | T (s)" << std::right << std::setw(8) << t_str.str();
                 std::cout << "\033[0m" << std::endl;
             }
@@ -186,8 +181,6 @@ void bench_literature(
             std::string outputfile = s + ".ini";
             std::cout << std::left << std::setw(60) << ins.name() << std::flush;
 
-            Solution sol(ins);
-            Cost lb = 0;
             Info info = Info()
                 .set_verbose(false)
                 .set_timelimit(time_limit)
@@ -195,18 +188,14 @@ void bench_literature(
                 .set_onlywriteattheend(true)
                 ;
 
-            func(ins, sol, lb, gen, info);
+            Output output = func(ins, gen, info);
             info.write_ini(outputfile);
 
-            std::string ub_str = (!sol.feasible())? "inf": std::to_string(sol.cost());
-            std::string lb_str = (lb == ins.bound())? "inf": std::to_string(lb);
-            if ((sol.feasible() && sol.cost() == lb)
-                    || (!sol.feasible() && lb == ins.bound()))
+            if (output.optimal())
                 std::cout << "\033[32m";
-            double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
-            std::cout << " | UB" << std::right << std::setw(5) << ub_str;
-            std::cout << " | LB" << std::setw(5) << lb_str;
-            std::cout << " | T (s)" << std::right << std::setw(8) << t;
+            std::cout << " | UB" << std::right << std::setw(5) << output.ub_str();
+            std::cout << " | LB" << std::setw(5) << output.lb_str();
+            std::cout << " | T (s)" << std::right << std::setw(8) << output.time;
             std::cout << "\033[0m" << std::endl;
         }
     }

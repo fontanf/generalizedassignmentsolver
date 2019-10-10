@@ -284,29 +284,43 @@ Output::Output(const Instance& ins, Info& info): solution(ins)
     print(info, std::stringstream(""));
 }
 
+std::string Output::ub_str() const
+{
+    return (!solution.feasible())? "inf": std::to_string(solution.comp());
+}
+
+std::string Output::lb_str() const
+{
+    return (lower_bound >= solution.instance().bound())? "inf": std::to_string(lower_bound);
+}
+
+std::string Output::gap_str() const
+{
+    if (lower_bound >= solution.instance().bound())
+        return "0";
+    if (lower_bound == 0 || !solution.feasible())
+        return "inf";
+    return std::to_string(solution.cost() - lower_bound);
+}
+
+double Output::gap() const
+{
+    if (lower_bound >= solution.instance().bound())
+        return 0;
+    if (lower_bound == 0 || !solution.feasible())
+        return std::numeric_limits<double>::infinity();
+    return (double)(10000 * (solution.cost() - lower_bound) / lower_bound) / 100;
+}
+
 void Output::print(Info& info, const std::stringstream& s) const
 {
     double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
-    std::string ub_str = (!solution.feasible())? "inf": std::to_string(solution.comp());
-    std::string lb_str = (lower_bound >= solution.instance().bound())? "inf": std::to_string(lower_bound);
-    std::string gap_str = "";
-    double gap = 0;
-    if (lower_bound >= solution.instance().bound()) {
-        gap = 0;
-        gap_str = "0";
-    } else if (lower_bound == 0 || !solution.feasible()) {
-        gap = std::numeric_limits<double>::infinity();
-        gap_str = "inf";
-    } else {
-        gap = (double)(10000 * (solution.cost() - lower_bound) / lower_bound) / 100;
-        gap_str = std::to_string(solution.cost() - lower_bound);
-    }
 
     VER(info, std::left << std::setw(10) << t);
-    VER(info, std::left << std::setw(12) << lb_str);
-    VER(info, std::left << std::setw(12) << ub_str);
-    VER(info, std::left << std::setw(10) << gap_str);
-    VER(info, std::left << std::setw(10) << gap);
+    VER(info, std::left << std::setw(12) << lb_str());
+    VER(info, std::left << std::setw(12) << ub_str());
+    VER(info, std::left << std::setw(10) << gap_str());
+    VER(info, std::left << std::setw(10) << gap());
     VER(info, s.str() << std::endl);
 
     if (!info.output->onlywriteattheend)
@@ -361,32 +375,18 @@ void Output::update_lower_bound(Cost lb, const std::stringstream& s, Info& info)
 
 Output& Output::algorithm_end(Info& info)
 {
-    double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
-    std::string ub_str = (!solution.feasible())? "inf": std::to_string(solution.comp());
-    std::string lb_str = (lower_bound >= solution.instance().bound())? "inf": std::to_string(lower_bound);
-    std::string gap_str = "";
-    double gap = 0;
-    if (lower_bound >= solution.instance().bound()) {
-        gap = 0;
-        gap_str = "0";
-    } else if (lower_bound == 0 || !solution.feasible()) {
-        gap = std::numeric_limits<double>::infinity();
-        gap_str = "inf";
-    } else {
-        gap = (double)(10000 * (solution.cost() - lower_bound) / lower_bound) / 100;
-        gap_str = std::to_string(solution.cost() - lower_bound);
-    }
+    time = (double)std::round(info.elapsed_time() * 10000) / 10000;
 
-    PUT(info, "Solution", "Value", ub_str);
-    PUT(info, "Bound", "Value", lb_str);
-    PUT(info, "Solution", "Time", t);
-    PUT(info, "Bound", "Time", t);
+    PUT(info, "Solution", "Value", ub_str());
+    PUT(info, "Bound", "Value", lb_str());
+    PUT(info, "Solution", "Time", time);
+    PUT(info, "Bound", "Time", time);
     VER(info, "---" << std::endl
-            << "Solution: " << ub_str << std::endl
-            << "Bound: " << lb_str << std::endl
-            << "Gap: " << gap_str << std::endl
-            << "Gap (%): " << gap << std::endl
-            << "Time (s): " << t << std::endl);
+            << "Solution: " << ub_str() << std::endl
+            << "Bound: " << lb_str() << std::endl
+            << "Gap: " << gap_str() << std::endl
+            << "Gap (%): " << gap() << std::endl
+            << "Time (s): " << time << std::endl);
 
     info.write_ini();
     solution.write_cert(info.output->certfile);

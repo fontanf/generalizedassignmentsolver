@@ -14,7 +14,7 @@ std::vector<Output (*)(Instance&)> f = {
         lb_linrelax_clp_test,
 };
 
-TEST(BranchAndCutCbc, TEST) { test(TEST, f, LB); }
+TEST(LinRelaxClp, TEST) { test(TEST, f, LB); }
 
 #endif
 
