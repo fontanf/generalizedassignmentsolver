@@ -29,15 +29,13 @@ VariableNeighborhoodBranchingOutput gap::sol_variableneighborhoodbranching_cplex
     IloModel model(env);
 
     // Variables
-    NumVarMatrix x(env, n);
-    for (ItemIdx j=0; j<n; ++j)
-        x[j] = IloNumVarArray(env, m, 0, 1, ILOBOOL);
+    IloNumVarArray x(env, o, 0, 1, ILOBOOL);
 
     // Objective
     IloExpr expr(env);
     for (ItemIdx j=0; j<n; j++)
         for (AgentIdx i=0; i<m; i++)
-            expr += x[j][i] * ins.alternative(j, i).c;
+            expr += x[ins.alternative_index(j, i)] * ins.alternative(j, i).c;
     IloObjective obj = IloMinimize(env, expr);
     model.add(obj);
 
@@ -45,7 +43,7 @@ VariableNeighborhoodBranchingOutput gap::sol_variableneighborhoodbranching_cplex
     for (AgentIdx i=0; i<m; i++) {
         IloExpr lhs(env);
         for (ItemIdx j=0; j<n; j++)
-            lhs += x[j][i] * ins.alternative(j, i).w;
+            lhs += x[ins.alternative_index(j, i)] * ins.alternative(j, i).w;
         model.add(IloRange(env, 0, lhs, ins.capacity(i)));
     }
 
@@ -53,12 +51,14 @@ VariableNeighborhoodBranchingOutput gap::sol_variableneighborhoodbranching_cplex
     for (ItemIdx j=0; j<n; j++) {
         IloExpr lhs(env);
         for (AgentIdx i=0; i<m; i++)
-            lhs += x[j][i];
+            lhs += x[ins.alternative_index(j, i)];
         model.add(IloRange(env, 1, lhs, 1));
     }
 
 
     // Initial solution
+
+    IloCplex cplex(model);
 
     // Time limit
     if (p.info.timelimit != std::numeric_limits<double>::infinity())
@@ -118,7 +118,7 @@ VariableNeighborhoodBranchingOutput gap::sol_variableneighborhoodbranching_cplex
 
     }
 
-    return algorithm_end(sol_best, info);
+    return output.algorithm_end(p.info);
 }
 
 #endif

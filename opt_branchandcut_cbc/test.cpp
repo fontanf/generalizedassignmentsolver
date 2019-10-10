@@ -5,22 +5,21 @@
 
 using namespace gap;
 
-Cost sopt_branchandcut_cbc_test(Instance& ins)
+Output sopt_branchandcut_cbc_test(Instance& ins)
 {
     Info info = Info()
         .set_verbose(true)
         ;
-    Solution sol(ins);
-    Cost lb = 0;
-    BranchAndCutCbcData d {.ins = ins, .sol = sol, .lb = lb, .stop_at_first_improvment = false, .info = info};
-    return sopt_branchandcut_cbc(d).cost();
+    BranchAndCutCbcOptionalParameters p;
+    p.info = info;
+    return sopt_branchandcut_cbc(ins, p);
 }
 
-std::vector<Cost (*)(Instance&)> f = {
+std::vector<Output (*)(Instance&)> f = {
         sopt_branchandcut_cbc_test,
 };
 
-TEST(BranchAndCutCbc, TEST) { test(TEST, f); }
+TEST(BranchAndCutCbc, TEST) { test(TEST, f, SOPT); }
 
 #endif
 

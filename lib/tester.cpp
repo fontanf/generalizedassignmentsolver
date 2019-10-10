@@ -5,26 +5,34 @@
 
 using namespace gap;
 
-bool test(const Instance& ins, std::vector<Cost (*)(Instance&)> fs, TestType tt)
+bool test(const Instance& ins, std::vector<Output (*)(Instance&)> fs, TestType tt)
 {
-    Cost opt = (ins.optimal_solution() == NULL)? -1: ins.optimal_solution()->cost();
+    bool feasible = false;
+    Cost opt = -1;
     for (auto f: fs) {
         Instance ins_tmp = ins;
-        Cost val = f(ins_tmp);
-        if (opt == -1)
-            opt = val;
-        if (tt == OPT) {
-            EXPECT_EQ(val, opt);
-            if (val != opt)
-                return false;
-        } else if (tt == UB) {
-            EXPECT_GE(val, opt);
-            if (val < opt)
-                return false;
+        Output output = f(ins_tmp);
+        if (ins.optimal_solution() == NULL && opt == -1) {
+            feasible = output.feasible();
+            opt = output.solution.cost();
+            continue;
+        }
+        if (tt == SOPT) {
+            if (feasible) {
+                EXPECT_EQ(output.lower_bound, opt);
+                EXPECT_TRUE(output.solution.feasible());
+                EXPECT_EQ(output.lower_bound, output.solution.cost());
+            } else {
+                EXPECT_GE(output.lower_bound, ins.bound());
+            }
         } else if (tt == LB) {
-            EXPECT_LE(val, opt);
-            if (val > opt)
-                return false;
+            if (feasible) {
+                EXPECT_LE(output.lower_bound, opt);
+            }
+        } else if (tt == UB) {
+            if (feasible) {
+                EXPECT_GE(output.solution.profit(), opt);
+            }
         }
     }
     return true;
@@ -139,7 +147,7 @@ private:
 
 };
 
-void test(Instances& inss, std::vector<Cost (*)(Instance&)> fs, TestType tt)
+void test(Instances& inss, std::vector<Output (*)(Instance&)> fs, TestType tt)
 {
     for (;;) {
         Instance ins(inss.next());
@@ -154,7 +162,7 @@ void test(Instances& inss, std::vector<Cost (*)(Instance&)> fs, TestType tt)
     std::cout << "ok" << std::endl;
 }
 
-void gap::test(InstacesType it, std::vector<Cost (*)(Instance&)> fs, TestType tt)
+void gap::test(InstacesType it, std::vector<Output (*)(Instance&)> fs, TestType tt)
 {
     if (it == TEST) {
         TestInstances ti;

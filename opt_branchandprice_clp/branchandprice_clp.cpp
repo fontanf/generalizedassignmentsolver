@@ -7,6 +7,12 @@
 
 using namespace gap;
 
+BranchAndPriceClpOutput& BranchAndPriceClpOutput::algorithm_end(Info& info)
+{
+    Output::algorithm_end(info);
+    return *this;
+}
+
 struct BranchAndPriceClpRecData
 {
     const Instance& ins;

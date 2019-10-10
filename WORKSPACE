@@ -18,7 +18,7 @@ cc_library(
 git_repository(
     name = "benchtools",
     remote = "https://github.com/fontanf/benchtools.git",
-    commit = "0257329b5401096c1cdee352f2e1d8f3b2335af2",
+    commit = "f7a92b00c89d2bca213d0a0f8303e78c2bf228ea",
 )
 
 local_repository(
@@ -53,6 +53,6 @@ cc_library(
 git_repository(
     name = "knapsack",
     remote = "https://github.com/fontanf/knapsack.git",
-    commit = "98da719284d0b56a48f36ada24e91cf6671beb94",
+    commit = "d671f72701673d5f13c13433c463c24e0000e5a9",
 )
 

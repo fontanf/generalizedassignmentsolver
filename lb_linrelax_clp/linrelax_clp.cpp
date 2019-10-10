@@ -8,7 +8,7 @@
 
 using namespace gap;
 
-BranchAndCutCbcOutput& BranchAndCutCbcOutput::algorithm_end(Info& info)
+LinRelaxClpOutput& LinRelaxClpOutput::algorithm_end(Info& info)
 {
     Output::algorithm_end(info);
     //PUT(info, "Algorithm", "Iterations", it);

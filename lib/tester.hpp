@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gap/lib/instance.hpp"
+#include "gap/lib/solution.hpp"
 
 #include <gtest/gtest.h>
 
@@ -8,10 +8,10 @@ namespace gap
 {
 
 Instance test_instance(Cpt i);
-enum TestType { OPT, LB, UB };
+enum TestType { SOPT, LB, UB };
 enum InstacesType { TEST };
 
-void test(InstacesType it, std::vector<Cost (*)(Instance&)> fs, TestType tt = OPT);
+void test(InstacesType it, std::vector<Output (*)(Instance&)> fs, TestType tt = SOPT);
 
 }
 

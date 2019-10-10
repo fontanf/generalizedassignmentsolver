@@ -5,12 +5,12 @@
 
 using namespace gap;
 
-Cost lb_linrelax_clp_test(Instance& ins)
+Output lb_linrelax_clp_test(Instance& ins)
 {
-    return lb_linrelax_clp(ins).lb;
+    return lb_linrelax_clp(ins);
 }
 
-std::vector<Cost (*)(Instance&)> f = {
+std::vector<Output (*)(Instance&)> f = {
         lb_linrelax_clp_test,
 };
 

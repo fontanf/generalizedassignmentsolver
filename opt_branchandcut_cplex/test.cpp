@@ -5,19 +5,21 @@
 
 using namespace gap;
 
-Cost opt_branchandcut_cplex_test(Instance& ins)
+Output sopt_branchandcut_cplex_test(Instance& ins)
 {
-    Solution sol(ins);
-    Cost lb = 0;
-    BranchAndCutCplexData d {.ins = ins, .sol = sol, .lb = lb, .info = Info().set_verbose(true)};
-    return sopt_branchandcut_cplex(d).cost();
+    Info info = Info()
+        .set_verbose(true)
+        ;
+    BranchAndCutCplexOptionalParameters p;
+    p.info = info;
+    return sopt_branchandcut_cplex(ins, p);
 }
 
-std::vector<Cost (*)(Instance&)> f = {
-        opt_branchandcut_cplex_test,
+std::vector<Output (*)(Instance&)> f = {
+        sopt_branchandcut_cplex_test,
 };
 
-TEST(MILP, TEST) { test(TEST, f); }
+TEST(BranchAndCutCplex, TEST) { test(TEST, f, SOPT); }
 
 #endif
 

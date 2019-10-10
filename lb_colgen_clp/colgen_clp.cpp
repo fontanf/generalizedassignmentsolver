@@ -9,6 +9,12 @@
 
 using namespace gap;
 
+ColGenClpOutput& ColGenClpOutput::algorithm_end(Info& info)
+{
+    Output::algorithm_end(info);
+    return *this;
+}
+
 void add_column(const Instance& ins,
         ColGenClpOptionalParameters& p,
         ClpSimplex& model,

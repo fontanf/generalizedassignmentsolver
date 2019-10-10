@@ -43,13 +43,15 @@ void gap::sol_greedy(Solution& sol, const std::vector<std::pair<ItemIdx, AgentId
     }
 }
 
-Solution gap::sol_greedy(const Instance& ins, const Desirability& f, Info info)
+Output gap::sol_greedy(const Instance& ins, const Desirability& f, Info info)
 {
     VER(info, "*** greedy " << f.to_string() << " ***" << std::endl);
+    Output output(ins, info);
     Solution sol(ins);
     auto alt = sol_greedy_init(sol, f);
     sol_greedy(sol, alt);
-    return algorithm_end(sol, info);
+    output.update_solution(sol, std::stringstream(""), info);
+    return output.algorithm_end(info);
 }
 
 /******************************************************************************/
@@ -125,13 +127,15 @@ void gap::sol_greedyregret(Solution& sol, const Desirability& f,
     }
 }
 
-Solution gap::sol_greedyregret(const Instance& ins, const Desirability& f, Info info)
+Output gap::sol_greedyregret(const Instance& ins, const Desirability& f, Info info)
 {
     VER(info, "*** greedyregret " << f.to_string() << " ***" << std::endl);
+    Output output(ins, info);
     Solution sol(ins);
     auto agents = sol_greedyregret_init(ins, f);
     sol_greedyregret(sol, f, agents, {});
-    return algorithm_end(sol, info);
+    output.update_solution(sol, std::stringstream(""), info);
+    return output.algorithm_end(info);
 }
 
 /******************************************************************************/
@@ -167,13 +171,15 @@ void gap::sol_mthg(Solution& sol, const std::vector<std::pair<ItemIdx, AgentIdx>
         nshift(sol);
 }
 
-Solution gap::sol_mthg(const Instance& ins, const Desirability& f, Info info)
+Output gap::sol_mthg(const Instance& ins, const Desirability& f, Info info)
 {
     VER(info, "*** mthg " << f.to_string() << " ***" << std::endl);
+    Output output(ins, info);
     Solution sol(ins);
     auto alt = sol_greedy_init(sol, f);
     sol_mthg(sol, alt);
-    return algorithm_end(sol, info);
+    output.update_solution(sol, std::stringstream(""), info);
+    return output.algorithm_end(info);
 }
 
 void gap::sol_mthgregret(Solution& sol, const Desirability& f,
@@ -185,12 +191,14 @@ void gap::sol_mthgregret(Solution& sol, const Desirability& f,
         nshift(sol);
 }
 
-Solution gap::sol_mthgregret(const Instance& ins, const Desirability& f, Info info)
+Output gap::sol_mthgregret(const Instance& ins, const Desirability& f, Info info)
 {
     VER(info, "*** mthgregret " << f.to_string() << " ***" << std::endl);
+    Output output(ins, info);
     Solution sol(ins);
     auto agents = sol_greedyregret_init(ins, f);
     sol_mthgregret(sol, f, agents, {});
-    return algorithm_end(sol, info);
+    output.update_solution(sol, std::stringstream(""), info);
+    return output.algorithm_end(info);
 }
 
