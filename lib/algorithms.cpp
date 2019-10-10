@@ -17,9 +17,7 @@
 #include "gap/ub_repair/repair.hpp"
 #include "gap/ub_ls_shiftswap/ls_shiftswap.hpp"
 #include "gap/ub_localsolver/localsolver.hpp"
-#include "gap/ub_vdns_simple/vdns_simple.hpp"
-#include "gap/ub_vnsbranching_cbc/vnsbranching_cbc.hpp"
-#include "gap/ub_vnsbranching_cplex/vnsbranching_cplex.hpp"
+#include "gap/ub_variableneighborhoodbranching_cplex/variableneighborhoodbranching_cplex.hpp"
 
 #include <map>
 
@@ -225,22 +223,10 @@ std::function<Output (Instance&, std::mt19937_64&, Info)> gap::get_algorithm(std
             return sol_localsolver({ins, sol, info});
         };
 #endif
-#if COINOR_FOUND
-    } else if (algo.name == "vdns_simple") {
-        return [](Instance& ins, std::mt19937_64& gen, Info info) {
-            return sol_vdns_simple(ins, gen, info);
-        };
-#endif
-#if COINOR_FOUND
-    } else if (algo.name == "vnsbranching_cbc") {
-        return [](Instance& ins, std::mt19937_64& gen, Info info) {
-            return sol_vnsbranching_cbc(ins, gen, info);
-        };
-#endif
 #if CPLEX_FOUND
-    } else if (algo.name == "vnsbranching_cplex") {
+    } else if (algo.name == "variableneighborhoodbranching_cplex") {
         return [](Instance& ins, std::mt19937_64& gen, Info info) {
-            return sol_vnsbranching_cplex(ins, gen, info);
+            return sol_variableneighborhoodbranching_cplex(ins, gen, info);
         };
 #endif
 

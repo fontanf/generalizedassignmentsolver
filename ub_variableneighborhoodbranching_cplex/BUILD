@@ -1,7 +1,7 @@
 cc_library(
-        name = "vnsbranching_cplex",
-        hdrs = ["vnsbranching_cplex.hpp"],
-        srcs = ["vnsbranching_cplex.cpp"],
+        name = "variableneighborhoodbranching_cplex",
+        hdrs = ["variableneighborhoodbranching_cplex.hpp"],
+        srcs = ["variableneighborhoodbranching_cplex.cpp"],
         deps = [
                 "//lib:cpp",
                 "//ub_random:random",
@@ -24,6 +24,6 @@ cc_library(
                 ],
         }),
         visibility = ["//visibility:public"],
-        include_prefix = "gap/ub_vnsbranching_cplex/",
+        include_prefix = "gap/ub_variableneighborhoodbranching_cplex/",
 )
 

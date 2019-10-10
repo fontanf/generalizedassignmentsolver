@@ -79,9 +79,7 @@ cc_library(
                 "//ub_ls_shiftswap:ls_shiftswap",
                 "//ub_ls_ejectionchain:ls_ejectionchain",
                 "//ub_localsolver:localsolver",
-                "//ub_vdns_simple:vdns_simple",
-                "//ub_vnsbranching_cbc:vnsbranching_cbc",
-                "//ub_vnsbranching_cplex:vnsbranching_cplex",
+                "//ub_variableneighborhoodbranching_cplex:variableneighborhoodbranching_cplex",
         ],
         copts = [] +
             select({":dlib_build":        ["-DDLIB_FOUND"],        "//conditions:default": []}) +
