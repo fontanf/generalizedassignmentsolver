@@ -16,6 +16,7 @@ LinRelaxGurobiOutput& LinRelaxGurobiOutput::algorithm_end(Info& info)
 
 LinRelaxGurobiOutput gap::lb_linrelax_gurobi(const Instance& ins, Info info)
 {
+    GRBEnv env;
     VER(info, "*** linrelax_gurobi ***" << std::endl);
 
     LinRelaxGurobiOutput output(ins, info);
@@ -24,7 +25,6 @@ LinRelaxGurobiOutput gap::lb_linrelax_gurobi(const Instance& ins, Info info)
     AgentIdx m = ins.agent_number();
     AltIdx o = ins.alternative_number();
 
-    GRBEnv env;
     GRBModel model(env);
 
     // Variables and objective

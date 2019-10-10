@@ -286,7 +286,7 @@ Output::Output(const Instance& ins, Info& info): solution(ins)
 
 std::string Output::ub_str() const
 {
-    return (!solution.feasible())? "inf": std::to_string(solution.comp());
+    return (!solution.feasible())? "inf": std::to_string(solution.cost());
 }
 
 std::string Output::lb_str() const
@@ -317,8 +317,8 @@ void Output::print(Info& info, const std::stringstream& s) const
     double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
 
     VER(info, std::left << std::setw(10) << t);
-    VER(info, std::left << std::setw(12) << lb_str());
     VER(info, std::left << std::setw(12) << ub_str());
+    VER(info, std::left << std::setw(12) << lb_str());
     VER(info, std::left << std::setw(10) << gap_str());
     VER(info, std::left << std::setw(10) << gap());
     VER(info, s.str() << std::endl);

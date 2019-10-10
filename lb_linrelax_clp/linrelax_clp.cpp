@@ -22,14 +22,12 @@ LinRelaxClpOutput gap::lb_linrelax_clp(const Instance& ins, Info info)
 
     LinRelaxClpOutput output(ins, info);
 
-    int loglevel = (info.output->verbose)? 1: 0;
-
     CoinLP mat(ins);
 
     ClpSimplex model;
 
     // Reduce printout
-    model.messageHandler()->setLogLevel(loglevel);
+    model.messageHandler()->setLogLevel(0);
 
     // Load problem
     model.loadProblem(mat.matrix, mat.col_lower.data(), mat.col_upper.data(),

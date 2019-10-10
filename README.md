@@ -55,11 +55,7 @@ Classical meta-heuristics based on shift-swap neighborhood optimized for large i
 Others heuristics and meta-heuristics:
 - Random feasible solution found with a Local search `-a random` :heavy_check_mark:
 - Repair linear relaxation solution `-a repairlinrelax_clp` :heavy_check_mark:
-- Variable neighborhood branching (see "Handbook of Metaheuristics", 3.6.1 Variable Neighborhood Branching)
-  - with CBC `-a vnsbranching_cbc` :heavy_check_mark:
-  - with CPLEX `-a vnsbranching_cplex` :heavy_check_mark:
-- Variable-depth neighborhood search (see "Handbook of Metaheuristics", 4.5.1 Variable-Depth Methods)
-  - k-agents reallocation neighborhood `-a vdns_simple` :heavy_check_mark:
+- Variable neighborhood branching with CPLEX (see "Handbook of Metaheuristics", 3.6.1 Variable Neighborhood Branching) `-a vnsbranching_cplex` :heavy_check_mark:
 - Local search with LocalSolver `-a localsolver` :heavy_check_mark:
 
 ### Exact algorithms

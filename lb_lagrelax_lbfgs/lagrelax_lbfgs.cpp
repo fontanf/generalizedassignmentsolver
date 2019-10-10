@@ -101,8 +101,6 @@ LagRelaxAssignmentLbfgsOutput gap::lb_lagrelax_assignment_lbfgs(const Instance& 
     auto def = [&func](const column_vector& x) { return func.der(x); };
     auto stop_strategy = objective_delta_stop_strategy(0.0001);
     //auto stop_strategy = gradient_norm_stop_strategy().be_verbose(),
-    if (info.output->verbose)
-        stop_strategy.be_verbose();
     double res = find_max(
             lbfgs_search_strategy(256),
             stop_strategy,
@@ -222,8 +220,6 @@ LagRelaxKnapsackLbfgsOutput gap::lb_lagrelax_knapsack_lbfgs(const Instance& ins,
     auto def = [&func](const column_vector& x) { return func.der(x); };
     auto stop_strategy = objective_delta_stop_strategy();
     //auto stop_strategy = gradient_norm_stop_strategy();
-    if (info.output->verbose)
-        stop_strategy.be_verbose();
     double res = find_max_box_constrained(
             lbfgs_search_strategy(256),
             stop_strategy,
