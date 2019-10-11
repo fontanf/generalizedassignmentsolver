@@ -115,7 +115,9 @@ struct Output
     Cost lower_bound = 0;
     double time = -1;
 
-    bool optimal() const { return (solution.feasible() && solution.profit() == lower_bound); }
+    bool optimal() const { return (
+            (solution.feasible() && solution.cost() == lower_bound)
+            || (lower_bound >= solution.instance().bound())); }
     bool feasible() const { return lower_bound < solution.instance().bound(); }
 
     std::string ub_str() const;

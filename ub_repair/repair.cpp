@@ -7,13 +7,13 @@
 
 using namespace gap;
 
-void repair(Solution& sol_curr)
+void repair(Solution& sol_curr, Info& info)
 {
     const Instance& ins = sol_curr.instance();
     AgentIdx m = ins.agent_number();
     ItemIdx n = ins.item_number();
 
-    while (sol_curr.overcapacity() > 0) {
+    while (sol_curr.overcapacity() > 0 && info.check_time()) {
         //std::cout << "cost " << sol_curr.cost() << " oc " << sol_curr.overcapacity() << std::endl;
         Weight oc = sol_curr.overcapacity();
         Cost c = sol_curr.cost();
@@ -83,7 +83,7 @@ Output gap::sol_repairgreedy(const Instance& ins, Info info)
     Solution sol_curr(ins);
     for (ItemIdx j=0; j<n; ++j) {
         sol_curr.set(j, ins.item(j).i_cmin);
-        repair(sol_curr);
+        repair(sol_curr, info);
     }
     output.update_solution(sol_curr, std::stringstream(""), info);
     return output.algorithm_end(info);
@@ -99,7 +99,7 @@ Output gap::sol_repaircombrelax(const Instance& ins, Info info)
     for (ItemIdx j=0; j<n; ++j)
         sol_curr.set(j, ins.item(j).i_cmin);
 
-    repair(sol_curr);
+    repair(sol_curr, info);
     output.update_solution(sol_curr, std::stringstream(""), info);
     return output.algorithm_end(info);
 }
@@ -128,7 +128,7 @@ Output gap::sol_repairlinrelax_clp(const Instance& ins, const LinRelaxClpOutput&
         sol_curr.set(j, i_best);
     }
 
-    repair(sol_curr);
+    repair(sol_curr, info);
     output.update_solution(sol_curr, std::stringstream(""), info);
     return output.algorithm_end(info);
 }

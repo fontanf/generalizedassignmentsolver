@@ -85,7 +85,7 @@ void bench_normal(
                     ;
                 Output output(ins, info);
                 try {
-                    auto output = func(ins, gen, info);
+                    output = func(ins, gen, info);
                 } catch (...) {
                 }
 

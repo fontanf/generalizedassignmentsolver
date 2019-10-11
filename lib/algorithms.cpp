@@ -17,7 +17,6 @@
 #include "gap/ub_repair/repair.hpp"
 #include "gap/ub_ls_shiftswap/ls_shiftswap.hpp"
 #include "gap/ub_localsolver/localsolver.hpp"
-#include "gap/ub_variableneighborhoodbranching_cplex/variableneighborhoodbranching_cplex.hpp"
 
 #include <map>
 
@@ -221,14 +220,6 @@ std::function<Output (Instance&, std::mt19937_64&, Info)> gap::get_algorithm(std
     } else if (algo.name == "localsolver") {
         return [](Instance& ins, std::mt19937_64&, Info info) {
             return sol_localsolver({ins, sol, info});
-        };
-#endif
-#if CPLEX_FOUND
-    } else if (algo.name == "variableneighborhoodbranching_cplex") {
-        return [](Instance& ins, std::mt19937_64& gen, Info info) {
-            VariableNeighborhoodBranchingOptionalParameters p;
-            p.info = info;
-            return sol_variableneighborhoodbranching_cplex(ins, gen, p);
         };
 #endif
 
