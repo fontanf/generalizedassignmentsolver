@@ -153,9 +153,12 @@ Instance::Instance(const Instance& ins):
     alternatives_(ins.alternatives_),
     t_(ins.t_),
     c_max_(ins.c_max_),
-    c_tot_(ins.c_tot_),
-    sol_opt_((ins.sol_opt_ == NULL)? NULL: std::make_unique<Solution>(*ins.sol_opt_))
+    c_tot_(ins.c_tot_)
 {
+    if (ins.optimal_solution() != NULL) {
+        sol_opt_ = std::make_unique<Solution>(*this);
+        *sol_opt_ = *ins.optimal_solution();
+    }
 }
 
 Instance& Instance::operator=(const Instance& ins)
@@ -167,7 +170,11 @@ Instance& Instance::operator=(const Instance& ins)
         t_            = ins.t_;
         c_max_        = ins.c_max_;
         c_tot_        = ins.c_tot_;
-        sol_opt_      = (ins.sol_opt_ != NULL)? std::make_unique<Solution>(*ins.sol_opt_): NULL;
+
+        if (ins.optimal_solution() != NULL) {
+            sol_opt_ = std::make_unique<Solution>(*this);
+            *sol_opt_ = *ins.optimal_solution();
+        }
     }
     return *this;
 }

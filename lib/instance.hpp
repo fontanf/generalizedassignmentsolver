@@ -90,8 +90,9 @@ public:
 
     /** Copy constructor. */
     Instance(const Instance& ins);
+    /** Copy assignment operator. */
     Instance& operator=(const Instance& ins);
-
+    /** Destructor. */
     ~Instance();
 
     /**
