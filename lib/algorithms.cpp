@@ -6,6 +6,7 @@
 #include "gap/lb_lagrelax_bundle/lagrelax_bundle.hpp"
 #include "gap/lb_lagrelax_lbfgs/lagrelax_lbfgs.hpp"
 #include "gap/lb_colgen_clp/colgen_clp.hpp"
+#include "gap/lb_colgen_cplex/colgen_cplex.hpp"
 #include "gap/opt_branchandcut_cbc/branchandcut_cbc.hpp"
 #include "gap/opt_branchandcut_cplex/branchandcut_cplex.hpp"
 #include "gap/opt_branchandcut_gurobi/branchandcut_gurobi.hpp"
@@ -87,6 +88,14 @@ std::function<Output (Instance&, std::mt19937_64&, Info)> gap::get_algorithm(std
             ColGenClpOptionalParameters p;
             p.info = info;
             return lb_colgen_clp(ins, p);
+        };
+#endif
+#if CPLEX_FOUND
+    } else if (algo.name == "colgen_cplex") {
+        return [algo](Instance& ins, std::mt19937_64&, Info info) {
+            ColGenCplexOptionalParameters p;
+            p.info = info;
+            return lb_colgen_cplex(ins, p);
         };
 #endif
 

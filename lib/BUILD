@@ -66,6 +66,7 @@ cc_library(
                 "//lb_lagrelax_bundle:lagrelax_bundle",
                 "//lb_lagrelax_lbfgs:lagrelax_lbfgs",
                 "//lb_colgen_clp:colgen_clp",
+                "//lb_colgen_cplex:colgen_cplex",
                 "//opt_branchandcut_cbc:branchandcut_cbc",
                 "//opt_branchandcut_cplex:branchandcut_cplex",
                 "//opt_branchandcut_gurobi:branchandcut_gurobi",

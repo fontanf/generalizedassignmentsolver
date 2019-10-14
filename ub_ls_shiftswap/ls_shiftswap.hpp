@@ -1,6 +1,5 @@
 #pragma once
 
-#include "gap/lib/instance.hpp"
 #include "gap/lib/solution.hpp"
 
 #include "gap/lb_linrelax_clp/linrelax_clp.hpp"

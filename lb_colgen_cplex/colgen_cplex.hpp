@@ -1,6 +1,6 @@
 #pragma once
 
-#if COINOR_FOUND
+#if CPLEX_FOUND
 
 #include "gap/lib/solution.hpp"
 
@@ -10,7 +10,7 @@
 namespace gap
 {
 
-struct ColGenClpOptionalParameters
+struct ColGenCplexOptionalParameters
 {
     Info info = Info();
 
@@ -18,17 +18,17 @@ struct ColGenClpOptionalParameters
     std::vector<int>* fixed_alt = NULL; // -1: unfixed, 0: fixed to 0, 1: fixed to 1.
 };
 
-struct ColGenClpOutput: Output
+struct ColGenCplexOutput: Output
 {
-    ColGenClpOutput(const Instance& ins, Info& info): Output(ins, info) { }
-    ColGenClpOutput& algorithm_end(Info& info);
+    ColGenCplexOutput(const Instance& ins, Info& info): Output(ins, info) { }
+    ColGenCplexOutput& algorithm_end(Info& info);
 
     std::vector<std::vector<std::vector<ItemIdx>>> columns;
     std::vector<double> x;
     Cpt it = 0;
 };
 
-ColGenClpOutput lb_colgen_clp(const Instance& ins, ColGenClpOptionalParameters p = {});
+ColGenCplexOutput lb_colgen_cplex(const Instance& ins, ColGenCplexOptionalParameters p = {});
 
 }
 

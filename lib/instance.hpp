@@ -31,6 +31,7 @@ typedef int64_t AltPos;
 typedef int64_t StateIdx;
 typedef int64_t Cpt;
 typedef int64_t Seed;
+typedef int64_t ColIdx;
 
 class Solution;
 

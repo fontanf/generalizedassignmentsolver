@@ -93,11 +93,10 @@ def FlagsForFile( filename, **kwargs ):
     '-DCPLEX_FOUND',
     '-DGUROBI_FOUND',
     '-DGECODE_FOUND',
+    '-DIL_STD', # Cplex
     '-I', '../',
     '-I', './bazel-gap/external/json/single_include',
-    '-I', './bazel-gap/external/benchtools/',
     '-I', './bazel-gap/external/googletest/googletest/include/',
-    '-I', './bazel-gap/external/knapsack/',
     '-I', './bazel-gap/external/',
     '-I', '/usr/lib/gcc/x86_64-linux-gnu/7.3.0/include/',
     '-I', '/opt/ibm/ILOG/CPLEX_Studio129/cplex/include/',

@@ -52,7 +52,7 @@ double lb_lagrelax_assignment_bundle_subproblem(
             }
         }
         auto output_kp = knapsack::sopt_minknap(ins_kp);
-        for (knapsack::ItemIdx j_kp=0; j_kp<ins_kp.total_item_number(); ++j_kp) {
+        for (knapsack::ItemIdx j_kp=0; j_kp<ins_kp.item_number(); ++j_kp) {
             if (output_kp.solution.contains_idx(j_kp)) {
                 ItemIdx j = indices[j_kp];
                 AltIdx k = ins.alternative_index(j, i);

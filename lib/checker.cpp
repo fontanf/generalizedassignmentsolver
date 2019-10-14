@@ -1,4 +1,3 @@
-#include "gap/lib/instance.hpp"
 #include "gap/lib/solution.hpp"
 #include "gap/lib/datasets.hpp"
 

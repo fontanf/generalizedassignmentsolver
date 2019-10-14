@@ -1,8 +1,12 @@
 cc_library(
-        name = "branchandcut_cplex",
-        hdrs = ["branchandcut_cplex.hpp"],
-        srcs = ["branchandcut_cplex.cpp"],
-        deps = ["//lib:cpp"],
+        name = "colgen_cplex",
+        hdrs = ["colgen_cplex.hpp"],
+        srcs = ["colgen_cplex.cpp"],
+        deps = [
+                "//lib:cpp",
+                "@knapsack//opt_minknap:minknap",
+                "@knapsack//opt_bellman:bellman",
+        ],
         copts = [
                 "-m64",
                 "-DIL_STD",
@@ -20,7 +24,7 @@ cc_library(
                 ],
         }),
         visibility = ["//visibility:public"],
-        include_prefix = "gap/opt_branchandcut_cplex/",
+        include_prefix = "gap/lb_colgen_cplex/",
 )
 
 cc_test(
@@ -28,7 +32,7 @@ cc_test(
         srcs = ["test.cpp"],
         deps = [
                 "//lib:tester",
-                ":branchandcut_cplex",
+                ":colgen_cplex",
         ],
         copts = select({"//lib:cplex_build": ["-DCPLEX_FOUND"], "//conditions:default": []}),
         timeout = "moderate",

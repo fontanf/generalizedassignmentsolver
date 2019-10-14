@@ -4,7 +4,6 @@ cc_library(
         srcs = ["colgen_clp.cpp"],
         deps = [
                 "//lib:cpp",
-                "//ub_ls_shiftswap:ls_shiftswap",
                 "@knapsack//opt_minknap:minknap",
                 "@knapsack//opt_bellman:bellman",
         ],
