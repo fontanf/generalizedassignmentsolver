@@ -56,7 +56,7 @@ void add_column(const Instance& ins,
     IloNumColumn col = obj(c);
     for (int i: rows)
         col += range[i](1);
-    model.add(IloNumVar(col, 0, 1));
+    model.add(IloNumVar(col, 0, 1, ILOFLOAT));
 }
 
 ColGenCplexOutput gap::lb_colgen_cplex(const Instance& ins, ColGenCplexOptionalParameters p)
@@ -87,12 +87,15 @@ ColGenCplexOutput gap::lb_colgen_cplex(const Instance& ins, ColGenCplexOptionalP
     IloModel model(env);
     IloObjective obj(env);
     obj.setSense(IloObjective::Minimize);
+    model.add(obj);
     IloRangeArray range(env);
-    range.add(m, IloRange(env, 0, 1));
-    range.add(n, IloRange(env, 1, n));
+    for (AgentIdx i = 0; i < m; ++i)
+        range.add(IloRange(env, 0, 1));
+    for (ItemIdx j = 0; j < n; ++j)
+        range.add(IloRange(env, 1, IloInfinity));
     model.add(range);
     IloCplex cplex(model);
-    //cplex.setOut(env.getNullStream()); // Remove standard output
+    cplex.setOut(env.getNullStream()); // Remove standard output
 
     // Add dummy column to ensure feasible solution
     std::vector<int> rows(m + n);
@@ -121,7 +124,7 @@ ColGenCplexOutput gap::lb_colgen_cplex(const Instance& ins, ColGenCplexOptionalP
     IloNumColumn col = obj(10 * ins.bound());
     for (int i = m; i < row_idx; ++i)
         col += range[i](1);
-    model.add(IloNumVar(col, 0, 1));
+    model.add(IloNumVar(col, 0, 1, ILOFLOAT));
 
     column_indices.push_back({-1, -1});
     std::vector<std::vector<std::vector<ItemIdx>>>* columns;
@@ -137,22 +140,24 @@ ColGenCplexOutput gap::lb_colgen_cplex(const Instance& ins, ColGenCplexOptionalP
 
     bool found = true;
     Weight mult = 100000;
+    IloNumArray dual_sol(env, row_idx);
     while (found) {
         // Solve LP
         cplex.solve();
         VER(p.info, "T " << std::setw(10) << p.info.elapsed_time() << " | C " << std::setw(10) << cplex.getObjValue() << std::endl);
+        cplex.getDuals(dual_sol, range);
 
         // Find and add new columns
         found = false;
         for (AgentIdx i=0; i<m; ++i) {
             ins_kp.clear();
             ins_kp.set_capacity(kp_capacities[i]);
-            Cost rc_ub = std::ceil((mult * (- cplex.getDual(range[i]))));
+            Cost rc_ub = std::ceil((mult * (- dual_sol[i])));
             ItemIdx j_kp = 0;
             for (ItemIdx j=0; j<n; ++j) {
                 AltIdx k = ins.alternative_index(j, i);
                 const Alternative& a = ins.alternative(k);
-                knapsack::Profit profit = std::floor(mult * cplex.getDual(range[row[j]])) - std::ceil(mult * a.c);
+                knapsack::Profit profit = std::floor(mult * dual_sol[row[j]]) - std::ceil(mult * a.c);
                 if (p.fixed_alt != NULL && (*p.fixed_alt)[k] == 1) {
                     indices[j] = -2;
                     continue;
@@ -186,16 +191,17 @@ ColGenCplexOutput gap::lb_colgen_cplex(const Instance& ins, ColGenCplexOptionalP
     // Compute the bound
     // Solve LP
     cplex.solve();
+    cplex.getDuals(dual_sol, range);
 
     Cost lb = std::floor(mult * cplex.getObjValue());
     for (AgentIdx i=0; i<m; ++i) {
         ins_kp.clear();
         ins_kp.set_capacity(kp_capacities[i]);
-        Cost rc_lb = std::floor((mult * (- cplex.getDual(range[i]))));
+        Cost rc_lb = std::floor((mult * (- dual_sol[i])));
         for (ItemIdx j=0; j<n; ++j) {
             AltIdx k = ins.alternative_index(j, i);
             const Alternative& a = ins.alternative(k);
-            knapsack::Profit profit = std::ceil(mult * cplex.getDual(range[row[j]])) - std::floor(mult * a.c);
+            knapsack::Profit profit = std::ceil(mult * dual_sol[row[j]]) - std::floor(mult * a.c);
             if (p.fixed_alt != NULL && (*p.fixed_alt)[k] == 1)
                 continue;
             if ((p.fixed_alt != NULL && (*p.fixed_alt)[k] == 0)
