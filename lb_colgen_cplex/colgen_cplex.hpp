@@ -26,6 +26,7 @@ struct ColGenCplexOutput: Output
     std::vector<std::vector<std::vector<ItemIdx>>> columns;
     std::vector<double> x;
     Cpt it = 0;
+    Cpt added_column_number = 0;
 };
 
 ColGenCplexOutput lb_colgen_cplex(const Instance& ins, ColGenCplexOptionalParameters p = {});

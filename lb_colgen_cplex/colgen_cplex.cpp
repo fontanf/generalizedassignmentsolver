@@ -11,6 +11,10 @@ ILOSTLBEGIN
 ColGenCplexOutput& ColGenCplexOutput::algorithm_end(Info& info)
 {
     Output::algorithm_end(info);
+    PUT(info, "Algorithm", "Iterations", it);
+    VER(info, "Iterations: " << it << std::endl);
+    PUT(info, "Algorithm", "AddedColumns", added_column_number);
+    VER(info, "Added columns: " << added_column_number << std::endl);
     return *this;
 }
 
@@ -142,9 +146,16 @@ ColGenCplexOutput gap::lb_colgen_cplex(const Instance& ins, ColGenCplexOptionalP
     Weight mult = 100000;
     IloNumArray dual_sol(env, row_idx);
     while (found) {
+        output.it++;
+
         // Solve LP
         cplex.solve();
-        VER(p.info, "T " << std::setw(10) << p.info.elapsed_time() << " | C " << std::setw(10) << cplex.getObjValue() << std::endl);
+        VER(p.info,
+                "It " << std::setw(8) << output.it
+                << " | T " << std::setw(10) << p.info.elapsed_time()
+                << " | C " << std::setw(10) << cplex.getObjValue()
+                << " | COL " << std::setw(10) << output.added_column_number
+                << std::endl);
         cplex.getDuals(dual_sol, range);
 
         // Find and add new columns
@@ -185,6 +196,7 @@ ColGenCplexOutput gap::lb_colgen_cplex(const Instance& ins, ColGenCplexOptionalP
                         || (indices[j] >= 0 && output_kp.solution.contains_idx(indices[j])))
                     (*columns)[i].back().push_back(j);
             add_column(ins, p, model, obj, range, columns, i, (*columns)[i].size() - 1, column_indices, row);
+            output.added_column_number++;
         }
     }
 
