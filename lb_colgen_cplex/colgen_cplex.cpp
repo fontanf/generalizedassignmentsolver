@@ -90,7 +90,7 @@ ColGenCplexOutput gap::lb_colgen_cplex(const Instance& ins, ColGenCplexOptionalP
     model.add(obj);
     IloRangeArray range(env);
     for (AgentIdx i = 0; i < m; ++i)
-        range.add(IloRange(env, 0, 1));
+        range.add(IloRange(env, -IloInfinity, 1));
     for (ItemIdx j = 0; j < n; ++j)
         range.add(IloRange(env, 1, IloInfinity));
     model.add(range);
