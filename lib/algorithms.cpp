@@ -91,11 +91,12 @@ std::function<Output (Instance&, std::mt19937_64&, Info)> gap::get_algorithm(std
         };
 #endif
 #if CPLEX_FOUND
-    } else if (algo.name == "colgen_cplex") {
+    } else if (algo.name == "columngeneration") {
         return [algo](Instance& ins, std::mt19937_64&, Info info) {
-            ColGenCplexOptionalParameters p;
+            ColGenOptionalParameters p;
             p.info = info;
-            return lb_colgen_cplex(ins, p);
+            p.set_params(algo.args);
+            return lb_colgen(ins, p);
         };
 #endif
 

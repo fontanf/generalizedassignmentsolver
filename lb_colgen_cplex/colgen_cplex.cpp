@@ -1,4 +1,3 @@
-#if CPLEX_FOUND
 
 #include "gap/lb_colgen_cplex/colgen_cplex.hpp"
 
@@ -6,9 +5,23 @@
 
 using namespace gap;
 
+class ColGenSolver
+{
+
+public:
+
+    virtual void add_column(std::vector<int> rows, Cost c) = 0;
+    virtual void solve() = 0;
+    virtual double objective() = 0;
+    virtual std::vector<double>& dual_solution() = 0;
+    virtual std::vector<double> solution() = 0;
+};
+
+#if CPLEX_FOUND
+
 ILOSTLBEGIN
 
-class ColGenSolverCplex
+class ColGenSolverCplex: public ColGenSolver
 {
 
 public:
@@ -79,7 +92,9 @@ private:
 
 };
 
-ColGenCplexOutput& ColGenCplexOutput::algorithm_end(Info& info)
+#endif
+
+ColGenOutput& ColGenOutput::algorithm_end(Info& info)
 {
     Output::algorithm_end(info);
     PUT(info, "Algorithm", "Iterations", it);
@@ -90,8 +105,8 @@ ColGenCplexOutput& ColGenCplexOutput::algorithm_end(Info& info)
 }
 
 void add_column(const Instance& ins,
-        ColGenCplexOptionalParameters& p,
-        ColGenSolverCplex& solver,
+        ColGenOptionalParameters& p,
+        ColGenSolver& solver,
         std::vector<std::vector<std::vector<ItemIdx>>>* columns,
         AgentIdx i,
         ColIdx col_idx,
@@ -130,10 +145,10 @@ void add_column(const Instance& ins,
     solver.add_column(rows, c);
 }
 
-ColGenCplexOutput gap::lb_colgen_cplex(const Instance& ins, ColGenCplexOptionalParameters p)
+ColGenOutput gap::lb_colgen(const Instance& ins, ColGenOptionalParameters p)
 {
-    VER(p.info, "*** colgen_cplex ***" << std::endl);
-    ColGenCplexOutput output(ins, p.info);
+    VER(p.info, "*** columngeneration " << p.solver << " ***" << std::endl);
+    ColGenOutput output(ins, p.info);
 
     ItemIdx n = ins.item_number();
     AgentIdx m = ins.agent_number();
@@ -164,7 +179,17 @@ ColGenCplexOutput gap::lb_colgen_cplex(const Instance& ins, ColGenCplexOptionalP
     ItemIdx item_constraint_number = row_idx - agent_constraint_number;
 
     // Initialize solver
-    ColGenSolverCplex solver(agent_constraint_number, item_constraint_number);
+    std::unique_ptr<ColGenSolver> solver = NULL;
+#if CPLEX_FOUND
+    if (p.solver == "cplex")
+        solver = std::unique_ptr<ColGenSolver>(new ColGenSolverCplex(agent_constraint_number, item_constraint_number));
+#endif
+#if COINOR_FOUND
+    //if (solver_str == "clp")
+        //solver = std::unique_ptr<ColGenSolver>(new ColGenSolverClp(agent_constraint_number, item_constraint_number));
+#endif
+    if (solver == NULL)
+        return output.algorithm_end(p.info);
 
     // KP utils
     knapsack::Instance ins_kp;
@@ -187,7 +212,7 @@ ColGenCplexOutput gap::lb_colgen_cplex(const Instance& ins, ColGenCplexOptionalP
     // Add initial columns
     std::vector<int> rows(m + n);
     std::iota(rows.begin(), rows.begin() + n, m);
-    solver.add_column(rows, 10 * ins.bound());
+    solver->add_column(rows, 10 * ins.bound());
     output.column_indices.push_back({-1, -1});
 
     std::vector<std::vector<std::vector<ItemIdx>>>* columns;
@@ -198,7 +223,7 @@ ColGenCplexOutput gap::lb_colgen_cplex(const Instance& ins, ColGenCplexOptionalP
         columns = p.columns;
         for (AgentIdx i=0; i<m; ++i)
             for (ColIdx col_idx = 0; col_idx < (ColIdx)(*columns)[i].size(); ++ col_idx)
-                add_column(ins, p, solver, columns, i, col_idx, output.column_indices, agent_row, item_row);
+                add_column(ins, p, *solver, columns, i, col_idx, output.column_indices, agent_row, item_row);
     }
 
     bool found = true;
@@ -207,14 +232,14 @@ ColGenCplexOutput gap::lb_colgen_cplex(const Instance& ins, ColGenCplexOptionalP
         output.it++;
 
         // Solve LP
-        solver.solve();
+        solver->solve();
         VER(p.info,
                 "It " << std::setw(8) << output.it
                 << " | T " << std::setw(10) << p.info.elapsed_time()
-                << " | C " << std::setw(10) << solver.objective()
+                << " | C " << std::setw(10) << solver->objective()
                 << " | COL " << std::setw(10) << output.added_column_number
                 << std::endl);
-        std::vector<double>& dual_sol = solver.dual_solution();
+        std::vector<double>& dual_sol = solver->dual_solution();
 
         // Find and add new columns
         found = false;
@@ -255,17 +280,17 @@ ColGenCplexOutput gap::lb_colgen_cplex(const Instance& ins, ColGenCplexOptionalP
                 if (indices[j] == -2
                         || (indices[j] >= 0 && output_kp.solution.contains_idx(indices[j])))
                     (*columns)[i].back().push_back(j);
-            add_column(ins, p, solver, columns, i, (*columns)[i].size() - 1, output.column_indices, agent_row, item_row);
+            add_column(ins, p, *solver, columns, i, (*columns)[i].size() - 1, output.column_indices, agent_row, item_row);
             output.added_column_number++;
         }
     }
 
     // Compute the bound
     // Solve LP
-    solver.solve();
-    std::vector<double>& dual_sol = solver.dual_solution();
+    solver->solve();
+    std::vector<double>& dual_sol = solver->dual_solution();
 
-    Cost lb = std::floor(mult * solver.objective());
+    Cost lb = std::floor(mult * solver->objective());
     for (AgentIdx i=0; i<m; ++i) {
         if (agent_row[i] < 0)
             continue;
@@ -297,7 +322,7 @@ ColGenCplexOutput gap::lb_colgen_cplex(const Instance& ins, ColGenCplexOptionalP
     output.update_lower_bound(lb, std::stringstream(""), p.info);
 
     // Compute x
-    output.solution = solver.solution();
+    output.solution = solver->solution();
     output.x.resize(ins.alternative_number(), 0);
     for (ColIdx col_idx = 1; col_idx < (int)output.column_indices.size(); ++col_idx) {
         AgentIdx i       = output.column_indices[col_idx].first;
@@ -308,6 +333,4 @@ ColGenCplexOutput gap::lb_colgen_cplex(const Instance& ins, ColGenCplexOptionalP
 
     return output.algorithm_end(p.info);
 }
-
-#endif
 
