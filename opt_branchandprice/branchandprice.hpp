@@ -1,7 +1,5 @@
 #pragma once
 
-#if COINOR_FOUND
-
 #include "gap/lib/solution.hpp"
 
 namespace gap
@@ -30,6 +28,4 @@ struct BranchAndPriceOutput: Output
 BranchAndPriceOutput sopt_branchandprice(const Instance& ins, BranchAndPriceOptionalParameters p = {});
 
 }
-
-#endif
 

@@ -1,5 +1,3 @@
-#if COINOR_FOUND
-
 #include "gap/opt_branchandprice/branchandprice.hpp"
 
 #include "gap/lb_columngeneration/columngeneration.hpp"
@@ -180,6 +178,4 @@ void sopt_branchandprice_clp_rec(BranchAndPriceRecData& d)
     sopt_branchandprice_clp_rec(d);
     d.fixed_alt[k_best] = -1;
 }
-
-#endif
 

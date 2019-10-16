@@ -17,6 +17,7 @@
 #include "gap/ub_repair/repair.hpp"
 #include "gap/ub_ls_shiftswap/ls_shiftswap.hpp"
 #include "gap/ub_localsolver/localsolver.hpp"
+#include "gap/ub_colgenheuristics/colgenheuristics.hpp"
 
 #include <map>
 
@@ -220,6 +221,27 @@ std::function<Output (Instance&, std::mt19937_64&, Info)> gap::get_algorithm(std
             return sol_localsolver({ins, sol, info});
         };
 #endif
+    } else if (algo.name == "cgh_restrictedmaster") {
+        return [algo](Instance& ins, std::mt19937_64&, Info info) {
+            CghRestrictedMasterOptionalParameters p;
+            p.info = info;
+            p.set_params(algo.args);
+            return sol_cgh_restrictedmaster(ins, p);
+        };
+    } else if (algo.name == "cgh_purediving") {
+        return [algo](Instance& ins, std::mt19937_64&, Info info) {
+            CghPureDivingOptionalParameters p;
+            p.info = info;
+            p.set_params(algo.args);
+            return sol_cgh_purediving(ins, p);
+        };
+    } else if (algo.name == "cgh_divingwithlds") {
+        return [algo](Instance& ins, std::mt19937_64&, Info info) {
+            CghDivingWithLdsOptionalParameters p;
+            p.info = info;
+            p.set_params(algo.args);
+            return sol_cgh_divingwithlds(ins, p);
+        };
 
 
     } else {

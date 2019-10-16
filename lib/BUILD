@@ -77,6 +77,7 @@ cc_library(
                 "//ub_repair:repair",
                 "//ub_ls_shiftswap:ls_shiftswap",
                 "//ub_localsolver:localsolver",
+                "//ub_colgenheuristics:colgenheuristics",
         ],
         copts = [] +
             select({":dlib_build":        ["-DDLIB_FOUND"],        "//conditions:default": []}) +
