@@ -5,12 +5,11 @@
 #include "gap/lb_lagrelax_volume/lagrelax_volume.hpp"
 #include "gap/lb_lagrelax_bundle/lagrelax_bundle.hpp"
 #include "gap/lb_lagrelax_lbfgs/lagrelax_lbfgs.hpp"
-#include "gap/lb_colgen_clp/colgen_clp.hpp"
-#include "gap/lb_colgen_cplex/colgen_cplex.hpp"
+#include "gap/lb_columngeneration/columngeneration.hpp"
 #include "gap/opt_branchandcut_cbc/branchandcut_cbc.hpp"
 #include "gap/opt_branchandcut_cplex/branchandcut_cplex.hpp"
 #include "gap/opt_branchandcut_gurobi/branchandcut_gurobi.hpp"
-#include "gap/opt_branchandprice_clp/branchandprice_clp.hpp"
+#include "gap/opt_branchandprice/branchandprice.hpp"
 #include "gap/opt_constraintprogramming_gecode/constraintprogramming_gecode.hpp"
 #include "gap/opt_constraintprogramming_cplex/constraintprogramming_cplex.hpp"
 #include "gap/ub_random/random.hpp"
@@ -82,23 +81,13 @@ std::function<Output (Instance&, std::mt19937_64&, Info)> gap::get_algorithm(std
             return lb_lagrelax_assignment_lbfgs(ins, info);
         };
 #endif
-#if COINOR_FOUND
-    } else if (algo.name == "colgen_clp") {
-        return [algo](Instance& ins, std::mt19937_64&, Info info) {
-            ColGenClpOptionalParameters p;
-            p.info = info;
-            return lb_colgen_clp(ins, p);
-        };
-#endif
-#if CPLEX_FOUND
     } else if (algo.name == "columngeneration") {
         return [algo](Instance& ins, std::mt19937_64&, Info info) {
             ColGenOptionalParameters p;
             p.info = info;
             p.set_params(algo.args);
-            return lb_colgen(ins, p);
+            return lb_columngeneration(ins, p);
         };
-#endif
 
     /*
      * Exact algorithms
@@ -127,14 +116,13 @@ std::function<Output (Instance&, std::mt19937_64&, Info)> gap::get_algorithm(std
             return sopt_branchandcut_gurobi(ins, p);
         };
 #endif
-#if COINOR_FOUND
-    } else if (algo.name == "branchandprice_clp") {
-        return [](Instance& ins, std::mt19937_64&, Info info) {
-            BranchAndPriceClpOptionalParameters p;
+    } else if (algo.name == "branchandprice") {
+        return [algo](Instance& ins, std::mt19937_64&, Info info) {
+            BranchAndPriceOptionalParameters p;
             p.info = info;
-            return sopt_branchandprice_clp(ins, p);
+            p.set_params(algo.args);
+            return sopt_branchandprice(ins, p);
         };
-#endif
 #if GECODE_FOUND
     } else if (algo.name == "constraintprogramming_gecode") {
         return [](Instance& ins, std::mt19937_64&, Info info) {

@@ -1,14 +1,14 @@
 cc_library(
-        name = "branchandprice_clp",
-        hdrs = ["branchandprice_clp.hpp"],
-        srcs = ["branchandprice_clp.cpp"],
+        name = "branchandprice",
+        hdrs = ["branchandprice.hpp"],
+        srcs = ["branchandprice.cpp"],
         deps = [
-                "//lb_colgen_clp:colgen_clp",
+                "//lb_columngeneration:columngeneration",
                 "//ub_greedy:greedy",
         ],
         copts = select({"//lib:coinor_build": ["-DCOINOR_FOUND"], "//conditions:default": []}),
         visibility = ["//visibility:public"],
-        include_prefix = "gap/opt_branchandprice_clp/",
+        include_prefix = "gap/opt_branchandprice/",
 )
 
 cc_test(
@@ -16,7 +16,7 @@ cc_test(
         srcs = ["test.cpp"],
         deps = [
                 "//lib:tester",
-                ":branchandprice_clp",
+                ":branchandprice",
         ],
         copts = select({"//lib:coinor_build": ["-DCOINOR_FOUND"], "//conditions:default": []}),
         timeout = "moderate",

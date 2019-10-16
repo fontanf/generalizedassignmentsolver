@@ -1,7 +1,7 @@
 cc_library(
-        name = "colgen_cplex",
-        hdrs = ["colgen_cplex.hpp"],
-        srcs = ["colgen_cplex.cpp"],
+        name = "columngeneration",
+        hdrs = ["columngeneration.hpp"],
+        srcs = ["columngeneration.cpp"],
         deps = [
                 "//lib:cpp",
                 "@knapsack//opt_minknap:minknap",
@@ -10,7 +10,8 @@ cc_library(
         copts = [
                 "-m64",
                 "-DIL_STD",
-        ] + select({"//lib:cplex_build": ["-DCPLEX_FOUND"], "//conditions:default": []}),
+        ] + select({"//lib:cplex_build": ["-DCPLEX_FOUND"], "//conditions:default": []})
+          + select({"//lib:coinor_build": ["-DCOINOR_FOUND"], "//conditions:default": []}),
         linkopts = select({
                 "//lib:cplex_build": [
                         "-lconcert",
@@ -22,9 +23,13 @@ cc_library(
                 ],
                 "//conditions:default": [
                 ],
-        }),
+        }) + select({"//lib:coinor_build": [
+                        "-lClp",
+                        "-lOsiClp",
+                        "-lCoinUtils",
+                ], "//conditions:default": []}),
         visibility = ["//visibility:public"],
-        include_prefix = "gap/lb_colgen_cplex/",
+        include_prefix = "gap/lb_columngeneration/",
 )
 
 cc_test(
@@ -32,9 +37,10 @@ cc_test(
         srcs = ["test.cpp"],
         deps = [
                 "//lib:tester",
-                ":colgen_cplex",
+                ":columngeneration",
         ],
-        copts = select({"//lib:cplex_build": ["-DCPLEX_FOUND"], "//conditions:default": []}),
+        copts = select({"//lib:cplex_build":  ["-DCPLEX_FOUND"],  "//conditions:default": []})
+              + select({"//lib:coinor_build": ["-DCOINOR_FOUND"], "//conditions:default": []}),
         timeout = "moderate",
 )
 

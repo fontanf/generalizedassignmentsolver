@@ -37,9 +37,8 @@ The first goal of this repository is for me to have reference implementations fo
 - Lagrangian relaxation of assignment constraints
   - solved with volume method `-a lagrelax_assignment_volume` :heavy_check_mark:
   - solved with L-BFGS method `-a lagrelax_assignment_lbfgs` :heavy_check_mark:
-- Column generation
-  - with CLP `-a colgen_clp` :heavy_check_mark:
-  - with CPLEX `-a colgen_cplex` :heavy_check_mark:
+- Column generation `-a columngeneration solver clp` :heavy_check_mark: `-a columngeneration solver cplex` :heavy_check_mark:
+
 
 ### Upper bounds
 
@@ -65,7 +64,8 @@ Others heuristics and meta-heuristics:
   - with CBC `-a branchandcut_cbc` :heavy_check_mark:
   - with CPLEX `-a branchandcut_cplex` :heavy_check_mark:
   - with Gurobi `-a branchandcut_gurobi` :heavy_check_mark:
-- Branch-and-price with CLP `-a branchandprice_clp` :heavy_check_mark:
+- Branch-and-price `-a branchandprice solver clp` :heavy_check_mark: `-a branchandprice solver cplex` :heavy_check_mark:
+
 - Constraint programming
   - with Gecode `-a constraintprogramming_gecode` :heavy_check_mark:
   - with CPLEX `-a constraintprogramming_cplex` :heavy_check_mark:

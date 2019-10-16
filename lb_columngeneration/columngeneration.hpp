@@ -38,7 +38,7 @@ struct ColGenOutput: Output
     Cpt added_column_number = 0;
 };
 
-ColGenOutput lb_colgen(const Instance& ins, ColGenOptionalParameters p = {});
+ColGenOutput lb_columngeneration(const Instance& ins, ColGenOptionalParameters p = {});
 
 }
 

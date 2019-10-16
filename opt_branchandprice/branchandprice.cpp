@@ -1,27 +1,27 @@
 #if COINOR_FOUND
 
-#include "gap/opt_branchandprice_clp/branchandprice_clp.hpp"
+#include "gap/opt_branchandprice/branchandprice.hpp"
 
-#include "gap/lb_colgen_clp/colgen_clp.hpp"
+#include "gap/lb_columngeneration/columngeneration.hpp"
 #include "gap/ub_greedy/greedy.hpp"
 
 using namespace gap;
 
-BranchAndPriceClpOutput& BranchAndPriceClpOutput::algorithm_end(Info& info)
+BranchAndPriceOutput& BranchAndPriceOutput::algorithm_end(Info& info)
 {
     Output::algorithm_end(info);
     return *this;
 }
 
-struct BranchAndPriceClpRecData
+struct BranchAndPriceRecData
 {
     const Instance& ins;
-    BranchAndPriceClpOutput& output;
+    BranchAndPriceOutput& output;
     Info& info;
 
     Solution sol_curr;
     std::vector<int> fixed_alt;
-    ColGenClpOptionalParameters p_colgen;
+    ColGenOptionalParameters p_colgen;
 
     std::unique_ptr<Desirability> f1;
     std::vector<std::vector<AgentIdx>> agents1;
@@ -31,17 +31,17 @@ struct BranchAndPriceClpRecData
     std::vector<std::vector<AgentIdx>> agents3;
 };
 
-void sopt_branchandprice_clp_rec(BranchAndPriceClpRecData& d);
+void sopt_branchandprice_clp_rec(BranchAndPriceRecData& d);
 
-BranchAndPriceClpOutput gap::sopt_branchandprice_clp(const Instance& ins, BranchAndPriceClpOptionalParameters p)
+BranchAndPriceOutput gap::sopt_branchandprice(const Instance& ins, BranchAndPriceOptionalParameters p)
 {
-    VER(p.info, "*** branchandprice_clp ***" << std::endl);
-    BranchAndPriceClpOutput output(ins, p.info);
+    VER(p.info, "*** branchandprice " << p.solver << " ***" << std::endl);
+    BranchAndPriceOutput output(ins, p.info);
 
-    std::vector<std::vector<std::vector<ItemIdx>>> columns;
+    std::vector<std::vector<std::vector<ItemIdx>>> columns(ins.agent_number());
     std::vector<double> x(ins.alternative_number());
 
-    BranchAndPriceClpRecData d_rec {
+    BranchAndPriceRecData d_rec {
         .ins = ins,
         .output = output,
         .info = p.info,
@@ -50,8 +50,10 @@ BranchAndPriceClpOutput gap::sopt_branchandprice_clp(const Instance& ins, Branch
         .fixed_alt = std::vector<int>(ins.alternative_number(), -1),
         .p_colgen = {
             .info = Info(),
+            .solver = p.solver,
             .columns = &columns,
             .fixed_alt = &d_rec.fixed_alt,
+            .fixed_agents = NULL,
         },
 
         .f1 = desirability("wij/ti", ins),
@@ -62,7 +64,7 @@ BranchAndPriceClpOutput gap::sopt_branchandprice_clp(const Instance& ins, Branch
         .agents3 = sol_greedyregret_init(ins, *d_rec.f3),
     };
 
-    auto output_colgen = lb_colgen_clp(ins, d_rec.p_colgen);
+    auto output_colgen = lb_columngeneration(ins, d_rec.p_colgen);
     output.update_lower_bound(output_colgen.lower_bound, std::stringstream(""), p.info);
 
     sopt_branchandprice_clp_rec(d_rec);
@@ -72,7 +74,7 @@ BranchAndPriceClpOutput gap::sopt_branchandprice_clp(const Instance& ins, Branch
 
 /******************************************************************************/
 
-void sopt_branchandprice_clp_rec(BranchAndPriceClpRecData& d)
+void sopt_branchandprice_clp_rec(BranchAndPriceRecData& d)
 {
     if (!d.info.check_time())
         return;
@@ -97,7 +99,7 @@ void sopt_branchandprice_clp_rec(BranchAndPriceClpRecData& d)
     }
 
     // Lower bound
-    auto output_colgen = lb_colgen_clp(d.ins, d.p_colgen);
+    auto output_colgen = lb_columngeneration(d.ins, d.p_colgen);
     if (d.output.solution.feasible() && output_colgen.lower_bound >= d.output.solution.cost())
         return;
 
