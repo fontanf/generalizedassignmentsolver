@@ -16,6 +16,7 @@ struct ColGenCplexOptionalParameters
 
     std::vector<std::vector<std::vector<ItemIdx>>>* columns = NULL;
     std::vector<int>* fixed_alt = NULL; // -1: unfixed, 0: fixed to 0, 1: fixed to 1.
+    std::vector<int>* fixed_agents = NULL; // 0: unfixed, 1: fixed.
 };
 
 struct ColGenCplexOutput: Output
@@ -24,6 +25,8 @@ struct ColGenCplexOutput: Output
     ColGenCplexOutput& algorithm_end(Info& info);
 
     std::vector<std::vector<std::vector<ItemIdx>>> columns;
+    std::vector<std::pair<AgentIdx, ColIdx>> column_indices;
+    std::vector<double> solution;
     std::vector<double> x;
     Cpt it = 0;
     Cpt added_column_number = 0;
