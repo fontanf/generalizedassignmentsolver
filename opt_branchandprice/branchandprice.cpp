@@ -147,7 +147,7 @@ void sopt_branchandprice_clp_rec(BranchAndPriceRecData& d)
             if (d.sol_curr.remaining_capacity(i) < d.ins.alternative(k).w)
                 continue;
             double x = - output_colgen.x[k];
-            //double x = std::abs(d.colgen_data.x[k] - 0.5);
+            //double x = std::abs(output_colgen.x[k] - 0.5);
             if (j_best == -1 || x_best > x) {
                 j_best = j;
                 i_best = i;

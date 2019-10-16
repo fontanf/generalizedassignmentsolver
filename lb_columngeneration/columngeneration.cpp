@@ -16,6 +16,7 @@ class ColGenSolver
 
 public:
 
+    virtual ~ColGenSolver() { }
     virtual void add_column(std::vector<int> rows, Cost c) = 0;
     virtual void solve() = 0;
     virtual double objective() = 0;
