@@ -112,7 +112,10 @@ public:
         cplex_.setOut(env_.getNullStream()); // Remove standard output
     }
 
-    virtual ~ColGenSolverCplex() { }
+    virtual ~ColGenSolverCplex()
+    {
+        env_.end();
+    }
 
     void add_column(std::vector<int> rows, Cost c)
     {
@@ -219,6 +222,7 @@ ColGenOutput gap::lb_columngeneration(const Instance& ins, ColGenOptionalParamet
     ItemIdx n = ins.item_number();
     AgentIdx m = ins.agent_number();
 
+    // Handle fixed variables and fixed agents.
     std::vector<int> agent_row(m, -2);
     int row_idx = 0;
     for (AgentIdx i=0; i<m; ++i) {
@@ -315,6 +319,25 @@ ColGenOutput gap::lb_columngeneration(const Instance& ins, ColGenOptionalParamet
         for (AgentIdx i=0; i<m; ++i) {
             if (agent_row[i] < 0)
                 continue;
+
+            // uᵢ: dual value associated with agent constraints (uᵢ ≤ 0).
+            // vⱼ: dual value associated with item constraints.
+            // xᵢⱼᵏ = 1 if yᵢᵏ contains item j
+            //      = 0 otherwise
+            // Reduced cost rcᵢᵏ = ∑ⱼ xᵢⱼᵏ cᵢⱼ - (uᵢ + ∑ⱼ xᵢⱼᵏ vⱼ)
+            //                   = ∑ⱼ xᵢⱼᵏ (cᵢⱼ - vⱼ) - uᵢ
+            // The algorithm that solves KP takes positive integers as input.
+            // * positive => the profit in KP are vⱼ - cᵢⱼ and its optimum is
+            //   > 0.
+            // * integers => we round down the profits to get an upper bound of
+            //   the minimum reduced cost.
+            // We need an upper bound on the minimum reduced cost in order to
+            // know when to stop.
+            // At the end, we will need a lower bound on the minimum reduced
+            // cost in order to compute the bound.
+            // Upper bound on the reduced cost rcubᵢᵏ = - opt(KPfloor) + ⌈-uᵢ⌉
+            // Lower bound on the reduced cost rclbᵢᵏ = - opt(KPceil)  + ⌊-uᵢ⌋
+
             ins_kp.clear();
             ins_kp.set_capacity(kp_capacities[i]);
             Cost rc_ub = std::ceil((mult * (- dual_sol[i])));
