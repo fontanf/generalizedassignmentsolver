@@ -31,12 +31,15 @@ The first goal of this repository is for me to have reference implementations fo
 - Linear relaxation
   - solved with CLP `-a linrelax_clp` :heavy_check_mark:
   - solved with Gurobi `-a linrelax_gurobi` :heavy_check_mark:
+
 - Lagrangian relaxation of knapsack constraints
   - solved with volume method `-a lagrelax_knapsack_volume` :heavy_check_mark:
   - solved with L-BFGS method `-a lagrelax_knapsack_lbfgs` :heavy_check_mark:
+
 - Lagrangian relaxation of assignment constraints
   - solved with volume method `-a lagrelax_assignment_volume` :heavy_check_mark:
   - solved with L-BFGS method `-a lagrelax_assignment_lbfgs` :heavy_check_mark:
+
 - Column generation `-a columngeneration solver clp` :heavy_check_mark: `-a columngeneration solver cplex` :heavy_check_mark:
 
 
@@ -59,7 +62,7 @@ Others heuristics and meta-heuristics:
 - Local search with LocalSolver `-a localsolver` :heavy_check_mark:
 - Tree search algorithms based on Branch-and-price branching scheme:
   - Limited discrepancy search `-a branchandprice_lds solver clp` :x: `-a branchandprice_lds solver cplex` :x:
-  - Beam search `-a branchandprice_beamsearch solver clp` :x: `-a branchandprice_beamsearch solver cplex` :heavy_check_mark:
+  - Beam search `-a branchandprice_beamsearch solver clp` :x: `-a branchandprice_beamsearch solver cplex` :x:
 - Tree search algorithms based on Dantzig-Wolfe reformulation branching scheme :x:
 
 ### Exact algorithms
