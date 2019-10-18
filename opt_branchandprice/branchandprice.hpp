@@ -25,7 +25,7 @@ struct BranchAndPriceOutput: Output
     BranchAndPriceOutput& algorithm_end(Info& info);
 };
 
-BranchAndPriceOutput sopt_branchandprice(const Instance& ins, BranchAndPriceOptionalParameters p = {});
+BranchAndPriceOutput sopt_branchandprice_astar(const Instance& ins, BranchAndPriceOptionalParameters p = {});
 
 }
 

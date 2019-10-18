@@ -189,18 +189,27 @@ void add_column(const Instance& ins,
     Cost c = 0;
     Weight w = 0;
     Weight t = ins.capacity(i);
-    ItemIdx j_prec = 0;
-    for (ItemIdx j: (*columns)[i][col_idx]) {
-        AltIdx k = ins.alternative_index(j, i);
-        // Check fixed variables
-        if (p.fixed_alt != NULL && (*p.fixed_alt)[k] == 0)
-            return;
-        for (ItemIdx j2 = j_prec + 1; j2 < j; ++j2) {
+
+    std::vector<ItemIdx> column = (*columns)[i][col_idx];
+    if (column.size() > 0) {
+        for (ItemIdx j2 = 0; j2 < column[0]; ++j2) {
             AltIdx k2 = ins.alternative_index(j2, i);
             if (p.fixed_alt != NULL && (*p.fixed_alt)[k2] == 1)
                 return;
         }
-        j_prec = j;
+    }
+    for (auto it = column.begin(); it != column.end(); ++it) {
+        ItemIdx j = *it;
+        AltIdx k = ins.alternative_index(j, i);
+        // Check fixed variables
+        if (p.fixed_alt != NULL && (*p.fixed_alt)[k] == 0)
+            return;
+        ItemIdx j_suiv = (std::next(it) == column.end())? ins.item_number(): *std::next(it);
+        for (ItemIdx j2 = j + 1; j2 < j_suiv; ++j2) {
+            AltIdx k2 = ins.alternative_index(j2, i);
+            if (p.fixed_alt != NULL && (*p.fixed_alt)[k2] == 1)
+                return;
+        }
         if (item_rows[j] == -1) {
             t -= ins.alternative(k).w;
             continue;
@@ -212,6 +221,12 @@ void add_column(const Instance& ins,
     }
     col_indices.push_back({i, col_idx});
 
+    //if (i == 8 || i == 9) {
+        //std::cout << "add_column i " << i << " c " << c << " items ";
+        //for (ItemIdx j: (*columns)[i][col_idx])
+            //std::cout << j << " ";
+        //std::cout << std::endl;
+    //}
     solver.add_column(rows, c);
 }
 
@@ -234,10 +249,12 @@ ColGenOutput gap::lb_columngeneration(const Instance& ins, ColGenOptionalParamet
     }
     AgentIdx agent_constraint_number = row_idx;
 
+    Cost c0 = 0;
     std::vector<int> item_row(n, -2);
     for (ItemIdx j=0; j<n; ++j) {
         for (AgentIdx i=0; i<m; ++i) {
             if (p.fixed_alt != NULL && (*p.fixed_alt)[ins.alternative_index(j, i)] == 1) {
+                c0 += ins.alternative(j, i).c;
                 item_row[j] = -1;
                 break;
             }
@@ -281,8 +298,8 @@ ColGenOutput gap::lb_columngeneration(const Instance& ins, ColGenOptionalParamet
     }
 
     // Add initial columns
-    std::vector<int> rows(agent_constraint_number + item_constraint_number);
-    std::iota(rows.begin(), rows.begin() + item_constraint_number, agent_constraint_number);
+    std::vector<int> rows(item_constraint_number);
+    std::iota(rows.begin(), rows.end(), agent_constraint_number);
     solver->add_column(rows, 10 * ins.bound());
     output.column_indices.push_back({-1, -1});
 
@@ -310,7 +327,7 @@ ColGenOutput gap::lb_columngeneration(const Instance& ins, ColGenOptionalParamet
         VER(p.info,
                 "It " << std::setw(8) << output.it
                 << " | T " << std::setw(10) << p.info.elapsed_time()
-                << " | C " << std::setw(10) << solver->objective()
+                << " | C " << std::setw(10) << c0 + solver->objective()
                 << " | COL " << std::setw(10) << output.added_column_number
                 << std::endl);
         std::vector<double>& dual_sol = solver->dual_solution();
@@ -408,10 +425,7 @@ ColGenOutput gap::lb_columngeneration(const Instance& ins, ColGenOptionalParamet
         //std::cout << rc_lb << std::endl;
     }
 
-    lb = std::ceil((double)lb / mult);
-    for (AltIdx k=0; k<ins.alternative_number(); ++k)
-        if (p.fixed_alt != NULL && (*p.fixed_alt)[k] == 1)
-            lb += ins.alternative(k).c;
+    lb = c0 + std::ceil((double)lb / mult);
     output.update_lower_bound(lb, std::stringstream(""), p.info);
 
     // Compute x

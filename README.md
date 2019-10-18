@@ -57,6 +57,10 @@ Others heuristics and meta-heuristics:
 - Random feasible solution found with a Local search `-a random` :heavy_check_mark:
 - Repair linear relaxation solution `-a repairlinrelax_clp` :heavy_check_mark:
 - Local search with LocalSolver `-a localsolver` :heavy_check_mark:
+- Tree search algorithms based on Branch-and-price branching scheme:
+  - Limited discrepancy search `-a branchandprice_lds solver clp` :x: `-a branchandprice_lds solver cplex` :x:
+  - Beam search `-a branchandprice_beamsearch solver clp` :x: `-a branchandprice_beamsearch solver cplex` :heavy_check_mark:
+- Tree search algorithms based on Dantzig-Wolfe reformulation branching scheme :x:
 
 ### Exact algorithms
 
@@ -64,7 +68,10 @@ Others heuristics and meta-heuristics:
   - with CBC `-a branchandcut_cbc` :heavy_check_mark:
   - with CPLEX `-a branchandcut_cplex` :heavy_check_mark:
   - with Gurobi `-a branchandcut_gurobi` :heavy_check_mark:
-- Branch-and-price `-a branchandprice solver clp` :heavy_check_mark: `-a branchandprice solver cplex` :heavy_check_mark:
+
+- Branch-and-price
+  - Depth First Search `-a branchandprice_dfs solver clp` :x: `-a branchandprice_dfs solver cplex` :x:
+  - A* (Best First Search) `-a branchandprice_astar solver clp` :heavy_check_mark: `-a branchandprice_astar solver cplex` :heavy_check_mark:
 
 - Constraint programming
   - with Gecode `-a constraintprogramming_gecode` :heavy_check_mark:
