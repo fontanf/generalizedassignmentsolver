@@ -9,6 +9,14 @@ namespace gap
 
 /************************ lb_lagrelax_assignment_lbfgs ************************/
 
+struct LagRelaxAssignmentLbfgsOptionalParameters
+{
+    Info info = Info();
+
+    std::vector<int>* initial_multipliers = NULL;
+    std::vector<int>* fixed_alt = NULL; // -1: unfixed, 0: fixed to 0, 1: fixed to 1.
+};
+
 struct LagRelaxAssignmentLbfgsOutput: Output
 {
     LagRelaxAssignmentLbfgsOutput(const Instance& ins, Info& info): Output(ins, info) { }
@@ -18,7 +26,7 @@ struct LagRelaxAssignmentLbfgsOutput: Output
     std::vector<double> multipliers; // vector of size ins.item_number()
 };
 
-LagRelaxAssignmentLbfgsOutput lb_lagrelax_assignment_lbfgs(const Instance& ins, Info info = Info());
+LagRelaxAssignmentLbfgsOutput lb_lagrelax_assignment_lbfgs(const Instance& ins, LagRelaxAssignmentLbfgsOptionalParameters p = {});
 
 /************************* lb_lagrelax_knapsack_lbfgs *************************/
 

@@ -31,8 +31,31 @@ class LagRelaxAssignmentLbfgsFunction
 
 public:
 
-    LagRelaxAssignmentLbfgsFunction(const Instance& ins): ins_(ins), grad_(ins.item_number()) {  }
-    virtual ~LagRelaxAssignmentLbfgsFunction() { };
+    LagRelaxAssignmentLbfgsFunction(const Instance& ins,
+            LagRelaxAssignmentLbfgsOptionalParameters& p,
+            ItemIdx unfixed_item_number,
+            const std::vector<ItemIdx>& item_indices):
+        ins_(ins), p_(p), item_indices_(item_indices), grad_(unfixed_item_number)
+    {
+        ItemIdx n = ins_.item_number();
+        AgentIdx m = ins_.agent_number();
+
+        capacities_kp_.resize(m);
+        for (AgentIdx i = 0; i < m; ++i) {
+            capacities_kp_[i] = ins.capacity(i);
+            for (ItemIdx j = 0; j < n; ++j) {
+                AltIdx k = ins.alternative_index(j, i);
+                if (p.fixed_alt != NULL && (*p.fixed_alt)[k] == 1)
+                    capacities_kp_[i] -= ins.alternative(k).w;
+            }
+            if (capacities_kp_[i] < 0)
+                std::cout << "ERROR i " << i << " c " << capacities_kp_[i] << std::endl;
+        }
+
+        indices_kp_.resize(n);
+    }
+
+    virtual ~LagRelaxAssignmentLbfgsFunction() { }
 
     double f(const column_vector& x);
 
@@ -41,7 +64,13 @@ public:
 private:
 
     const Instance& ins_;
+    LagRelaxAssignmentLbfgsOptionalParameters& p_;
+    const std::vector<ItemIdx>& item_indices_; // item_indices_[j] the index of item j in mu and grad
+
     column_vector grad_;
+
+    std::vector<knapsack::Weight> capacities_kp_;
+    std::vector<knapsack::ItemIdx> indices_kp_; // indices_kp_[j] is the index of item j in the current KP
 
 };
 
@@ -53,33 +82,40 @@ double LagRelaxAssignmentLbfgsFunction::f(const column_vector& mu)
     double l = 0;
     std::fill(grad_.begin(), grad_.end(), 1);
 
-    for (ItemIdx j=0; j<n; ++j)
-        l += mu(j);
+    for (ItemIdx j = 0; j < n; ++j)
+        if (item_indices_[j] >= 0)
+            l += mu(item_indices_[j]);
 
     Weight mult = 1000000;
-    std::vector<ItemIdx> indices(n);
-    for (AgentIdx i=0; i<m; ++i) {
+    for (AgentIdx i = 0; i < m; ++i) {
         knapsack::Instance ins_kp;
-        ins_kp.set_capacity(ins_.capacity(i));
-        for (ItemIdx j=0; j<n; ++j) {
+        ins_kp.set_capacity(capacities_kp_[i]);
+        ItemIdx j_kp = 0;
+        for (ItemIdx j = 0; j < n; ++j) {
             AltIdx k = ins_.alternative_index(j, i);
             const Alternative& a = ins_.alternative(k);
-            knapsack::Profit p = std::ceil(mult * mu(j) - mult * a.c);
-            if (p > 0) {
-                ins_kp.add_item(a.w, p);
-                knapsack::ItemIdx j_kp = ins_kp.item_number() - 1;
-                indices[j_kp] = j;
+            if ((p_.fixed_alt != NULL && (*p_.fixed_alt)[k] >= 0)
+                    || a.w > capacities_kp_[i]) {
+                indices_kp_[j] = -1;
+                continue;
             }
+            knapsack::Profit profit = std::ceil(mult * mu(j) - mult * a.c);
+            if (profit <= 0) {
+                indices_kp_[j] = -1;
+                continue;
+            }
+            ins_kp.add_item(a.w, profit);
+            indices_kp_[j] = j_kp;
+            j_kp++;
         }
         //knapsack::Solution sol = knapsack::sopt_bellman_array_all(ins_kp, Info().set_verbose(false));
         auto output_kp = knapsack::sopt_minknap(ins_kp);
         //std::cout << "i " << i << " opt " << sol.profit() << std::endl;
-        for (knapsack::ItemIdx j_kp=0; j_kp<ins_kp.item_number(); ++j_kp) {
-            if (output_kp.solution.contains_idx(j_kp)) {
-                ItemIdx j = indices[j_kp];
+        for (ItemIdx j = 0; j < n; ++j) {
+            if (indices_kp_[j] >= 0 && output_kp.solution.contains_idx(indices_kp_[j])) {
                 AltIdx k = ins_.alternative_index(j, i);
-                grad_(j)--;
-                l += ins_.alternative(k).c - mu(j);
+                grad_(item_indices_[j])--;
+                l += ins_.alternative(k).c - mu(item_indices_[j]);
             }
         }
     }
@@ -87,16 +123,44 @@ double LagRelaxAssignmentLbfgsFunction::f(const column_vector& mu)
     return l;
 }
 
-LagRelaxAssignmentLbfgsOutput gap::lb_lagrelax_assignment_lbfgs(const Instance& ins, Info info)
+LagRelaxAssignmentLbfgsOutput gap::lb_lagrelax_assignment_lbfgs(const Instance& ins, LagRelaxAssignmentLbfgsOptionalParameters p)
 {
-    VER(info, "*** lagrelax_assignment_lbfgs ***" << std::endl);
-    LagRelaxAssignmentLbfgsOutput output(ins, info);
+    VER(p.info, "*** lagrelax_assignment_lbfgs ***" << std::endl);
+    LagRelaxAssignmentLbfgsOutput output(ins, p.info);
 
     ItemIdx n = ins.item_number();
-    LagRelaxAssignmentLbfgsFunction func(ins);
-    column_vector mu(n);
-    for (ItemIdx j=0; j<n; ++j)
-        mu(j) = 0;
+    AgentIdx m = ins.agent_number();
+
+    ItemIdx item_idx = 0;
+    Cost c0 = 0;
+    std::vector<ItemIdx> item_indices(n, -2);
+    for (ItemIdx j = 0; j < n; ++j) {
+        for (AgentIdx i = 0; i < m; ++i) {
+            if (p.fixed_alt != NULL && (*p.fixed_alt)[ins.alternative_index(j, i)] == 1) {
+                c0 += ins.alternative(j, i).c;
+                item_indices[j] = -1;
+                break;
+            }
+        }
+        if (item_indices[j] == -2) {
+            item_indices[j] = item_idx;
+            item_idx++;
+        }
+    }
+    ItemIdx unfixed_item_number = item_idx;
+
+    LagRelaxAssignmentLbfgsFunction func(ins, p, unfixed_item_number, item_indices);
+
+    column_vector mu(unfixed_item_number);
+    if (p.initial_multipliers != NULL) {
+        for (ItemIdx j = 0; j < n; ++j)
+            if (item_indices[j] >= 0)
+                mu(item_indices[j]) = (*p.initial_multipliers)[j];
+    } else {
+        for (ItemIdx j = 0; j < n; ++j)
+            mu(j) = 0;
+    }
+
     auto f   = [&func](const column_vector& x) { return func.f(x); };
     auto def = [&func](const column_vector& x) { return func.der(x); };
     auto stop_strategy = objective_delta_stop_strategy(0.0001);
@@ -109,13 +173,14 @@ LagRelaxAssignmentLbfgsOutput gap::lb_lagrelax_assignment_lbfgs(const Instance& 
             mu,
             std::numeric_limits<double>::max());
 
-    Cost lb = std::ceil(res - TOL);
-    output.update_lower_bound(lb, std::stringstream(""), info);
+    Cost lb = c0 + std::ceil(res - TOL);
+    output.update_lower_bound(lb, std::stringstream(""), p.info);
     output.multipliers.resize(n);
-    for (ItemIdx j=0; j<n; ++j)
-        output.multipliers[j] = mu(j);
+    for (ItemIdx j = 0; j < n; ++j)
+        if (item_indices[j] >= 0)
+            output.multipliers[j] = mu(item_indices[j]);
 
-    return output.algorithm_end(info);
+    return output.algorithm_end(p.info);
 }
 
 /************************* lb_lagrelax_knapsack_lbfgs *************************/

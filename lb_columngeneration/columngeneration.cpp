@@ -285,16 +285,16 @@ ColGenOutput gap::lb_columngeneration(const Instance& ins, ColGenOptionalParamet
     //            == -1: item j is not in KP and does not belong to the column.
     //            >=  0: item j is the item of index indices[j] in KP.
     std::vector<knapsack::ItemIdx> indices(n);
-    std::vector<knapsack::Weight> kp_capacities(m);
+    std::vector<knapsack::Weight> capacities_kp(m);
     for (AgentIdx i=0; i<m; ++i) {
-        kp_capacities[i] = ins.capacity(i);
+        capacities_kp[i] = ins.capacity(i);
         for (ItemIdx j=0; j<n; ++j) {
             AltIdx k = ins.alternative_index(j, i);
             if (p.fixed_alt != NULL && (*p.fixed_alt)[k] == 1)
-                kp_capacities[i] -= ins.alternative(k).w;
+                capacities_kp[i] -= ins.alternative(k).w;
         }
-        if (kp_capacities[i] < 0)
-            std::cout << "ERROR i " << i << " c " << kp_capacities[i] << std::endl;
+        if (capacities_kp[i] < 0)
+            std::cout << "ERROR i " << i << " c " << capacities_kp[i] << std::endl;
     }
 
     // Add initial columns
@@ -357,7 +357,7 @@ ColGenOutput gap::lb_columngeneration(const Instance& ins, ColGenOptionalParamet
             // Lower bound on the reduced cost rclbᵢᵏ = - opt(KPceil)  + ⌊-uᵢ⌋
 
             ins_kp.clear();
-            ins_kp.set_capacity(kp_capacities[i]);
+            ins_kp.set_capacity(capacities_kp[i]);
             Cost rc_ub = std::ceil((mult * (- dual_sol[i])));
             ItemIdx j_kp = 0;
             for (ItemIdx j=0; j<n; ++j) {
@@ -370,7 +370,7 @@ ColGenOutput gap::lb_columngeneration(const Instance& ins, ColGenOptionalParamet
                 }
                 if ((p.fixed_alt != NULL && (*p.fixed_alt)[k] == 0)
                         || profit <= 0
-                        || a.w > kp_capacities[i]) {
+                        || a.w > capacities_kp[i]) {
                     indices[j] = -1;
                     continue;
                 }
@@ -405,7 +405,7 @@ ColGenOutput gap::lb_columngeneration(const Instance& ins, ColGenOptionalParamet
         if (agent_row[i] < 0)
             continue;
         ins_kp.clear();
-        ins_kp.set_capacity(kp_capacities[i]);
+        ins_kp.set_capacity(capacities_kp[i]);
         Cost rc_lb = std::floor((mult * (- dual_sol[i])));
         for (ItemIdx j=0; j<n; ++j) {
             AltIdx k = ins.alternative_index(j, i);
@@ -415,7 +415,7 @@ ColGenOutput gap::lb_columngeneration(const Instance& ins, ColGenOptionalParamet
                 continue;
             if ((p.fixed_alt != NULL && (*p.fixed_alt)[k] == 0)
                     || profit <= 0
-                    || a.w > kp_capacities[i])
+                    || a.w > capacities_kp[i])
                 continue;
             ins_kp.add_item(a.w, profit);
         }

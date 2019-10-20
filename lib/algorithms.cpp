@@ -79,7 +79,9 @@ std::function<Output (Instance&, std::mt19937_64&, Info)> gap::get_algorithm(std
 #if DLIB_FOUND
     } else if (algo.name == "lagrelax_assignment_lbfgs") {
         return [](Instance& ins, std::mt19937_64&, Info info) {
-            return lb_lagrelax_assignment_lbfgs(ins, info);
+            LagRelaxAssignmentLbfgsOptionalParameters p;
+            p.info = info;
+            return lb_lagrelax_assignment_lbfgs(ins, p);
         };
 #endif
     } else if (algo.name == "columngeneration") {
