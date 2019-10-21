@@ -18,8 +18,9 @@ BranchAndPriceOutput& BranchAndPriceOutput::algorithm_end(Info& info)
 struct BranchAndPriceNode
 {
 
-    AltIdx init_k(const Instance& ins)
+    void filter()
     {
+        const Instance& ins = sol_curr.instance();
         for (ItemIdx j = 0; j < ins.item_number(); ++j) {
             AgentIdx i0 = -1;
             for (AgentIdx i = 0; i < ins.agent_number(); ++i) {
@@ -36,8 +37,10 @@ struct BranchAndPriceNode
                     }
                 }
             }
-            if (i0 < 0)
-                return -1;
+            if (i0 < 0) {
+                feasible_ = false;
+                return;
+            }
             if (i0 == ins.agent_number())
                 continue;
             //std::cout << "set " << ins.alternative(k).j << " to " << ins.alternative(k).i << std::endl;
@@ -46,30 +49,6 @@ struct BranchAndPriceNode
                 (*p_colgen.fixed_alt)[ins.alternative_index(j, i)] = 0;
             (*p_colgen.fixed_alt)[ins.alternative_index(j, i0)] = 1;
         }
-
-        ItemIdx  j_best = -1;
-        AgentIdx i_best = -1;
-        double   x_best = -1;
-        for (ItemIdx j = 0; j < ins.item_number(); ++j) {
-            for (AgentIdx i = 0; i < ins.agent_number(); ++i) {
-                AltIdx k = ins.alternative_index(j, i);
-                if ((*p_colgen.fixed_alt)[k] >= 0)
-                    continue;
-                if (sol_curr.remaining_capacity(i) < ins.alternative(k).w)
-                    continue;
-                double x = - output_colgen.x[k];
-                //double x = std::abs(output_colgen.x[k] - 0.5);
-                if (j_best == -1 || x_best > x) {
-                    j_best = j;
-                    i_best = i;
-                    x_best = x;
-                }
-            }
-        }
-        if (j_best == -1)
-            return -1;
-        //std::cout << "j " << j_best << " i " << i_best << " k " << ins.alternative_index(j_best, i_best) << " x " << x_best << std::endl;
-        return ins.alternative_index(j_best, i_best);
     }
 
     BranchAndPriceNode(const Instance& ins, BranchAndPriceOptionalParameters& p,
@@ -81,28 +60,30 @@ struct BranchAndPriceNode
                 .columns = columns,
                 .fixed_alt = new std::vector<int>(ins.alternative_number(), -1)
                 }),
-        output_colgen(lb_columngeneration(ins, p_colgen)),
-        k(init_k(ins)) { }
+        output_colgen(lb_columngeneration(ins, p_colgen))
+    {
+        filter();
+    }
 
-    Solution init_solution(const Instance& ins, const BranchAndPriceNode& node, int z)
+    Solution init_solution(const Instance& ins, const BranchAndPriceNode& node, AltIdx k, int val)
     {
         (void)ins;
         Solution sol(node.sol_curr);
-        if (z == 1)
-            sol.set(node.k);
+        if (val == 1)
+            sol.set(k);
         return sol;
     }
 
-    ColGenOutput init_output_colgen(const Instance& ins, const BranchAndPriceNode& node, int z)
+    ColGenOutput init_output_colgen(const Instance& ins, const BranchAndPriceNode& node, AltIdx k, int val)
     {
         //p_colgen.info      = Info().set_verbose(true);
         p_colgen.solver    = node.p_colgen.solver;
         p_colgen.columns   = node.p_colgen.columns;
         p_colgen.fixed_alt = new std::vector<int>(*(node.p_colgen.fixed_alt));
-        (*p_colgen.fixed_alt)[node.k] = z;
-        if (z == 1) {
-            ItemIdx j = ins.alternative(node.k).j;
-            AgentIdx i0 = ins.alternative(node.k).i;
+        (*p_colgen.fixed_alt)[k] = val;
+        if (val == 1) {
+            ItemIdx j = ins.alternative(k).j;
+            AgentIdx i0 = ins.alternative(k).i;
             for (AgentIdx i = 0; i < ins.agent_number(); ++i)
                 if (i != i0)
                     (*p_colgen.fixed_alt)[ins.alternative_index(j, i)] = 0;
@@ -116,15 +97,15 @@ struct BranchAndPriceNode
         return lb_columngeneration(ins, p_colgen);
     }
 
-    BranchAndPriceNode(const Instance& ins, const BranchAndPriceNode& node, int z):
-        sol_curr(init_solution(ins, node, z)),
-        output_colgen(init_output_colgen(ins, node, z)),
-        k(init_k(ins))
+    BranchAndPriceNode(const Instance& ins, const BranchAndPriceNode& node, AltIdx k, int val):
+        sol_curr(init_solution(ins, node, k, val)),
+        output_colgen(init_output_colgen(ins, node, k, val))
     {
+        filter();
     }
 
     BranchAndPriceNode(const BranchAndPriceNode& node):
-        sol_curr(node.sol_curr), p_colgen(node.p_colgen), output_colgen(node.output_colgen), k(node.k)
+        sol_curr(node.sol_curr), p_colgen(node.p_colgen), output_colgen(node.output_colgen)
     {
         p_colgen.fixed_alt = new std::vector<int>(*(node.p_colgen.fixed_alt));
     }
@@ -134,17 +115,51 @@ struct BranchAndPriceNode
             sol_curr = node.sol_curr;
             p_colgen = node.p_colgen;
             output_colgen = node.output_colgen;
-            k = node.k;
             p_colgen.fixed_alt = new std::vector<int>(*(node.p_colgen.fixed_alt));
         }
         return *this;
     }
     ~BranchAndPriceNode() { delete p_colgen.fixed_alt; }
 
+    std::vector<BranchAndPriceNode> children(std::string str)
+    {
+        const Instance& ins = sol_curr.instance();
+        ItemIdx  j_best = -1;
+        AgentIdx i_best = -1;
+        double val_best = -1;
+        for (ItemIdx j = 0; j < ins.item_number(); ++j) {
+            for (AgentIdx i = 0; i < ins.agent_number(); ++i) {
+                AltIdx k = ins.alternative_index(j, i);
+                if ((*p_colgen.fixed_alt)[k] >= 0)
+                    continue;
+                if (sol_curr.remaining_capacity(i) < ins.alternative(k).w)
+                    continue;
+                double val = 0;
+                if (str == "frac")
+                    val = std::abs(output_colgen.x[k] - 0.5);
+                if (str == "max")
+                    val = - output_colgen.x[k];
+
+                if (j_best == -1 || val_best > val) {
+                    j_best = j;
+                    i_best = i;
+                    val_best = val;
+                }
+            }
+        }
+        if (j_best == -1)
+            return {};
+        AltIdx k = ins.alternative_index(j_best, i_best);
+        std::vector<BranchAndPriceNode> vec;
+        vec.push_back(BranchAndPriceNode(ins, *this, k, 0));
+        vec.push_back(BranchAndPriceNode(ins, *this, k, 1));
+        return vec;
+    }
+
+    bool feasible_ = true;
     Solution sol_curr;
     ColGenOptionalParameters p_colgen;
     ColGenOutput output_colgen;
-    AltIdx k = -1;
 };
 
 BranchAndPriceOutput gap::sopt_branchandprice_dfs(const Instance& ins, BranchAndPriceOptionalParameters p)
@@ -177,10 +192,9 @@ BranchAndPriceOutput gap::sopt_branchandprice_dfs(const Instance& ins, BranchAnd
                 return output.algorithm_end(p.info);
         }
 
-        if (node.k != -1) {
-            q.push_back(BranchAndPriceNode(ins, node, 0));
-            q.push_back(BranchAndPriceNode(ins, node, 1));
-        }
+        auto children = node.children("max");
+        for (BranchAndPriceNode& child: children)
+            q.push_back(child);
 
     }
     return output.algorithm_end(p.info);
@@ -225,10 +239,9 @@ BranchAndPriceOutput gap::sopt_branchandprice_astar(const Instance& ins, BranchA
             return output.algorithm_end(p.info);
         }
 
-        if (node.k != -1) {
-            q.push(BranchAndPriceNode(ins, node, 0));
-            q.push(BranchAndPriceNode(ins, node, 1));
-        }
+        auto children = node.children("frac");
+        for (BranchAndPriceNode& child: children)
+            q.push(child);
 
     }
     return output.algorithm_end(p.info);
