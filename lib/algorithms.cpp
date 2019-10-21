@@ -119,6 +119,13 @@ std::function<Output (Instance&, std::mt19937_64&, Info)> gap::get_algorithm(std
             return sopt_branchandcut_gurobi(ins, p);
         };
 #endif
+    } else if (algo.name == "branchandprice_dfs") {
+        return [algo](Instance& ins, std::mt19937_64&, Info info) {
+            BranchAndPriceOptionalParameters p;
+            p.info = info;
+            p.set_params(algo.args);
+            return sopt_branchandprice_dfs(ins, p);
+        };
     } else if (algo.name == "branchandprice_astar") {
         return [algo](Instance& ins, std::mt19937_64&, Info info) {
             BranchAndPriceOptionalParameters p;

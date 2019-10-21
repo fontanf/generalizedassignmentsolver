@@ -73,7 +73,7 @@ Others heuristics and meta-heuristics:
   - with Gurobi `-a branchandcut_gurobi` :heavy_check_mark:
 
 - Branch-and-price
-  - Depth First Search `-a branchandprice_dfs solver clp` :x: `-a branchandprice_dfs solver cplex` :x:
+  - Depth First Search `-a branchandprice_dfs solver clp` :heavy_check_mark: `-a branchandprice_dfs solver cplex` :heavy_check_mark:
   - A* (Best First Search) `-a branchandprice_astar solver clp` :heavy_check_mark: `-a branchandprice_astar solver cplex` :heavy_check_mark:
 
 - Constraint programming

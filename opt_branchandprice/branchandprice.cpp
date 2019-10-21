@@ -10,6 +10,8 @@ using namespace gap;
 BranchAndPriceOutput& BranchAndPriceOutput::algorithm_end(Info& info)
 {
     Output::algorithm_end(info);
+    PUT(info, "Algorithm", "NodeNumber", node_number);
+    VER(info, "Nodes: " << node_number << std::endl);
     return *this;
 }
 
@@ -55,8 +57,8 @@ struct BranchAndPriceNode
                     continue;
                 if (sol_curr.remaining_capacity(i) < ins.alternative(k).w)
                     continue;
-                //double x = - output_colgen.x[k];
-                double x = std::abs(output_colgen.x[k] - 0.5);
+                double x = - output_colgen.x[k];
+                //double x = std::abs(output_colgen.x[k] - 0.5);
                 if (j_best == -1 || x_best > x) {
                     j_best = j;
                     i_best = i;
@@ -145,6 +147,45 @@ struct BranchAndPriceNode
     AltIdx k = -1;
 };
 
+BranchAndPriceOutput gap::sopt_branchandprice_dfs(const Instance& ins, BranchAndPriceOptionalParameters p)
+{
+    VER(p.info, "*** branchandprice_dfs " << p.solver << " ***" << std::endl);
+    BranchAndPriceOutput output(ins, p.info);
+
+    std::vector<std::vector<std::vector<ItemIdx>>> columns(ins.agent_number());
+
+    std::vector<BranchAndPriceNode> q;
+
+    q.push_back(BranchAndPriceNode(ins, p, &columns));
+    while (!q.empty()) {
+        output.node_number++;
+
+        if (!p.info.check_time())
+            return output.algorithm_end(p.info);
+
+        // Get node
+        BranchAndPriceNode node = q.back();
+        q.pop_back();
+
+        if (output.node_number == 1)
+            output.update_lower_bound(node.output_colgen.lower_bound, std::stringstream(), p.info);
+
+        // if found feasible solution
+        if (node.sol_curr.feasible()) {
+            output.update_solution(node.sol_curr, std::stringstream(""), p.info);
+            if (output.optimal())
+                return output.algorithm_end(p.info);
+        }
+
+        if (node.k != -1) {
+            q.push_back(BranchAndPriceNode(ins, node, 0));
+            q.push_back(BranchAndPriceNode(ins, node, 1));
+        }
+
+    }
+    return output.algorithm_end(p.info);
+}
+
 BranchAndPriceOutput gap::sopt_branchandprice_astar(const Instance& ins, BranchAndPriceOptionalParameters p)
 {
     VER(p.info, "*** branchandprice_astar " << p.solver << " ***" << std::endl);
@@ -157,12 +198,11 @@ BranchAndPriceOutput gap::sopt_branchandprice_astar(const Instance& ins, BranchA
         return n1.output_colgen.lower_bound >= n2.output_colgen.lower_bound;
     };
     std::priority_queue<BranchAndPriceNode, std::vector<BranchAndPriceNode>, decltype(comp)> q(comp);
-    Cpt node_number = 0;
 
     q.push(BranchAndPriceNode(ins, p, &columns));
     while (!q.empty()) {
         //std::cout << "node " << node_number << std::endl;
-        node_number++;
+        output.node_number++;
 
         if (!p.info.check_time())
             return output.algorithm_end(p.info);
