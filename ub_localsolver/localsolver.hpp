@@ -15,6 +15,7 @@ struct LocalSolverOptionalParameters
 struct LocalSolverOutput: Output
 {
     LocalSolverOutput(const Instance& ins, Info& info): Output(ins, info) { }
+    LocalSolverOutput& algorithm_end(Info& info);
 };
 
 LocalSolverOutput sol_localsolver(const Instance& ins, LocalSolverOptionalParameters p = {});

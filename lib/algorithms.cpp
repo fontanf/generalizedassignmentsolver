@@ -227,7 +227,9 @@ std::function<Output (Instance&, std::mt19937_64&, Info)> gap::get_algorithm(std
 #if LOCALSOLVER_FOUND
     } else if (algo.name == "localsolver") {
         return [](Instance& ins, std::mt19937_64&, Info info) {
-            return sol_localsolver({ins, sol, info});
+            LocalSolverOptionalParameters p;
+            p.info = info;
+            return sol_localsolver(ins, p);
         };
 #endif
     } else if (algo.name == "cgh_restrictedmaster") {

@@ -13,23 +13,32 @@
 using namespace gap;
 using namespace localsolver;
 
+LocalSolverOutput& LocalSolverOutput::algorithm_end(Info& info)
+{
+    Output::algorithm_end(info);
+    //PUT(info, "Algorithm", "Iterations", it);
+    //VER(info, "Iterations: " << it << std::endl);
+    return *this;
+}
+
 class MyCallback: public LSCallback
 {
 
 public:
 
-    MyCallback(Solution& sol, Info& info, std::vector<LSExpression>& agents):
-        sol_(sol), info_(info), agents_(agents) { }
+    MyCallback(LocalSolverOutput& output, LocalSolverOptionalParameters& p, std::vector<LSExpression>& agents):
+        output_(output), p_(p), agents_(agents) { }
 
     void callback(LocalSolver& ls, LSCallbackType type) {
+        (void)type;
         LSSolutionStatus s = ls.getSolution().getStatus();
         if (s == SS_Infeasible)
             return;
 
         LSExpression obj = ls.getModel().getObjective(0);
-        if(!sol_.feasible() || sol_.cost() > obj.getValue() + 0.5) {
-            Solution sol_curr(sol_.instance());
-            AgentIdx m = sol_.instance().agent_number();
+        if(!output_.solution.feasible() || output_.solution.cost() > obj.getValue() + 0.5) {
+            Solution sol_curr(output_.solution.instance());
+            AgentIdx m = output_.solution.instance().agent_number();
             for (AgentIdx i=0; i<m; ++i) {
                 LSCollection bin_collection = agents_[i].getCollectionValue();
                 for (ItemIdx j_pos=0; j_pos<bin_collection.count(); ++j_pos) {
@@ -37,28 +46,28 @@ public:
                 }
             }
             std::stringstream ss;
-            sol_.update(sol_curr, 0, ss, info_);
+            output_.update_solution(sol_curr, std::stringstream(""), p_.info);
         }
     }
 
 private:
 
-    Solution& sol_;
-    Info& info_;
+    LocalSolverOutput& output_;
+    LocalSolverOptionalParameters& p_;
     std::vector<LSExpression>& agents_;
 
 };
 
-Solution gap::ub_localsolver(LocalSolverData d)
+LocalSolverOutput gap::sol_localsolver(const Instance& ins, LocalSolverOptionalParameters p)
 {
-    VER(d.info, "*** localsolver ***" << std::endl);
-    ItemIdx n = d.ins.item_number();
-    AgentIdx m = d.ins.agent_number();
+    VER(p.info, "*** localsolver ***" << std::endl);
+    ItemIdx n = ins.item_number();
+    AgentIdx m = ins.agent_number();
 
-    init_display(d.info);
+    LocalSolverOutput output(ins, p.info);
 
     if (n == 0)
-        return algorithm_end(d.sol, d.info);
+        return output.algorithm_end(p.info);
 
     LocalSolver localsolver;
 
@@ -73,8 +82,8 @@ Solution gap::ub_localsolver(LocalSolverData d)
     std::vector<std::vector<lsint>> item_costs(n, std::vector<lsint>(n));
     for (AgentIdx i=0; i<m; ++i) {
         for (ItemIdx j=0; j<n; ++j) {
-            item_weights[i][j] = d.ins.alternative(j, i).w;
-            item_costs[i][j] = d.ins.alternative(j, i).c;
+            item_weights[i][j] = ins.alternative(j, i).w;
+            item_costs[i][j] = ins.alternative(j, i).c;
         }
     }
 
@@ -90,8 +99,8 @@ Solution gap::ub_localsolver(LocalSolverData d)
     LSExpression total_cost; // Objective
 
     // Set decisions: bins[k] represents the items in bin k
-    for (AgentIdx i=0; i<d.ins.agent_number(); ++i)
-        agents[i] = model.setVar(d.ins.item_number());
+    for (AgentIdx i=0; i<ins.agent_number(); ++i)
+        agents[i] = model.setVar(ins.item_number());
 
     // Each item must be in one bin and one bin only
     model.constraint(model.partition(agents.begin(), agents.end()));
@@ -113,7 +122,7 @@ Solution gap::ub_localsolver(LocalSolverData d)
     for (AgentIdx i=0; i<m; ++i) {
         // Weight constraint for each bin
         agents_weight[i] = model.sum(agents[i], weight_selector[i]);
-        model.constraint(agents_weight[i] <= (lsint)d.ins.capacity(i));
+        model.constraint(agents_weight[i] <= (lsint)ins.capacity(i));
         agents_cost[i] = model.sum(agents[i], cost_selector[i]);
     }
 
@@ -126,24 +135,26 @@ Solution gap::ub_localsolver(LocalSolverData d)
     model.close();
 
     // Time limit
-    if (d.info.timelimit != std::numeric_limits<double>::infinity())
-        localsolver.getParam().setTimeLimit(d.info.timelimit);
+    if (p.info.timelimit != std::numeric_limits<double>::infinity())
+        localsolver.getParam().setTimeLimit(p.info.timelimit);
 
     // Custom callback
-    MyCallback cb(d.sol, d.info, agents);
+    MyCallback cb(output, p, agents);
     localsolver.addCallback(CT_TimeTicked, &cb);
 
     // Solve
     localsolver.solve();
 
     // Retrieve solution
+    Solution sol_curr(ins);
     for (AgentIdx i=0; i<m; ++i) {
         LSCollection bin_collection = agents[i].getCollectionValue();
         for (ItemIdx j_pos=0; j_pos<bin_collection.count(); ++j_pos)
-            d.sol.set(bin_collection[j_pos], i);
+            sol_curr.set(bin_collection[j_pos], i);
     }
+    output.update_solution(sol_curr, std::stringstream(""), p.info);
 
-    return algorithm_end(d.sol, d.info);
+    return output.algorithm_end(p.info);
 }
 
 #endif
