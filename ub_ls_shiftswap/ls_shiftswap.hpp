@@ -1,10 +1,10 @@
 #pragma once
 
-#include "gap/lib/solution.hpp"
+#include "generalizedassignment/lib/solution.hpp"
 
-#include "gap/lb_linrelax_clp/linrelax_clp.hpp"
+#include "generalizedassignment/lb_linrelax_clp/linrelax_clp.hpp"
 
-namespace gap
+namespace generalizedassignment
 {
 
 /******************************** Local search ********************************/

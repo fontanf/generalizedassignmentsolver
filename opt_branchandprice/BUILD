@@ -8,7 +8,7 @@ cc_library(
         ],
         copts = select({"//lib:coinor_build": ["-DCOINOR_FOUND"], "//conditions:default": []}),
         visibility = ["//visibility:public"],
-        include_prefix = "gap/opt_branchandprice/",
+        include_prefix = "generalizedassignment/opt_branchandprice/",
 )
 
 cc_test(

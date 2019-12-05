@@ -1,12 +1,12 @@
-#include "gap/ub_ls_shiftswap/ls_shiftswap.hpp"
-#include "gap/ub_random/random.hpp"
+#include "generalizedassignment/ub_ls_shiftswap/ls_shiftswap.hpp"
+#include "generalizedassignment/ub_random/random.hpp"
 
 #include <set>
 #include <random>
 #include <algorithm>
 #include <vector>
 
-using namespace gap;
+using namespace generalizedassignment;
 
 /******************************** Local search ********************************/
 
@@ -18,7 +18,7 @@ LSShiftSwapOutput& LSShiftSwapOutput::algorithm_end(Info& info)
     return *this;
 }
 
-LSShiftSwapOutput gap::sol_ls_shiftswap(const Instance& ins, std::mt19937_64& gen, LSShiftSwapOptionalParameters p)
+LSShiftSwapOutput generalizedassignment::sol_ls_shiftswap(const Instance& ins, std::mt19937_64& gen, LSShiftSwapOptionalParameters p)
 {
     LSShiftSwapOutput output(ins, p.info);
 
@@ -91,7 +91,7 @@ TSShiftSwapOutput& TSShiftSwapOutput::algorithm_end(Info& info)
     return *this;
 }
 
-TSShiftSwapOutput gap::sol_ts_shiftswap(const Instance& ins, std::mt19937_64& gen, TSShiftSwapOptionalParameters p)
+TSShiftSwapOutput generalizedassignment::sol_ts_shiftswap(const Instance& ins, std::mt19937_64& gen, TSShiftSwapOptionalParameters p)
 {
     TSShiftSwapOutput output(ins, p.info);
 
@@ -230,7 +230,7 @@ SAShiftSwapOutput& SAShiftSwapOutput::algorithm_end(Info& info)
     return *this;
 }
 
-SAShiftSwapOutput gap::sol_sa_shiftswap(const Instance& ins, std::mt19937_64& gen, SAShiftSwapOptionalParameters p)
+SAShiftSwapOutput generalizedassignment::sol_sa_shiftswap(const Instance& ins, std::mt19937_64& gen, SAShiftSwapOptionalParameters p)
 {
     SAShiftSwapOutput output(ins, p.info);
 

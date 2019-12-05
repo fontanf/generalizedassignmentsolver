@@ -1,10 +1,10 @@
 #if CPLEX_FOUND
 
-#include "gap/opt_branchandcut_cplex/branchandcut_cplex.hpp"
+#include "generalizedassignment/opt_branchandcut_cplex/branchandcut_cplex.hpp"
 
 #include <ilcplex/ilocplex.h>
 
-using namespace gap;
+using namespace generalizedassignment;
 
 ILOSTLBEGIN
 
@@ -39,7 +39,7 @@ ILOMIPINFOCALLBACK4(loggingCallback,
     }
 }
 
-BranchAndCutCplexOutput gap::sopt_branchandcut_cplex(const Instance& ins, BranchAndCutCplexOptionalParameters p)
+BranchAndCutCplexOutput generalizedassignment::sopt_branchandcut_cplex(const Instance& ins, BranchAndCutCplexOptionalParameters p)
 {
     VER(p.info, "*** branchandcut_cplex ***" << std::endl);
 

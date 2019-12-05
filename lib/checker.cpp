@@ -1,9 +1,9 @@
-#include "gap/lib/solution.hpp"
-#include "gap/lib/datasets.hpp"
+#include "generalizedassignment/lib/solution.hpp"
+#include "generalizedassignment/lib/datasets.hpp"
 
 #include <iomanip>
 
-using namespace gap;
+using namespace generalizedassignment;
 
 void checker(const Instance& ins, std::string solfile, std::string bndfile)
 {
@@ -15,7 +15,7 @@ void checker(const Instance& ins, std::string solfile, std::string bndfile)
     f_bound.close();
 
     double ub = (!sol.feasible())? std::numeric_limits<double>::infinity(): sol.cost();
-    double gap = (lb == 0 || !sol.feasible())? std::numeric_limits<double>::infinity():
+    double generalizedassignment = (lb == 0 || !sol.feasible())? std::numeric_limits<double>::infinity():
         (double)(10000 * (sol.cost() - lb) / lb) / 100;
 
     if (ub == lb)
@@ -31,7 +31,7 @@ void checker(const Instance& ins, std::string solfile, std::string bndfile)
     std::cout << std::left << std::setw(7) << " | GAP";
     std::cout << std::right << std::setw(6) << ub - lb;
     std::cout << std::left << std::setw(11) << " | GAP (%)";
-    std::cout << std::right << std::setw(6) << gap;
+    std::cout << std::right << std::setw(6) << generalizedassignment;
     std::cout << "\033[0m" << std::endl;
 }
 

@@ -1,8 +1,8 @@
-#include "gap/lib/algorithms.hpp"
+#include "generalizedassignment/lib/algorithms.hpp"
 
 #include <boost/program_options.hpp>
 
-using namespace gap;
+using namespace generalizedassignment;
 
 int main(int argc, char *argv[])
 {
@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
     std::string algorithm = "branchandcut_cbc";
     std::string instancefile = "";
     std::string outputfile = "";
-    std::string format = "gap_beasley";
+    std::string format = "generalizedassignment_beasley";
     std::string initsolfile = "";
     std::string certfile = "";
     std::string logfile = "";
@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
         ("help,h", "produce help message")
         ("algorithm,a", po::value<std::string>(&algorithm), "set algorithm")
         ("input,i", po::value<std::string>(&instancefile)->required(), "set input file (required)")
-        ("format,f", po::value<std::string>(&format), "set input file format (default: gap_beasley)")
+        ("format,f", po::value<std::string>(&format), "set input file format (default: generalizedassignment_beasley)")
         ("initsol", po::value<std::string>(&initsolfile), "set initial solution file")
         ("output,o", po::value<std::string>(&outputfile), "set output file")
         ("cert,c", po::value<std::string>(&certfile), "set certificate file")

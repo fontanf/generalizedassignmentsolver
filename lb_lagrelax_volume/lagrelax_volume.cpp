@@ -1,6 +1,6 @@
 #if COINOR_FOUND
 
-#include "gap/lb_lagrelax_volume/lagrelax_volume.hpp"
+#include "generalizedassignment/lb_lagrelax_volume/lagrelax_volume.hpp"
 
 #include "knapsack/opt_minknap/minknap.hpp"
 
@@ -8,7 +8,7 @@
 #include "coin/CoinHelperFunctions.hpp"
 #include "coin/CoinPackedMatrix.hpp"
 
-using namespace gap;
+using namespace generalizedassignment;
 
 /**
  * Useful links to use Vol:
@@ -185,7 +185,7 @@ int LagRelaxAssignmentHook::solve_subproblem(const VOL_dvector& dual, const VOL_
     return 0;
 }
 
-LagRelaxAssignmentVolumeOutput gap::lb_lagrelax_assignment_volume(const Instance& ins, Info info)
+LagRelaxAssignmentVolumeOutput generalizedassignment::lb_lagrelax_assignment_volume(const Instance& ins, Info info)
 {
     VER(info, "*** lagrelax_assignment_volume ***" << std::endl);
     LagRelaxAssignmentVolumeOutput output(ins, info);
@@ -352,7 +352,7 @@ int LagRelaxKnapsackHook::solve_subproblem(const VOL_dvector& dual, const VOL_dv
     return 0;
 }
 
-LagRelaxKnapsackVolumeOutput gap::lb_lagrelax_knapsack_volume(const Instance& ins, Info info)
+LagRelaxKnapsackVolumeOutput generalizedassignment::lb_lagrelax_knapsack_volume(const Instance& ins, Info info)
 {
     VER(info, "*** lagrelax_knapsack_volume ***" << std::endl);
     LagRelaxKnapsackVolumeOutput output(ins, info);

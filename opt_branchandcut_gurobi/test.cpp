@@ -1,9 +1,9 @@
 #if GUROBI_FOUND
 
-#include "gap/lib/tester.hpp"
-#include "gap/opt_branchandcut_gurobi/branchandcut_gurobi.hpp"
+#include "generalizedassignment/lib/tester.hpp"
+#include "generalizedassignment/opt_branchandcut_gurobi/branchandcut_gurobi.hpp"
 
-using namespace gap;
+using namespace generalizedassignment;
 
 // Currently, tests fail. I think that because of Bazel sandboxing, Gurobi is
 // unable to find the license file.

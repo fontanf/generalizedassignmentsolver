@@ -1,8 +1,8 @@
-#include "gap/lib/generator.hpp"
+#include "generalizedassignment/lib/generator.hpp"
 
 #include <boost/program_options.hpp>
 
-using namespace gap;
+using namespace generalizedassignment;
 
 int main(int argc, char *argv[])
 {

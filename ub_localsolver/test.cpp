@@ -1,5 +1,5 @@
-#include "gap/lib/tester.hpp"
-#include "gap/ub_localsolver/localsolver.hpp"
+#include "generalizedassignment/lib/tester.hpp"
+#include "generalizedassignment/ub_localsolver/localsolver.hpp"
 
-using namespace gap;
+using namespace generalizedassignment;
 

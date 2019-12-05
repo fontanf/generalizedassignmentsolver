@@ -1,6 +1,6 @@
-#include "gap/lib/tester.hpp"
-#include "gap/lib/generator.hpp"
-#include "gap/lb_lagrelax_bundle/lagrelax_bundle.hpp"
+#include "generalizedassignment/lib/tester.hpp"
+#include "generalizedassignment/lib/generator.hpp"
+#include "generalizedassignment/lb_lagrelax_bundle/lagrelax_bundle.hpp"
 
-using namespace gap;
+using namespace generalizedassignment;
 

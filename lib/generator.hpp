@@ -1,8 +1,8 @@
 #pragma once
 
-#include "gap/lib/instance.hpp"
+#include "generalizedassignment/lib/instance.hpp"
 
-namespace gap
+namespace generalizedassignment
 {
 
 class Generator

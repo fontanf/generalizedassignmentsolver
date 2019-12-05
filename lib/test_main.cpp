@@ -1,9 +1,9 @@
-#include "gap/opt_branchandcut_cbc/branchandcut_cbc.hpp"
+#include "generalizedassignment/opt_branchandcut_cbc/branchandcut_cbc.hpp"
 
-#include "gap/lib/tester.hpp"
-#include "gap/lib/generator.hpp"
+#include "generalizedassignment/lib/tester.hpp"
+#include "generalizedassignment/lib/generator.hpp"
 
-using namespace gap;
+using namespace generalizedassignment;
 
 int main(int argc, char *argv[])
 {

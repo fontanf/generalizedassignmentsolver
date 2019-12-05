@@ -1,13 +1,13 @@
-#include "gap/ub_random/random.hpp"
+#include "generalizedassignment/ub_random/random.hpp"
 
 #include <set>
 #include <random>
 #include <algorithm>
 #include <vector>
 
-using namespace gap;
+using namespace generalizedassignment;
 
-Solution gap::sol_random_infeasible(const Instance& ins, std::mt19937_64& gen)
+Solution generalizedassignment::sol_random_infeasible(const Instance& ins, std::mt19937_64& gen)
 {
     std::uniform_int_distribution<> dis(0, ins.agent_number() - 1);
     Solution sol(ins);
@@ -16,7 +16,7 @@ Solution gap::sol_random_infeasible(const Instance& ins, std::mt19937_64& gen)
     return sol;
 }
 
-Output gap::sol_random(const Instance& ins, std::mt19937_64& gen, Info info)
+Output generalizedassignment::sol_random(const Instance& ins, std::mt19937_64& gen, Info info)
 {
     VER(info, "*** random ***" << std::endl);
     Output output(ins, info);

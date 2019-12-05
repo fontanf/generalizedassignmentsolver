@@ -1,9 +1,9 @@
 #if GUROBI_FOUND
 
-#include "gap/lib/tester.hpp"
-#include "gap/lb_linrelax_gurobi/linrelax_gurobi.hpp"
+#include "generalizedassignment/lib/tester.hpp"
+#include "generalizedassignment/lb_linrelax_gurobi/linrelax_gurobi.hpp"
 
-using namespace gap;
+using namespace generalizedassignment;
 
 /*
 Output lb_linrelax_gurobi_test(Instance& ins)

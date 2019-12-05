@@ -16,7 +16,7 @@ cc_library(
                 ],
         }),
         visibility = ["//visibility:public"],
-        include_prefix = "gap/opt_branchandcut_cbc/",
+        include_prefix = "generalizedassignment/opt_branchandcut_cbc/",
 )
 
 cc_test(

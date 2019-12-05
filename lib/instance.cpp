@@ -1,8 +1,8 @@
-#include "gap/lib/instance.hpp"
+#include "generalizedassignment/lib/instance.hpp"
 
-#include "gap/lib/solution.hpp"
+#include "generalizedassignment/lib/solution.hpp"
 
-using namespace gap;
+using namespace generalizedassignment;
 
 Instance::Instance(AgentIdx m)
 {
@@ -89,9 +89,9 @@ Instance::Instance(std::string filepath, std::string format): name_(filepath)
         return;
     }
 
-    if (format == "gap_beasley") {
+    if (format == "generalizedassignment_beasley") {
         read_beasley(file);
-    } else if (format == "gap_standard") {
+    } else if (format == "generalizedassignment_standard") {
         read_standard(file);
     } else {
         std::cerr << "ERROR, instance format unknown: " << format << std::endl;
@@ -184,13 +184,13 @@ Cost Instance::optimum() const
     return optimal_solution()->cost();
 }
 
-std::ostream& gap::operator<<(std::ostream& os, const Alternative& alt)
+std::ostream& generalizedassignment::operator<<(std::ostream& os, const Alternative& alt)
 {
     os << "(" << alt.i << " " << alt.c << " " << alt.w << " " << alt.efficiency() << ")";
     return os;
 }
 
-std::ostream& gap::operator<<(std::ostream& os, const Instance& ins)
+std::ostream& generalizedassignment::operator<<(std::ostream& os, const Instance& ins)
 {
     os << "m " << ins.agent_number() << " n " << ins.item_number() << std::endl;
     os << "c";

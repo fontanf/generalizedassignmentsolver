@@ -8,6 +8,6 @@ cc_library(
                 "//ub_random:random",
         ],
         visibility = ["//visibility:public"],
-        include_prefix = "gap/ub_ls_shiftswap/",
+        include_prefix = "generalizedassignment/ub_ls_shiftswap/",
 )
 

@@ -1,12 +1,12 @@
-#include "gap/lib/algorithms.hpp"
-#include "gap/lib/generator.hpp"
-#include "gap/lib/datasets.hpp"
+#include "generalizedassignment/lib/algorithms.hpp"
+#include "generalizedassignment/lib/generator.hpp"
+#include "generalizedassignment/lib/datasets.hpp"
 
 #include <iomanip>
 #include <experimental/filesystem>
 #include <boost/program_options.hpp>
 
-using namespace gap;
+using namespace generalizedassignment;
 
 const std::string forbidden_chars = " \\/:?\"<>|";
 static char clear_forbidden(char to_check)

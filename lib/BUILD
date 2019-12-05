@@ -20,7 +20,7 @@ cc_library(
         ],
         deps = ["@benchtools//:info"],
         visibility = ["//visibility:public"],
-        include_prefix = "gap/lib/",
+        include_prefix = "generalizedassignment/lib/",
 )
 
 cc_library(
@@ -30,7 +30,7 @@ cc_library(
                 "solution.hpp",
         ],
         visibility = ["//visibility:public"],
-        include_prefix = "gap/lib/",
+        include_prefix = "generalizedassignment/lib/",
 )
 
 cc_library(
@@ -43,7 +43,7 @@ cc_library(
                 "@googletest//:gtest_main",
         ],
         visibility = ["//visibility:public"],
-        include_prefix = "gap/lib/",
+        include_prefix = "generalizedassignment/lib/",
 )
 
 cc_library(
@@ -52,7 +52,7 @@ cc_library(
         srcs = ["generator.cpp"],
         deps = ["//lib:cpp"],
         visibility = ["//visibility:public"],
-        include_prefix = "gap/lib/",
+        include_prefix = "generalizedassignment/lib/",
 )
 
 cc_library(
@@ -87,7 +87,7 @@ cc_library(
             select({":gecode_build":      ["-DGECODE_FOUND"],      "//conditions:default": []}) +
             select({":localsolver_build": ["-DLOCALSOLVER_FOUND"], "//conditions:default": []}),
         visibility = ["//visibility:public"],
-        include_prefix = "gap/lib/",
+        include_prefix = "generalizedassignment/lib/",
 )
 
 cc_binary(

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "gap/lib/solution.hpp"
-#include "gap/lib/desirability.hpp"
+#include "generalizedassignment/lib/solution.hpp"
+#include "generalizedassignment/lib/desirability.hpp"
 
-namespace gap
+namespace generalizedassignment
 {
 
 std::vector<std::pair<ItemIdx, AgentIdx>> sol_greedy_init(const Solution& sol, const Desirability& f);

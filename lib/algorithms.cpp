@@ -1,29 +1,29 @@
-#include "gap/lib/algorithms.hpp"
+#include "generalizedassignment/lib/algorithms.hpp"
 
-#include "gap/lb_linrelax_clp/linrelax_clp.hpp"
-#include "gap/lb_linrelax_gurobi/linrelax_gurobi.hpp"
-#include "gap/lb_lagrelax_volume/lagrelax_volume.hpp"
-#include "gap/lb_lagrelax_bundle/lagrelax_bundle.hpp"
-#include "gap/lb_lagrelax_lbfgs/lagrelax_lbfgs.hpp"
-#include "gap/lb_columngeneration/columngeneration.hpp"
-#include "gap/opt_branchandcut_cbc/branchandcut_cbc.hpp"
-#include "gap/opt_branchandcut_cplex/branchandcut_cplex.hpp"
-#include "gap/opt_branchandcut_gurobi/branchandcut_gurobi.hpp"
-#include "gap/opt_branchandprice/branchandprice.hpp"
-#include "gap/opt_constraintprogramming_gecode/constraintprogramming_gecode.hpp"
-#include "gap/opt_constraintprogramming_cplex/constraintprogramming_cplex.hpp"
-#include "gap/ub_random/random.hpp"
-#include "gap/ub_greedy/greedy.hpp"
-#include "gap/ub_repair/repair.hpp"
-#include "gap/ub_ls_shiftswap/ls_shiftswap.hpp"
-#include "gap/ub_localsolver/localsolver.hpp"
-#include "gap/ub_colgenheuristics/colgenheuristics.hpp"
+#include "generalizedassignment/lb_linrelax_clp/linrelax_clp.hpp"
+#include "generalizedassignment/lb_linrelax_gurobi/linrelax_gurobi.hpp"
+#include "generalizedassignment/lb_lagrelax_volume/lagrelax_volume.hpp"
+#include "generalizedassignment/lb_lagrelax_bundle/lagrelax_bundle.hpp"
+#include "generalizedassignment/lb_lagrelax_lbfgs/lagrelax_lbfgs.hpp"
+#include "generalizedassignment/lb_columngeneration/columngeneration.hpp"
+#include "generalizedassignment/opt_branchandcut_cbc/branchandcut_cbc.hpp"
+#include "generalizedassignment/opt_branchandcut_cplex/branchandcut_cplex.hpp"
+#include "generalizedassignment/opt_branchandcut_gurobi/branchandcut_gurobi.hpp"
+#include "generalizedassignment/opt_branchandprice/branchandprice.hpp"
+#include "generalizedassignment/opt_constraintprogramming_gecode/constraintprogramming_gecode.hpp"
+#include "generalizedassignment/opt_constraintprogramming_cplex/constraintprogramming_cplex.hpp"
+#include "generalizedassignment/ub_random/random.hpp"
+#include "generalizedassignment/ub_greedy/greedy.hpp"
+#include "generalizedassignment/ub_repair/repair.hpp"
+#include "generalizedassignment/ub_ls_shiftswap/ls_shiftswap.hpp"
+#include "generalizedassignment/ub_localsolver/localsolver.hpp"
+#include "generalizedassignment/ub_colgenheuristics/colgenheuristics.hpp"
 
 #include <map>
 
-using namespace gap;
+using namespace generalizedassignment;
 
-std::function<Output (Instance&, std::mt19937_64&, Info)> gap::get_algorithm(std::string str)
+std::function<Output (Instance&, std::mt19937_64&, Info)> generalizedassignment::get_algorithm(std::string str)
 {
     benchtools::Algorithm algo(str);
 

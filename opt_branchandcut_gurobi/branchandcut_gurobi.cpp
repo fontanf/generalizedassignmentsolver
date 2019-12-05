@@ -1,6 +1,6 @@
 #if GUROBI_FOUND
 
-#include "gap/opt_branchandcut_gurobi/branchandcut_gurobi.hpp"
+#include "generalizedassignment/opt_branchandcut_gurobi/branchandcut_gurobi.hpp"
 
 #include "gurobi_c++.h"
 
@@ -8,7 +8,7 @@
  * https://stackoverflow.com/questions/46779850/cannot-compile-gurobi-examples-in-version-7-5-1
  */
 
-using namespace gap;
+using namespace generalizedassignment;
 
 BranchAndCutGurobiOutput& BranchAndCutGurobiOutput::algorithm_end(Info& info)
 {
@@ -59,7 +59,7 @@ private:
 
 };
 
-BranchAndCutGurobiOutput gap::sopt_branchandcut_gurobi(const Instance& ins, BranchAndCutGurobiOptionalParameters p)
+BranchAndCutGurobiOutput generalizedassignment::sopt_branchandcut_gurobi(const Instance& ins, BranchAndCutGurobiOptionalParameters p)
 {
     GRBEnv env;
     VER(p.info, "*** branchandcut_gurobi ***" << std::endl);

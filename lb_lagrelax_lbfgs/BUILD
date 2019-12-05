@@ -16,7 +16,7 @@ cc_library(
                 ],
         }),
         visibility = ["//visibility:public"],
-        include_prefix = "gap/lb_lagrelax_lbfgs/",
+        include_prefix = "generalizedassignment/lb_lagrelax_lbfgs/",
 )
 
 cc_test(

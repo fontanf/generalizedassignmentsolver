@@ -1,10 +1,10 @@
 #pragma once
 
-#include "gap/lib/solution.hpp"
+#include "generalizedassignment/lib/solution.hpp"
 
 #include <gtest/gtest.h>
 
-namespace gap
+namespace generalizedassignment
 {
 
 Instance test_instance(Cpt i);

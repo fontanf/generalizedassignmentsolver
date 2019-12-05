@@ -4,6 +4,6 @@ cc_library(
         srcs = ["random.cpp"],
         deps = ["//lib:cpp"],
         visibility = ["//visibility:public"],
-        include_prefix = "gap/ub_random/",
+        include_prefix = "generalizedassignment/ub_random/",
 )
 

@@ -1,9 +1,9 @@
-#include "gap/lib/tester.hpp"
+#include "generalizedassignment/lib/tester.hpp"
 
-#include "gap/lib/solution.hpp"
-#include "gap/lib/generator.hpp"
+#include "generalizedassignment/lib/solution.hpp"
+#include "generalizedassignment/lib/generator.hpp"
 
-using namespace gap;
+using namespace generalizedassignment;
 
 bool test(const Instance& ins, std::vector<Output (*)(Instance&)> fs, TestType tt)
 {
@@ -46,7 +46,7 @@ public:
 };
 
 typedef const std::vector<std::vector<ItemIdx>>& v;
-Instance gap::test_instance(Cpt i)
+Instance generalizedassignment::test_instance(Cpt i)
 {
     std::cout << "i " << i << std::endl;
     switch (i) {
@@ -162,7 +162,7 @@ void test(Instances& inss, std::vector<Output (*)(Instance&)> fs, TestType tt)
     std::cout << "ok" << std::endl;
 }
 
-void gap::test(InstacesType it, std::vector<Output (*)(Instance&)> fs, TestType tt)
+void generalizedassignment::test(InstacesType it, std::vector<Output (*)(Instance&)> fs, TestType tt)
 {
     if (it == TEST) {
         TestInstances ti;

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "gap/lib/solution.hpp"
+#include "generalizedassignment/lib/solution.hpp"
 
-namespace gap
+namespace generalizedassignment
 {
 
 Solution sol_random_infeasible(const Instance& ins, std::mt19937_64& gen);

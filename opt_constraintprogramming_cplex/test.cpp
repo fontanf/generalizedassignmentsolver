@@ -1,9 +1,9 @@
 #if CPLEX_FOUND
 
-#include "gap/lib/tester.hpp"
-#include "gap/opt_constraintprogramming_cplex/constraintprogramming_cplex.hpp"
+#include "generalizedassignment/lib/tester.hpp"
+#include "generalizedassignment/opt_constraintprogramming_cplex/constraintprogramming_cplex.hpp"
 
-using namespace gap;
+using namespace generalizedassignment;
 
 Output sopt_constraintprogramming_cplex_test(Instance& ins)
 {

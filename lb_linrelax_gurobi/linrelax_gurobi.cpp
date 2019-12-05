@@ -1,10 +1,10 @@
 #if GUROBI_FOUND
 
-#include "gap/lb_linrelax_gurobi/linrelax_gurobi.hpp"
+#include "generalizedassignment/lb_linrelax_gurobi/linrelax_gurobi.hpp"
 
 #include "gurobi_c++.h"
 
-using namespace gap;
+using namespace generalizedassignment;
 
 LinRelaxGurobiOutput& LinRelaxGurobiOutput::algorithm_end(Info& info)
 {
@@ -14,7 +14,7 @@ LinRelaxGurobiOutput& LinRelaxGurobiOutput::algorithm_end(Info& info)
     return *this;
 }
 
-LinRelaxGurobiOutput gap::lb_linrelax_gurobi(const Instance& ins, Info info)
+LinRelaxGurobiOutput generalizedassignment::lb_linrelax_gurobi(const Instance& ins, Info info)
 {
     GRBEnv env;
     VER(info, "*** linrelax_gurobi ***" << std::endl);

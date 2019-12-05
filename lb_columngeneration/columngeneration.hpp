@@ -1,11 +1,11 @@
 #pragma once
 
-#include "gap/lib/solution.hpp"
+#include "generalizedassignment/lib/solution.hpp"
 
 #include "knapsack/opt_minknap/minknap.hpp"
 #include "knapsack/opt_bellman/bellman.hpp"
 
-namespace gap
+namespace generalizedassignment
 {
 
 struct ColGenOptionalParameters

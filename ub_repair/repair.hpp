@@ -1,12 +1,12 @@
 #pragma once
 
-#include "gap/lib/solution.hpp"
+#include "generalizedassignment/lib/solution.hpp"
 
 #if COINOR_FOUND
-#include "gap/lb_linrelax_clp/linrelax_clp.hpp"
+#include "generalizedassignment/lb_linrelax_clp/linrelax_clp.hpp"
 #endif
 
-namespace gap
+namespace generalizedassignment
 {
 
 Output sol_repairgreedy(const Instance& ins, Info info = Info());

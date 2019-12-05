@@ -1,11 +1,11 @@
-#include "gap/opt_branchandprice/branchandprice.hpp"
+#include "generalizedassignment/opt_branchandprice/branchandprice.hpp"
 
-#include "gap/lb_columngeneration/columngeneration.hpp"
-#include "gap/ub_greedy/greedy.hpp"
+#include "generalizedassignment/lb_columngeneration/columngeneration.hpp"
+#include "generalizedassignment/ub_greedy/greedy.hpp"
 
 #include <queue>
 
-using namespace gap;
+using namespace generalizedassignment;
 
 BranchAndPriceOutput& BranchAndPriceOutput::algorithm_end(Info& info)
 {
@@ -162,7 +162,7 @@ struct BranchAndPriceNode
     ColGenOutput output_colgen;
 };
 
-BranchAndPriceOutput gap::sopt_branchandprice_dfs(const Instance& ins, BranchAndPriceOptionalParameters p)
+BranchAndPriceOutput generalizedassignment::sopt_branchandprice_dfs(const Instance& ins, BranchAndPriceOptionalParameters p)
 {
     VER(p.info, "*** branchandprice_dfs " << p.solver << " ***" << std::endl);
     BranchAndPriceOutput output(ins, p.info);
@@ -200,7 +200,7 @@ BranchAndPriceOutput gap::sopt_branchandprice_dfs(const Instance& ins, BranchAnd
     return output.algorithm_end(p.info);
 }
 
-BranchAndPriceOutput gap::sopt_branchandprice_astar(const Instance& ins, BranchAndPriceOptionalParameters p)
+BranchAndPriceOutput generalizedassignment::sopt_branchandprice_astar(const Instance& ins, BranchAndPriceOptionalParameters p)
 {
     VER(p.info, "*** branchandprice_astar " << p.solver << " ***" << std::endl);
     BranchAndPriceOutput output(ins, p.info);

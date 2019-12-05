@@ -1,6 +1,6 @@
 #if COINOR_FOUND
 
-#include "gap/opt_branchandcut_cbc/branchandcut_cbc.hpp"
+#include "generalizedassignment/opt_branchandcut_cbc/branchandcut_cbc.hpp"
 
 #include "coin/CbcHeuristicDiveCoefficient.hpp"
 #include "coin/CbcHeuristicDiveFractional.hpp"
@@ -40,7 +40,7 @@
  * Callback https://github.com/coin-or/Cbc/blob/master/Cbc/examples/inc.cpp
  */
 
-using namespace gap;
+using namespace generalizedassignment;
 
 CoinLP::CoinLP(const Instance& ins)
 {
@@ -165,7 +165,7 @@ CbcEventHandler::CbcAction SolHandler::event(CbcEvent whichEvent)
     return noAction;
 }
 
-BranchAndCutCbcOutput gap::sopt_branchandcut_cbc(const Instance& ins, BranchAndCutCbcOptionalParameters p)
+BranchAndCutCbcOutput generalizedassignment::sopt_branchandcut_cbc(const Instance& ins, BranchAndCutCbcOptionalParameters p)
 {
     VER(p.info, "*** branchandcut_cbc ***" << std::endl);
 

@@ -8,7 +8,7 @@ cc_library(
         ] + select({"//lib:gurobi_build": ["-DGUROBI_FOUND"], "//conditions:default": []}),
         deps = ["//lib:cpp"],
         visibility = ["//visibility:public"],
-        include_prefix = "gap/lb_linrelax_gurobi/",
+        include_prefix = "generalizedassignment/lb_linrelax_gurobi/",
 )
 
 cc_test(

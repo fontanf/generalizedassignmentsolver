@@ -9,6 +9,6 @@ cc_library(
         ],
         copts = select({"//lib:coinor_build": ["-DCOINOR_FOUND"], "//conditions:default": []}),
         visibility = ["//visibility:public"],
-        include_prefix = "gap/ub_repair/",
+        include_prefix = "generalizedassignment/ub_repair/",
 )
 

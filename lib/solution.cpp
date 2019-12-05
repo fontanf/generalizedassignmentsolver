@@ -1,9 +1,9 @@
-#include "gap/lib/solution.hpp"
+#include "generalizedassignment/lib/solution.hpp"
 
 #include <iomanip>
 #include <iostream>
 
-using namespace gap;
+using namespace generalizedassignment;
 
 Solution::Solution(const Instance& ins):
     instance_(ins),
@@ -220,7 +220,7 @@ std::string Solution::to_string(AgentIdx i)
     return s;
 }
 
-ItemIdx gap::distance(const Solution& sol1, const Solution& sol2)
+ItemIdx generalizedassignment::distance(const Solution& sol1, const Solution& sol2)
 {
     ItemIdx dist = 0;
     for (ItemIdx j=0; j<sol1.instance().item_number(); ++j)
@@ -244,7 +244,7 @@ void Solution::write_cert(std::string filepath)
     cert.close();
 }
 
-std::ostream& gap::operator<<(std::ostream& os, const Solution& sol)
+std::ostream& generalizedassignment::operator<<(std::ostream& os, const Solution& sol)
 {
     os <<  "n " << sol.item_number() << "/" << sol.instance().item_number()
         << " cost " << sol.cost()
@@ -261,7 +261,7 @@ std::ostream& gap::operator<<(std::ostream& os, const Solution& sol)
     return os;
 }
 
-bool gap::compare(const Solution& sol_best, const Solution& sol_curr)
+bool generalizedassignment::compare(const Solution& sol_best, const Solution& sol_curr)
 {
     if (!sol_curr.feasible())
         return false;
@@ -393,7 +393,7 @@ Output& Output::algorithm_end(Info& info)
     return *this;
 }
 
-Cost gap::algorithm_end(Cost lower_bound, Info& info)
+Cost generalizedassignment::algorithm_end(Cost lower_bound, Info& info)
 {
     double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
     PUT(info, "Bound", "Value", lower_bound);

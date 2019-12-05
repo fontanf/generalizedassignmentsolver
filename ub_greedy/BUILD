@@ -4,6 +4,6 @@ cc_library(
         srcs = ["greedy.cpp"],
         deps = ["//lib:cpp"],
         visibility = ["//visibility:public"],
-        include_prefix = "gap/ub_greedy/",
+        include_prefix = "generalizedassignment/ub_greedy/",
 )
 

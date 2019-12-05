@@ -2,14 +2,14 @@
 
 #if COINOR_FOUND
 
-#include "gap/lib/solution.hpp"
+#include "generalizedassignment/lib/solution.hpp"
 
 #include <coin/CbcModel.hpp>
 #include <coin/OsiCbcSolverInterface.hpp>
 #include <coin/CglKnapsackCover.hpp>
 #include <coin/CglClique.hpp>
 
-namespace gap
+namespace generalizedassignment
 {
 
 struct CoinLP

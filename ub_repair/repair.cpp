@@ -1,11 +1,11 @@
-#include "gap/ub_repair/repair.hpp"
+#include "generalizedassignment/ub_repair/repair.hpp"
 
 #include <set>
 #include <random>
 #include <algorithm>
 #include <vector>
 
-using namespace gap;
+using namespace generalizedassignment;
 
 void repair(Solution& sol_curr, Info& info)
 {
@@ -74,7 +74,7 @@ void repair(Solution& sol_curr, Info& info)
     }
 }
 
-Output gap::sol_repairgreedy(const Instance& ins, Info info)
+Output generalizedassignment::sol_repairgreedy(const Instance& ins, Info info)
 {
     Output output(ins, info);
     ItemIdx n = ins.item_number();
@@ -89,7 +89,7 @@ Output gap::sol_repairgreedy(const Instance& ins, Info info)
     return output.algorithm_end(info);
 }
 
-Output gap::sol_repaircombrelax(const Instance& ins, Info info)
+Output generalizedassignment::sol_repaircombrelax(const Instance& ins, Info info)
 {
     Output output(ins, info);
     ItemIdx n = ins.item_number();
@@ -106,7 +106,7 @@ Output gap::sol_repaircombrelax(const Instance& ins, Info info)
 
 #if COINOR_FOUND
 
-Output gap::sol_repairlinrelax_clp(const Instance& ins, const LinRelaxClpOutput& linrelax_output, Info info)
+Output generalizedassignment::sol_repairlinrelax_clp(const Instance& ins, const LinRelaxClpOutput& linrelax_output, Info info)
 {
     Output output(ins, info);
     AgentIdx m = ins.agent_number();

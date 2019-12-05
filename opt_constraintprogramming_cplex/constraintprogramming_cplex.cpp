@@ -1,10 +1,10 @@
-#include "gap/opt_constraintprogramming_cplex/constraintprogramming_cplex.hpp"
+#include "generalizedassignment/opt_constraintprogramming_cplex/constraintprogramming_cplex.hpp"
 
 #if CPLEX_FOUND
 
 #include <ilcp/cp.h>
 
-using namespace gap;
+using namespace generalizedassignment;
 
 ILOSTLBEGIN
 
@@ -14,7 +14,7 @@ ConstraintProgrammingCplexOutput& ConstraintProgrammingCplexOutput::algorithm_en
     return *this;
 }
 
-ConstraintProgrammingCplexOutput gap::sopt_constraintprogramming_cplex(const Instance& ins, ConstraintProgrammingCplexOptionalParameters p)
+ConstraintProgrammingCplexOutput generalizedassignment::sopt_constraintprogramming_cplex(const Instance& ins, ConstraintProgrammingCplexOptionalParameters p)
 {
     VER(p.info, "*** constraintprogramming_cplex ***" << std::endl);
     ConstraintProgrammingCplexOutput output(ins, p.info);

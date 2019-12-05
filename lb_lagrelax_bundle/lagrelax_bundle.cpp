@@ -1,6 +1,6 @@
 #if COINOR_FOUND
 
-#include "gap/lb_lagrelax_bundle/lagrelax_bundle.hpp"
+#include "generalizedassignment/lb_lagrelax_bundle/lagrelax_bundle.hpp"
 
 #include "knapsack/opt_minknap/minknap.hpp"
 
@@ -12,7 +12,7 @@
 #include <algorithm>
 #include <iomanip>
 
-using namespace gap;
+using namespace generalizedassignment;
 
 /*********************** lb_lagrelax_assignment_bundle ************************/
 
@@ -65,7 +65,7 @@ double lb_lagrelax_assignment_bundle_subproblem(
     return l;
 }
 
-LagRelaxAssignmentBundleOutput gap::lb_lagrelax_assignment_bundle(const Instance& ins, Info info)
+LagRelaxAssignmentBundleOutput generalizedassignment::lb_lagrelax_assignment_bundle(const Instance& ins, Info info)
 {
     /*
      * L(μ^k) = min_x Σij cij xij + Σj μ^k_j (1 - Σi xij)
@@ -183,7 +183,7 @@ LagRelaxKnapsackBundleOutput& LagRelaxKnapsackBundleOutput::algorithm_end(Info& 
     return *this;
 }
 
-LagRelaxKnapsackBundleOutput gap::lb_lagrelax_knapsack_bundle(const Instance& ins, Info info)
+LagRelaxKnapsackBundleOutput generalizedassignment::lb_lagrelax_knapsack_bundle(const Instance& ins, Info info)
 {
     VER(info, "*** lagrelax_knapsack_bundle ***" << std::endl);
     LagRelaxKnapsackBundleOutput output(ins, info);

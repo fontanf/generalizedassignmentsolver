@@ -1,10 +1,10 @@
-#include "gap/lib/generator.hpp"
+#include "generalizedassignment/lib/generator.hpp"
 
 #include <random>
 
-using namespace gap;
+using namespace generalizedassignment;
 
-std::ostream& gap::operator<<(std::ostream& os, const Generator& data)
+std::ostream& generalizedassignment::operator<<(std::ostream& os, const Generator& data)
 {
     os << "n " << data.n
         << " m " << data.m

@@ -1,6 +1,6 @@
 #if DLIB_FOUND
 
-#include "gap/lb_lagrelax_lbfgs/lagrelax_lbfgs.hpp"
+#include "generalizedassignment/lb_lagrelax_lbfgs/lagrelax_lbfgs.hpp"
 
 #include "knapsack/opt_minknap/minknap.hpp"
 #include "knapsack/opt_bellman/bellman.hpp"
@@ -11,7 +11,7 @@
 #include <iomanip>
 #include <limits>
 
-using namespace gap;
+using namespace generalizedassignment;
 using namespace dlib;
 
 typedef matrix<double,0,1> column_vector;
@@ -123,7 +123,7 @@ double LagRelaxAssignmentLbfgsFunction::f(const column_vector& mu)
     return l;
 }
 
-LagRelaxAssignmentLbfgsOutput gap::lb_lagrelax_assignment_lbfgs(const Instance& ins, LagRelaxAssignmentLbfgsOptionalParameters p)
+LagRelaxAssignmentLbfgsOutput generalizedassignment::lb_lagrelax_assignment_lbfgs(const Instance& ins, LagRelaxAssignmentLbfgsOptionalParameters p)
 {
     VER(p.info, "*** lagrelax_assignment_lbfgs ***" << std::endl);
     LagRelaxAssignmentLbfgsOutput output(ins, p.info);
@@ -264,7 +264,7 @@ double LagRelaxKnapsackLbfgsFunction::f(const column_vector& mu)
     return l;
 }
 
-LagRelaxKnapsackLbfgsOutput gap::lb_lagrelax_knapsack_lbfgs(const Instance& ins, Info info)
+LagRelaxKnapsackLbfgsOutput generalizedassignment::lb_lagrelax_knapsack_lbfgs(const Instance& ins, Info info)
 {
     VER(info, "*** lagrelax_knapsack_lbfgs ***" << std::endl);
     LagRelaxKnapsackLbfgsOutput output(ins, info);

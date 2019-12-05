@@ -1,4 +1,4 @@
-#include "gap/lb_columngeneration/columngeneration.hpp"
+#include "generalizedassignment/lb_columngeneration/columngeneration.hpp"
 
 #if CPLEX_FOUND
 #include <ilcplex/ilocplex.h>
@@ -9,7 +9,7 @@
 #include <coin/OsiClpSolverInterface.hpp>
 #endif
 
-using namespace gap;
+using namespace generalizedassignment;
 
 class ColGenSolver
 {
@@ -230,7 +230,7 @@ void add_column(const Instance& ins,
     solver.add_column(rows, c);
 }
 
-ColGenOutput gap::lb_columngeneration(const Instance& ins, ColGenOptionalParameters p)
+ColGenOutput generalizedassignment::lb_columngeneration(const Instance& ins, ColGenOptionalParameters p)
 {
     VER(p.info, "*** columngeneration " << p.solver << " ***" << std::endl);
     ColGenOutput output(ins, p.info);

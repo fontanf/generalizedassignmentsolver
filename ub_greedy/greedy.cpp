@@ -1,13 +1,13 @@
-#include "gap/ub_greedy/greedy.hpp"
+#include "generalizedassignment/ub_greedy/greedy.hpp"
 
 #include <set>
 #include <random>
 #include <algorithm>
 #include <vector>
 
-using namespace gap;
+using namespace generalizedassignment;
 
-std::vector<std::pair<ItemIdx, AgentIdx>> gap::sol_greedy_init(const Solution& sol, const Desirability& f)
+std::vector<std::pair<ItemIdx, AgentIdx>> generalizedassignment::sol_greedy_init(const Solution& sol, const Desirability& f)
 {
     const Instance& ins = sol.instance();
     ItemIdx n = ins.item_number();
@@ -26,7 +26,7 @@ std::vector<std::pair<ItemIdx, AgentIdx>> gap::sol_greedy_init(const Solution& s
     return alt;
 }
 
-void gap::sol_greedy(Solution& sol, const std::vector<std::pair<ItemIdx, AgentIdx>>& alt)
+void generalizedassignment::sol_greedy(Solution& sol, const std::vector<std::pair<ItemIdx, AgentIdx>>& alt)
 {
     const Instance& ins = sol.instance();
     for (auto p: alt) {
@@ -43,7 +43,7 @@ void gap::sol_greedy(Solution& sol, const std::vector<std::pair<ItemIdx, AgentId
     }
 }
 
-Output gap::sol_greedy(const Instance& ins, const Desirability& f, Info info)
+Output generalizedassignment::sol_greedy(const Instance& ins, const Desirability& f, Info info)
 {
     VER(info, "*** greedy " << f.to_string() << " ***" << std::endl);
     Output output(ins, info);
@@ -56,7 +56,7 @@ Output gap::sol_greedy(const Instance& ins, const Desirability& f, Info info)
 
 /******************************************************************************/
 
-std::vector<std::vector<AgentIdx>> gap::sol_greedyregret_init(const Instance& ins, const Desirability& f)
+std::vector<std::vector<AgentIdx>> generalizedassignment::sol_greedyregret_init(const Instance& ins, const Desirability& f)
 {
     ItemIdx n = ins.item_number();
     AgentIdx m = ins.agent_number();
@@ -72,7 +72,7 @@ std::vector<std::vector<AgentIdx>> gap::sol_greedyregret_init(const Instance& in
     return agents;
 }
 
-void gap::sol_greedyregret(Solution& sol, const Desirability& f,
+void generalizedassignment::sol_greedyregret(Solution& sol, const Desirability& f,
         const std::vector<std::vector<AgentIdx>>& agents,
         const std::vector<int>& fixed_alt)
 {
@@ -127,7 +127,7 @@ void gap::sol_greedyregret(Solution& sol, const Desirability& f,
     }
 }
 
-Output gap::sol_greedyregret(const Instance& ins, const Desirability& f, Info info)
+Output generalizedassignment::sol_greedyregret(const Instance& ins, const Desirability& f, Info info)
 {
     VER(info, "*** greedyregret " << f.to_string() << " ***" << std::endl);
     Output output(ins, info);
@@ -164,14 +164,14 @@ void nshift(Solution& sol)
     }
 }
 
-void gap::sol_mthg(Solution& sol, const std::vector<std::pair<ItemIdx, AgentIdx>>& alt)
+void generalizedassignment::sol_mthg(Solution& sol, const std::vector<std::pair<ItemIdx, AgentIdx>>& alt)
 {
     sol_greedy(sol, alt);
     if (sol.feasible())
         nshift(sol);
 }
 
-Output gap::sol_mthg(const Instance& ins, const Desirability& f, Info info)
+Output generalizedassignment::sol_mthg(const Instance& ins, const Desirability& f, Info info)
 {
     VER(info, "*** mthg " << f.to_string() << " ***" << std::endl);
     Output output(ins, info);
@@ -182,7 +182,7 @@ Output gap::sol_mthg(const Instance& ins, const Desirability& f, Info info)
     return output.algorithm_end(info);
 }
 
-void gap::sol_mthgregret(Solution& sol, const Desirability& f,
+void generalizedassignment::sol_mthgregret(Solution& sol, const Desirability& f,
         const std::vector<std::vector<AgentIdx>>& agents,
         const std::vector<int>& fixed_alt)
 {
@@ -191,7 +191,7 @@ void gap::sol_mthgregret(Solution& sol, const Desirability& f,
         nshift(sol);
 }
 
-Output gap::sol_mthgregret(const Instance& ins, const Desirability& f, Info info)
+Output generalizedassignment::sol_mthgregret(const Instance& ins, const Desirability& f, Info info)
 {
     VER(info, "*** mthgregret " << f.to_string() << " ***" << std::endl);
     Output output(ins, info);

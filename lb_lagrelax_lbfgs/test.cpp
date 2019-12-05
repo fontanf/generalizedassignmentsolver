@@ -1,10 +1,10 @@
 #if DLIB_FOUND
 
-#include "gap/lib/tester.hpp"
-#include "gap/lib/generator.hpp"
-#include "gap/lb_lagrelax_lbfgs/lagrelax_lbfgs.hpp"
+#include "generalizedassignment/lib/tester.hpp"
+#include "generalizedassignment/lib/generator.hpp"
+#include "generalizedassignment/lb_lagrelax_lbfgs/lagrelax_lbfgs.hpp"
 
-using namespace gap;
+using namespace generalizedassignment;
 
 #endif
 

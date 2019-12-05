@@ -1,8 +1,8 @@
 #pragma once
 
-#include "gap/lib/solution.hpp"
+#include "generalizedassignment/lib/solution.hpp"
 
-namespace gap
+namespace generalizedassignment
 {
 
 struct BranchAndPriceOptionalParameters

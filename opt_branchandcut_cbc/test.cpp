@@ -1,9 +1,9 @@
 #if COINOR_FOUND
 
-#include "gap/lib/tester.hpp"
-#include "gap/opt_branchandcut_cbc/branchandcut_cbc.hpp"
+#include "generalizedassignment/lib/tester.hpp"
+#include "generalizedassignment/opt_branchandcut_cbc/branchandcut_cbc.hpp"
 
-using namespace gap;
+using namespace generalizedassignment;
 
 Output sopt_branchandcut_cbc_test(Instance& ins)
 {

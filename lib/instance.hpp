@@ -14,7 +14,7 @@
 
 #define TOL 0.0000001
 
-namespace gap
+namespace generalizedassignment
 {
 
 using benchtools::Info;
@@ -74,7 +74,7 @@ public:
      */
 
     /** Create instance from file. */
-    Instance(std::string filename, std::string format = "gap_beasley");
+    Instance(std::string filename, std::string format = "generalizedassignment_beasley");
 
     /** Manual constructor. */
     Instance(AgentIdx m);

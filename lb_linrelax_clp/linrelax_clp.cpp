@@ -1,12 +1,12 @@
 #if COINOR_FOUND
 
-#include "gap/lb_linrelax_clp/linrelax_clp.hpp"
-#include "gap/opt_branchandcut_cbc/branchandcut_cbc.hpp"
+#include "generalizedassignment/lb_linrelax_clp/linrelax_clp.hpp"
+#include "generalizedassignment/opt_branchandcut_cbc/branchandcut_cbc.hpp"
 
 #include <coin/ClpModel.hpp>
 #include <coin/OsiClpSolverInterface.hpp>
 
-using namespace gap;
+using namespace generalizedassignment;
 
 LinRelaxClpOutput& LinRelaxClpOutput::algorithm_end(Info& info)
 {
@@ -16,7 +16,7 @@ LinRelaxClpOutput& LinRelaxClpOutput::algorithm_end(Info& info)
     return *this;
 }
 
-LinRelaxClpOutput gap::lb_linrelax_clp(const Instance& ins, Info info)
+LinRelaxClpOutput generalizedassignment::lb_linrelax_clp(const Instance& ins, Info info)
 {
     VER(info, "*** linrelax_clp ***" << std::endl);
 

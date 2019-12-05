@@ -2,9 +2,9 @@
 
 #if COINOR_FOUND
 
-#include "gap/lib/solution.hpp"
+#include "generalizedassignment/lib/solution.hpp"
 
-namespace gap
+namespace generalizedassignment
 {
 
 /*********************** lb_lagrelax_assignment_bundle ************************/

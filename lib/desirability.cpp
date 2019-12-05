@@ -1,13 +1,13 @@
-#include "gap/lib/desirability.hpp"
+#include "generalizedassignment/lib/desirability.hpp"
 
 #include <set>
 #include <random>
 #include <algorithm>
 #include <vector>
 
-using namespace gap;
+using namespace generalizedassignment;
 
-std::unique_ptr<Desirability> gap::desirability(std::string str, const Instance& ins)
+std::unique_ptr<Desirability> generalizedassignment::desirability(std::string str, const Instance& ins)
 {
     if (str == "cij") {
         return std::make_unique<DesirabilityCost>(ins);

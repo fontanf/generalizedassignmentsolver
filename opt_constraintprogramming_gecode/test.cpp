@@ -1,9 +1,9 @@
 #if GECODE_FOUND
 
-#include "gap/lib/tester.hpp"
-#include "gap/opt_constraintprogramming_gecode/constraintprogramming_gecode.hpp"
+#include "generalizedassignment/lib/tester.hpp"
+#include "generalizedassignment/opt_constraintprogramming_gecode/constraintprogramming_gecode.hpp"
 
-using namespace gap;
+using namespace generalizedassignment;
 
 Output sopt_constraintprogramming_gecode_test(Instance& ins)
 {

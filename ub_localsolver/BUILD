@@ -13,7 +13,7 @@ cc_library(
                 ],
         }),
         visibility = ["//visibility:public"],
-        include_prefix = "gap/ub_localsolver/",
+        include_prefix = "generalizedassignment/ub_localsolver/",
 )
 
 cc_test(

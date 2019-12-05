@@ -8,7 +8,7 @@ cc_library(
                 "-DIL_STD",
         ] + select({"//lib:gurobi_build": ["-DGUROBI_FOUND"], "//conditions:default": []}),
         visibility = ["//visibility:public"],
-        include_prefix = "gap/opt_branchandcut_gurobi/",
+        include_prefix = "generalizedassignment/opt_branchandcut_gurobi/",
 )
 
 cc_test(

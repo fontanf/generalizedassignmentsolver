@@ -29,7 +29,7 @@ cc_library(
                         "-lCoinUtils",
                 ], "//conditions:default": []}),
         visibility = ["//visibility:public"],
-        include_prefix = "gap/lb_columngeneration/",
+        include_prefix = "generalizedassignment/lb_columngeneration/",
 )
 
 cc_test(

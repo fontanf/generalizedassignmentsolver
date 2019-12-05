@@ -1,13 +1,13 @@
 #if GECODE_FOUND
 
-#include "gap/opt_constraintprogramming_gecode/constraintprogramming_gecode.hpp"
+#include "generalizedassignment/opt_constraintprogramming_gecode/constraintprogramming_gecode.hpp"
 
 #include <gecode/int.hh>
 #include <gecode/search.hh>
 #include <gecode/minimodel.hh>
 #include <gecode/gist.hh>
 
-using namespace gap;
+using namespace generalizedassignment;
 using namespace Gecode;
 
 /**
@@ -26,8 +26,9 @@ class GapGecode: public IntMinimizeSpace
 
 public:
 
-    GapGecode(const Instance& ins):
+    GapGecode(const Instance& ins, ConstraintProgrammingGecodeOptionalParameters& p):
         ins_(ins),
+        p_(p),
         xij0_(*this, ins.item_number() * ins.agent_number(), 0, 1),
         xj_(*this, ins.item_number(), 0, ins.agent_number() - 1),
         cj_(*this, ins.item_number()),
@@ -90,7 +91,7 @@ public:
     ~GapGecode() {  }
 
     GapGecode(GapGecode& s):
-        IntMinimizeSpace(s), ins_(s.ins_), weights_(s.weights_), costs_(s.costs_)
+        IntMinimizeSpace(s), ins_(s.ins_), p_(s.p_), weights_(s.weights_), costs_(s.costs_)
     {
         xij0_.update(*this, s.xij0_);
         xj_.update(*this, s.xj_);
@@ -114,6 +115,7 @@ public:
 private:
 
     const Instance& ins_;
+    ConstraintProgrammingGecodeOptionalParameters& p_;
     std::vector<IntArgs> weights_;
     std::vector<IntArgs> costs_;
     BoolVarArray xij0_;
@@ -124,7 +126,7 @@ private:
 
 };
 
-ConstraintProgrammingGecodeOutput gap::sopt_constraintprogramming_gecode(const Instance& ins, ConstraintProgrammingGecodeOptionalParameters p)
+ConstraintProgrammingGecodeOutput generalizedassignment::sopt_constraintprogramming_gecode(const Instance& ins, ConstraintProgrammingGecodeOptionalParameters p)
 {
     VER(p.info, "*** constraintprogramming_gecode ***" << std::endl);
     ConstraintProgrammingGecodeOutput output(ins, p.info);
@@ -132,7 +134,7 @@ ConstraintProgrammingGecodeOutput gap::sopt_constraintprogramming_gecode(const I
     if (ins.item_number() == 0)
         return output.algorithm_end(p.info);
 
-    GapGecode model(ins);
+    GapGecode model(ins, p);
     //Gist::bab(&model);
 
     Search::Options options;

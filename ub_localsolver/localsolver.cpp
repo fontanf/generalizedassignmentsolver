@@ -1,6 +1,6 @@
 #if LOCALSOLVER_FOUND
 
-#include "gap/ub_localsolver/localsolver.hpp"
+#include "generalizedassignment/ub_localsolver/localsolver.hpp"
 
 #include <localsolver.h>
 
@@ -10,7 +10,7 @@
 #include <numeric>
 #include <cmath>
 
-using namespace gap;
+using namespace generalizedassignment;
 using namespace localsolver;
 
 LocalSolverOutput& LocalSolverOutput::algorithm_end(Info& info)
@@ -58,7 +58,7 @@ private:
 
 };
 
-LocalSolverOutput gap::sol_localsolver(const Instance& ins, LocalSolverOptionalParameters p)
+LocalSolverOutput generalizedassignment::sol_localsolver(const Instance& ins, LocalSolverOptionalParameters p)
 {
     VER(p.info, "*** localsolver ***" << std::endl);
     ItemIdx n = ins.item_number();

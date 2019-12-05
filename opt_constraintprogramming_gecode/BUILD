@@ -21,7 +21,7 @@ cc_library(
                 ],
         }),
         visibility = ["//visibility:public"],
-        include_prefix = "gap/opt_constraintprogramming_gecode/",
+        include_prefix = "generalizedassignment/opt_constraintprogramming_gecode/",
 )
 
 cc_test(

@@ -1,12 +1,12 @@
 #pragma once
 
-#include <gap/lib/instance.hpp>
+#include <generalizedassignment/lib/instance.hpp>
 
 #include <benchtools/dataset.hpp>
 
 #include <map>
 
-namespace gap
+namespace generalizedassignment
 {
 
 const std::map<std::string, std::shared_ptr<Dataset<Instance>>> datasets = {
@@ -17,7 +17,7 @@ const std::map<std::string, std::shared_ptr<Dataset<Instance>>> datasets = {
             "data/a05200",
             "data/a10200",
             "data/a20200",
-        }, "gap_beasley"))},
+        }, "generalizedassignment_beasley"))},
     {"B", std::shared_ptr<Dataset<Instance>>(new DatasetFromFiles<Instance>({
             "data/b05100",
             "data/b10100",
@@ -25,7 +25,7 @@ const std::map<std::string, std::shared_ptr<Dataset<Instance>>> datasets = {
             "data/b05200",
             "data/b10200",
             "data/b20200",
-        }, "gap_beasley"))},
+        }, "generalizedassignment_beasley"))},
     {"C", std::shared_ptr<Dataset<Instance>>(new DatasetFromFiles<Instance>({
             "data/c05100",
             "data/c10100",
@@ -42,7 +42,7 @@ const std::map<std::string, std::shared_ptr<Dataset<Instance>>> datasets = {
             "data/c201600",
             "data/c401600",
             "data/c801600",
-        }, "gap_beasley"))},
+        }, "generalizedassignment_beasley"))},
     {"D", std::shared_ptr<Dataset<Instance>>(new DatasetFromFiles<Instance>({
             "data/d05100",
             "data/d10100",
@@ -59,7 +59,7 @@ const std::map<std::string, std::shared_ptr<Dataset<Instance>>> datasets = {
             "data/d201600",
             "data/d401600",
             "data/d801600",
-        }, "gap_beasley"))},
+        }, "generalizedassignment_beasley"))},
     {"E", std::shared_ptr<Dataset<Instance>>(new DatasetFromFiles<Instance>({
             "data/e05100",
             "data/e10100",
@@ -76,7 +76,7 @@ const std::map<std::string, std::shared_ptr<Dataset<Instance>>> datasets = {
             "data/e201600",
             "data/e401600",
             "data/e801600",
-        }, "gap_beasley"))},
+        }, "generalizedassignment_beasley"))},
 };
 
 }
