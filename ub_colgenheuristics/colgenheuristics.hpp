@@ -1,7 +1,5 @@
 #pragma once
 
-#if COINOR_FOUND
-
 #include "gap/lib/solution.hpp"
 
 namespace gap
@@ -80,6 +78,4 @@ struct CghDivingWithLdsOutput: Output
 CghDivingWithLdsOutput sol_cgh_divingwithlds(const Instance& ins, CghDivingWithLdsOptionalParameters p = {});
 
 }
-
-#endif
 
