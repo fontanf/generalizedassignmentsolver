@@ -12,12 +12,14 @@ cc_library(
 )
 """,
     urls = ["https://github.com/nlohmann/json/releases/download/v3.7.3/include.zip"],
+    sha256 = "87b5884741427220d3a33df1363ae0e8b898099fbc59f1c451113f6732891014",
 )
 
 git_repository(
     name = "benchtools",
     remote = "https://github.com/fontanf/benchtools.git",
     commit = "fe56ed683d32f70cd248d77cd4107e57eee05758",
+    shallow_since = "1576623294 +0100",
 )
 
 local_repository(
@@ -46,7 +48,8 @@ cc_library(
 )
 """,
     remote = "https://github.com/google/googletest",
-    tag = "release-1.8.0",
+    commit = "ec44c6c1675c25b9827aacd08c02433cccde7780",
+    shallow_since = "1468516538 -0400",
 )
 
 git_repository(
