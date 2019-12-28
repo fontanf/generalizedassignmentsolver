@@ -23,11 +23,14 @@
 
 using namespace generalizedassignment;
 
-std::function<Output (Instance&, std::mt19937_64&, Info)> generalizedassignment::get_algorithm(std::string str)
+std::function<Output (Instance&, std::mt19937_64&, Info)> generalizedassignment::get_algorithm(std::string algorithm)
 {
-    benchtools::Algorithm algo(str);
+    std::stringstream ss(algorithm);
+    std::istream_iterator<std::string> begin(ss);
+    std::istream_iterator<std::string> end;
+    std::vector<std::string> argv(begin, end);
 
-    if (algo.name == "") {
+    if (argv[0] == "") {
         std::cerr << "\033[32m" << "ERROR, missing algorithm." << "\033[0m" << std::endl;
         return [](Instance& ins, std::mt19937_64&, Info info) { return Output(ins, info); };
 
@@ -35,60 +38,61 @@ std::function<Output (Instance&, std::mt19937_64&, Info)> generalizedassignment:
      * Lower bounds
      */
 #if COINOR_FOUND
-    } else if (algo.name == "linrelax_clp") {
+    } else if (argv[0] == "linrelax_clp") {
         return [](Instance& ins, std::mt19937_64&, Info info) {
             return lb_linrelax_clp(ins, info);
         };
 #endif
 #if GUROBI_FOUND
-    } else if (algo.name == "linrelax_gurobi") {
+    } else if (argv[0] == "linrelax_gurobi") {
         return [](Instance& ins, std::mt19937_64&, Info info) {
             return lb_linrelax_gurobi(ins, info);
         };
 #endif
 #if COINOR_FOUND
-    } else if (algo.name == "lagrelax_knapsack_volume") {
+    } else if (argv[0] == "lagrelax_knapsack_volume") {
         return [](Instance& ins, std::mt19937_64&, Info info) {
             return lb_lagrelax_knapsack_volume(ins, info);
         };
 #endif
 #if COINOR_FOUND
-    } else if (algo.name == "lagrelax_knapsack_bundle") {
+    } else if (argv[0] == "lagrelax_knapsack_bundle") {
         return [](Instance& ins, std::mt19937_64&, Info info) {
             return lb_lagrelax_knapsack_bundle(ins, info);
         };
 #endif
 #if DLIB_FOUND
-    } else if (algo.name == "lagrelax_knapsack_lbfgs") {
+    } else if (argv[0] == "lagrelax_knapsack_lbfgs") {
         return [](Instance& ins, std::mt19937_64&, Info info) {
             return lb_lagrelax_knapsack_lbfgs(ins, info);
         };
 #endif
 #if COINOR_FOUND
-    } else if (algo.name == "lagrelax_assignment_volume") {
+    } else if (argv[0] == "lagrelax_assignment_volume") {
         return [](Instance& ins, std::mt19937_64&, Info info) {
             return lb_lagrelax_assignment_volume(ins, info);
         };
 #endif
 #if COINOR_FOUND
-    } else if (algo.name == "lagrelax_assignment_bundle") {
+    } else if (argv[0] == "lagrelax_assignment_bundle") {
         return [](Instance& ins, std::mt19937_64&, Info info) {
             return lb_lagrelax_assignment_bundle(ins, info);
         };
 #endif
 #if DLIB_FOUND
-    } else if (algo.name == "lagrelax_assignment_lbfgs") {
+    } else if (argv[0] == "lagrelax_assignment_lbfgs") {
         return [](Instance& ins, std::mt19937_64&, Info info) {
             LagRelaxAssignmentLbfgsOptionalParameters p;
             p.info = info;
             return lb_lagrelax_assignment_lbfgs(ins, p);
         };
 #endif
-    } else if (algo.name == "columngeneration") {
-        return [algo](Instance& ins, std::mt19937_64&, Info info) {
+    } else if (argv[0] == "columngeneration") {
+        return [argv](Instance& ins, std::mt19937_64&, Info info) {
             ColGenOptionalParameters p;
             p.info = info;
-            p.set_params(algo.args);
+            for (auto it = argv.begin() + 1; it != argv.end(); ++it)
+                if (*it == "solver") { p.solver = *(++it); }
             return lb_columngeneration(ins, p);
         };
 
@@ -96,7 +100,7 @@ std::function<Output (Instance&, std::mt19937_64&, Info)> generalizedassignment:
      * Exact algorithms
      */
 #if COINOR_FOUND
-    } else if (algo.name == "branchandcut_cbc") {
+    } else if (argv[0] == "branchandcut_cbc") {
         return [](Instance& ins, std::mt19937_64&, Info info) {
             BranchAndCutCbcOptionalParameters p;
             p.info = info;
@@ -104,7 +108,7 @@ std::function<Output (Instance&, std::mt19937_64&, Info)> generalizedassignment:
         };
 #endif
 #if CPLEX_FOUND
-    } else if (algo.name == "branchandcut_cplex") {
+    } else if (argv[0] == "branchandcut_cplex") {
         return [](Instance& ins, std::mt19937_64&, Info info) {
             BranchAndCutCplexOptionalParameters p;
             p.info = info;
@@ -112,29 +116,29 @@ std::function<Output (Instance&, std::mt19937_64&, Info)> generalizedassignment:
         };
 #endif
 #if GUROBI_FOUND
-    } else if (algo.name == "branchandcut_gurobi") {
+    } else if (argv[0] == "branchandcut_gurobi") {
         return [](Instance& ins, std::mt19937_64&, Info info) {
             BranchAndCutGurobiOptionalParameters p;
             p.info = info;
             return sopt_branchandcut_gurobi(ins, p);
         };
 #endif
-    } else if (algo.name == "branchandprice_dfs") {
-        return [algo](Instance& ins, std::mt19937_64&, Info info) {
+    } else if (argv[0] == "branchandprice_dfs") {
+        return [argv](Instance& ins, std::mt19937_64&, Info info) {
             BranchAndPriceOptionalParameters p;
             p.info = info;
-            p.set_params(algo.args);
+            p.set_params(argv);
             return sopt_branchandprice_dfs(ins, p);
         };
-    } else if (algo.name == "branchandprice_astar") {
-        return [algo](Instance& ins, std::mt19937_64&, Info info) {
+    } else if (argv[0] == "branchandprice_astar") {
+        return [argv](Instance& ins, std::mt19937_64&, Info info) {
             BranchAndPriceOptionalParameters p;
             p.info = info;
-            p.set_params(algo.args);
+            p.set_params(argv);
             return sopt_branchandprice_astar(ins, p);
         };
 #if GECODE_FOUND
-    } else if (algo.name == "constraintprogramming_gecode") {
+    } else if (argv[0] == "constraintprogramming_gecode") {
         return [](Instance& ins, std::mt19937_64&, Info info) {
             ConstraintProgrammingGecodeOptionalParameters p;
             p.info = info;
@@ -142,7 +146,7 @@ std::function<Output (Instance&, std::mt19937_64&, Info)> generalizedassignment:
         };
 #endif
 #if CPLEX_FOUND
-    } else if (algo.name == "constraintprogramming_cplex") {
+    } else if (argv[0] == "constraintprogramming_cplex") {
         return [](Instance& ins, std::mt19937_64&, Info info) {
             ConstraintProgrammingCplexOptionalParameters p;
             p.info = info;
@@ -153,110 +157,110 @@ std::function<Output (Instance&, std::mt19937_64&, Info)> generalizedassignment:
     /*
      * Upper bounds
      */
-    } else if (algo.name == "random") {
+    } else if (argv[0] == "random") {
         return [](Instance& ins, std::mt19937_64& gen, Info info) {
             return sol_random(ins, gen, info);
         };
-    } else if (algo.name == "greedy") {
-        return [algo](Instance& ins, std::mt19937_64&, Info info) {
-            auto it = algo.args.find("f");
-            std::string des_str = (it == algo.args.end())? "cij": it->second;
+    } else if (argv[0] == "greedy") {
+        return [argv](Instance& ins, std::mt19937_64&, Info info) {
+            auto it = std::find(argv.begin(), argv.end(), "f");
+            std::string des_str = (it == argv.end())? "cij": *(++it);
             std::unique_ptr<Desirability> f = desirability(des_str, ins);
             return sol_greedy(ins, *f, info);
         };
-    } else if (algo.name == "greedyregret") {
-        return [algo](Instance& ins, std::mt19937_64&, Info info) {
-            auto it = algo.args.find("f");
-            std::string des_str = (it == algo.args.end())? "cij": it->second;
+    } else if (argv[0] == "greedyregret") {
+        return [argv](Instance& ins, std::mt19937_64&, Info info) {
+            auto it = std::find(argv.begin(), argv.end(), "f");
+            std::string des_str = (it == argv.end())? "cij": *(++it);
             std::unique_ptr<Desirability> f = desirability(des_str, ins);
             return sol_greedyregret(ins, *f, info);
         };
-    } else if (algo.name == "mthg") {
-        return [algo](Instance& ins, std::mt19937_64&, Info info) {
-            auto it = algo.args.find("f");
-            std::string des_str = (it == algo.args.end())? "cij": it->second;
+    } else if (argv[0] == "mthg") {
+        return [argv](Instance& ins, std::mt19937_64&, Info info) {
+            auto it = std::find(argv.begin(), argv.end(), "f");
+            std::string des_str = (it == argv.end())? "cij": *(++it);
             std::unique_ptr<Desirability> f = desirability(des_str, ins);
             return sol_mthg(ins, *f, info);
         };
-    } else if (algo.name == "mthgregret") {
-        return [algo](Instance& ins, std::mt19937_64&, Info info) {
-            auto it = algo.args.find("f");
-            std::string des_str = (it == algo.args.end())? "cij": it->second;
+    } else if (argv[0] == "mthgregret") {
+        return [argv](Instance& ins, std::mt19937_64&, Info info) {
+            auto it = std::find(argv.begin(), argv.end(), "f");
+            std::string des_str = (it == argv.end())? "cij": *(++it);
             std::unique_ptr<Desirability> f = desirability(des_str, ins);
             return sol_mthgregret(ins, *f, info);
         };
 #if COINOR_FOUND
-    } else if (algo.name == "repaircombrelax") {
+    } else if (argv[0] == "repaircombrelax") {
         return [](Instance& ins, std::mt19937_64&, Info info) {
             return sol_repaircombrelax(ins, info);
         };
 #endif
 #if COINOR_FOUND
-    } else if (algo.name == "repairgreedy") {
+    } else if (argv[0] == "repairgreedy") {
         return [](Instance& ins, std::mt19937_64&, Info info) {
             return sol_repairgreedy(ins, info);
         };
 #endif
 #if COINOR_FOUND
-    } else if (algo.name == "repairlinrelax_clp") {
+    } else if (argv[0] == "repairlinrelax_clp") {
         return [](Instance& ins, std::mt19937_64&, Info info) {
             LinRelaxClpOutput linrelax_output = lb_linrelax_clp(ins);
             return sol_repairlinrelax_clp(ins, linrelax_output, info);
         };
 #endif
-    } else if (algo.name == "ls_shiftswap") {
-        return [algo](Instance& ins, std::mt19937_64& gen, Info info) {
+    } else if (argv[0] == "ls_shiftswap") {
+        return [argv](Instance& ins, std::mt19937_64& gen, Info info) {
             LSShiftSwapOptionalParameters p;
             p.info = info;
             return sol_ls_shiftswap(ins, gen, p);
         };
-    } else if (algo.name == "ts_shiftswap") {
-        return [algo](Instance& ins, std::mt19937_64& gen, Info info) {
+    } else if (argv[0] == "ts_shiftswap") {
+        return [argv](Instance& ins, std::mt19937_64& gen, Info info) {
             TSShiftSwapOptionalParameters p;
             p.info = info;
-            p.set_params(algo.args);
+            p.set_params(argv);
             return sol_ts_shiftswap(ins, gen, p);
         };
-    } else if (algo.name == "sa_shiftswap") {
-        return [algo](Instance& ins, std::mt19937_64& gen, Info info) {
+    } else if (argv[0] == "sa_shiftswap") {
+        return [argv](Instance& ins, std::mt19937_64& gen, Info info) {
             SAShiftSwapOptionalParameters p;
             p.info = info;
-            p.set_params(algo.args);
+            p.set_params(argv);
             return sol_sa_shiftswap(ins, gen, p);
         };
 #if LOCALSOLVER_FOUND
-    } else if (algo.name == "localsolver") {
+    } else if (argv[0] == "localsolver") {
         return [](Instance& ins, std::mt19937_64&, Info info) {
             LocalSolverOptionalParameters p;
             p.info = info;
             return sol_localsolver(ins, p);
         };
 #endif
-    } else if (algo.name == "cgh_restrictedmaster") {
-        return [algo](Instance& ins, std::mt19937_64&, Info info) {
+    } else if (argv[0] == "cgh_restrictedmaster") {
+        return [argv](Instance& ins, std::mt19937_64&, Info info) {
             CghRestrictedMasterOptionalParameters p;
             p.info = info;
-            p.set_params(algo.args);
+            p.set_params(argv);
             return sol_cgh_restrictedmaster(ins, p);
         };
-    } else if (algo.name == "cgh_purediving") {
-        return [algo](Instance& ins, std::mt19937_64&, Info info) {
+    } else if (argv[0] == "cgh_purediving") {
+        return [argv](Instance& ins, std::mt19937_64&, Info info) {
             CghPureDivingOptionalParameters p;
             p.info = info;
-            p.set_params(algo.args);
+            p.set_params(argv);
             return sol_cgh_purediving(ins, p);
         };
-    } else if (algo.name == "cgh_divingwithlds") {
-        return [algo](Instance& ins, std::mt19937_64&, Info info) {
+    } else if (argv[0] == "cgh_divingwithlds") {
+        return [argv](Instance& ins, std::mt19937_64&, Info info) {
             CghDivingWithLdsOptionalParameters p;
             p.info = info;
-            p.set_params(algo.args);
+            p.set_params(argv);
             return sol_cgh_divingwithlds(ins, p);
         };
 
 
     } else {
-        std::cerr << "\033[31m" << "ERROR, unknown algorithm: " << algo.name << "\033[0m" << std::endl;
+        std::cerr << "\033[31m" << "ERROR, unknown algorithm: " << argv[0] << "\033[0m" << std::endl;
         assert(false);
         return [](Instance& ins, std::mt19937_64&, Info info) { return Output(ins, info); };
     }

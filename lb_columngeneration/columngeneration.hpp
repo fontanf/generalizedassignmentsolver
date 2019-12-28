@@ -17,10 +17,11 @@ struct ColGenOptionalParameters
     std::vector<int>* fixed_alt = NULL; // -1: unfixed, 0: fixed to 0, 1: fixed to 1.
     std::vector<int>* fixed_agents = NULL; // 0: unfixed, 1: fixed.
 
-    ColGenOptionalParameters& set_params(const std::map<std::string, std::string>& args)
+    ColGenOptionalParameters& set_params(const std::vector<std::string>& argv)
     {
-        auto it = args.end();
-        if ((it = args.find("solver")) != args.end()) solver = it->second;
+        for (auto it = argv.begin() + 1; it != argv.end(); ++it) {
+            if (*it == "solver") { solver = *(++it); }
+        }
         return *this;
     }
 };

@@ -11,10 +11,11 @@ struct BranchAndPriceOptionalParameters
 
     std::string solver = "clp"; // "clp", "cplex"
 
-    BranchAndPriceOptionalParameters& set_params(const std::map<std::string, std::string>& args)
+    BranchAndPriceOptionalParameters& set_params(const std::vector<std::string>& argv)
     {
-        auto it = args.end();
-        if ((it = args.find("solver")) != args.end()) solver = it->second;
+        for (auto it = argv.begin() + 1; it != argv.end(); ++it) {
+            if (*it == "solver") { solver = *(++it); }
+        }
         return *this;
     }
 };

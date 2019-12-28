@@ -13,10 +13,11 @@ struct CghRestrictedMasterOptionalParameters
 
     std::string solver = "clp"; // "clp", "cplex"
 
-    CghRestrictedMasterOptionalParameters& set_params(const std::map<std::string, std::string>& args)
+    CghRestrictedMasterOptionalParameters& set_params(const std::vector<std::string>& argv)
     {
-        auto it = args.end();
-        if ((it = args.find("solver")) != args.end()) solver = it->second;
+        for (auto it = argv.begin() + 1; it != argv.end(); ++it) {
+            if (*it == "solver") { solver  = *(++it); }
+        }
         return *this;
     }
 };
@@ -37,10 +38,11 @@ struct CghPureDivingOptionalParameters
 
     std::string solver = "clp"; // "clp", "cplex"
 
-    CghPureDivingOptionalParameters& set_params(const std::map<std::string, std::string>& args)
+    CghPureDivingOptionalParameters& set_params(const std::vector<std::string>& argv)
     {
-        auto it = args.end();
-        if ((it = args.find("solver")) != args.end()) solver = it->second;
+        for (auto it = argv.begin() + 1; it != argv.end(); ++it) {
+            if (*it == "solver") { solver  = *(++it); }
+        }
         return *this;
     }
 };
@@ -61,10 +63,11 @@ struct CghDivingWithLdsOptionalParameters
 
     std::string solver = "clp"; // "clp", "cplex"
 
-    CghDivingWithLdsOptionalParameters& set_params(const std::map<std::string, std::string>& args)
+    CghDivingWithLdsOptionalParameters& set_params(const std::vector<std::string>& argv)
     {
-        auto it = args.end();
-        if ((it = args.find("solver")) != args.end()) solver = it->second;
+        for (auto it = argv.begin() + 1; it != argv.end(); ++it) {
+            if (*it == "solver") { solver  = *(++it); }
+        }
         return *this;
     }
 };

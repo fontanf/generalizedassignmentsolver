@@ -1,7 +1,7 @@
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository", "new_git_repository")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-new_git_repository(
+http_archive(
     name = "json",
     build_file_content = """
 cc_library(
@@ -11,14 +11,13 @@ cc_library(
         strip_include_prefix = "single_include/"
 )
 """,
-    remote = "https://github.com/nlohmann/json",
-    tag = "v3.7.0",
+    urls = ["https://github.com/nlohmann/json/releases/download/v3.7.3/include.zip"],
 )
 
 git_repository(
     name = "benchtools",
     remote = "https://github.com/fontanf/benchtools.git",
-    commit = "f7a92b00c89d2bca213d0a0f8303e78c2bf228ea",
+    commit = "fe56ed683d32f70cd248d77cd4107e57eee05758",
 )
 
 local_repository(
@@ -53,6 +52,7 @@ cc_library(
 git_repository(
     name = "knapsack",
     remote = "https://github.com/fontanf/knapsack.git",
-    commit = "28463ae256d3835b0c71f6248a8c79bfb5e8d4a0",
+    commit = "4f96972a1d6a496eaaef7f4b0f691070c9ffe8ee",
+    shallow_since = "1577520924 +0100",
 )
 

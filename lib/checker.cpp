@@ -1,5 +1,4 @@
 #include "generalizedassignment/lib/solution.hpp"
-#include "generalizedassignment/lib/datasets.hpp"
 
 #include <iomanip>
 
@@ -37,30 +36,11 @@ void checker(const Instance& ins, std::string solfile, std::string bndfile)
 
 int main(int argc, char *argv[])
 {
-    if (argc <= 1) {
-        for (auto it = datasets.begin(); it != datasets.end(); ++it) {
-            // Print dataset name centered
-            std::string s = "--- " + it->first + " --- ";
-            int pos = (int)((80-s.length())/2);
-            for(int i=0; i<pos; i++)
-                std::cout << " ";
-            std::cout << s << std::endl;
-
-            Dataset<Instance>* d = it->second.get();
-            for (InsId i=0; i<d->size(); ++i) {
-                Instance ins = d->instance(i);
-                std::string solfile = ins.name() + ".sol";
-                std::string bndfile = ins.name() + ".bound";
-                checker(ins, solfile, bndfile);
-            }
-        }
-    } else {
-        std::string insfile = argv[1];
-        Instance ins(insfile);
-        std::string solfile = (argc <= 2)? insfile + ".sol": argv[2];
-        std::string bndfile = insfile + ".bound";
-        checker(ins, solfile, bndfile);
-    }
+    std::string insfile = argv[1];
+    Instance ins(insfile);
+    std::string solfile = (argc <= 2)? insfile + ".sol": argv[2];
+    std::string bndfile = insfile + ".bound";
+    checker(ins, solfile, bndfile);
 
     return 0;
 }

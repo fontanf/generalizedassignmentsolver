@@ -32,10 +32,11 @@ struct TSShiftSwapOptionalParameters
 
     Cpt l = 10000;
 
-    TSShiftSwapOptionalParameters& set_params(const std::map<std::string, std::string>& args)
+    TSShiftSwapOptionalParameters& set_params(const std::vector<std::string>& argv)
     {
-        auto it = args.end();
-        if ((it = args.find("l")) != args.end()) l = std::stod(it->second);
+        for (auto it = argv.begin() + 1; it != argv.end(); ++it) {
+            if (*it == "l") { l = std::stol(*(++it)); }
+        }
         return *this;
     }
 };
@@ -61,11 +62,12 @@ struct SAShiftSwapOptionalParameters
     double beta = 0.999;
     double l = 1000000;
 
-    SAShiftSwapOptionalParameters& set_params(const std::map<std::string, std::string>& args)
+    SAShiftSwapOptionalParameters& set_params(const std::vector<std::string>& argv)
     {
-        auto it = args.end();
-        if ((it = args.find("beta")) != args.end()) beta = std::stod(it->second);
-        if ((it = args.find("l")) != args.end()) l = std::stol(it->second);
+        for (auto it = argv.begin() + 1; it != argv.end(); ++it) {
+            if        (*it == "l")    { l    = std::stol(*(++it));
+            } else if (*it == "beta") { beta = stod(*(++it)); }
+        }
         return *this;
     }
 };

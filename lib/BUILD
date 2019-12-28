@@ -11,7 +11,6 @@ cc_library(
                 "instance.hpp",
                 "solution.hpp",
                 "desirability.hpp",
-                "datasets.hpp",
         ],
         srcs = [
                 "instance.cpp",
@@ -106,23 +105,6 @@ cc_binary(
         name = "checker",
         srcs = ["checker.cpp"],
         deps = [":cpp"],
-        data = ["//data:data"],
-)
-
-cc_binary(
-        name = "bench",
-        srcs = ["bench.cpp"],
-        deps = [
-                ":algorithms",
-                ":generator",
-        ],
-        linkopts = [
-                "-lstdc++fs",
-                "-lboost_program_options",
-            ] + select({"//lib:gurobi_build": [
-                        "-lgurobi_c++",
-                        "-lgurobi81",
-                ], "//conditions:default": [ ], }),
         data = ["//data:data"],
 )
 
