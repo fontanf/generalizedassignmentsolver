@@ -68,23 +68,26 @@ BranchAndCutCplexOutput generalizedassignment::sopt_branchandcut_cplex(const Ins
 
     // Capacity constraints
     for (AgentIdx i=0; i<m; i++) {
-        IloExpr lhs(env);
+        IloExpr expr(env);
         for (ItemIdx j=0; j<n; j++)
-            lhs += x[ins.alternative_index(j, i)] * ins.alternative(j, i).w;
-        model.add(IloRange(env, 0, lhs, ins.capacity(i)));
+            expr += x[ins.alternative_index(j, i)] * ins.alternative(j, i).w;
+        model.add(0 <= expr <= ins.capacity(i));
     }
 
     // One alternative per item constraint
     for (ItemIdx j=0; j<n; j++) {
-        IloExpr lhs(env);
+        IloExpr expr(env);
         for (AgentIdx i=0; i<m; i++)
-            lhs += x[ins.alternative_index(j, i)];
-        model.add(IloRange(env, 1, lhs, 1));
+            expr += x[ins.alternative_index(j, i)];
+        model.add(expr == 1);
     }
 
     IloCplex cplex(model);
 
-    cplex.setOut(env.getNullStream()); // Remove standard output
+    // Redirect standard output to log file
+    std::ofstream logfile("cplex.log");
+    cplex.setOut(logfile);
+
     cplex.setParam(IloCplex::Param::MIP::Tolerances::MIPGap, 0.0); // Fix precision issue
     cplex.setParam(IloCplex::Param::MIP::Strategy::File, 2); // Avoid running out of memory
 

@@ -105,7 +105,10 @@ BranchAndCutGurobiOutput generalizedassignment::sopt_branchandcut_gurobi(const I
             for (AgentIdx i=0; i<m; ++i)
                 x[ins.alternative_index(j, i)].set(GRB_DoubleAttr_Start, (p.initial_solution->agent(j) == i)? 1: 0);
 
-    model.getEnv().set(GRB_IntParam_OutputFlag, 0); // Remove standard output
+    // Redirect standard output to log file
+    model.set(GRB_StringParam_LogFile, "gurobi.log");
+    model.set(GRB_IntParam_LogToConsole, 0);
+
     model.set(GRB_DoubleParam_MIPGap, 0); // Fix precision issue
     model.set(GRB_DoubleParam_NodefileStart, 0.5); // Avoid running out of memory
 
