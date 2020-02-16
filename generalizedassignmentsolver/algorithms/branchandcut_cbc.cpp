@@ -54,48 +54,58 @@ CoinLP::CoinLP(const Instance& ins)
 
     // Objective
     objective = std::vector<double>(col_number);
-    for (AltIdx k=0; k<col_number; ++k)
+    for (AltIdx k = 0; k < col_number; ++k)
         objective[k] = ins.alternative(k).c;
 
     // Constraints
     int row_number = 0; // will be increased each time we add a constraint
-    std::vector<CoinBigIndex> start;
-    std::vector<int> length;
-    std::vector<int> cols;
+    std::vector<CoinBigIndex> row_starts;
+    std::vector<int> number_of_elements_in_rows;
+    std::vector<int> element_columns;
     std::vector<double> elements;
 
     // Every item needs to be assigned
     // sum_i xij = 1 for all j
-    for (ItemIdx j=0; j<n; ++j) {
-        start.push_back(elements.size());
-        length.push_back(m);
-        for (AgentIdx i=0; i<m; ++i) {
+    for (ItemIdx j = 0; j < n; ++j) {
+        // Initialize new row
+        row_starts.push_back(elements.size());
+        number_of_elements_in_rows.push_back(0);
+        row_number++;
+        // Add elements
+        for (AgentIdx i = 0; i < m; ++i) {
             elements.push_back(1);
-            cols.push_back(ins.alternative_index(j, i));
+            element_columns.push_back(ins.alternative_index(j, i));
+            number_of_elements_in_rows.back()++;
         }
+        // Add row bounds
         row_lower.push_back(1);
         row_upper.push_back(1);
-        row_number++;
     }
 
     // Capacity constraint
     // sum_j wj xij <= ci
-    for (AgentIdx i=0; i<m; ++i) {
-        start.push_back(elements.size());
-        length.push_back(n);
-        for (ItemIdx j=0; j<n; ++j) {
+    for (AgentIdx i = 0; i < m; ++i) {
+        // Initialize new row
+        row_starts.push_back(elements.size());
+        number_of_elements_in_rows.push_back(0);
+        row_number++;
+        // Add row elements
+        for (ItemIdx j = 0; j < n; ++j) {
             elements.push_back(ins.alternative(j, i).w);
-            cols.push_back(ins.alternative_index(j, i));
+            element_columns.push_back(ins.alternative_index(j, i));
+            number_of_elements_in_rows.back()++;
         }
+        // Add row bounds
         row_lower.push_back(0);
         row_upper.push_back(ins.capacity(i));
-        row_number++;
     }
 
     // Create matrix
-    start.push_back(elements.size());
-    matrix = CoinPackedMatrix(false, col_number, row_number, elements.size(),
-            elements.data(), cols.data(), start.data(), length.data());
+    row_starts.push_back(elements.size());
+    matrix = CoinPackedMatrix(false,
+            col_number, row_number, elements.size(),
+            elements.data(), element_columns.data(),
+            row_starts.data(), number_of_elements_in_rows.data());
 }
 
 BranchAndCutCbcOutput& BranchAndCutCbcOutput::algorithm_end(Info& info)
@@ -156,7 +166,7 @@ CbcEventHandler::CbcAction SolHandler::event(CbcEvent whichEvent)
     if (!output_.solution.feasible() || output_.solution.cost() > solver->getObjValue() + 0.5) {
         const double *solution = solver->getColSolution();
         Solution sol_curr(ins_);
-        for (AltIdx k=0; k<ins_.alternative_number(); ++k)
+        for (AltIdx k = 0; k < ins_.alternative_number(); ++k)
             if (solution[k] > 0.5)
                 sol_curr.set(k);
         output_.update_solution(sol_curr, std::stringstream(""), p_.info);
@@ -188,7 +198,7 @@ BranchAndCutCbcOutput generalizedassignmentsolver::branchandcut_cbc(const Instan
               mat.objective.data(), mat.row_lower.data(), mat.row_upper.data());
 
     // Mark integer
-    for (AltIdx k=0; k<ins.alternative_number(); ++k)
+    for (AltIdx k = 0; k < ins.alternative_number(); ++k)
         solver1.setInteger(k);
 
     // Pass data and solver to CbcModel
@@ -274,7 +284,7 @@ BranchAndCutCbcOutput generalizedassignmentsolver::branchandcut_cbc(const Instan
     // Add initial solution
     std::vector<double> sol_init(ins.alternative_number(), 0);
     if (p.initial_solution != NULL && p.initial_solution->feasible()) {
-        for (AltIdx k=0; k<ins.alternative_number(); ++k)
+        for (AltIdx k = 0; k < ins.alternative_number(); ++k)
             if (p.initial_solution->agent(ins.alternative(k).j) == ins.alternative(k).i)
                 sol_init[k] = 1;
         model.setBestSolution(sol_init.data(), ins.alternative_number(), p.initial_solution->cost());
@@ -291,7 +301,7 @@ BranchAndCutCbcOutput generalizedassignmentsolver::branchandcut_cbc(const Instan
         if (!output.solution.feasible() || output.solution.cost() > model.getObjValue() + 0.5) {
             const double *solution = model.solver()->getColSolution();
             Solution sol_curr(ins);
-            for (AltIdx k=0; k<ins.alternative_number(); ++k)
+            for (AltIdx k = 0; k < ins.alternative_number(); ++k)
                 if (solution[k] > 0.5)
                     sol_curr.set(k);
             output.update_solution(sol_curr, std::stringstream(""), p.info);
@@ -301,7 +311,7 @@ BranchAndCutCbcOutput generalizedassignmentsolver::branchandcut_cbc(const Instan
         if (!output.solution.feasible() || output.solution.cost() > model.getObjValue() + 0.5) {
             const double *solution = model.solver()->getColSolution();
             Solution sol_curr(ins);
-            for (AltIdx k=0; k<ins.alternative_number(); ++k)
+            for (AltIdx k = 0; k < ins.alternative_number(); ++k)
                 if (solution[k] > 0.5)
                     sol_curr.set(k);
             output.update_solution(sol_curr, std::stringstream(""), p.info);

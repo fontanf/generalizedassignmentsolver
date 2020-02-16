@@ -101,7 +101,11 @@ bazel build \
 
 Solve:
 ```shell
-./bazel-bin/generalizedassignmentsolver/main -v -a 'mthg f -pij/wij' -i "data/a05100" -o "out.ini" -c "sol.txt"
+./bazel-bin/generalizedassignmentsolver/main -v \
+    -a 'mthg f -pij/wij' \
+    -i "data/a05100" \
+    -o "a05100_output.json" \
+    -c "a05100_solution.txt"
 ```
 
 Unit tests:
