@@ -2,6 +2,30 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository", "new_git_r
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
+    name = "googletest",
+    build_file_content = """
+cc_library(
+        name = "gtest",
+        srcs = ["googletest-release-1.8.0/googletest/src/gtest-all.cc", "googletest-release-1.8.0/googlemock/src/gmock-all.cc",],
+        hdrs = glob(["**/*.h", "googletest-release-1.8.0/googletest/src/*.cc", "googletest-release-1.8.0/googlemock/src/*.cc",]),
+        includes = ["googletest-release-1.8.0/googlemock", "googletest-release-1.8.0/googletest", "googletest-release-1.8.0/googletest/include", "googletest-release-1.8.0/googlemock/include",],
+        linkopts = ["-pthread"],
+        visibility = ["//visibility:public"],
+)
+
+cc_library(
+        name = "gtest_main",
+        srcs = ["googletest-release-1.8.0/googlemock/src/gmock_main.cc"],
+        linkopts = ["-pthread"],
+        visibility = ["//visibility:public"],
+        deps = [":gtest"],
+)
+""",
+    url = "https://github.com/google/googletest/archive/release-1.8.0.zip",
+    sha256 = "f3ed3b58511efd272eb074a3a6d6fb79d7c2e6a0e374323d1e6bcbcc1ef141bf",
+)
+
+http_archive(
     name = "json",
     build_file_content = """
 cc_library(
@@ -27,35 +51,10 @@ local_repository(
     path = "/home/florian/Dev/benchtools/",
 )
 
-new_git_repository(
-    name = "googletest",
-    build_file_content = """
-cc_library(
-        name = "gtest",
-        srcs = ["googletest/src/gtest-all.cc", "googlemock/src/gmock-all.cc",],
-        hdrs = glob(["**/*.h", "googletest/src/*.cc", "googlemock/src/*.cc",]),
-        includes = ["googlemock", "googletest", "googletest/include", "googlemock/include",],
-        linkopts = ["-pthread"],
-        visibility = ["//visibility:public"],
-)
-
-cc_library(
-        name = "gtest_main",
-        srcs = ["googlemock/src/gmock_main.cc"],
-        linkopts = ["-pthread"],
-        visibility = ["//visibility:public"],
-        deps = [":gtest"],
-)
-""",
-    remote = "https://github.com/google/googletest",
-    commit = "ec44c6c1675c25b9827aacd08c02433cccde7780",
-    shallow_since = "1468516538 -0400",
-)
-
 git_repository(
-    name = "knapsack",
-    remote = "https://github.com/fontanf/knapsack.git",
-    commit = "4f96972a1d6a496eaaef7f4b0f691070c9ffe8ee",
-    shallow_since = "1577520924 +0100",
+    name = "knapsacksolver",
+    remote = "https://github.com/fontanf/knapsacksolver.git",
+    commit = "0b0ad3b66831dfcc374ae577597385563effde4f",
+    shallow_since = "1581762443 +0100"
 )
 

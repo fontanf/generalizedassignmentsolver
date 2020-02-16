@@ -1,28 +1,8 @@
-WORK IN PROGRESS
+# GeneralizedAssignmentSolver
 
-# Generalized Assignment Problem
+A solver for the Generalized Assignment Problem.
 
-Algorithm implementations for the Generalized Assignment Problem.
-
-## Description
-
-The Generalized Assignment Problem (GAP) is the problem of assigning n jobs to m agent at minimum cost:
-- for each agent i, each job j has associated cost cij and weight wij
-- each agent i has a capacity ti
-- each job must be assigned to exactly one agent
-- the sum of the weights of jobs assigned to an agent must not overcome its capacity
-- the total cost of the assignment must be minimized
-
-GAP is interesting for several reasons:
-- it is simple (to state, to understand...)
-- it is difficult to solve, i.e. it is NP-complete, and there are several instances of reasonable size that are not solved exactly (unlike for example the Knapsack Problem, which is also NP-complete, but all instances of the literature are solved exactly by state-of-the-art algorithms)
-- the size of input data is not very large: O(nm) (unlike for example TSP, which input size is O(n^2))
-- it appears as subproblem of many practical applications
-- it is structured for simple local search algorithms, i.e. the basic shift-swap neighbourhood makes it possible to implement simulated annealing, tabu search or other classical meta-heuristics (unlike for example the roadef2018 problem, which has no simple neighbourhoods)
-- it is also structured for decomposition techniques (Lagrangian relaxations, Column generation...)
-- it is well-studied, i.e. researchers have proposed many and various algorithms to solve it (branch-and-bound, cutting plane, large neighbourhood search, path relinking...)
-
-The first goal of this repository is for me to have reference implementations for classical algorithms and solvers. I'll also try to implement state of the art algorithms and provide free implementations.
+This problem is interesting because many different optimization technics can and have been applied to solve it (Branch-and-cut, Branch-and-price, Branch-and-relax, Local search, Constraint programming, Column generation heuristics...). Thus, the main goal of this repository is for me to have reference implementations for classical algorithms and optimization solvers.
 
 ## Implemented algorithms
 
@@ -42,7 +22,6 @@ The first goal of this repository is for me to have reference implementations fo
 
 - Column generation `-a columngeneration solver clp` :heavy_check_mark: `-a columngeneration solver cplex` :heavy_check_mark:
 
-
 ### Upper bounds
 
 Polynomial algorithms from "Generalized Assignment Problems" (Martello et al., 1992), options `f cij` `f wij` `f cij*wij` `f -pij/wij` `f wij/ti`:
@@ -52,17 +31,15 @@ Polynomial algorithms from "Generalized Assignment Problems" (Martello et al., 1
 - MTHG, greedy with regret measure (+ n shifts) `-a "mthgregret f wij"` :heavy_check_mark:
 
 Classical meta-heuristics based on shift-swap neighborhood optimized for large instances:
-- Local search `-a ls_shiftswap` :heavy_check_mark:
-- Tabu search `-a ts_shiftswap` :heavy_check_mark:
-- Simulated annealing `-a sa_shiftswap` :heavy_check_mark:
+- Local search `-a localsearch` :heavy_check_mark:
+- Tabu search `-a tabusearch` :heavy_check_mark:
+- Simulated annealing `-a simulatedannealing` :heavy_check_mark:
 
 Others heuristics and meta-heuristics:
 - Random feasible solution found with a Local search `-a random` :heavy_check_mark:
 - Repair linear relaxation solution `-a repairlinrelax_clp` :heavy_check_mark:
 - Local search with LocalSolver `-a localsolver` :heavy_check_mark:
-- Tree search algorithms based on Branch-and-price branching scheme:
-  - Limited discrepancy search `-a branchandprice_lds solver clp` :x: `-a branchandprice_lds solver cplex` :x:
-  - Beam search `-a branchandprice_beamsearch solver clp` :x: `-a branchandprice_beamsearch solver cplex` :x:
+- Tree search algorithms based on Branch-and-price branching scheme :x:
 - Tree search algorithms based on Dantzig-Wolfe reformulation branching scheme :x:
 
 ### Exact algorithms
@@ -80,7 +57,7 @@ Others heuristics and meta-heuristics:
   - with Gecode `-a constraintprogramming_gecode` :heavy_check_mark:
   - with CPLEX `-a constraintprogramming_cplex` :heavy_check_mark:
 
-## Results
+## Notes
 
 ### Linear relaxation gap
 
@@ -105,13 +82,13 @@ sudo apt-get install libboost-all-dev
 ```
 
 Compile:
-```
+```shell
 bazel build -- //...
 ```
 
 However, most algorithms require additional libraries (see below).
 Compile with additional libraries (or just uncomment the corresponding lines in `.bazelrc`):
-```
+```shell
 bazel build \
     --define coinor=true \
     --define cplex=true \
@@ -123,29 +100,29 @@ bazel build \
 ```
 
 Solve:
-```
-./bazel-bin/lib/main -v -a 'mthg f -pij/wij' -i "data/a05100" -o "out.ini" -c "sol.txt"
+```shell
+./bazel-bin/generalizedassignmentsolver/main -v -a 'mthg f -pij/wij' -i "data/a05100" -o "out.ini" -c "sol.txt"
 ```
 
 Unit tests:
-```
+```shell
 bazel test --compilation_mode=dbg -- //...
 ```
 
 Checker:
 ```
-bazel run -- //lib:checker                # show best bounds for all instances
-bazel run -- //lib:checker "data/a05100"  # show best bounds for one instance
-bazel build -- //lib:checker              # check another solution file
-./bazel-bin/lib/checker "instancefile" "solutionfile"
+bazel run -- //generalizedassignmentsolver:checker                # show best bounds for all instances
+bazel run -- //generalizedassignmentsolver:checker "data/a05100"  # show best bounds for one instance
+bazel build -- //generalizedassignmentsolver:checker              # check another solution file
+./bazel-bin/generalizedassignmentsolver/checker "instancefile" "solutionfile"
 ```
 
 Run benchmarks (results stored in `out/algorithm/`)
 ```
-bazel run -- //lib:bench "mthg f wij"             # no time limit
-bazel run -- //lib:bench "branchandcut_cbc" 7200  # 2h time limit
+bazel run -- //generalizedassignmentsolver:bench "mthg f wij"             # no time limit
+bazel run -- //generalizedassignmentsolver:bench "branchandcut_cbc" 7200  # 2h time limit
 ```
-Output files can then be retrieved from `bazel-out/k8-opt/bin/lib/bench.runfiles/__main__/`.
+Output files can then be retrieved from `bazel-out/k8-opt/bin/generalizedassignmentsolver/bench.runfiles/__main__/`.
 
 ## Optional dependencies
 

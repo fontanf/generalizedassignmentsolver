@@ -1,9 +1,9 @@
 build --cxxopt='-std=c++17' --compilation_mode=opt
-#build --define coinor=true
+build --define coinor=true
 #build --define ortools=true
-#build --define cplex=true
-#build --define gurobi=true
-#build --define gecode=true
-#build --define dlib=true
+build --define cplex=true
+build --define gurobi=true
+build --define gecode=true
+build --define dlib=true
 #build --define localsolver=true
 

@@ -9,10 +9,11 @@ def Settings( **kwargs ):
                 '-DGUROBI_FOUND',
                 '-DGECODE_FOUND',
                 '-DIL_STD', # Cplex
-                '-I', '..',
-                '-I', './bazel-generalizedassignment/external/json/single_include',
-                '-I', './bazel-generalizedassignment/external/googletest/googletest/include/',
-                '-I', './bazel-generalizedassignment/external/',
+                '-I', '.',
+                '-I', './bazel-generalizedassignmentsolver/external/json/single_include',
+                '-I', './bazel-generalizedassignmentsolver/external/googletest/googletest-release-1.8.0/googletest/include/',
+                '-I', './bazel-generalizedassignmentsolver/external/knapsacksolver',
+                '-I', './bazel-generalizedassignmentsolver/external/',
                 ],
             }
 
