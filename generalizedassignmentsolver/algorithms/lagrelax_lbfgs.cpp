@@ -68,12 +68,14 @@ private:
 
     const Instance& instance_;
     LagRelaxAssignmentLbfgsOptionalParameters& p_;
-    const std::vector<ItemIdx>& item_indices_; // item_indices_[j] the index of item j in mu and grad
+    /** item_indices_[j] is the index of item j in mu and grad_. */
+    const std::vector<ItemIdx>& item_indices_;
 
     column_vector grad_;
 
     std::vector<knapsacksolver::Weight> kp_capacities_;
-    std::vector<knapsacksolver::ItemIdx> kp_indices_; // kp_indices_[j] is the index of item j in the current KP
+    /** kp_indices_[j] is the index of item j in the current KP. */
+    std::vector<knapsacksolver::ItemIdx> kp_indices_;
 
 };
 
@@ -228,23 +230,19 @@ double LagRelaxKnapsackLbfgsFunction::f(const column_vector& mu)
     ItemIdx n = instance_.item_number();
     AgentIdx m = instance_.agent_number();
 
-    //std::cout << "mu";
-    //for (AgentIdx i=0; i<m; ++i)
-        //std::cout << " " << mu(i);
-    //std::cout << std::endl;
-
+    // Initialize bound and gradient
     double l = 0;
-    for (AgentIdx i=0; i<m; ++i) {
+    for (AgentIdx i = 0; i < m; ++i) {
         l += mu(i) * instance_.capacity(i);
         grad_(i) = instance_.capacity(i);
     }
-    //std::cout << "l0 " << l << std::endl;
 
-    for (ItemIdx j=0; j<n; ++j) {
+    for (ItemIdx j = 0; j < n; ++j) {
+        // Solve the trivial Generalized Upper Bound Problem
         AltIdx k_best = -1;
         AgentIdx i_best = -1;
         double rc_best = -1;
-        for (AgentIdx i=0; i<m; ++i) {
+        for (AgentIdx i = 0; i < m; ++i) {
             AltIdx k = instance_.alternative_index(j, i);
             double rc = instance_.alternative(k).c - mu(i) * instance_.alternative(k).w;
             if (k_best == -1
@@ -261,16 +259,11 @@ double LagRelaxKnapsackLbfgsFunction::f(const column_vector& mu)
                 rc_best = rc;
             }
         }
+
+        // Update bound and gradient
         grad_(i_best) -= instance_.alternative(k_best).w;
         l += rc_best;
-        //std::cout << "l " << l << std::endl;
     }
-
-    //std::cout << "grad";
-    //for (AgentIdx i=0; i<m; ++i)
-        //std::cout << " " << grad_(i);
-    //std::cout << std::endl;
-    //std::cout << "l " << l << std::endl;
 
     return l;
 }
@@ -281,17 +274,21 @@ LagRelaxKnapsackLbfgsOutput generalizedassignmentsolver::lagrelax_knapsack_lbfgs
     LagRelaxKnapsackLbfgsOutput output(instance, info);
 
     AgentIdx m = instance.agent_number();
-    LagRelaxKnapsackLbfgsFunction func(instance);
+
+    // Initialize multipliers
     column_vector mu(m);
     column_vector mu_lower(m);
     column_vector mu_upper(m);
-    for (AgentIdx i=0; i<m; ++i) {
+    for (AgentIdx i = 0; i < m; ++i) {
         //mu_lower(i) = 0;
         //mu_upper(i) = std::numeric_limits<double>::max();
         mu(i) = 0;
         mu_lower(i) = -std::numeric_limits<double>::max();
         mu_upper(i) = 0;
     }
+
+    // Solve
+    LagRelaxKnapsackLbfgsFunction func(instance);
     auto f   = [&func](const column_vector& x) { return func.f(x); };
     auto def = [&func](const column_vector& x) { return func.der(x); };
     auto stop_strategy = objective_delta_stop_strategy();
@@ -305,17 +302,12 @@ LagRelaxKnapsackLbfgsOutput generalizedassignmentsolver::lagrelax_knapsack_lbfgs
             mu_lower,
             mu_upper);
 
+    // Compute output parameters
     Cost lb = std::ceil(res - TOL);
     output.update_lower_bound(lb, std::stringstream(""), info);
     output.multipliers.resize(m);
-    for (AgentIdx i=0; i<m; ++i)
+    for (AgentIdx i = 0; i < m; ++i)
         output.multipliers[i] = mu(i);
-
-    //std::cout << "mu";
-    //for (AgentIdx i=0; i<instance.agent_number(); ++i)
-        //std::cout << " " << mu(i);
-    //std::cout << std::endl;
-    //std::cout << "lb " << out.lb << std::endl;
 
     return output.algorithm_end(info);
 }
