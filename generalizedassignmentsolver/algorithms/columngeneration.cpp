@@ -166,10 +166,10 @@ private:
 
 ColGenOutput& ColGenOutput::algorithm_end(Info& info)
 {
-    Output::algorithm_end(info);
     PUT(info, "Algorithm", "Iterations", it);
-    VER(info, "Iterations: " << it << std::endl);
     PUT(info, "Algorithm", "AddedColumns", added_column_number);
+    Output::algorithm_end(info);
+    VER(info, "Iterations: " << it << std::endl);
     VER(info, "Added columns: " << added_column_number << std::endl);
     return *this;
 }

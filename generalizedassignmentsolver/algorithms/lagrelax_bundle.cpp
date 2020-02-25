@@ -18,8 +18,8 @@ using namespace generalizedassignmentsolver;
 
 LagRelaxAssignmentBundleOutput& LagRelaxAssignmentBundleOutput::algorithm_end(Info& info)
 {
-    Output::algorithm_end(info);
     //PUT(info, "Algorithm", "Iterations", it);
+    Output::algorithm_end(info);
     //VER(info, "Iterations: " << it << std::endl);
     return *this;
 }
@@ -177,8 +177,8 @@ LagRelaxAssignmentBundleOutput generalizedassignmentsolver::lagrelax_assignment_
 
 LagRelaxKnapsackBundleOutput& LagRelaxKnapsackBundleOutput::algorithm_end(Info& info)
 {
-    Output::algorithm_end(info);
     //PUT(info, "Algorithm", "Iterations", it);
+    Output::algorithm_end(info);
     //VER(info, "Iterations: " << it << std::endl);
     return *this;
 }

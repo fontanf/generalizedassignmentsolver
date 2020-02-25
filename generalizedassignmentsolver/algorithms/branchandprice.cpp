@@ -9,8 +9,8 @@ using namespace generalizedassignmentsolver;
 
 BranchAndPriceOutput& BranchAndPriceOutput::algorithm_end(Info& info)
 {
-    Output::algorithm_end(info);
     PUT(info, "Algorithm", "NodeNumber", node_number);
+    Output::algorithm_end(info);
     VER(info, "Nodes: " << node_number << std::endl);
     return *this;
 }

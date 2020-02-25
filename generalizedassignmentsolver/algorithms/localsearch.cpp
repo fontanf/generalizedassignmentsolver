@@ -12,8 +12,8 @@ using namespace generalizedassignmentsolver;
 
 LocalSearchOutput& LocalSearchOutput::algorithm_end(Info& info)
 {
-    Output::algorithm_end(info);
     PUT(info, "Algorithm", "Iterations", it);
+    Output::algorithm_end(info);
     VER(info, "Iterations: " << it << std::endl);
     return *this;
 }
@@ -81,10 +81,10 @@ LocalSearchOutput generalizedassignmentsolver::localsearch(const Instance& ins, 
 
 TabuSearchOutput& TabuSearchOutput::algorithm_end(Info& info)
 {
-    Output::algorithm_end(info);
     PUT(info, "Algorithm", "Iterations", it);
     PUT(info, "Algorithm", "Improving", improving_move_number);
     PUT(info, "Algorithm", "Degrading", degrading_move_number);
+    Output::algorithm_end(info);
     VER(info, "Iterations: " << it << std::endl);
     VER(info, "Improving: " << improving_move_number << std::endl);
     VER(info, "Degrading: " << degrading_move_number << std::endl);
@@ -224,8 +224,8 @@ TabuSearchOutput generalizedassignmentsolver::tabusearch(const Instance& ins, st
 
 SimulatedAnnealingOutput& SimulatedAnnealingOutput::algorithm_end(Info& info)
 {
-    Output::algorithm_end(info);
     PUT(info, "Algorithm", "Iterations", it);
+    Output::algorithm_end(info);
     VER(info, "Iterations: " << it << std::endl);
     return *this;
 }

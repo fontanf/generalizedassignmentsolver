@@ -24,8 +24,8 @@ using namespace generalizedassignmentsolver;
 
 LagRelaxAssignmentVolumeOutput& LagRelaxAssignmentVolumeOutput::algorithm_end(Info& info)
 {
-    Output::algorithm_end(info);
     //PUT(info, "Algorithm", "Iterations", it);
+    Output::algorithm_end(info);
     //VER(info, "Iterations: " << it << std::endl);
     return *this;
 }
@@ -236,8 +236,8 @@ LagRelaxAssignmentVolumeOutput generalizedassignmentsolver::lagrelax_assignment_
 
 LagRelaxKnapsackVolumeOutput& LagRelaxKnapsackVolumeOutput::algorithm_end(Info& info)
 {
-    Output::algorithm_end(info);
     //PUT(info, "Algorithm", "Iterations", it);
+    Output::algorithm_end(info);
     //VER(info, "Iterations: " << it << std::endl);
     return *this;
 }

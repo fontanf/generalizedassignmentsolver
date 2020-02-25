@@ -20,8 +20,8 @@ typedef matrix<double,0,1> column_vector;
 
 LagRelaxAssignmentLbfgsOutput& LagRelaxAssignmentLbfgsOutput::algorithm_end(Info& info)
 {
-    Output::algorithm_end(info);
     //PUT(info, "Algorithm", "Iterations", it);
+    Output::algorithm_end(info);
     //VER(info, "Iterations: " << it << std::endl);
     return *this;
 }
@@ -187,8 +187,8 @@ LagRelaxAssignmentLbfgsOutput generalizedassignmentsolver::lagrelax_assignment_l
 
 LagRelaxKnapsackLbfgsOutput& LagRelaxKnapsackLbfgsOutput::algorithm_end(Info& info)
 {
-    Output::algorithm_end(info);
     //PUT(info, "Algorithm", "Iterations", it);
+    Output::algorithm_end(info);
     //VER(info, "Iterations: " << it << std::endl);
     return *this;
 }
