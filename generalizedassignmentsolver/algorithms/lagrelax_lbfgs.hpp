@@ -19,27 +19,27 @@ struct LagRelaxAssignmentLbfgsOptionalParameters
 
 struct LagRelaxAssignmentLbfgsOutput: Output
 {
-    LagRelaxAssignmentLbfgsOutput(const Instance& ins, Info& info): Output(ins, info) { }
+    LagRelaxAssignmentLbfgsOutput(const Instance& instance, Info& info): Output(instance, info) { }
     LagRelaxAssignmentLbfgsOutput& algorithm_end(Info& info);
 
-    std::vector<double> x; // vector of size ins.alternative_number()
-    std::vector<double> multipliers; // vector of size ins.item_number()
+    std::vector<double> x; // vector of size instance.alternative_number()
+    std::vector<double> multipliers; // vector of size instance.item_number()
 };
 
-LagRelaxAssignmentLbfgsOutput lagrelax_assignment_lbfgs(const Instance& ins, LagRelaxAssignmentLbfgsOptionalParameters p = {});
+LagRelaxAssignmentLbfgsOutput lagrelax_assignment_lbfgs(const Instance& instance, LagRelaxAssignmentLbfgsOptionalParameters p = {});
 
 /*************************** lagrelax_knapsack_lbfgs **************************/
 
 struct LagRelaxKnapsackLbfgsOutput: Output
 {
-    LagRelaxKnapsackLbfgsOutput(const Instance& ins, Info& info): Output(ins, info) { }
+    LagRelaxKnapsackLbfgsOutput(const Instance& instance, Info& info): Output(instance, info) { }
     LagRelaxKnapsackLbfgsOutput& algorithm_end(Info& info);
 
-    std::vector<double> x; // vector of size ins.alternative_number()
-    std::vector<double> multipliers; // vector of size ins.agent_number()
+    std::vector<double> x; // vector of size instance.alternative_number()
+    std::vector<double> multipliers; // vector of size instance.agent_number()
 };
 
-LagRelaxKnapsackLbfgsOutput lagrelax_knapsack_lbfgs(const Instance& ins, Info info = Info());
+LagRelaxKnapsackLbfgsOutput lagrelax_knapsack_lbfgs(const Instance& instance, Info info = Info());
 
 }
 
