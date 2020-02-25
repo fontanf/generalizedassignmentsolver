@@ -9,13 +9,13 @@ namespace generalizedassignmentsolver
 
 struct LinRelaxClpOutput: Output
 {
-    LinRelaxClpOutput(const Instance& ins, Info& info): Output(ins, info) { }
+    LinRelaxClpOutput(const Instance& instance, Info& info): Output(instance, info) { }
     LinRelaxClpOutput& algorithm_end(Info& info);
 
     std::vector<double> x;
 };
 
-LinRelaxClpOutput linrelax_clp(const Instance& ins, Info info = Info());
+LinRelaxClpOutput linrelax_clp(const Instance& instance, Info info = Info());
 
 }
 
