@@ -146,12 +146,7 @@ Update `.bashrc`:
 export COINOR_HOME="/home/florian/Programmes/coinbrew"
 export PATH="${PATH}:${COINOR_HOME}/dist/bin"
 export CPLUS_INCLUDE_PATH="${CPLUS_INCLUDE_PATH}:${COINOR_HOME}/dist/include"
-```
-
-Create symlinks for libraries:
-```shell
-LIB_DIR="/usr/lib/x86_64-linux-gnu/"
-for i in "${COINOR_HOME}"/dist/lib/*.so*; do sudo ln -f -s "$i" "${LIB_DIR}"; done
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${COINOR_HOME}/dist/lib"
 ```
 
 ### Gecode
@@ -169,12 +164,7 @@ Update `.bashrc`:
 # Gecode
 export GECODE_HOME="/opt/gecode-release-6.2.0"
 export CPLUS_INCLUDE_PATH="${CPLUS_INCLUDE_PATH}:${GECODE_HOME}"
-```
-
-Create symlinks for libraries:
-```shell
-LIB_DIR="/usr/lib/x86_64-linux-gnu/"
-for i in "${GECODE_HOME}"/*.so*; do sudo ln -f -s "$i" "${LIB_DIR}"; done
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${GECODE_HOME}"
 ```
 
 ### DLib
@@ -191,12 +181,7 @@ Update `.bashrc`:
 # DLib
 export DLIB_HOME="/home/florian/Programmes/dlib"
 export CPLUS_INCLUDE_PATH="${CPLUS_INCLUDE_PATH}:${DLIB_HOME}"
-```
-
-Create symlinks for libraries:
-```shell
-LIB_DIR="/usr/lib/x86_64-linux-gnu/"
-sudo ln -f -s "${DLIB_HOME}/build/dlib/libdlib.a" "${LIB_DIR}"
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${DLIB_HOME}/build/dlib"
 ```
 
 ### CPLEX
@@ -211,16 +196,9 @@ export CLASSPATH="$CLASSPATH:${CPLEX_HOME}/cplex/lib/cplex.jar"
 export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:${CPLEX_HOME}/cplex/include"
 export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:${CPLEX_HOME}/concert/include"
 export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:${CPLEX_HOME}/cpoptimizer/include"
-```
-
-Create symlinks for libraries:
-```shell
-LIB_DIR="/usr/lib/x86_64-linux-gnu/"
-sudo ln -f -s "${CPLEX_HOME}/cplex/lib/x86-64_linux/static_pic/libcplex.a"        "${LIB_DIR}"
-sudo ln -f -s "${CPLEX_HOME}/cplex/lib/x86-64_linux/static_pic/libilocplex.a"     "${LIB_DIR}"
-sudo ln -f -s "${CPLEX_HOME}/cplex/lib/x86-64_linux/static_pic/libcplexdistmip.a" "${LIB_DIR}"
-sudo ln -f -s "${CPLEX_HOME}/concert/lib/x86-64_linux/static_pic/libconcert.a"    "${LIB_DIR}"
-sudo ln -f -s "${CPLEX_HOME}/cpoptimizer/lib/x86-64_linux/static_pic/libcp.a"     "${LIB_DIR}"
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${CPLEX_HOME}/concert/lib/x86-64_linux/static_pic"
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${CPLEX_HOME}/cplex/lib/x86-64_linux/static_pic"
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${CPLEX_HOME}/cpoptimizer/lib/x86-64_linux/static_pic"
 ```
 
 ### Gurobi
@@ -232,6 +210,7 @@ export GUROBI_HOME="/home/florian/Programmes/gurobi811"
 export GRB_LICENSE_FILE=/home/florian/gurobi.lic
 export PATH="${PATH}:${GUROBI_HOME}/linux64/bin"
 export CPLUS_INCLUDE_PATH="${CPLUS_INCLUDE_PATH}:${GUROBI_HOME}/linux64/include"
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${GUROBI_HOME}/linux64/lib"
 ```
 
 Execute the following commands:
@@ -241,13 +220,6 @@ make
 cp libgurobi_c++.a ../../lib/
 ```
 
-Create symlinks for libraries:
-```shell
-LIB_DIR="/usr/lib/x86_64-linux-gnu/"
-sudo ln -f -s "${GUROBI_HOME}/linux64/lib/libgurobi_c++.a" "${LIB_DIR}"
-sudo ln -f -s "${GUROBI_HOME}/linux64/lib/libgurobi81.so"  "${LIB_DIR}"
-```
-
 ### LocalSolver
 
 Update `.bashrc`:
@@ -255,11 +227,5 @@ Update `.bashrc`:
 # LocalSolver
 export LOCALSOLVER_HOME="/opt/localsolver_8_5"
 export CPLUS_INCLUDE_PATH="${CPLUS_INCLUDE_PATH}:${LOCALSOLVER_HOME}/include"
-```
-
-Create symlinks for libraries:
-```shell
-LIB_DIR="/usr/lib/x86_64-linux-gnu/"
-for i in "${LOCALSOLVER_HOME}"/bin/*.so*; do sudo ln -f -s "$i" "${LIB_DIR}"; done
 ```
 

@@ -1,9 +1,21 @@
 build --cxxopt='-std=c++17' --compilation_mode=opt
-build --define coinor=true
-#build --define ortools=true
-build --define cplex=true
-build --define gurobi=true
-build --define gecode=true
-build --define dlib=true
+
+#build --define coinor=true
+#build --linkopt='-L /home/florian/Programmes/coinbrew/dist/lib'
+
+#build --define cplex=true
+#build --linkopt='-L /opt/ibm/ILOG/CPLEX_Studio129/concert/lib/x86-64_linux/static_pic'
+#build --linkopt='-L /opt/ibm/ILOG/CPLEX_Studio129/cplex/lib/x86-64_linux/static_pic'
+#build --linkopt='-L /opt/ibm/ILOG/CPLEX_Studio129/cpoptimizer/lib/x86-64_linux/static_pic'
+
+#build --define gurobi=true
+#build --linkopt='-L /home/florian/Programmes/gurobi811/linux64/lib'
+
+#build --define gecode=true
+#build --linkopt='-L /home/florian/Programmes/gecode-release-6.2.0'
+
+#build --define dlib=true
+#build --linkopt='-L /home/florian/Programmes/dlib/build/dlib'
+
 #build --define localsolver=true
 
