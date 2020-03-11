@@ -14,7 +14,7 @@ namespace generalizedassignmentsolver
 
 struct CoinLP
 {
-    CoinLP(const Instance& ins);
+    CoinLP(const Instance& instance);
 
     std::vector<double> col_lower;
     std::vector<double> col_upper;
@@ -35,11 +35,11 @@ struct BranchAndCutCbcOptionalParameters
 
 struct BranchAndCutCbcOutput: Output
 {
-    BranchAndCutCbcOutput(const Instance& ins, Info& info): Output(ins, info) { }
+    BranchAndCutCbcOutput(const Instance& instance, Info& info): Output(instance, info) { }
     BranchAndCutCbcOutput& algorithm_end(Info& info);
 };
 
-BranchAndCutCbcOutput branchandcut_cbc(const Instance& ins, BranchAndCutCbcOptionalParameters p = {});
+BranchAndCutCbcOutput branchandcut_cbc(const Instance& instance, BranchAndCutCbcOptionalParameters p = {});
 
 }
 
