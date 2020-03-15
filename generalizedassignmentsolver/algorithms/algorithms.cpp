@@ -135,12 +135,10 @@ std::function<Output (Instance&, std::mt19937_64&, Info)> generalizedassignments
             return lagrelax_knapsack_bundle(ins, info);
         };
 #endif
-#if DLIB_FOUND
     } else if (algorithm_args[0] == "lagrelax_knapsack_lbfgs") {
         return [](Instance& ins, std::mt19937_64&, Info info) {
             return lagrelax_knapsack_lbfgs(ins, info);
         };
-#endif
 #if COINOR_FOUND
     } else if (algorithm_args[0] == "lagrelax_assignment_volume") {
         return [](Instance& ins, std::mt19937_64&, Info info) {
@@ -153,14 +151,12 @@ std::function<Output (Instance&, std::mt19937_64&, Info)> generalizedassignments
             return lagrelax_assignment_bundle(ins, info);
         };
 #endif
-#if DLIB_FOUND
     } else if (algorithm_args[0] == "lagrelax_assignment_lbfgs") {
         return [](Instance& ins, std::mt19937_64&, Info info) {
             LagRelaxAssignmentLbfgsOptionalParameters p;
             p.info = info;
             return lagrelax_assignment_lbfgs(ins, p);
         };
-#endif
     } else if (algorithm_args[0] == "columngeneration") {
         return [algorithm_argv](Instance& ins, std::mt19937_64&, Info info) {
             ColGenOptionalParameters p = read_columngeneration_args(algorithm_argv);

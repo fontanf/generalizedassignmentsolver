@@ -1,12 +1,10 @@
 config_setting(name = "coinor_build",      values = {"define": "coinor=true"},      visibility = ["//visibility:public"])
-config_setting(name = "dlib_build",        values = {"define": "dlib=true"},        visibility = ["//visibility:public"])
 config_setting(name = "cplex_build",       values = {"define": "cplex=true"},       visibility = ["//visibility:public"])
 config_setting(name = "gurobi_build",      values = {"define": "gurobi=true"},      visibility = ["//visibility:public"])
 config_setting(name = "localsolver_build", values = {"define": "localsolver=true"}, visibility = ["//visibility:public"])
 config_setting(name = "gecode_build",      values = {"define": "gecode=true"},      visibility = ["//visibility:public"])
 
 load("//generalizedassignmentsolver:variables.bzl", "STDCPP",
-         "DLIB_COPTS", "DLIB_LINKOPTS",
          "COINOR_COPTS", "COINOR_LINKOPTS",
          "CPLEX_COPTS", "CPLEX_LINKOPTS",
          "GUROBI_COPTS", "GUROBI_LINKOPTS",

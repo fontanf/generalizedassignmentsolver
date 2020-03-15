@@ -1,10 +1,9 @@
 load("//generalizedassignmentsolver:variables.bzl", "STDCPP",
-     "DLIB_COPTS", "DLIB_LINKOPTS",
-     "COINOR_COPTS", "COINOR_LINKOPTS",
-     "CPLEX_COPTS", "CPLEX_LINKOPTS",
-     "GUROBI_COPTS", "GUROBI_LINKOPTS",
-     "GECODE_COPTS", "GECODE_LINKOPTS",
-     "LOCALSOLVER_COPTS", "LOCALSOLVER_LINKOPTS")
+         "COINOR_COPTS", "COINOR_LINKOPTS",
+         "CPLEX_COPTS", "CPLEX_LINKOPTS",
+         "GUROBI_COPTS", "GUROBI_LINKOPTS",
+         "GECODE_COPTS", "GECODE_LINKOPTS",
+         "LOCALSOLVER_COPTS", "LOCALSOLVER_LINKOPTS")
 
 cc_library(
         name = "linrelax_clp",
@@ -114,9 +113,8 @@ cc_library(
                 "//generalizedassignmentsolver:generalizedassignmentsolver",
                 "@knapsacksolver//knapsacksolver/algorithms:minknap",
                 "@knapsacksolver//knapsacksolver/algorithms:bellman",
+                "@dlib//:dlib",
         ],
-        copts = DLIB_COPTS,
-        linkopts = DLIB_LINKOPTS,
         visibility = ["//visibility:public"],
 )
 
@@ -127,7 +125,6 @@ cc_test(
                 "//generalizedassignmentsolver:tester",
                 ":lagrelax_lbfgs",
         ],
-        copts = DLIB_COPTS,
         timeout = "moderate",
 )
 
@@ -421,7 +418,7 @@ cc_library(
                 ":localsolver",
                 ":colgenheuristics",
         ],
-        copts = DLIB_COPTS + COINOR_COPTS + CPLEX_COPTS + GUROBI_COPTS + GECODE_COPTS + LOCALSOLVER_COPTS,
+        copts = COINOR_COPTS + CPLEX_COPTS + GUROBI_COPTS + GECODE_COPTS + LOCALSOLVER_COPTS,
         visibility = ["//visibility:public"],
 )
 

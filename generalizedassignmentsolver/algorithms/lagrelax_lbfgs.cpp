@@ -1,5 +1,3 @@
-#if DLIB_FOUND
-
 #include "generalizedassignmentsolver/algorithms/lagrelax_lbfgs.hpp"
 
 #include "knapsacksolver/algorithms/minknap.hpp"
@@ -311,6 +309,4 @@ LagRelaxKnapsackLbfgsOutput generalizedassignmentsolver::lagrelax_knapsack_lbfgs
 
     return output.algorithm_end(info);
 }
-
-#endif
 

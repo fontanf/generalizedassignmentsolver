@@ -31,6 +31,20 @@ cc_library(
     sha256 = "87b5884741427220d3a33df1363ae0e8b898099fbc59f1c451113f6732891014",
 )
 
+http_archive(
+    name = "dlib",
+    build_file_content = """
+cc_library(
+        name = "dlib",
+        hdrs = ["dlib-19.19/dlib/all/source.cpp"],
+        visibility = ["//visibility:public"],
+        strip_include_prefix = "dlib-19.19/",
+)
+""",
+    urls = ["http://dlib.net/files/dlib-19.19.tar.bz2"],
+    sha256 = "1decfe883635ce51acd72869cebe870ab9b85eb094d417adc8f48aa7b8c60cd7",
+)
+
 git_repository(
     name = "benchtools",
     remote = "https://github.com/fontanf/benchtools.git",

@@ -20,10 +20,6 @@ build --compilation_mode=opt
 #build --define gecode=true
 #build --linkopt='-L /home/florian/Programmes/gecode-release-6.2.0'
 
-# DLib
-#build --define dlib=true
-#build --linkopt='-L /home/florian/Programmes/dlib/build/dlib'
-
 # LocalSolver
 #build --define localsolver=true
 

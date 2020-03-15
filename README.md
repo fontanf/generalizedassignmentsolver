@@ -170,23 +170,6 @@ export CPLUS_INCLUDE_PATH="${CPLUS_INCLUDE_PATH}:${GECODE_HOME}"
 export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${GECODE_HOME}"
 ```
 
-### DLib
-
-Download and compile
-```shell
-git clone https://github.com/davisking/dlib.git
-cd dlib
-mkdir build; cd build; cmake .. ; cmake --build .
-```
-
-Update `.bashrc`:
-```shell
-# DLib
-export DLIB_HOME="/home/florian/Programmes/dlib"
-export CPLUS_INCLUDE_PATH="${CPLUS_INCLUDE_PATH}:${DLIB_HOME}"
-export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${DLIB_HOME}/build/dlib"
-```
-
 ### CPLEX
 
 Update `.bashrc`:

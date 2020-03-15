@@ -1,7 +1,5 @@
 #pragma once
 
-#if DLIB_FOUND
-
 #include "generalizedassignmentsolver/solution.hpp"
 
 namespace generalizedassignmentsolver
@@ -42,6 +40,4 @@ struct LagRelaxKnapsackLbfgsOutput: Output
 LagRelaxKnapsackLbfgsOutput lagrelax_knapsack_lbfgs(const Instance& instance, Info info = Info());
 
 }
-
-#endif
 
