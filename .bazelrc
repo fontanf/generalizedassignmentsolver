@@ -1,21 +1,29 @@
-build --cxxopt='-std=c++17' --compilation_mode=opt
+build --compilation_mode=opt
 
+############################ Optional dependencies #############################
+
+# COIN-OR
 #build --define coinor=true
 #build --linkopt='-L /home/florian/Programmes/coinbrew/dist/lib'
 
+# CPlex
 #build --define cplex=true
 #build --linkopt='-L /opt/ibm/ILOG/CPLEX_Studio129/concert/lib/x86-64_linux/static_pic'
 #build --linkopt='-L /opt/ibm/ILOG/CPLEX_Studio129/cplex/lib/x86-64_linux/static_pic'
 #build --linkopt='-L /opt/ibm/ILOG/CPLEX_Studio129/cpoptimizer/lib/x86-64_linux/static_pic'
 
+# Gurobi
 #build --define gurobi=true
 #build --linkopt='-L /home/florian/Programmes/gurobi811/linux64/lib'
 
+# Gecode
 #build --define gecode=true
 #build --linkopt='-L /home/florian/Programmes/gecode-release-6.2.0'
 
+# DLib
 #build --define dlib=true
 #build --linkopt='-L /home/florian/Programmes/dlib/build/dlib'
 
+# LocalSolver
 #build --define localsolver=true
 

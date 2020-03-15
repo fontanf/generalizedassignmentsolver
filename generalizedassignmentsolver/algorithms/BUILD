@@ -1,3 +1,11 @@
+load("//generalizedassignmentsolver:variables.bzl", "STDCPP",
+     "DLIB_COPTS", "DLIB_LINKOPTS",
+     "COINOR_COPTS", "COINOR_LINKOPTS",
+     "CPLEX_COPTS", "CPLEX_LINKOPTS",
+     "GUROBI_COPTS", "GUROBI_LINKOPTS",
+     "GECODE_COPTS", "GECODE_LINKOPTS",
+     "LOCALSOLVER_COPTS", "LOCALSOLVER_LINKOPTS")
+
 cc_library(
         name = "linrelax_clp",
         hdrs = ["linrelax_clp.hpp"],
@@ -6,16 +14,8 @@ cc_library(
                 "//generalizedassignmentsolver:generalizedassignmentsolver",
                 ":branchandcut_cbc",
         ],
-        copts = select({"//generalizedassignmentsolver:coinor_build": ["-DCOINOR_FOUND"], "//conditions:default": []}),
-        linkopts = select({
-                "//generalizedassignmentsolver:coinor_build": [
-                        "-lClp",
-                        "-lOsiClp",
-                        "-lCoinUtils",
-                ],
-                "//conditions:default": [
-                ],
-        }),
+        copts = COINOR_COPTS,
+        linkopts = COINOR_LINKOPTS,
         visibility = ["//visibility:public"],
 )
 
@@ -26,7 +26,7 @@ cc_test(
                 "//generalizedassignmentsolver:tester",
                 ":linrelax_clp",
         ],
-        copts = select({"//generalizedassignmentsolver:coinor_build": ["-DCOINOR_FOUND"], "//conditions:default": []}),
+        copts = COINOR_COPTS,
         timeout = "moderate",
 )
 
@@ -36,10 +36,7 @@ cc_library(
         name = "linrelax_gurobi",
         hdrs = ["linrelax_gurobi.hpp"],
         srcs = ["linrelax_gurobi.cpp"],
-        copts = [
-                "-m64",
-                "-DIL_STD",
-        ] + select({"//generalizedassignmentsolver:gurobi_build": ["-DGUROBI_FOUND"], "//conditions:default": []}),
+        copts = GUROBI_COPTS,
         deps = ["//generalizedassignmentsolver:generalizedassignmentsolver"],
         visibility = ["//visibility:public"],
 )
@@ -51,12 +48,8 @@ cc_test(
                 "//generalizedassignmentsolver:tester",
                 ":linrelax_gurobi",
         ],
-        copts = select({"//generalizedassignmentsolver:gurobi_build": ["-DGUROBI_FOUND"], "//conditions:default": []}),
-        linkopts = select({"//generalizedassignmentsolver:gurobi_build": [
-                        "-lgurobi_c++",
-                        "-lgurobi81",
-                ], "//conditions:default": [ ],
-        }),
+        copts = GUROBI_COPTS,
+        linkopts = GUROBI_LINKOPTS,
         timeout = "moderate",
 )
 
@@ -70,16 +63,8 @@ cc_library(
                 "//generalizedassignmentsolver:generalizedassignmentsolver",
                 "@knapsacksolver//knapsacksolver/algorithms:minknap",
         ],
-        copts = select({"//generalizedassignmentsolver:coinor_build": ["-DCOINOR_FOUND"], "//conditions:default": []}),
-        linkopts = select({
-                "//generalizedassignmentsolver:coinor_build": [
-                        "-lClp",
-                        "-lOsiClp",
-                        "-lCoinUtils",
-                ],
-                "//conditions:default": [
-                ],
-        }),
+        copts = COINOR_COPTS,
+        linkopts = COINOR_LINKOPTS,
         visibility = ["//visibility:public"],
 )
 
@@ -90,7 +75,7 @@ cc_test(
                 "//generalizedassignmentsolver:tester",
                 ":lagrelax_bundle",
         ],
-        copts = select({"//generalizedassignmentsolver:coinor_build": ["-DCOINOR_FOUND"], "//conditions:default": []}),
+        copts = COINOR_COPTS,
         timeout = "moderate",
 )
 
@@ -104,15 +89,8 @@ cc_library(
                 "//generalizedassignmentsolver:generalizedassignmentsolver",
                 "@knapsacksolver//knapsacksolver/algorithms:minknap",
         ],
-        copts = select({"//generalizedassignmentsolver:coinor_build": ["-DCOINOR_FOUND"], "//conditions:default": []}),
-        linkopts = select({
-                "//generalizedassignmentsolver:coinor_build": [
-                        "-lVol",
-                        "-lCoinUtils",
-                ],
-                "//conditions:default": [
-                ],
-        }),
+        copts = COINOR_COPTS,
+        linkopts = COINOR_LINKOPTS,
         visibility = ["//visibility:public"],
 )
 
@@ -137,14 +115,8 @@ cc_library(
                 "@knapsacksolver//knapsacksolver/algorithms:minknap",
                 "@knapsacksolver//knapsacksolver/algorithms:bellman",
         ],
-        copts = select({"//generalizedassignmentsolver:dlib_build": ["-DDLIB_FOUND"], "//conditions:default": []}),
-        linkopts = select({
-                "//generalizedassignmentsolver:dlib_build": [
-                        "-ldlib",
-                ],
-                "//conditions:default": [
-                ],
-        }),
+        copts = DLIB_COPTS,
+        linkopts = DLIB_LINKOPTS,
         visibility = ["//visibility:public"],
 )
 
@@ -155,7 +127,7 @@ cc_test(
                 "//generalizedassignmentsolver:tester",
                 ":lagrelax_lbfgs",
         ],
-        copts = select({"//generalizedassignmentsolver:dlib_build": ["-DDLIB_FOUND"], "//conditions:default": []}),
+        copts = DLIB_COPTS,
         timeout = "moderate",
 )
 
@@ -204,7 +176,7 @@ cc_library(
                 ":linrelax_clp",
                 ":random",
         ],
-        copts = select({"//generalizedassignmentsolver:coinor_build": ["-DCOINOR_FOUND"], "//conditions:default": []}),
+        copts = COINOR_COPTS,
         visibility = ["//visibility:public"],
 )
 
@@ -219,27 +191,8 @@ cc_library(
                 "@knapsacksolver//knapsacksolver/algorithms:minknap",
                 "@knapsacksolver//knapsacksolver/algorithms:bellman",
         ],
-        copts = [
-                "-m64",
-                "-DIL_STD",
-        ] + select({"//generalizedassignmentsolver:cplex_build": ["-DCPLEX_FOUND"], "//conditions:default": []})
-          + select({"//generalizedassignmentsolver:coinor_build": ["-DCOINOR_FOUND"], "//conditions:default": []}),
-        linkopts = select({
-                "//generalizedassignmentsolver:cplex_build": [
-                        "-lconcert",
-                        "-lilocplex",
-                        "-lcplex",
-                        "-lm",
-                        "-lpthread",
-                        "-ldl",
-                ],
-                "//conditions:default": [
-                ],
-        }) + select({"//generalizedassignmentsolver:coinor_build": [
-                        "-lClp",
-                        "-lOsiClp",
-                        "-lCoinUtils",
-                ], "//conditions:default": []}),
+        copts = CPLEX_COPTS + COINOR_COPTS,
+        linkopts = CPLEX_LINKOPTS + COINOR_LINKOPTS,
         visibility = ["//visibility:public"],
 )
 
@@ -250,8 +203,7 @@ cc_test(
                 "//generalizedassignmentsolver:tester",
                 ":columngeneration",
         ],
-        copts = select({"//generalizedassignmentsolver:cplex_build":  ["-DCPLEX_FOUND"],  "//conditions:default": []})
-              + select({"//generalizedassignmentsolver:coinor_build": ["-DCOINOR_FOUND"], "//conditions:default": []}),
+        copts = CPLEX_COPTS + COINOR_COPTS,
         timeout = "moderate",
 )
 
@@ -265,7 +217,7 @@ cc_library(
                 ":columngeneration",
                 ":greedy",
         ],
-        copts = select({"//generalizedassignmentsolver:coinor_build": ["-DCOINOR_FOUND"], "//conditions:default": []}),
+        copts = STDCPP + COINOR_COPTS,
         visibility = ["//visibility:public"],
 )
 
@@ -276,7 +228,7 @@ cc_test(
                 "//generalizedassignmentsolver:tester",
                 ":colgenheuristics",
         ],
-        copts = select({"//generalizedassignmentsolver:coinor_build": ["-DCOINOR_FOUND"], "//conditions:default": []}),
+        copts = COINOR_COPTS,
         timeout = "moderate",
 )
 
@@ -287,15 +239,8 @@ cc_library(
         hdrs = ["localsolver.hpp"],
         srcs = ["localsolver.cpp"],
         deps = ["//generalizedassignmentsolver:generalizedassignmentsolver"],
-        copts = select({"//generalizedassignmentsolver:localsolver_build": ["-DLOCALSOLVER_FOUND"], "//conditions:default": []}),
-        linkopts = select({
-                "//generalizedassignmentsolver:localsolver_build": [
-                        "-llocalsolver",
-                        "-lpthread",
-                ],
-                "//conditions:default": [
-                ],
-        }),
+        copts = LOCALSOLVER_COPTS,
+        linkopts = LOCALSOLVER_LINKOPTS,
         visibility = ["//visibility:public"],
 )
 
@@ -316,18 +261,8 @@ cc_library(
         hdrs = ["branchandcut_cbc.hpp"],
         srcs = ["branchandcut_cbc.cpp"],
         deps = ["//generalizedassignmentsolver:generalizedassignmentsolver"],
-        copts = select({"//generalizedassignmentsolver:coinor_build": ["-DCOINOR_FOUND"], "//conditions:default": []}),
-        linkopts = select({
-                "//generalizedassignmentsolver:coinor_build": [
-                        "-lCbcSolver",
-                        "-lCbc",
-                        "-lCgl",
-                        "-lOsiCbc",
-                        "-lCoinUtils",
-                ],
-                "//conditions:default": [
-                ],
-        }),
+        copts = COINOR_COPTS,
+        linkopts = COINOR_LINKOPTS,
         visibility = ["//visibility:public"],
 )
 
@@ -338,7 +273,7 @@ cc_test(
                 "//generalizedassignmentsolver:tester",
                 ":branchandcut_cbc",
         ],
-        copts = select({"//generalizedassignmentsolver:coinor_build": ["-DCOINOR_FOUND"], "//conditions:default": []}),
+        copts = COINOR_COPTS,
         timeout = "moderate",
 )
 
@@ -349,22 +284,8 @@ cc_library(
         hdrs = ["branchandcut_cplex.hpp"],
         srcs = ["branchandcut_cplex.cpp"],
         deps = ["//generalizedassignmentsolver:generalizedassignmentsolver"],
-        copts = [
-                "-m64",
-                "-DIL_STD",
-        ] + select({"//generalizedassignmentsolver:cplex_build": ["-DCPLEX_FOUND"], "//conditions:default": []}),
-        linkopts = select({
-                "//generalizedassignmentsolver:cplex_build": [
-                        "-lconcert",
-                        "-lilocplex",
-                        "-lcplex",
-                        "-lm",
-                        "-lpthread",
-                        "-ldl",
-                ],
-                "//conditions:default": [
-                ],
-        }),
+        copts = CPLEX_COPTS,
+        linkopts = CPLEX_LINKOPTS,
         visibility = ["//visibility:public"],
 )
 
@@ -375,7 +296,7 @@ cc_test(
                 "//generalizedassignmentsolver:tester",
                 ":branchandcut_cplex",
         ],
-        copts = select({"//generalizedassignmentsolver:cplex_build": ["-DCPLEX_FOUND"], "//conditions:default": []}),
+        copts = COINOR_COPTS,
         timeout = "moderate",
 )
 
@@ -386,10 +307,7 @@ cc_library(
         hdrs = ["branchandcut_gurobi.hpp"],
         srcs = ["branchandcut_gurobi.cpp"],
         deps = ["//generalizedassignmentsolver:generalizedassignmentsolver"],
-        copts = [
-                "-m64",
-                "-DIL_STD",
-        ] + select({"//generalizedassignmentsolver:gurobi_build": ["-DGUROBI_FOUND"], "//conditions:default": []}),
+        copts = GUROBI_COPTS,
         visibility = ["//visibility:public"],
 )
 
@@ -400,12 +318,8 @@ cc_test(
                 "//generalizedassignmentsolver:tester",
                 ":branchandcut_gurobi",
         ],
-        copts = select({"//generalizedassignmentsolver:gurobi_build": ["-DGUROBI_FOUND"], "//conditions:default": []}),
-        linkopts = select({"//generalizedassignmentsolver:gurobi_build": [
-                        "-lgurobi_c++",
-                        "-lgurobi81",
-                ], "//conditions:default": [ ],
-        }),
+        copts = GUROBI_COPTS,
+        linkopts = GUROBI_LINKOPTS,
         timeout = "moderate",
 )
 
@@ -419,7 +333,7 @@ cc_library(
                 ":columngeneration",
                 ":greedy",
         ],
-        copts = select({"//generalizedassignmentsolver:coinor_build": ["-DCOINOR_FOUND"], "//conditions:default": []}),
+        copts = STDCPP + COINOR_COPTS,
         visibility = ["//visibility:public"],
 )
 
@@ -430,7 +344,7 @@ cc_test(
                 "//generalizedassignmentsolver:tester",
                 ":branchandprice",
         ],
-        copts = select({"//generalizedassignmentsolver:coinor_build": ["-DCOINOR_FOUND"], "//conditions:default": []}),
+        copts = COINOR_COPTS,
         timeout = "moderate",
 )
 
@@ -441,23 +355,8 @@ cc_library(
         hdrs = ["constraintprogramming_cplex.hpp"],
         srcs = ["constraintprogramming_cplex.cpp"],
         deps = ["//generalizedassignmentsolver:generalizedassignmentsolver"],
-        copts = [
-                "-m64",
-                "-DIL_STD",
-        ] + select({"//generalizedassignmentsolver:cplex_build": ["-DCPLEX_FOUND"], "//conditions:default": []}),
-        linkopts = select({
-                "//generalizedassignmentsolver:cplex_build": [
-                        "-lcp",
-                        "-lconcert",
-                        "-lilocplex",
-                        "-lcplex",
-                        "-lm",
-                        "-lpthread",
-                        "-ldl",
-                ],
-                "//conditions:default": [
-                ],
-        }),
+        copts = CPLEX_COPTS,
+        linkopts = CPLEX_LINKOPTS,
         visibility = ["//visibility:public"],
 )
 
@@ -468,7 +367,7 @@ cc_test(
                 "//generalizedassignmentsolver:tester",
                 ":constraintprogramming_cplex",
         ],
-        copts = select({"//generalizedassignmentsolver:cplex_build": ["-DCPLEX_FOUND"], "//conditions:default": []}),
+        copts = COINOR_COPTS,
         timeout = "moderate",
 )
 
@@ -479,23 +378,8 @@ cc_library(
         hdrs = ["constraintprogramming_gecode.hpp"],
         srcs = ["constraintprogramming_gecode.cpp"],
         deps = ["//generalizedassignmentsolver:generalizedassignmentsolver"],
-        copts = select({"//generalizedassignmentsolver:gecode_build": ["-DGECODE_FOUND"], "//conditions:default": []}),
-        linkopts = select({
-                "//generalizedassignmentsolver:gecode_build": [
-                        "-lgecodeflatzinc",
-                        "-lgecodedriver",
-                        "-lgecodegist",
-                        "-lgecodesearch",
-                        "-lgecodeminimodel",
-                        "-lgecodeset",
-                        "-lgecodefloat",
-                        "-lgecodeint",
-                        "-lgecodekernel",
-                        "-lgecodesupport",
-                ],
-                "//conditions:default": [
-                ],
-        }),
+        copts = GECODE_COPTS,
+        linkopts = GECODE_LINKOPTS,
         visibility = ["//visibility:public"],
 )
 
@@ -506,7 +390,7 @@ cc_test(
                 "//generalizedassignmentsolver:tester",
                 ":constraintprogramming_gecode",
         ],
-        copts = select({"//generalizedassignmentsolver:gecode_build": ["-DGECODE_FOUND"], "//conditions:default": []}),
+        copts = GECODE_COPTS,
         tags = ["requires-network"],
         timeout = "moderate",
 )
@@ -537,13 +421,7 @@ cc_library(
                 ":localsolver",
                 ":colgenheuristics",
         ],
-        copts = [] +
-            select({"//generalizedassignmentsolver:dlib_build":        ["-DDLIB_FOUND"],        "//conditions:default": []}) +
-            select({"//generalizedassignmentsolver:coinor_build":      ["-DCOINOR_FOUND"],      "//conditions:default": []}) +
-            select({"//generalizedassignmentsolver:cplex_build":       ["-DCPLEX_FOUND"],       "//conditions:default": []}) +
-            select({"//generalizedassignmentsolver:gurobi_build":      ["-DGUROBI_FOUND"],      "//conditions:default": []}) +
-            select({"//generalizedassignmentsolver:gecode_build":      ["-DGECODE_FOUND"],      "//conditions:default": []}) +
-            select({"//generalizedassignmentsolver:localsolver_build": ["-DLOCALSOLVER_FOUND"], "//conditions:default": []}),
+        copts = DLIB_COPTS + COINOR_COPTS + CPLEX_COPTS + GUROBI_COPTS + GECODE_COPTS + LOCALSOLVER_COPTS,
         visibility = ["//visibility:public"],
 )
 

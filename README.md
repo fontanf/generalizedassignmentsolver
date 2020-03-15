@@ -130,6 +130,9 @@ Output files can then be retrieved from `bazel-out/k8-opt/bin/generalizedassignm
 
 ## Optional dependencies
 
+This section describes how to install optional dependencies on Linux.
+To enable a dependency during the compilation, you need to uncomment and adapt the corresponding lines in `.bazelrc`.
+
 ### COIN-OR (CLP, CBC, VOL, DIP)
 
 Install (https://coin-or.github.io/coinbrew/):

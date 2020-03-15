@@ -5,6 +5,14 @@ config_setting(name = "gurobi_build",      values = {"define": "gurobi=true"},  
 config_setting(name = "localsolver_build", values = {"define": "localsolver=true"}, visibility = ["//visibility:public"])
 config_setting(name = "gecode_build",      values = {"define": "gecode=true"},      visibility = ["//visibility:public"])
 
+load("//generalizedassignmentsolver:variables.bzl", "STDCPP",
+         "DLIB_COPTS", "DLIB_LINKOPTS",
+         "COINOR_COPTS", "COINOR_LINKOPTS",
+         "CPLEX_COPTS", "CPLEX_LINKOPTS",
+         "GUROBI_COPTS", "GUROBI_LINKOPTS",
+         "GECODE_COPTS", "GECODE_LINKOPTS",
+         "LOCALSOLVER_COPTS", "LOCALSOLVER_LINKOPTS")
+
 cc_library(
         name = "generalizedassignmentsolver",
         hdrs = [
@@ -17,6 +25,7 @@ cc_library(
                 "solution.cpp",
                 "desirability.cpp",
         ],
+        copts = STDCPP,
         deps = ["@benchtools//:info"],
         visibility = ["//visibility:public"],
 )
@@ -53,12 +62,11 @@ cc_library(
 cc_binary(
         name = "main",
         srcs = ["main.cpp"],
-        deps = ["//generalizedassignmentsolver/algorithms:algorithms"],
-        linkopts = ["-lboost_program_options"] +
-            select({":gurobi_build": [
-                        "-lgurobi_c++",
-                        "-lgurobi81",
-                ], "//conditions:default": [ ], }),
+        deps = [
+                "//generalizedassignmentsolver/algorithms:algorithms",
+                "@boost//:program_options",
+        ],
+        linkopts = GUROBI_LINKOPTS,
         data = ["//data:data"],
 )
 
@@ -81,7 +89,9 @@ cc_binary(
 cc_binary(
         name = "generator_main",
         srcs = ["generator_main.cpp"],
-        deps = [":generator"],
-        linkopts = ["-lboost_program_options"],
+        deps = [
+                ":generator",
+                "@boost//:program_options",
+        ],
 )
 
