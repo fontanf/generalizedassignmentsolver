@@ -16,11 +16,11 @@ struct BranchAndCutCplexOptionalParameters
 
 struct BranchAndCutCplexOutput: Output
 {
-    BranchAndCutCplexOutput(const Instance& ins, Info& info): Output(ins, info) { }
+    BranchAndCutCplexOutput(const Instance& instance, Info& info): Output(instance, info) { }
     BranchAndCutCplexOutput& algorithm_end(Info& info);
 };
 
-BranchAndCutCplexOutput branchandcut_cplex(const Instance& ins, BranchAndCutCplexOptionalParameters p = {});
+BranchAndCutCplexOutput branchandcut_cplex(const Instance& instance, BranchAndCutCplexOptionalParameters p = {});
 
 }
 

@@ -11,7 +11,7 @@ def Settings( **kwargs ):
                 '-DIL_STD', # Cplex
                 '-I', '.',
                 '-I', './bazel-generalizedassignmentsolver/external/json/single_include',
-                '-I', './bazel-generalizedassignmentsolver/external/googletest/googletest-release-1.8.0/googletest/include/',
+                '-I', './bazel-generalizedassignmentsolver/external/googletest/googletest/include/',
                 '-I', './bazel-generalizedassignmentsolver/external/knapsacksolver',
                 '-I', './bazel-generalizedassignmentsolver/external/',
                 ],

@@ -11,12 +11,12 @@ int main(int argc, char *argv[])
     // Parse program options
 
     std::string algorithm = "branchandcut_cbc";
-    std::string instancefile = "";
-    std::string outputfile = "";
+    std::string instance_path = "";
     std::string format = "generalizedassignment_beasley";
-    std::string initsolfile = "";
-    std::string certfile = "";
-    std::string logfile = "";
+    std::string output_path = "";
+    std::string initial_solution_path = "";
+    std::string certificate_path = "";
+    std::string log_path = "";
     int loglevelmax = 999;
     int seed = 0;
     double time_limit = std::numeric_limits<double>::infinity();
@@ -25,15 +25,15 @@ int main(int argc, char *argv[])
     desc.add_options()
         ("help,h", "produce help message")
         ("algorithm,a", po::value<std::string>(&algorithm), "set algorithm")
-        ("input,i", po::value<std::string>(&instancefile)->required(), "set input file (required)")
+        ("input,i", po::value<std::string>(&instance_path)->required(), "set input file (required)")
         ("format,f", po::value<std::string>(&format), "set input file format (default: generalizedassignment_beasley)")
-        ("initsol", po::value<std::string>(&initsolfile), "set initial solution file")
-        ("output,o", po::value<std::string>(&outputfile), "set output file")
-        ("cert,c", po::value<std::string>(&certfile), "set certificate file")
+        ("initsol", po::value<std::string>(&initial_solution_path), "set initial solution file")
+        ("output,o", po::value<std::string>(&output_path), "set output file")
+        ("cert,c", po::value<std::string>(&certificate_path), "set certificate file")
         ("time-limit,t", po::value<double>(&time_limit), "Time limit in seconds\n  ex: 3600")
         ("seed,s", po::value<int>(&seed), "seed")
         ("verbose,v", "")
-        ("log,l", po::value<std::string>(&logfile), "set log file")
+        ("log,l", po::value<std::string>(&log_path), "set log file")
         ("loglevelmax", po::value<int>(&loglevelmax), "set log max level")
         ("log2stderr", "write log in stderr")
         ;
@@ -55,20 +55,20 @@ int main(int argc, char *argv[])
     std::mt19937_64 gen(seed);
     auto func = get_algorithm(algorithm);
 
-    Instance ins(instancefile, format);
+    Instance instance(instance_path, format);
 
     Info info = Info()
         .set_verbose(vm.count("verbose"))
         .set_timelimit(time_limit)
-        .set_certfile(certfile)
-        .set_outputfile(outputfile)
+        .set_certfile(certificate_path)
+        .set_outputfile(output_path)
         .set_onlywriteattheend(true)
-        .set_logfile(logfile)
+        .set_logfile(log_path)
         .set_log2stderr(vm.count("log2stderr"))
         .set_loglevelmax(loglevelmax)
         ;
 
-    func(ins, gen, info);
+    func(instance, gen, info);
 
     return 0;
 }

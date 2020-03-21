@@ -101,10 +101,10 @@ std::function<Output (Instance&, std::mt19937_64&, Info)> generalizedassignments
 {
     std::vector<std::string> algorithm_args = po::split_unix(algorithm);
     std::vector<char*> algorithm_argv;
-    for(Counter i = 0; i < (Counter)algorithm_args.size(); ++i)
+    for (Counter i = 0; i < (Counter)algorithm_args.size(); ++i)
         algorithm_argv.push_back(const_cast<char*>(algorithm_args[i].c_str()));
 
-    if (algorithm_args[0] == "") {
+    if (algorithm.empty() || algorithm_args[0].empty()) {
         std::cerr << "\033[32m" << "ERROR, missing algorithm." << "\033[0m" << std::endl;
         return [](Instance& ins, std::mt19937_64&, Info info) { return Output(ins, info); };
 

@@ -16,11 +16,12 @@ struct BranchAndCutGurobiOptionalParameters
 
 struct BranchAndCutGurobiOutput: Output
 {
-    BranchAndCutGurobiOutput(const Instance& ins, Info& info): Output(ins, info) { }
+    BranchAndCutGurobiOutput(const Instance& instance, Info& info): Output(instance, info) { }
     BranchAndCutGurobiOutput& algorithm_end(Info& info);
 };
 
-BranchAndCutGurobiOutput branchandcut_gurobi(const Instance& ins, BranchAndCutGurobiOptionalParameters p = {});
+BranchAndCutGurobiOutput branchandcut_gurobi(
+        const Instance& instance, BranchAndCutGurobiOptionalParameters p = {});
 
 }
 

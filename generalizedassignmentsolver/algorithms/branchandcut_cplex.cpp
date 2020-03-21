@@ -17,7 +17,7 @@ BranchAndCutCplexOutput& BranchAndCutCplexOutput::algorithm_end(Info& info)
 }
 
 ILOMIPINFOCALLBACK4(loggingCallback,
-                    const Instance&, ins,
+                    const Instance&, instance,
                     BranchAndCutCplexOptionalParameters&, p,
                     BranchAndCutCplexOutput&, output,
                     IloNumVarArray, vars)
@@ -29,25 +29,25 @@ ILOMIPINFOCALLBACK4(loggingCallback,
         return;
 
     if (!output.solution.feasible() || output.solution.cost() > getIncumbentObjValue() + 0.5) {
-        Solution sol_curr(ins);
+        Solution sol_curr(instance);
         IloNumArray val(vars.getEnv());
         getIncumbentValues(val, vars);
-        for (AltIdx k=0; k<ins.alternative_number(); ++k)
+        for (AltIdx k=0; k<instance.alternative_number(); ++k)
             if (val[k] > 0.5)
                 sol_curr.set(k);
         output.update_solution(sol_curr, std::stringstream(""), p.info);
     }
 }
 
-BranchAndCutCplexOutput generalizedassignmentsolver::branchandcut_cplex(const Instance& ins, BranchAndCutCplexOptionalParameters p)
+BranchAndCutCplexOutput generalizedassignmentsolver::branchandcut_cplex(const Instance& instance, BranchAndCutCplexOptionalParameters p)
 {
     VER(p.info, "*** branchandcut_cplex ***" << std::endl);
 
-    BranchAndCutCplexOutput output(ins, p.info);
+    BranchAndCutCplexOutput output(instance, p.info);
 
-    ItemIdx n = ins.item_number();
-    AgentIdx m = ins.agent_number();
-    AltIdx o = ins.alternative_number();
+    ItemIdx n = instance.item_number();
+    AgentIdx m = instance.agent_number();
+    AltIdx o = instance.alternative_number();
 
     if (n == 0)
         return output.algorithm_end(p.info);
@@ -62,7 +62,7 @@ BranchAndCutCplexOutput generalizedassignmentsolver::branchandcut_cplex(const In
     IloExpr expr(env);
     for (ItemIdx j=0; j<n; j++)
         for (AgentIdx i=0; i<m; i++)
-            expr += x[ins.alternative_index(j, i)] * ins.alternative(j, i).c;
+            expr += x[instance.alternative_index(j, i)] * instance.alternative(j, i).c;
     IloObjective obj = IloMinimize(env, expr);
     model.add(obj);
 
@@ -70,15 +70,15 @@ BranchAndCutCplexOutput generalizedassignmentsolver::branchandcut_cplex(const In
     for (AgentIdx i=0; i<m; i++) {
         IloExpr expr(env);
         for (ItemIdx j=0; j<n; j++)
-            expr += x[ins.alternative_index(j, i)] * ins.alternative(j, i).w;
-        model.add(0 <= expr <= ins.capacity(i));
+            expr += x[instance.alternative_index(j, i)] * instance.alternative(j, i).w;
+        model.add(0 <= expr <= instance.capacity(i));
     }
 
     // One alternative per item constraint
     for (ItemIdx j=0; j<n; j++) {
         IloExpr expr(env);
         for (AgentIdx i=0; i<m; i++)
-            expr += x[ins.alternative_index(j, i)];
+            expr += x[instance.alternative_index(j, i)];
         model.add(expr == 1);
     }
 
@@ -98,7 +98,7 @@ BranchAndCutCplexOutput generalizedassignmentsolver::branchandcut_cplex(const In
         for (ItemIdx j=0; j<n; ++j) {
             AgentIdx i_curr = p.initial_solution->agent(j);
             for (AgentIdx i=0; i<m; ++i) {
-                startVar.add(x[ins.alternative_index(j, i)]);
+                startVar.add(x[instance.alternative_index(j, i)]);
                 startVal.add(((i == i_curr)? 1: 0));
             }
         }
@@ -112,16 +112,16 @@ BranchAndCutCplexOutput generalizedassignmentsolver::branchandcut_cplex(const In
         cplex.setParam(IloCplex::TiLim, p.info.remaining_time());
 
     // Callback
-    cplex.use(loggingCallback(env, ins, p, output, x));
+    cplex.use(loggingCallback(env, instance, p, output, x));
 
     // Optimize
     cplex.solve();
 
     if (cplex.getStatus() == IloAlgorithm::Infeasible) {
-        output.update_lower_bound(ins.bound(), std::stringstream(""), p.info);
+        output.update_lower_bound(instance.bound(), std::stringstream(""), p.info);
     } else if (cplex.getStatus() == IloAlgorithm::Optimal) {
         if (!output.solution.feasible() || output.solution.cost() > cplex.getObjValue() + 0.5) {
-            Solution sol_curr(ins);
+            Solution sol_curr(instance);
             for (AltIdx k=0; k<o; ++k)
                 if (cplex.getValue(x[k]) > 0.5)
                     sol_curr.set(k);
@@ -130,7 +130,7 @@ BranchAndCutCplexOutput generalizedassignmentsolver::branchandcut_cplex(const In
         output.update_lower_bound(output.solution.cost(), std::stringstream(""), p.info);
     } else if (cplex.isPrimalFeasible()) {
         if (!output.solution.feasible() || output.solution.cost() > cplex.getObjValue() + 0.5) {
-            Solution sol_curr(ins);
+            Solution sol_curr(instance);
             for (AltIdx k=0; k<o; ++k)
                 if (cplex.getValue(x[k]) > 0.5)
                     sol_curr.set(k);
