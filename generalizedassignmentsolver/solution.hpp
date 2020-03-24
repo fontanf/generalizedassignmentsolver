@@ -126,8 +126,8 @@ struct Output
     double gap() const;
     void print(Info& info, const std::stringstream& s) const;
 
-    void update_solution(const Solution& sol, const std::stringstream& s, Info& info);
-    void update_lower_bound(Cost lb, const std::stringstream& s, Info& info);
+    void update_solution(const Solution& solution_new, const std::stringstream& s, Info& info);
+    void update_lower_bound(Cost lower_bound_new, const std::stringstream& s, Info& info);
 
     Output& algorithm_end(Info& info);
 };

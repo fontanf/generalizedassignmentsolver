@@ -327,15 +327,15 @@ void Output::print(Info& info, const std::stringstream& s) const
         info.write_ini();
 }
 
-void Output::update_solution(const Solution& sol, const std::stringstream& s, Info& info)
+void Output::update_solution(const Solution& solution_new, const std::stringstream& s, Info& info)
 {
-    if (!compare(solution, sol))
+    if (!compare(solution, solution_new))
         return;
 
     info.output->mutex_sol.lock();
 
-    if (compare(solution, sol)) {
-        solution = sol;
+    if (compare(solution, solution_new)) {
+        solution = solution_new;
         print(info, s);
 
         info.output->sol_number++;
@@ -350,15 +350,15 @@ void Output::update_solution(const Solution& sol, const std::stringstream& s, In
     info.output->mutex_sol.unlock();
 }
 
-void Output::update_lower_bound(Cost lb, const std::stringstream& s, Info& info)
+void Output::update_lower_bound(Cost lower_bound_new, const std::stringstream& s, Info& info)
 {
-    if (lower_bound != -1 && lower_bound >= lb)
+    if (lower_bound != -1 && lower_bound >= lower_bound_new)
         return;
 
     info.output->mutex_sol.lock();
 
-    if (lower_bound == -1 || lower_bound < lb) {
-        lower_bound = lb;
+    if (lower_bound == -1 || lower_bound < lower_bound_new) {
+        lower_bound = lower_bound_new;
         print(info, s);
 
         info.output->bnd_number++;

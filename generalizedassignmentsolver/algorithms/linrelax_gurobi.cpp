@@ -14,16 +14,16 @@ LinRelaxGurobiOutput& LinRelaxGurobiOutput::algorithm_end(Info& info)
     return *this;
 }
 
-LinRelaxGurobiOutput generalizedassignmentsolver::linrelax_gurobi(const Instance& ins, Info info)
+LinRelaxGurobiOutput generalizedassignmentsolver::linrelax_gurobi(const Instance& instance, Info info)
 {
     GRBEnv env;
     VER(info, "*** linrelax_gurobi ***" << std::endl);
 
-    LinRelaxGurobiOutput output(ins, info);
+    LinRelaxGurobiOutput output(instance, info);
 
-    ItemIdx n = ins.item_number();
-    AgentIdx m = ins.agent_number();
-    AltIdx o = ins.alternative_number();
+    ItemIdx n = instance.item_number();
+    AgentIdx m = instance.agent_number();
+    AltIdx o = instance.alternative_number();
 
     GRBModel model(env);
 
@@ -33,28 +33,29 @@ LinRelaxGurobiOutput generalizedassignmentsolver::linrelax_gurobi(const Instance
         x[k].set(GRB_CharAttr_VType, GRB_CONTINUOUS);
         x[k].set(GRB_DoubleAttr_LB, 0);
         x[k].set(GRB_DoubleAttr_UB, 1);
-        x[k].set(GRB_DoubleAttr_Obj, ins.alternative(k).c);
+        x[k].set(GRB_DoubleAttr_Obj, instance.alternative(k).c);
     }
     model.set(GRB_IntAttr_ModelSense, GRB_MINIMIZE);
 
     // Capacity constraints
-    for (AgentIdx i=0; i<m; i++) {
+    for (AgentIdx i = 0; i < m; i++) {
         GRBLinExpr expr;
-        for (ItemIdx j=0; j<n; j++)
-            expr += x[ins.alternative_index(j, i)] * ins.alternative(j, i).w;
-        model.addConstr(expr <= ins.capacity(i));
+        for (ItemIdx j = 0; j < n; j++)
+            expr += x[instance.alternative_index(j, i)] * instance.alternative(j, i).w;
+        model.addConstr(expr <= instance.capacity(i));
     }
 
     // One alternative per item constraint
-    for (ItemIdx j=0; j<n; j++) {
+    for (ItemIdx j = 0; j < n; j++) {
         GRBLinExpr expr;
-        for (AgentIdx i=0; i<m; i++)
-            expr += x[ins.alternative_index(j, i)];
+        for (AgentIdx i = 0; i < m; i++)
+            expr += x[instance.alternative_index(j, i)];
         model.addConstr(expr == 1);
     }
 
-    // Display
-    model.getEnv().set(GRB_IntParam_OutputFlag, 0);
+    // Redirect standard output to log file
+    model.set(GRB_StringParam_LogFile, "gurobi.log");
+    model.set(GRB_IntParam_LogToConsole, 0);
 
     // Optimize
     model.optimize();
@@ -63,7 +64,7 @@ LinRelaxGurobiOutput generalizedassignmentsolver::linrelax_gurobi(const Instance
     Cost lb = std::ceil(model.get(GRB_DoubleAttr_ObjVal) - TOL);
     output.update_lower_bound(lb, std::stringstream(""), info);
     output.x = std::vector<double>(o, 0);
-    for (AltIdx k=0; k<ins.alternative_number(); ++k)
+    for (AltIdx k = 0; k < instance.alternative_number(); ++k)
         output.x[k] = x[k].get(GRB_DoubleAttr_X);
 
     return output.algorithm_end(info);
