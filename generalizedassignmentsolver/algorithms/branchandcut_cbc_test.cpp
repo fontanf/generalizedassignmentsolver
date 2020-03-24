@@ -5,14 +5,14 @@
 
 using namespace generalizedassignmentsolver;
 
-Output branchandcut_cbc_test(Instance& ins)
+Output branchandcut_cbc_test(Instance& instance)
 {
     Info info = Info()
         .set_verbose(true)
         ;
     BranchAndCutCbcOptionalParameters p;
     p.info = info;
-    return branchandcut_cbc(ins, p);
+    return branchandcut_cbc(instance, p);
 }
 
 std::vector<Output (*)(Instance&)> f = {
