@@ -46,16 +46,16 @@ cc_library(
 )
 
 git_repository(
-    name = "benchtools",
-    remote = "https://github.com/fontanf/benchtools.git",
-    commit = "fe56ed683d32f70cd248d77cd4107e57eee05758",
-    shallow_since = "1576623294 +0100",
+    name = "optimizationtools",
+    remote = "https://github.com/fontanf/optimizationtools.git",
+    commit = "aa1f5edb039109ac2eb7133e47e17d483299cf13",
+    shallow_since = "1585857862 +0200",
 )
 
 git_repository(
     name = "knapsacksolver",
     remote = "https://github.com/fontanf/knapsacksolver.git",
-    commit = "29329dad9584ba92aa0093d3488b1a0014e806e5",
-    shallow_since = "1584187590 +0100"
+    commit = "718c383f10f77df552ff93f21068839a59683f06",
+    shallow_since = "1585933275 +0200",
 )
 

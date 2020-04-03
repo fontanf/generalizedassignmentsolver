@@ -1,6 +1,6 @@
 #pragma once
 
-#include "benchtools/info.hpp"
+#include "optimizationtools/info.hpp"
 
 #include <cstdint>
 #include <random>
@@ -16,7 +16,7 @@
 namespace generalizedassignmentsolver
 {
 
-using benchtools::Info;
+using optimizationtools::Info;
 
 typedef int64_t Cost;
 typedef double  PCost;
