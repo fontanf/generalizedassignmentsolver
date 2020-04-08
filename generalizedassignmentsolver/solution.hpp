@@ -19,9 +19,9 @@ class Solution
 
 public:
 
-    Solution(const Instance& ins);
-    Solution(const Instance& ins, std::string filepath);
-    Solution(const Instance& ins, const std::vector<std::vector<ItemIdx>>& agents);
+    Solution(const Instance& instance);
+    Solution(const Instance& instance, std::string filepath);
+    Solution(const Instance& instance, const std::vector<std::vector<ItemIdx>>& agents);
     Solution(const Solution& sol);
     Solution& operator=(const Solution& sol);
     ~Solution() { }
@@ -110,7 +110,7 @@ struct SolutionCompare
 
 struct Output
 {
-    Output(const Instance& ins, Info& info);
+    Output(const Instance& instance, Info& info);
     Solution solution;
     Cost lower_bound = 0;
     double time = -1;

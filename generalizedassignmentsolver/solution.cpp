@@ -5,16 +5,16 @@
 
 using namespace generalizedassignmentsolver;
 
-Solution::Solution(const Instance& ins):
-    instance_(ins),
-    x_(ins.item_number(), -1),
-    agents_(ins.agent_number())
+Solution::Solution(const Instance& instance):
+    instance_(instance),
+    x_(instance.item_number(), -1),
+    agents_(instance.agent_number())
 { }
 
-Solution::Solution(const Instance& ins, std::string filepath):
-    instance_(ins),
-    x_(ins.item_number(), -1),
-    agents_(ins.agent_number())
+Solution::Solution(const Instance& instance, std::string filepath):
+    instance_(instance),
+    x_(instance.item_number(), -1),
+    agents_(instance.agent_number())
 {
     if (filepath.empty())
         return;
@@ -25,18 +25,18 @@ Solution::Solution(const Instance& ins, std::string filepath):
     }
 
     AgentIdx i = -1;
-    for (ItemPos j=0; j<instance().item_number(); ++j) {
+    for (ItemPos j = 0; j < instance.item_number(); ++j) {
         file >> i;
         set(j, i);
     }
 }
 
-Solution::Solution(const Instance& ins, const std::vector<std::vector<ItemIdx>>& agents):
-    instance_(ins),
-    x_(ins.item_number(), -1),
-    agents_(ins.agent_number())
+Solution::Solution(const Instance& instance, const std::vector<std::vector<ItemIdx>>& agents):
+    instance_(instance),
+    x_(instance.item_number(), -1),
+    agents_(instance.agent_number())
 {
-    for (AgentIdx i=0; i<(AgentIdx)agents.size(); i++)
+    for (AgentIdx i = 0; i < (AgentIdx)agents.size(); i++)
         for (ItemIdx j: agents[i])
             set(j, i);
 }
@@ -67,7 +67,7 @@ Solution& Solution::operator=(const Solution& sol)
             comp_               = sol.comp_;
         } else {
             clear();
-            for (ItemIdx j=0; j<instance().item_number(); ++j)
+            for (ItemIdx j = 0; j < instance().item_number(); ++j)
                 set(j, sol.agent(j));
         }
     }
@@ -78,7 +78,7 @@ bool Solution::operator==(const Solution& sol)
 {
     if (total_weight_ != sol.total_weight_ || total_cost_ != sol.total_cost_)
         return false;
-    for (ItemIdx j=0; j<instance().item_number(); ++j)
+    for (ItemIdx j = 0; j < instance().item_number(); ++j)
         if (x_[j] != sol.x_[j])
             return false;
     return true;
@@ -86,27 +86,26 @@ bool Solution::operator==(const Solution& sol)
 
 void Solution::set(ItemIdx j, AgentIdx i)
 {
-    const Instance& ins = instance();
-    assert(i >= -1 || i < ins.agent_number());
-    assert(j >= 0 && j < ins.item_number());
+    assert(i >= -1 || i < instance().agent_number());
+    assert(j >= 0 && j < instance().item_number());
 
     AgentIdx i_old = agent(j);
     if (i_old == i)
         return;
 
     if (i_old != -1) {
-        const Alternative& a_old = ins.alternative(j, i_old);
-        if (agents_[i_old].weight <= ins.capacity(i_old)) {
-        } else if (agents_[i_old].weight - a_old.w >= ins.capacity(i_old)) {
+        const Alternative& a_old = instance().alternative(j, i_old);
+        if (agents_[i_old].weight <= instance().capacity(i_old)) {
+        } else if (agents_[i_old].weight - a_old.w >= instance().capacity(i_old)) {
             agents_[i_old].overcapacity -= a_old.w;
             total_overcapacity_         -= a_old.w;
             agents_[i_old].pcost        -= agents_[i_old].penalty * a_old.w;
             total_pcost_                -= agents_[i_old].penalty * a_old.w;
         } else {
-            agents_[i_old].overcapacity -= agents_[i_old].weight - ins.capacity(i_old);
-            total_overcapacity_         -= agents_[i_old].weight - ins.capacity(i_old);
-            agents_[i_old].pcost        -= agents_[i_old].penalty * (agents_[i_old].weight - ins.capacity(i_old));
-            total_pcost_                -= agents_[i_old].penalty * (agents_[i_old].weight - ins.capacity(i_old));
+            agents_[i_old].overcapacity -= agents_[i_old].weight - instance().capacity(i_old);
+            total_overcapacity_         -= agents_[i_old].weight - instance().capacity(i_old);
+            agents_[i_old].pcost        -= agents_[i_old].penalty * (agents_[i_old].weight - instance().capacity(i_old));
+            total_pcost_                -= agents_[i_old].penalty * (agents_[i_old].weight - instance().capacity(i_old));
         }
         agents_[i_old].cost   -= a_old.c;
         total_cost_           -= a_old.c;
@@ -118,15 +117,15 @@ void Solution::set(ItemIdx j, AgentIdx i)
     }
 
     if (i != -1) {
-        const Alternative& a = ins.alternative(j, i);
-        if (agents_[i].weight >= ins.capacity(i)) {
+        const Alternative& a = instance().alternative(j, i);
+        if (agents_[i].weight >= instance().capacity(i)) {
             agents_[i].overcapacity    += a.w;
             total_overcapacity_        += a.w;
             agents_[i].pcost           += agents_[i].penalty * a.w;
             total_pcost_               += agents_[i].penalty * a.w;
-        } else if (agents_[i].weight + a.w <= ins.capacity(i)) {
+        } else if (agents_[i].weight + a.w <= instance().capacity(i)) {
         } else {
-            Weight w = agents_[i].weight + a.w - ins.capacity(i);
+            Weight w = agents_[i].weight + a.w - instance().capacity(i);
             agents_[i].overcapacity += w;
             total_overcapacity_     += w;
             agents_[i].pcost        += agents_[i].penalty * w;
@@ -154,23 +153,23 @@ void Solution::update_penalties(bool inc, PCost delta_inc, PCost delta_dec)
     ItemIdx m = instance().agent_number();
     if (inc) {
         double ratio_max = 0.0;
-        for (AgentIdx i=0; i<m; ++i) {
+        for (AgentIdx i = 0; i < m; ++i) {
             double r = (double)overcapacity(i) / instance().capacity(i);
             if (ratio_max < r)
                 ratio_max = r;
         }
         double big_delta = (ratio_max > 0)? delta_inc / ratio_max: 0;
-        for (AgentIdx i=0; i<m; ++i)
+        for (AgentIdx i = 0; i < m; ++i)
             agents_[i].penalty *= (1 + big_delta * overcapacity(i) / instance().capacity(i));
     } else {
-        for (AgentIdx i=0; i<m; ++i)
+        for (AgentIdx i = 0; i < m; ++i)
             agents_[i].penalty *= (1 - delta_dec);
     }
 
     total_pcost_ = 0;
     //std::cout << ((inc)? "inc": "dec ");
     //std::cout << " alpha";
-    for (AgentIdx i=0; i<m; ++i) {
+    for (AgentIdx i = 0; i < m; ++i) {
         //std::cout << " " << agents_[i].penalty;
         agents_[i].pcost = agents_[i].cost + agents_[i].penalty * agents_[i].overcapacity;
         total_pcost_    += agents_[i].pcost;
@@ -182,7 +181,7 @@ void Solution::update_penalties(PCost delta_inc)
 {
     ItemIdx m = instance().agent_number();
     total_pcost_ = 0;
-    for (AgentIdx i=0; i<m; ++i) {
+    for (AgentIdx i = 0; i < m; ++i) {
         agents_[i].penalty *= (1 + delta_inc);
         agents_[i].pcost = agents_[i].cost + agents_[i].penalty * agents_[i].overcapacity;
         total_pcost_    += agents_[i].pcost;
@@ -193,7 +192,7 @@ void Solution::update_penalties(const std::vector<PCost>& penalty)
 {
     ItemIdx m = instance().agent_number();
     total_pcost_ = 0;
-    for (AgentIdx i=0; i<m; ++i) {
+    for (AgentIdx i = 0; i < m; ++i) {
         agents_[i].penalty = penalty[i];
         agents_[i].pcost = agents_[i].cost + agents_[i].penalty * agents_[i].overcapacity;
         total_pcost_    += agents_[i].pcost;
@@ -214,7 +213,7 @@ void Solution::clear()
 std::string Solution::to_string(AgentIdx i)
 {
     std::string s = "agent " + std::to_string(i) + ":";
-    for (ItemIdx j=0; j<instance().item_number(); ++j)
+    for (ItemIdx j = 0; j < instance().item_number(); ++j)
         if (agent(j) == i)
             s += " " + std::to_string(j);
     return s;
@@ -223,7 +222,7 @@ std::string Solution::to_string(AgentIdx i)
 ItemIdx generalizedassignmentsolver::distance(const Solution& sol1, const Solution& sol2)
 {
     ItemIdx dist = 0;
-    for (ItemIdx j=0; j<sol1.instance().item_number(); ++j)
+    for (ItemIdx j = 0; j < sol1.instance().item_number(); ++j)
         if (sol1.agent(j) != sol2.agent(j))
             dist++;
     return dist;
@@ -244,18 +243,18 @@ void Solution::write_cert(std::string filepath)
     cert.close();
 }
 
-std::ostream& generalizedassignmentsolver::operator<<(std::ostream& os, const Solution& sol)
+std::ostream& generalizedassignmentsolver::operator<<(std::ostream& os, const Solution& solution)
 {
-    os <<  "n " << sol.item_number() << "/" << sol.instance().item_number()
-        << " cost " << sol.cost()
-        << " overcapacity " << sol.overcapacity()
+    os <<  "n " << solution.item_number() << "/" << solution.instance().item_number()
+        << " cost " << solution.cost()
+        << " overcapacity " << solution.overcapacity()
         << std::endl;
-    for (AgentIdx i=0; i<sol.instance().agent_number(); ++i) {
-        os << "agent " << i << " (" << sol.remaining_capacity(i) << "/" << sol.instance().capacity(i) <<  "):";
-        for (ItemPos j=0; j<sol.instance().item_number(); ++j)
-            if (sol.agent(j) == i)
+    for (AgentIdx i = 0; i < solution.instance().agent_number(); ++i) {
+        os << "agent " << i << " (" << solution.remaining_capacity(i) << "/" << solution.instance().capacity(i) <<  "):";
+        for (ItemPos j = 0; j < solution.instance().item_number(); ++j)
+            if (solution.agent(j) == i)
                 os << " " << j;
-        if (i != sol.instance().agent_number() - 1)
+        if (i != solution.instance().agent_number() - 1)
             os << std::endl;
     }
     return os;
@@ -272,7 +271,7 @@ bool generalizedassignmentsolver::compare(const Solution& sol_best, const Soluti
 
 /*********************************** Output ***********************************/
 
-Output::Output(const Instance& ins, Info& info): solution(ins)
+Output::Output(const Instance& instance, Info& info): solution(instance)
 {
     VER(info, std::left << std::setw(10) << "T (s)");
     VER(info, std::left << std::setw(12) << "UB");
