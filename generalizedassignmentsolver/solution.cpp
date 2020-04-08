@@ -283,17 +283,23 @@ Output::Output(const Instance& instance, Info& info): solution(instance)
     print(info, std::stringstream(""));
 }
 
-std::string Output::ub_str() const
+bool Output::optimal() const
+{
+    return ((solution.feasible() && solution.cost() == lower_bound)
+        || (lower_bound >= solution.instance().bound()));
+}
+
+std::string Output::upper_bound_string() const
 {
     return (!solution.feasible())? "inf": std::to_string(solution.cost());
 }
 
-std::string Output::lb_str() const
+std::string Output::lower_bound_string() const
 {
     return (lower_bound >= solution.instance().bound())? "inf": std::to_string(lower_bound);
 }
 
-std::string Output::gap_str() const
+std::string Output::gap_string() const
 {
     if (lower_bound >= solution.instance().bound())
         return "0";
@@ -316,9 +322,9 @@ void Output::print(Info& info, const std::stringstream& s) const
     double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
 
     VER(info, std::left << std::setw(10) << t);
-    VER(info, std::left << std::setw(12) << ub_str());
-    VER(info, std::left << std::setw(12) << lb_str());
-    VER(info, std::left << std::setw(10) << gap_str());
+    VER(info, std::left << std::setw(12) << upper_bound_string());
+    VER(info, std::left << std::setw(12) << lower_bound_string());
+    VER(info, std::left << std::setw(10) << gap_string());
     VER(info, std::left << std::setw(10) << gap());
     VER(info, s.str() << std::endl);
 
@@ -376,14 +382,14 @@ Output& Output::algorithm_end(Info& info)
 {
     time = (double)std::round(info.elapsed_time() * 10000) / 10000;
 
-    PUT(info, "Solution", "Value", ub_str());
-    PUT(info, "Bound", "Value", lb_str());
+    PUT(info, "Solution", "Value", upper_bound_string());
+    PUT(info, "Bound", "Value", lower_bound_string());
     PUT(info, "Solution", "Time", time);
     PUT(info, "Bound", "Time", time);
     VER(info, "---" << std::endl
-            << "Solution: " << ub_str() << std::endl
-            << "Bound: " << lb_str() << std::endl
-            << "Gap: " << gap_str() << std::endl
+            << "Solution: " << upper_bound_string() << std::endl
+            << "Bound: " << lower_bound_string() << std::endl
+            << "Gap: " << gap_string() << std::endl
             << "Gap (%): " << gap() << std::endl
             << "Time (s): " << time << std::endl);
 

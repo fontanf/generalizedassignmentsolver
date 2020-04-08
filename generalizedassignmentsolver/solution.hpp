@@ -111,18 +111,17 @@ struct SolutionCompare
 struct Output
 {
     Output(const Instance& instance, Info& info);
+
     Solution solution;
     Cost lower_bound = 0;
     double time = -1;
 
-    bool optimal() const { return (
-            (solution.feasible() && solution.cost() == lower_bound)
-            || (lower_bound >= solution.instance().bound())); }
+    bool optimal() const;
     bool feasible() const { return lower_bound < solution.instance().bound(); }
 
-    std::string ub_str() const;
-    std::string lb_str() const;
-    std::string gap_str() const;
+    std::string upper_bound_string() const;
+    std::string lower_bound_string() const;
+    std::string         gap_string() const;
     double gap() const;
     void print(Info& info, const std::stringstream& s) const;
 
