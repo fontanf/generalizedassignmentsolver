@@ -53,7 +53,6 @@ int main(int argc, char *argv[])
     // Run algorithm
 
     std::mt19937_64 gen(seed);
-    auto func = get_algorithm(algorithm);
 
     Instance instance(instance_path, format);
 
@@ -68,7 +67,7 @@ int main(int argc, char *argv[])
         .set_loglevelmax(loglevelmax)
         ;
 
-    func(instance, gen, info);
+    run(algorithm, instance, gen, info);
 
     return 0;
 }

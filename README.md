@@ -2,7 +2,7 @@
 
 A solver for the Generalized Assignment Problem.
 
-This problem is interesting because many different optimization technics can and have been applied to solve it (Branch-and-cut, Branch-and-price, Branch-and-relax, Local search, Constraint programming, Column generation heuristics...). Thus, the main goal of this repository is for me to have reference implementations for classical algorithms and optimization solvers.
+This problem is interesting because many different optimization methods can and have been applied to solve it (Branch-and-cut, Branch-and-price, Branch-and-relax, Local search, Constraint programming, Column generation heuristics...). Thus, the main goal of this repository is for me to have reference implementations for classical algorithms and optimization solvers.
 
 ## Implemented algorithms
 
@@ -20,15 +20,15 @@ This problem is interesting because many different optimization technics can and
   - solved with volume method `-a lagrelax_assignment_volume` :heavy_check_mark:
   - solved with L-BFGS method `-a lagrelax_assignment_lbfgs` :heavy_check_mark:
 
-- Column generation `-a columngeneration solver clp` :heavy_check_mark: `-a columngeneration solver cplex` :heavy_check_mark:
+- Column generation `-a columngeneration --solver clp` :heavy_check_mark: `-a columngeneration --solver cplex` :heavy_check_mark:
 
 ### Upper bounds
 
 Polynomial algorithms from "Generalized Assignment Problems" (Martello et al., 1992), options `f cij` `f wij` `f cij*wij` `f -pij/wij` `f wij/ti`:
-- Basic greedy `-a "greedy f wij"` :heavy_check_mark:
-- Greedy with regret measure `-a "greedyregret f wij"` :heavy_check_mark:
-- MTHG, basic greedy (+ n shifts) `-a "mthg f wij"` :heavy_check_mark:
-- MTHG, greedy with regret measure (+ n shifts) `-a "mthgregret f wij"` :heavy_check_mark:
+- Basic greedy `-a "greedy -f wij"` :heavy_check_mark:
+- Greedy with regret measure `-a "greedyregret -f wij"` :heavy_check_mark:
+- MTHG, basic greedy (+ n shifts) `-a "mthg -f wij"` :heavy_check_mark:
+- MTHG, greedy with regret measure (+ n shifts) `-a "mthgregret -f wij"` :heavy_check_mark:
 
 Classical meta-heuristics based on shift-swap neighborhood optimized for large instances:
 - Local search `-a localsearch` :heavy_check_mark:
@@ -50,8 +50,8 @@ Others heuristics and meta-heuristics:
   - with Gurobi `-a branchandcut_gurobi` :heavy_check_mark:
 
 - Branch-and-price
-  - Depth First Search `-a branchandprice_dfs solver clp` :heavy_check_mark: `-a branchandprice_dfs solver cplex` :heavy_check_mark:
-  - A* (Best First Search) `-a branchandprice_astar solver clp` :heavy_check_mark: `-a branchandprice_astar solver cplex` :heavy_check_mark:
+  - Depth First Search `-a branchandprice_dfs --solver clp` :heavy_check_mark: `-a branchandprice_dfs --solver cplex` :heavy_check_mark:
+  - A* (Best First Search) `-a branchandprice_astar --solver clp` :heavy_check_mark: `-a branchandprice_astar --solver cplex` :heavy_check_mark:
 
 - Constraint programming
   - with Gecode `-a constraintprogramming_gecode` :heavy_check_mark:
@@ -71,7 +71,7 @@ The same happens for the bound obtained by solving the lagrangian relaxation of 
 
 ### Finding a feasible solution
 
-* [mthgregret f wij/ti](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/generalizedassignment/master/bench/mthgregret_f_wij_ti.json)
+* [mthgregret -f wij/ti](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/generalizedassignment/master/bench/mthgregret_f_wij_ti.json)
 * [random](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/generalizedassignment/master/bench/random.json)
 
 ## Usage (command line)
@@ -102,7 +102,7 @@ bazel build \
 Solve:
 ```shell
 ./bazel-bin/generalizedassignmentsolver/main -v \
-    -a 'mthg f -pij/wij' \
+    -a 'mthg -f -pij/wij' \
     -i "data/a05100" \
     -o "a05100_output.json" \
     -c "a05100_solution.txt"
@@ -123,7 +123,7 @@ bazel build -- //generalizedassignmentsolver:checker              # check anothe
 
 Run benchmarks (results stored in `out/algorithm/`)
 ```
-bazel run -- //generalizedassignmentsolver:bench "mthg f wij"             # no time limit
+bazel run -- //generalizedassignmentsolver:bench "mthg -f wij"             # no time limit
 bazel run -- //generalizedassignmentsolver:bench "branchandcut_cbc" 7200  # 2h time limit
 ```
 Output files can then be retrieved from `bazel-out/k8-opt/bin/generalizedassignmentsolver/bench.runfiles/__main__/`.

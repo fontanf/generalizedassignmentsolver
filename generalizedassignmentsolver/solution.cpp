@@ -281,6 +281,7 @@ Output::Output(const Instance& instance, Info& info): solution(instance)
     VER(info, "");
     VER(info, std::endl);
     print(info, std::stringstream(""));
+    info.reset_time();
 }
 
 bool Output::optimal() const
