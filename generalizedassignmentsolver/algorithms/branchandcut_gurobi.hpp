@@ -21,7 +21,7 @@ struct BranchAndCutGurobiOutput: Output
 };
 
 BranchAndCutGurobiOutput branchandcut_gurobi(
-        const Instance& instance, BranchAndCutGurobiOptionalParameters p = {});
+        const Instance& instance, BranchAndCutGurobiOptionalParameters parameters = {});
 
 }
 
