@@ -31,20 +31,6 @@ cc_library(
     sha256 = "87b5884741427220d3a33df1363ae0e8b898099fbc59f1c451113f6732891014",
 )
 
-http_archive(
-    name = "dlib",
-    build_file_content = """
-cc_library(
-        name = "dlib",
-        hdrs = ["dlib-19.19/dlib/all/source.cpp"],
-        visibility = ["//visibility:public"],
-        strip_include_prefix = "dlib-19.19/",
-)
-""",
-    urls = ["http://dlib.net/files/dlib-19.19.tar.bz2"],
-    sha256 = "1decfe883635ce51acd72869cebe870ab9b85eb094d417adc8f48aa7b8c60cd7",
-)
-
 git_repository(
     name = "optimizationtools",
     remote = "https://github.com/fontanf/optimizationtools.git",
@@ -57,5 +43,132 @@ git_repository(
     remote = "https://github.com/fontanf/knapsacksolver.git",
     commit = "718c383f10f77df552ff93f21068839a59683f06",
     shallow_since = "1585933275 +0200",
+)
+
+http_archive(
+    name = "dlib",
+    build_file_content = """
+cc_library(
+        name = "dlib",
+        hdrs = [
+                "dlib-19.19/dlib/all/source.cpp",
+        ] + glob(["**/*.h"], exclude_directories = 0),
+        visibility = ["//visibility:public"],
+        strip_include_prefix = "dlib-19.19/",
+)
+""",
+    urls = ["http://dlib.net/files/dlib-19.19.tar.bz2"],
+    sha256 = "1decfe883635ce51acd72869cebe870ab9b85eb094d417adc8f48aa7b8c60cd7",
+)
+
+new_local_repository(
+    name = "gurobi",
+    path = "/home/florian/Programmes/gurobi811/linux64/",
+    build_file_content = """
+cc_library(
+    name = "gurobi",
+    hdrs = [
+            "include/gurobi_c.h",
+            "include/gurobi_c++.h",
+    ],
+    strip_include_prefix = "include/",
+    srcs = [
+            "lib/libgurobi_c++.a",
+            "lib/libgurobi81.so",
+    ],
+    visibility = ["//visibility:public"],
+)
+""",
+)
+
+new_local_repository(
+    name = "cplex",
+    path = "/opt/ibm/ILOG/CPLEX_Studio129/",
+    build_file_content = """
+cc_library(
+    name = "concert",
+    hdrs = glob(["concert/include/ilconcert/**/*.h"], exclude_directories = 0),
+    strip_include_prefix = "concert/include/",
+    srcs = ["concert/lib/x86-64_linux/static_pic/libconcert.a"],
+    linkopts = [
+            "-lm",
+            "-lpthread",
+            "-ldl",
+    ],
+    visibility = ["//visibility:public"],
+)
+cc_library(
+    name = "cplex",
+    hdrs = glob(["cplex/include/ilcplex/*.h"]),
+    strip_include_prefix = "cplex/include/",
+    srcs = [
+            "cplex/lib/x86-64_linux/static_pic/libilocplex.a",
+            "cplex/lib/x86-64_linux/static_pic/libcplex.a",
+    ],
+    deps = [":concert"],
+    visibility = ["//visibility:public"],
+)
+cc_library(
+    name = "cpoptimizer",
+    hdrs = glob(["cpoptimizer/include/ilcp/*.h"]),
+    strip_include_prefix = "cpoptimizer/include/",
+    srcs = ["cpoptimizer/lib/x86-64_linux/static_pic/libcp.a"],
+    deps = [":cplex"],
+    visibility = ["//visibility:public"],
+)
+""",
+)
+
+new_local_repository(
+    name = "gecode",
+    path = "/home/florian/Programmes/gecode-release-6.2.0/",
+    build_file_content = """
+cc_library(
+    name = "gecode",
+    hdrs = glob(["**/*.h"]),
+    srcs = [
+            "libgecodedriver.so",
+            "libgecodeflatzinc.so",
+            "libgecodefloat.so",
+            "libgecodegist.so",
+            "libgecodeint.so",
+            "libgecodekernel.so",
+            "libgecodeminimodel.so",
+            "libgecodesearch.so",
+            "libgecodeset.so",
+            "libgecodesupport.so",
+    ],
+    visibility = ["//visibility:public"],
+)
+""",
+)
+
+new_local_repository(
+    name = "coinor",
+    path = "/home/florian/Programmes/coinbrew/",
+    build_file_content = """
+cc_library(
+    name = "coinor",
+    hdrs = glob(["dist/include/**/*.h", exclude_directories = 0]),
+    strip_include_prefix = "dist/include/",
+    srcs = glob(["dist/lib/**/*.so", exclude_directories = 0]),
+    visibility = ["//visibility:public"],
+)
+""",
+)
+
+new_local_repository(
+    name = "localsolver",
+    path = "/opt/localsolver_8_5",
+    build_file_content = """
+cc_library(
+    name = "localsolver",
+    hdrs = glob(["include/**/*.h", exclude_directories = 0]),
+    strip_include_prefix = "include/",
+    srcs = glob(["lib/**/*.a", exclude_directories = 0]),
+    linkopts = ["-lpthread"],
+    visibility = ["//visibility:public"],
+)
+""",
 )
 

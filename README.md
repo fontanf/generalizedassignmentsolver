@@ -130,8 +130,9 @@ Output files can then be retrieved from `bazel-out/k8-opt/bin/generalizedassignm
 
 ## Optional dependencies
 
-This section describes how to install optional dependencies on Linux.
-To enable a dependency during the compilation, you need to uncomment and adapt the corresponding lines in `.bazelrc`.
+To enable a dependency, uncomment the corresponding line in the `.bazelrc` file and adapt its path in the `WORKSPACEi` file.
+
+Here are some notes for their installations:
 
 ### COIN-OR (CLP, CBC, VOL, DIP)
 
@@ -141,15 +142,6 @@ git clone https://www.github.com/coin-or/coinbrew
 cd coinbrew
 ./coinbrew fetch build Dip --no-prompt
 ./coinbrew fetch build Vol --no-prompt
-```
-
-Update `.bashrc`:
-```shell
-# COIN-OR
-export COINOR_HOME="/home/florian/Programmes/coinbrew"
-export PATH="${PATH}:${COINOR_HOME}/dist/bin"
-export CPLUS_INCLUDE_PATH="${CPLUS_INCLUDE_PATH}:${COINOR_HOME}/dist/include"
-export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${COINOR_HOME}/dist/lib"
 ```
 
 ### Gecode
@@ -162,56 +154,12 @@ Compile (more info https://www.gecode.org/doc/2.2.0/reference/PageComp.html):
 make
 ```
 
-Update `.bashrc`:
-```shell
-# Gecode
-export GECODE_HOME="/opt/gecode-release-6.2.0"
-export CPLUS_INCLUDE_PATH="${CPLUS_INCLUDE_PATH}:${GECODE_HOME}"
-export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${GECODE_HOME}"
-```
-
-### CPLEX
-
-Update `.bashrc`:
-```shell
-# CPlex
-export CPLEX_VERSION="126"
-export CPLEX_HOME="/opt/ibm/ILOG/CPLEX_Studio${CPLEX_VERSION}"
-export PATH="$PATH:${CPLEX_HOME}/cplex/bin/x86-64_linux"
-export CLASSPATH="$CLASSPATH:${CPLEX_HOME}/cplex/lib/cplex.jar"
-export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:${CPLEX_HOME}/cplex/include"
-export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:${CPLEX_HOME}/concert/include"
-export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:${CPLEX_HOME}/cpoptimizer/include"
-export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${CPLEX_HOME}/concert/lib/x86-64_linux/static_pic"
-export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${CPLEX_HOME}/cplex/lib/x86-64_linux/static_pic"
-export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${CPLEX_HOME}/cpoptimizer/lib/x86-64_linux/static_pic"
-```
-
 ### Gurobi
 
-Update `.bashrc`:
-```shell
-# Gurobi
-export GUROBI_HOME="/home/florian/Programmes/gurobi811"
-export GRB_LICENSE_FILE=/home/florian/gurobi.lic
-export PATH="${PATH}:${GUROBI_HOME}/linux64/bin"
-export CPLUS_INCLUDE_PATH="${CPLUS_INCLUDE_PATH}:${GUROBI_HOME}/linux64/include"
-export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${GUROBI_HOME}/linux64/lib"
-```
-
-Execute the following commands:
+After installing, execute the following commands:
 ```shell
 cd ${GUROBI_HOME}/linux64/src/build/
 make
 cp libgurobi_c++.a ../../lib/
-```
-
-### LocalSolver
-
-Update `.bashrc`:
-```shell
-# LocalSolver
-export LOCALSOLVER_HOME="/opt/localsolver_8_5"
-export CPLUS_INCLUDE_PATH="${CPLUS_INCLUDE_PATH}:${LOCALSOLVER_HOME}/include"
 ```
 

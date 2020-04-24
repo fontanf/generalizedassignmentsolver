@@ -4,12 +4,7 @@ config_setting(name = "gurobi_build",      values = {"define": "gurobi=true"},  
 config_setting(name = "localsolver_build", values = {"define": "localsolver=true"}, visibility = ["//visibility:public"])
 config_setting(name = "gecode_build",      values = {"define": "gecode=true"},      visibility = ["//visibility:public"])
 
-load("//generalizedassignmentsolver:variables.bzl", "STDCPP",
-         "COINOR_COPTS", "COINOR_LINKOPTS",
-         "CPLEX_COPTS", "CPLEX_LINKOPTS",
-         "GUROBI_COPTS", "GUROBI_LINKOPTS",
-         "GECODE_COPTS", "GECODE_LINKOPTS",
-         "LOCALSOLVER_COPTS", "LOCALSOLVER_LINKOPTS")
+load("//generalizedassignmentsolver:variables.bzl", "STDCPP")
 
 cc_library(
         name = "generalizedassignmentsolver",
@@ -64,7 +59,6 @@ cc_binary(
                 "//generalizedassignmentsolver/algorithms:algorithms",
                 "@boost//:program_options",
         ],
-        linkopts = GUROBI_LINKOPTS,
         data = ["//data:data"],
 )
 

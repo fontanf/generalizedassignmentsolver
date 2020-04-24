@@ -1,9 +1,9 @@
 load("//generalizedassignmentsolver:variables.bzl", "STDCPP",
-         "COINOR_COPTS", "COINOR_LINKOPTS",
-         "CPLEX_COPTS", "CPLEX_LINKOPTS",
-         "GUROBI_COPTS", "GUROBI_LINKOPTS",
-         "GECODE_COPTS", "GECODE_LINKOPTS",
-         "LOCALSOLVER_COPTS", "LOCALSOLVER_LINKOPTS")
+         "COINOR_COPTS", "COINOR_DEP",
+         "CPLEX_COPTS", "CPLEX_DEP", "CPOPTIMIZER_DEP",
+         "GUROBI_COPTS", "GUROBI_DEP",
+         "GECODE_COPTS", "GECODE_DEP",
+         "LOCALSOLVER_COPTS", "LOCALSOLVER_DEP")
 
 cc_library(
         name = "linrelax_clp",
@@ -12,9 +12,8 @@ cc_library(
         deps = [
                 "//generalizedassignmentsolver:generalizedassignmentsolver",
                 ":branchandcut_cbc",
-        ],
+        ] + COINOR_DEP,
         copts = COINOR_COPTS,
-        linkopts = COINOR_LINKOPTS,
         visibility = ["//visibility:public"],
 )
 
@@ -36,7 +35,9 @@ cc_library(
         hdrs = ["linrelax_gurobi.hpp"],
         srcs = ["linrelax_gurobi.cpp"],
         copts = GUROBI_COPTS,
-        deps = ["//generalizedassignmentsolver:generalizedassignmentsolver"],
+        deps = [
+                "//generalizedassignmentsolver:generalizedassignmentsolver"
+        ] + GUROBI_DEP,
         visibility = ["//visibility:public"],
 )
 
@@ -48,7 +49,6 @@ cc_test(
                 ":linrelax_gurobi",
         ],
         copts = GUROBI_COPTS,
-        linkopts = GUROBI_LINKOPTS,
         timeout = "moderate",
 )
 
@@ -61,9 +61,8 @@ cc_library(
         deps = [
                 "//generalizedassignmentsolver:generalizedassignmentsolver",
                 "@knapsacksolver//knapsacksolver/algorithms:minknap",
-        ],
+        ] + COINOR_DEP,
         copts = COINOR_COPTS,
-        linkopts = COINOR_LINKOPTS,
         visibility = ["//visibility:public"],
 )
 
@@ -87,9 +86,8 @@ cc_library(
         deps = [
                 "//generalizedassignmentsolver:generalizedassignmentsolver",
                 "@knapsacksolver//knapsacksolver/algorithms:minknap",
-        ],
+        ] + COINOR_DEP,
         copts = COINOR_COPTS,
-        linkopts = COINOR_LINKOPTS,
         visibility = ["//visibility:public"],
 )
 
@@ -187,9 +185,8 @@ cc_library(
                 "//generalizedassignmentsolver:generalizedassignmentsolver",
                 "@knapsacksolver//knapsacksolver/algorithms:minknap",
                 "@knapsacksolver//knapsacksolver/algorithms:bellman",
-        ],
+        ] + CPLEX_DEP + COINOR_DEP,
         copts = CPLEX_COPTS + COINOR_COPTS,
-        linkopts = CPLEX_LINKOPTS + COINOR_LINKOPTS,
         visibility = ["//visibility:public"],
 )
 
@@ -235,9 +232,10 @@ cc_library(
         name = "localsolver",
         hdrs = ["localsolver.hpp"],
         srcs = ["localsolver.cpp"],
-        deps = ["//generalizedassignmentsolver:generalizedassignmentsolver"],
+        deps = [
+                "//generalizedassignmentsolver:generalizedassignmentsolver",
+        ] + LOCALSOLVER_DEP,
         copts = LOCALSOLVER_COPTS,
-        linkopts = LOCALSOLVER_LINKOPTS,
         visibility = ["//visibility:public"],
 )
 
@@ -257,9 +255,10 @@ cc_library(
         name = "branchandcut_cbc",
         hdrs = ["branchandcut_cbc.hpp"],
         srcs = ["branchandcut_cbc.cpp"],
-        deps = ["//generalizedassignmentsolver:generalizedassignmentsolver"],
+        deps = [
+                "//generalizedassignmentsolver:generalizedassignmentsolver",
+        ] + COINOR_DEP,
         copts = COINOR_COPTS,
-        linkopts = COINOR_LINKOPTS,
         visibility = ["//visibility:public"],
 )
 
@@ -280,9 +279,10 @@ cc_library(
         name = "branchandcut_cplex",
         hdrs = ["branchandcut_cplex.hpp"],
         srcs = ["branchandcut_cplex.cpp"],
-        deps = ["//generalizedassignmentsolver:generalizedassignmentsolver"],
+        deps = [
+                "//generalizedassignmentsolver:generalizedassignmentsolver"
+        ] + CPLEX_DEP,
         copts = CPLEX_COPTS,
-        linkopts = CPLEX_LINKOPTS,
         visibility = ["//visibility:public"],
 )
 
@@ -303,7 +303,9 @@ cc_library(
         name = "branchandcut_gurobi",
         hdrs = ["branchandcut_gurobi.hpp"],
         srcs = ["branchandcut_gurobi.cpp"],
-        deps = ["//generalizedassignmentsolver:generalizedassignmentsolver"],
+        deps = [
+                "//generalizedassignmentsolver:generalizedassignmentsolver",
+        ] + GUROBI_DEP,
         copts = GUROBI_COPTS,
         visibility = ["//visibility:public"],
 )
@@ -316,7 +318,6 @@ cc_test(
                 ":branchandcut_gurobi",
         ],
         copts = GUROBI_COPTS,
-        linkopts = GUROBI_LINKOPTS,
         timeout = "moderate",
 )
 
@@ -351,9 +352,10 @@ cc_library(
         name = "constraintprogramming_cplex",
         hdrs = ["constraintprogramming_cplex.hpp"],
         srcs = ["constraintprogramming_cplex.cpp"],
-        deps = ["//generalizedassignmentsolver:generalizedassignmentsolver"],
+        deps = [
+                "//generalizedassignmentsolver:generalizedassignmentsolver",
+        ] + CPOPTIMIZER_DEP,
         copts = CPLEX_COPTS,
-        linkopts = CPLEX_LINKOPTS,
         visibility = ["//visibility:public"],
 )
 
@@ -374,9 +376,10 @@ cc_library(
         name = "constraintprogramming_gecode",
         hdrs = ["constraintprogramming_gecode.hpp"],
         srcs = ["constraintprogramming_gecode.cpp"],
-        deps = ["//generalizedassignmentsolver:generalizedassignmentsolver"],
+        deps = [
+                "//generalizedassignmentsolver:generalizedassignmentsolver"
+        ] + GECODE_DEP,
         copts = GECODE_COPTS,
-        linkopts = GECODE_LINKOPTS,
         visibility = ["//visibility:public"],
 )
 

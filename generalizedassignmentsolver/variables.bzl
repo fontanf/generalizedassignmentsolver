@@ -21,43 +21,22 @@ LOCALSOLVER_COPTS = select({
             "//generalizedassignmentsolver:localsolver_build": ["-DLOCALSOLVER_FOUND"],
             "//conditions:default": []})
 
-COINOR_LINKOPTS = select({
-            "//generalizedassignmentsolver:coinor_build": [
-                    "-lClp",
-                    "-lOsiClp",
-                    "-lCoinUtils"],
+COINOR_DEP = select({
+            "//generalizedassignmentsolver:coinor_build": ["@coinor//:coinor"],
             "//conditions:default": []})
-CPLEX_LINKOPTS = select({
-            "//generalizedassignmentsolver:cplex_build": [
-                    "-lconcert",
-                    "-lilocplex",
-                    "-lcp",
-                    "-lcplex",
-                    "-lm",
-                    "-lpthread",
-                    "-ldl"],
+CPLEX_DEP = select({
+            "//generalizedassignmentsolver:cplex_build": ["@cplex//:cplex"],
             "//conditions:default": []})
-GUROBI_LINKOPTS = select({
-            "//generalizedassignmentsolver:gurobi_build": [
-                    "-lgurobi_c++",
-                    "-lgurobi81"],
+CPOPTIMIZER_DEP = select({
+            "//generalizedassignmentsolver:cplex_build": ["@cplex//:cpoptimizer"],
             "//conditions:default": []})
-GECODE_LINKOPTS = select({
-            "//generalizedassignmentsolver:gecode_build": [
-                    "-lgecodeflatzinc",
-                    "-lgecodedriver",
-                    "-lgecodegist",
-                    "-lgecodesearch",
-                    "-lgecodeminimodel",
-                    "-lgecodeset",
-                    "-lgecodefloat",
-                    "-lgecodeint",
-                    "-lgecodekernel",
-                    "-lgecodesupport"],
+GUROBI_DEP = select({
+            "//generalizedassignmentsolver:gurobi_build": ["@gurobi//:gurobi"],
             "//conditions:default": []})
-LOCALSOLVER_LINKOPTS = select({
-            "//generalizedassignmentsolver:localsolver_build": [
-                    "-llocalsolver",
-                    "-lpthread"],
+GECODE_DEP = select({
+            "//generalizedassignmentsolver:gecode_build": ["@gecode//:gecode"],
+            "//conditions:default": []})
+LOCALSOLVER_DEP = select({
+            "//generalizedassignmentsolver:localsolver_build": ["@localsolver//:localsolver"],
             "//conditions:default": []})
 
