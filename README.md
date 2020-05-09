@@ -118,12 +118,12 @@ Checker:
 ./bazel-bin/generalizedassignmentsolver/checker data/a05100 output/best/a05100_solution.txt
 ```
 
-Run benchmarks (results stored in `out/algorithm/`)
+Run benchmarks:
 ```
-bazel run -- //generalizedassignmentsolver:bench "mthg -f wij"            # no time limit
-bazel run -- //generalizedassignmentsolver:bench "branchandcut_cbc" 7200  # 2h time limit
+bazel build -- //...
+python3 generalizedassignmentsolver/bench.py yagiura2004 "mthg -f wij/ti"          # no time limit
+python3 generalizedassignmentsolver/bench.py yagiura2004 "branchandcut_gurobi" 60  # 1m time limit
 ```
-Output files can then be retrieved from `bazel-out/k8-opt/bin/generalizedassignmentsolver/bench.runfiles/__main__/`.
 
 ## Optional dependencies
 
