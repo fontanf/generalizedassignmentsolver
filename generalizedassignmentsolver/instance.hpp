@@ -73,7 +73,7 @@ public:
      */
 
     /** Create instance from file. */
-    Instance(std::string filename, std::string format = "generalizedassignment_beasley");
+    Instance(std::string filename, std::string format = "orlibrary");
 
     /** Manual constructor. */
     Instance(AgentIdx m);
@@ -125,7 +125,7 @@ public:
 
 private:
 
-    void read_beasley(std::ifstream& file);
+    void read_orlibrary(std::ifstream& file);
     void read_standard(std::ifstream& file);
 
     std::string name_;

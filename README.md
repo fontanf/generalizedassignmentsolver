@@ -114,16 +114,13 @@ bazel test --compilation_mode=dbg -- //...
 ```
 
 Checker:
-```
-bazel run -- //generalizedassignmentsolver:checker                # show best bounds for all instances
-bazel run -- //generalizedassignmentsolver:checker "data/a05100"  # show best bounds for one instance
-bazel build -- //generalizedassignmentsolver:checker              # check another solution file
-./bazel-bin/generalizedassignmentsolver/checker "instancefile" "solutionfile"
+```shell
+./bazel-bin/generalizedassignmentsolver/checker data/a05100 output/best/a05100_solution.txt
 ```
 
 Run benchmarks (results stored in `out/algorithm/`)
 ```
-bazel run -- //generalizedassignmentsolver:bench "mthg -f wij"             # no time limit
+bazel run -- //generalizedassignmentsolver:bench "mthg -f wij"            # no time limit
 bazel run -- //generalizedassignmentsolver:bench "branchandcut_cbc" 7200  # 2h time limit
 ```
 Output files can then be retrieved from `bazel-out/k8-opt/bin/generalizedassignmentsolver/bench.runfiles/__main__/`.

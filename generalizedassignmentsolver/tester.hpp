@@ -7,11 +7,10 @@
 namespace generalizedassignmentsolver
 {
 
-Instance test_instance(Counter i);
 enum TestType { SOPT, LB, UB };
 enum InstacesType { TEST };
 
-void test(InstacesType it, std::vector<Output (*)(Instance&)> fs, TestType tt = SOPT);
+void test(InstacesType instances_type, std::vector<Output (*)(Instance&)> algorithms, TestType test_type = SOPT);
 
 }
 

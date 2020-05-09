@@ -89,9 +89,9 @@ Instance::Instance(std::string filepath, std::string format): name_(filepath)
         return;
     }
 
-    if (format == "generalizedassignment_beasley") {
-        read_beasley(file);
-    } else if (format == "generalizedassignment_standard") {
+    if (format == "orlibrary") {
+        read_orlibrary(file);
+    } else if (format == "standard") {
         read_standard(file);
     } else {
         std::cerr << "ERROR, instance format unknown: " << format << std::endl;
@@ -100,7 +100,7 @@ Instance::Instance(std::string filepath, std::string format): name_(filepath)
     file.close();
 }
 
-void Instance::read_beasley(std::ifstream& file)
+void Instance::read_orlibrary(std::ifstream& file)
 {
     ItemIdx n;
     AgentIdx m;

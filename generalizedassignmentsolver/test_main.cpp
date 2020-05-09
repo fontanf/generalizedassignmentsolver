@@ -5,17 +5,7 @@
 
 using namespace generalizedassignmentsolver;
 
-int main(int argc, char *argv[])
+int main(int, char**)
 {
-    (void)argc;
-    (void)argv;
-
-    for (int i=0; i<=9; ++i) {
-        Instance ins = test_instance(i);
-        std::cout << ins << std::endl;
-        //Solution sol = milp(ins);
-        //std::cout << sol << std::endl;
-    }
-
 }
 

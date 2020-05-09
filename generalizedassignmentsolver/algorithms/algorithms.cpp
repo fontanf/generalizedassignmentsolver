@@ -24,6 +24,25 @@
 using namespace generalizedassignmentsolver;
 namespace po = boost::program_options;
 
+std::string read_desiralibity_args(const std::vector<char*>& argv)
+{
+    ColGenOptionalParameters parameters;
+    po::options_description desc("Allowed options");
+    std::string desirability = "cij";
+    desc.add_options()
+        (",f", po::value<std::string>(&desirability), "")
+        ;
+    po::variables_map vm;
+    po::store(po::parse_command_line((Counter)argv.size(), argv.data(), desc), vm);
+    try {
+        po::notify(vm);
+    } catch (po::required_option e) {
+        std::cout << desc << std::endl;;
+        throw "";
+    }
+    return desirability;
+}
+
 ColGenOptionalParameters read_columngeneration_args(const std::vector<char*>& argv)
 {
     ColGenOptionalParameters parameters;
@@ -195,24 +214,20 @@ Output generalizedassignmentsolver::run(
     } else if (algorithm_args[0] == "random") {
         return random(instance, generator, info);
     } else if (algorithm_args[0] == "greedy") {
-        auto it = std::find(algorithm_argv.begin(), algorithm_argv.end(), "f");
-        std::string des_str = (it == algorithm_argv.end())? "cij": *(++it);
-        std::unique_ptr<Desirability> f = desirability(des_str, instance);
+        std::string desirability_string = read_desiralibity_args(algorithm_argv);
+        std::unique_ptr<Desirability> f = desirability(desirability_string, instance);
         return greedy(instance, *f, info);
     } else if (algorithm_args[0] == "greedyregret") {
-        auto it = std::find(algorithm_argv.begin(), algorithm_argv.end(), "f");
-        std::string des_str = (it == algorithm_argv.end())? "cij": *(++it);
-        std::unique_ptr<Desirability> f = desirability(des_str, instance);
+        std::string desirability_string = read_desiralibity_args(algorithm_argv);
+        std::unique_ptr<Desirability> f = desirability(desirability_string, instance);
         return greedyregret(instance, *f, info);
     } else if (algorithm_args[0] == "mthg") {
-        auto it = std::find(algorithm_argv.begin(), algorithm_argv.end(), "f");
-        std::string des_str = (it == algorithm_argv.end())? "cij": *(++it);
-        std::unique_ptr<Desirability> f = desirability(des_str, instance);
+        std::string desirability_string = read_desiralibity_args(algorithm_argv);
+        std::unique_ptr<Desirability> f = desirability(desirability_string, instance);
         return mthg(instance, *f, info);
     } else if (algorithm_args[0] == "mthgregret") {
-        auto it = std::find(algorithm_argv.begin(), algorithm_argv.end(), "f");
-        std::string des_str = (it == algorithm_argv.end())? "cij": *(++it);
-        std::unique_ptr<Desirability> f = desirability(des_str, instance);
+        std::string desirability_string = read_desiralibity_args(algorithm_argv);
+        std::unique_ptr<Desirability> f = desirability(desirability_string, instance);
         return mthgregret(instance, *f, info);
 #if COINOR_FOUND
     } else if (algorithm_args[0] == "repaircombrelax") {

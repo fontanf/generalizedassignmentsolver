@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 
     std::string algorithm = "branchandcut_cbc";
     std::string instance_path = "";
-    std::string format = "generalizedassignment_beasley";
+    std::string format = "orlibrary";
     std::string output_path = "";
     std::string initial_solution_path = "";
     std::string certificate_path = "";
@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
         ("help,h", "produce help message")
         ("algorithm,a", po::value<std::string>(&algorithm), "set algorithm")
         ("input,i", po::value<std::string>(&instance_path)->required(), "set input file (required)")
-        ("format,f", po::value<std::string>(&format), "set input file format (default: generalizedassignment_beasley)")
+        ("format,f", po::value<std::string>(&format), "set input file format (default: orlibrary)")
         ("initsol", po::value<std::string>(&initial_solution_path), "set initial solution file")
         ("output,o", po::value<std::string>(&output_path), "set output file")
         ("cert,c", po::value<std::string>(&certificate_path), "set certificate file")
