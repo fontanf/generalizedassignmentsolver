@@ -119,7 +119,7 @@ Checker:
 ```
 
 Run benchmarks:
-```
+```shell
 bazel build -- //...
 python3 generalizedassignmentsolver/bench.py yagiura2004 "mthg -f wij/ti"          # no time limit
 python3 generalizedassignmentsolver/bench.py yagiura2004 "branchandcut_gurobi" 60  # 1m time limit

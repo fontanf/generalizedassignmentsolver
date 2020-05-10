@@ -86,12 +86,12 @@ public:
     /** Constructor for test instances. */
     void add_item(const std::vector<std::pair<Weight, Cost>>& a);
     void set_capacities(const std::vector<Weight>& t);
-    void set_optimal_solution(Solution& sol);
+    void set_optimal_solution(Solution& solution);
 
     /** Copy constructor. */
-    Instance(const Instance& ins);
+    Instance(const Instance& instance);
     /** Copy assignment operator. */
-    Instance& operator=(const Instance& ins);
+    Instance& operator=(const Instance& instance);
     /** Destructor. */
     ~Instance();
 
@@ -140,7 +140,7 @@ private:
 
 };
 
-std::ostream& operator<<(std::ostream &os, const Alternative& alt);
+std::ostream& operator<<(std::ostream &os, const Alternative& alternative);
 std::ostream& operator<<(std::ostream &os, const Instance& instance);
 
 }
