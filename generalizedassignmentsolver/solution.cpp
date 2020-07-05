@@ -347,7 +347,7 @@ void Output::update_solution(const Solution& solution_new, const std::stringstre
         info.output->sol_number++;
         double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
         std::string sol_str = "Solution" + std::to_string(info.output->sol_number);
-        PUT(info, sol_str, "Cost", solution.cost());
+        PUT(info, sol_str, "Value", solution.cost());
         PUT(info, sol_str, "Time", t);
         if (!info.output->onlywriteattheend)
             solution.write_cert(info.output->certfile);
@@ -370,7 +370,7 @@ void Output::update_lower_bound(Cost lower_bound_new, const std::stringstream& s
         info.output->bnd_number++;
         double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
         std::string sol_str = "Bound" + std::to_string(info.output->bnd_number);
-        PUT(info, sol_str, "Cost", lower_bound);
+        PUT(info, sol_str, "Value", lower_bound);
         PUT(info, sol_str, "Time", t);
         if (!info.output->onlywriteattheend)
             solution.write_cert(info.output->certfile);

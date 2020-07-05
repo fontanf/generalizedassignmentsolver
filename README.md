@@ -39,8 +39,9 @@ Others heuristics and meta-heuristics:
 - Random feasible solution found with a Local search `-a random` :heavy_check_mark:
 - Repair linear relaxation solution `-a repairlinrelax_clp` :heavy_check_mark:
 - Local search with LocalSolver `-a localsolver` :heavy_check_mark:
-- Tree search algorithms based on Branch-and-price branching scheme :x:
-- Tree search algorithms based on Dantzig-Wolfe reformulation branching scheme :x:
+- Tree search algorithms based on Dantzig-Wolfe reformulation branching scheme
+  - Greedy `-a cgh_greedy --lp-solver clp` :heavy_check_mark:
+  - Limited discrepency search `-a cgh_limiteddiscrepencysearch --lp-solver clp` :x:
 
 ### Exact algorithms
 

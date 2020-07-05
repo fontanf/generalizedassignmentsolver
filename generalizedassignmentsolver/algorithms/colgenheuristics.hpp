@@ -11,15 +11,7 @@ struct CghRestrictedMasterOptionalParameters
 {
     Info info = Info();
 
-    std::string solver = "clp"; // "clp", "cplex"
-
-    CghRestrictedMasterOptionalParameters& set_params(const std::vector<std::string>& argv)
-    {
-        for (auto it = argv.begin() + 1; it != argv.end(); ++it) {
-            if (*it == "solver") { solver  = *(++it); }
-        }
-        return *this;
-    }
+    std::string lp_solver = "clp"; // "clp", "cplex"
 };
 
 struct CghRestrictedMasterOutput: Output
@@ -30,55 +22,39 @@ struct CghRestrictedMasterOutput: Output
 
 CghRestrictedMasterOutput cgh_restrictedmaster(const Instance& ins, CghRestrictedMasterOptionalParameters p = {});
 
-/******************************* cgh_purediving *******************************/
+/********************************* cgh_greedy *********************************/
 
-struct CghPureDivingOptionalParameters
+struct CghGreedyOptionalParameters
 {
     Info info = Info();
 
-    std::string solver = "clp"; // "clp", "cplex"
-
-    CghPureDivingOptionalParameters& set_params(const std::vector<std::string>& argv)
-    {
-        for (auto it = argv.begin() + 1; it != argv.end(); ++it) {
-            if (*it == "solver") { solver  = *(++it); }
-        }
-        return *this;
-    }
+    std::string lp_solver = "clp"; // "clp", "cplex"
 };
 
-struct CghPureDivingOutput: Output
+struct CghGreedyOutput: Output
 {
-    CghPureDivingOutput(const Instance& ins, Info& info): Output(ins, info) { }
-    CghPureDivingOutput& algorithm_end(Info& info);
+    CghGreedyOutput(const Instance& ins, Info& info): Output(ins, info) { }
+    CghGreedyOutput& algorithm_end(Info& info);
 };
 
-CghPureDivingOutput cgh_purediving(const Instance& ins, CghPureDivingOptionalParameters p = {});
+CghGreedyOutput cgh_greedy(const Instance& ins, CghGreedyOptionalParameters p = {});
 
-/***************************** cgh_divingwithlds ******************************/
+/************************ cgh_limiteddiscrepencysearch ************************/
 
-struct CghDivingWithLdsOptionalParameters
+struct CghLimitedDiscrepencySearchOptionalParameters
 {
     Info info = Info();
 
-    std::string solver = "clp"; // "clp", "cplex"
-
-    CghDivingWithLdsOptionalParameters& set_params(const std::vector<std::string>& argv)
-    {
-        for (auto it = argv.begin() + 1; it != argv.end(); ++it) {
-            if (*it == "solver") { solver  = *(++it); }
-        }
-        return *this;
-    }
+    std::string lp_solver = "clp"; // "clp", "cplex"
 };
 
-struct CghDivingWithLdsOutput: Output
+struct CghLimitedDiscrepencySearchOutput: Output
 {
-    CghDivingWithLdsOutput(const Instance& ins, Info& info): Output(ins, info) { }
-    CghDivingWithLdsOutput& algorithm_end(Info& info);
+    CghLimitedDiscrepencySearchOutput(const Instance& ins, Info& info): Output(ins, info) { }
+    CghLimitedDiscrepencySearchOutput& algorithm_end(Info& info);
 };
 
-CghDivingWithLdsOutput cgh_divingwithlds(const Instance& ins, CghDivingWithLdsOptionalParameters p = {});
+CghLimitedDiscrepencySearchOutput cgh_limiteddiscrepencysearch(const Instance& ins, CghLimitedDiscrepencySearchOptionalParameters p = {});
 
 }
 

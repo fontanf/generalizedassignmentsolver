@@ -51,6 +51,7 @@ BranchAndPriceOutput generalizedassignmentsolver::branchandprice(
 
     // Root node.
     auto root = std::make_shared<BranchAndPriceNode>();
+    colgen_parameters.info.set_timelimit(parameters.info.remaining_time());
     auto colgen_output = columngeneration(instance, colgen_parameters);
     std::stringstream ss;
     ss << "root node";

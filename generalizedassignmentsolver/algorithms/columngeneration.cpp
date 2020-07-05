@@ -323,6 +323,10 @@ ColGenOutput generalizedassignmentsolver::columngeneration(
     while (found) {
         output.it++;
 
+        // Check time
+        if (!parameters.info.check_time())
+            break;
+
         // Solve LP
         solver->solve();
         VER(parameters.info,
@@ -359,7 +363,7 @@ ColGenOutput generalizedassignmentsolver::columngeneration(
 
             instance_kp.clear();
             instance_kp.set_capacity(capacities_kp[i]);
-            Cost rc_ub = std::ceil((mult * (- dual_sol[i])));
+            Cost rc_ub = std::ceil((mult * (- dual_sol[agent_row[i]])));
             ItemIdx j_kp = 0;
             for (ItemIdx j = 0; j < n; ++j) {
                 AltIdx k = instance.alternative_index(j, i);
@@ -381,7 +385,7 @@ ColGenOutput generalizedassignmentsolver::columngeneration(
             }
             auto output_kp = knapsacksolver::minknap(instance_kp);
             rc_ub -= output_kp.solution.profit();
-            //std::cout << "rc_ub " << rc_ub << " opt(kp) " << sol.profit() << " vi " << (Cost)std::ceil((mult * (- dual_sol[i]))) << std::endl;
+            //std::cout << "i " << i << " rc_ub " << rc_ub << " opt(kp) " << output_kp.solution.profit() << " vi " << (Cost)std::ceil((mult * (- dual_sol[agent_row[i]]))) << std::endl;
             if (rc_ub >= 0)
                 continue;
 
@@ -407,7 +411,7 @@ ColGenOutput generalizedassignmentsolver::columngeneration(
             continue;
         instance_kp.clear();
         instance_kp.set_capacity(capacities_kp[i]);
-        Cost rc_lb = std::floor((mult * (- dual_sol[i])));
+        Cost rc_lb = std::floor((mult * (- dual_sol[agent_row[i]])));
         for (ItemIdx j = 0; j < n; ++j) {
             AltIdx k = instance.alternative_index(j, i);
             const Alternative& a = instance.alternative(k);
