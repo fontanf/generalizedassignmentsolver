@@ -233,7 +233,7 @@ void add_column(const Instance& instance,
 ColGenOutput generalizedassignmentsolver::columngeneration(
         const Instance& instance, ColGenOptionalParameters parameters)
 {
-    VER(parameters.info, "*** columngeneration " << parameters.solver << " ***" << std::endl);
+    VER(parameters.info, "*** columngeneration --lp-solver " << parameters.lp_solver << " ***" << std::endl);
     ColGenOutput output(instance, parameters.info);
 
     ItemIdx n = instance.item_number();
@@ -270,11 +270,11 @@ ColGenOutput generalizedassignmentsolver::columngeneration(
     // Initialize solver
     std::unique_ptr<ColGenSolver> solver = NULL;
 #if CPLEX_FOUND
-    if (parameters.solver == "cplex")
+    if (parameters.lp_solver == "cplex")
         solver = std::unique_ptr<ColGenSolver>(new ColGenSolverCplex(agent_constraint_number, item_constraint_number));
 #endif
 #if COINOR_FOUND
-    if (parameters.solver == "clp")
+    if (parameters.lp_solver == "clp")
         solver = std::unique_ptr<ColGenSolver>(new ColGenSolverClp(agent_constraint_number, item_constraint_number));
 #endif
     if (solver == NULL)

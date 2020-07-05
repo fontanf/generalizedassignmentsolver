@@ -20,7 +20,7 @@ This problem is interesting because many different optimization methods can and 
   - solved with volume method `-a lagrelax_assignment_volume` :heavy_check_mark:
   - solved with L-BFGS method `-a lagrelax_assignment_lbfgs` :heavy_check_mark:
 
-- Column generation `-a columngeneration --solver clp` :heavy_check_mark: `-a columngeneration --solver cplex` :heavy_check_mark:
+- Column generation `-a columngeneration --lp-solver clp` :heavy_check_mark: `-a columngeneration --lp-solver cplex` :heavy_check_mark:
 
 ### Upper bounds
 
@@ -50,8 +50,9 @@ Others heuristics and meta-heuristics:
   - with Gurobi `-a branchandcut_gurobi` :heavy_check_mark:
 
 - Branch-and-price
-  - Depth First Search `-a branchandprice_dfs --solver clp` :heavy_check_mark: `-a branchandprice_dfs --solver cplex` :heavy_check_mark:
-  - A* (Best First Search) `-a branchandprice_astar --solver clp` :heavy_check_mark: `-a branchandprice_astar --solver cplex` :heavy_check_mark:
+  - `-a branchandprice --lp-solver clp --tree-search-algorithm dfs --branching-rule most-integer` :heavy_check_mark:
+  - `-a branchandprice --lp-solver clp --tree-search-algorithm lds --branching-rule most-integer` :heavy_check_mark:
+  - `-a branchandprice --lp-solver clp --tree-search-algorithm bfs --branching-rule most-fractional` :heavy_check_mark:
 
 - Constraint programming
   - with Gecode `-a constraintprogramming_gecode` :heavy_check_mark:

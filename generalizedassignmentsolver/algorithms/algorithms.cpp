@@ -48,7 +48,7 @@ ColGenOptionalParameters read_columngeneration_args(const std::vector<char*>& ar
     ColGenOptionalParameters parameters;
     po::options_description desc("Allowed options");
     desc.add_options()
-        ("solver,s", po::value<std::string>(&parameters.solver), "")
+        ("lp-solver,s", po::value<std::string>(&parameters.lp_solver), "")
         ;
     po::variables_map vm;
     po::store(po::parse_command_line((Counter)argv.size(), argv.data(), desc), vm);
@@ -66,7 +66,9 @@ BranchAndPriceOptionalParameters read_branchandprice_args(const std::vector<char
     BranchAndPriceOptionalParameters parameters;
     po::options_description desc("Allowed options");
     desc.add_options()
-        ("solver,s", po::value<std::string>(&parameters.solver), "")
+        ("lp-solver,s", po::value<std::string>(&parameters.lp_solver), "")
+        ("tree-search-algorithm,t", po::value<std::string>(&parameters.tree_search_algorithm), "")
+        ("branching-rule,b", po::value<std::string>(&parameters.branching_rule), "")
         ;
     po::variables_map vm;
     po::store(po::parse_command_line((Counter)argv.size(), argv.data(), desc), vm);
@@ -187,14 +189,10 @@ Output generalizedassignmentsolver::run(
         parameters.info = info;
         return branchandcut_gurobi(instance, parameters);
 #endif
-    } else if (algorithm_args[0] == "branchandprice_dfs") {
+    } else if (algorithm_args[0] == "branchandprice") {
         BranchAndPriceOptionalParameters parameters = read_branchandprice_args(algorithm_argv);
         parameters.info = info;
-        return branchandprice_dfs(instance, parameters);
-    } else if (algorithm_args[0] == "branchandprice_astar") {
-        BranchAndPriceOptionalParameters parameters = read_branchandprice_args(algorithm_argv);
-        parameters.info = info;
-        return branchandprice_astar(instance, parameters);
+        return branchandprice(instance, parameters);
 #if GECODE_FOUND
     } else if (algorithm_args[0] == "constraintprogramming_gecode") {
         ConstraintProgrammingGecodeOptionalParameters parameters;

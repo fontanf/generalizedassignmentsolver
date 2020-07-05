@@ -9,20 +9,21 @@ struct BranchAndPriceOptionalParameters
 {
     Info info = Info();
 
-    std::string solver = "clp"; // "clp", "cplex"
+    std::string lp_solver = "clp"; // "clp", "cplex"
+    std::string tree_search_algorithm = "dfs"; // "dfs", "bfs", "lds"
+    std::string branching_rule = "most-fractional"; // "most-fractional", "most-integer"
 };
 
 struct BranchAndPriceOutput: Output
 {
-    BranchAndPriceOutput(const Instance& ins, Info& info): Output(ins, info) { }
+    BranchAndPriceOutput(const Instance& instance, Info& info): Output(instance, info) { }
     BranchAndPriceOutput& algorithm_end(Info& info);
 
     Counter node_number = 0;
 };
 
-BranchAndPriceOutput branchandprice_dfs(const Instance& ins, BranchAndPriceOptionalParameters p = {});
-
-BranchAndPriceOutput branchandprice_astar(const Instance& ins, BranchAndPriceOptionalParameters p = {});
+BranchAndPriceOutput branchandprice(
+        const Instance& instance, BranchAndPriceOptionalParameters parameters = {});
 
 }
 

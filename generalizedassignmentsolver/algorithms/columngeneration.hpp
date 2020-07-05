@@ -12,7 +12,7 @@ struct ColGenOptionalParameters
 {
     Info info = Info();
 
-    std::string solver = "clp"; // "clp", "cplex"
+    std::string lp_solver = "clp"; // "clp", "cplex"
     std::vector<std::vector<std::vector<ItemIdx>>>* columns = NULL;
     std::vector<int>* fixed_alt = NULL; // -1: unfixed, 0: fixed to 0, 1: fixed to 1.
     std::vector<int>* fixed_agents = NULL; // 0: unfixed, 1: fixed.
