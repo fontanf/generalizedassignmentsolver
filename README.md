@@ -40,8 +40,8 @@ Others heuristics and meta-heuristics:
 - Repair linear relaxation solution `-a repairlinrelax_clp` :heavy_check_mark:
 - Local search with LocalSolver `-a localsolver` :heavy_check_mark:
 - Tree search algorithms based on Dantzig-Wolfe reformulation branching scheme
-  - Greedy `-a cgh_greedy --lp-solver clp` :heavy_check_mark:
-  - Limited discrepency search `-a cgh_limiteddiscrepencysearch --lp-solver clp` :x:
+  - Greedy `-a "cgh_greedy --lp-solver clp"` :heavy_check_mark:
+  - Limited discrepency search `-a "cgh_limiteddiscrepencysearch --lp-solver clp"` :x:
 
 ### Exact algorithms
 
@@ -51,9 +51,9 @@ Others heuristics and meta-heuristics:
   - with Gurobi `-a branchandcut_gurobi` :heavy_check_mark:
 
 - Branch-and-price
-  - `-a branchandprice --lp-solver clp --tree-search-algorithm dfs --branching-rule most-integer` :heavy_check_mark:
-  - `-a branchandprice --lp-solver clp --tree-search-algorithm lds --branching-rule most-integer` :heavy_check_mark:
-  - `-a branchandprice --lp-solver clp --tree-search-algorithm bfs --branching-rule most-fractional` :heavy_check_mark:
+  - `-a "branchandprice --lp-solver clp --tree-search-algorithm dfs --branching-rule most-integer"` :heavy_check_mark:
+  - `-a "branchandprice --lp-solver clp --tree-search-algorithm lds --branching-rule most-integer"` :heavy_check_mark:
+  - `-a "branchandprice --lp-solver clp --tree-search-algorithm bfs --branching-rule most-fractional"` :heavy_check_mark:
 
 - Constraint programming
   - with Gecode `-a constraintprogramming_gecode` :heavy_check_mark:

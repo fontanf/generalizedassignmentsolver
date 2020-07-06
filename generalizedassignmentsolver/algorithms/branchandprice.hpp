@@ -20,6 +20,7 @@ struct BranchAndPriceOutput: Output
     BranchAndPriceOutput& algorithm_end(Info& info);
 
     Counter node_number = 0;
+    ColIdx column_number = 0;
 };
 
 BranchAndPriceOutput branchandprice(

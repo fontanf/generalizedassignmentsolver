@@ -136,35 +136,34 @@ BranchAndPriceOutput generalizedassignmentsolver::branchandprice(
             }
         }
 
-        if (solution.remaining_capacity(i_best) < instance.alternative(k_best).w)
-            continue;
+        if (solution.remaining_capacity(i_best) >= instance.alternative(k_best).w) {
+            // Update solution
+            solution.set(k_best);
+            if (solution.feasible()) {
+                std::stringstream ss;
+                ss << "node " << output.node_number;
+                output.update_solution(solution, ss, parameters.info);
+                if (output.optimal())
+                    return output.algorithm_end(parameters.info);
+                continue;
+            }
 
-        // Update solution
-        solution.set(k_best);
-        if (solution.feasible()) {
-            std::stringstream ss;
-            ss << "node " << output.node_number;
-            output.update_solution(solution, ss, parameters.info);
-            if (output.optimal())
-                return output.algorithm_end(parameters.info);
-            continue;
+            // Child 1
+            auto child_1 = std::make_shared<BranchAndPriceNode>();
+            child_1->father = node;
+            child_1->k = k_best;
+            child_1->v = 1;
+            if (parameters.tree_search_algorithm == "dfs") {
+                child_1->value = - 0.5 - depth;
+            } else if (parameters.tree_search_algorithm == "lds") {
+                child_1->value = node->value;
+            } else {
+                fixed_alternatives[k_best] = 1;
+                auto colgen_output_child = columngeneration(instance, colgen_parameters);
+                child_1->value = (double)colgen_output_child.lower_bound - (double)(solution.item_number() + 1) / instance.item_number();
+            }
+            nodes.insert(child_1);
         }
-
-        // Child 1
-        auto child_1 = std::make_shared<BranchAndPriceNode>();
-        child_1->father = node;
-        child_1->k = k_best;
-        child_1->v = 1;
-        if (parameters.tree_search_algorithm == "dfs") {
-            child_1->value = - 0.5 - depth;
-        } else if (parameters.tree_search_algorithm == "lds") {
-            child_1->value = node->value;
-        } else {
-            fixed_alternatives[k_best] = 1;
-            auto colgen_output_child = columngeneration(instance, colgen_parameters);
-            child_1->value = (double)colgen_output_child.lower_bound - (double)(solution.item_number() + 1) / instance.item_number();
-        }
-        nodes.insert(child_1);
 
         // Child 0
         auto child_0 = std::make_shared<BranchAndPriceNode>();
