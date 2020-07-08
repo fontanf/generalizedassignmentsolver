@@ -20,28 +20,29 @@ This problem is interesting because many different optimization methods can and 
   - solved with volume method `-a lagrelax_assignment_volume` :heavy_check_mark:
   - solved with L-BFGS method `-a lagrelax_assignment_lbfgs` :heavy_check_mark:
 
-- Column generation `-a columngeneration --lp-solver clp` :heavy_check_mark: `-a columngeneration --lp-solver cplex` :heavy_check_mark:
+- Column generation `-a "columngeneration --lp-solver clp"` :heavy_check_mark: `-a "columngeneration --lp-solver cplex"` :heavy_check_mark:
 
 ### Upper bounds
 
-Polynomial algorithms from "Generalized Assignment Problems" (Martello et al., 1992), options `f cij` `f wij` `f cij*wij` `f -pij/wij` `f wij/ti`:
+Polynomial algorithms from "Generalized Assignment Problems" (Martello et al., 1992), options `-f cij` `-f wij` `-f cij*wij` `-f -pij/wij` `-f wij/ti`:
 - Basic greedy `-a "greedy -f wij"` :heavy_check_mark:
 - Greedy with regret measure `-a "greedyregret -f wij"` :heavy_check_mark:
 - MTHG, basic greedy (+ n shifts) `-a "mthg -f wij"` :heavy_check_mark:
 - MTHG, greedy with regret measure (+ n shifts) `-a "mthgregret -f wij"` :heavy_check_mark:
 
-Classical meta-heuristics based on shift-swap neighborhood optimized for large instances:
+Classical local search algorithms based on the shift-swap neighborhood:
 - Local search `-a localsearch` :heavy_check_mark:
 - Tabu search `-a tabusearch` :heavy_check_mark:
 - Simulated annealing `-a simulatedannealing` :heavy_check_mark:
 
-Others heuristics and meta-heuristics:
+Tree search algorithms based on the Dantzig-Wolfe reformulation branching scheme (i.e. column generation heuristics) inspired by "Primal Heuristics for Branch and Price: The Assets of
+Diving Methods" (Sadykov et al., 2019):
+- Greedy `-a "cgh_greedy --lp-solver cplex"` :heavy_check_mark:
+- Limited discrepency search `-a "cgh_limiteddiscrepencysearch --lp-solver cplex"` :heavy_check_mark:
+
+Others heuristics:
 - Random feasible solution found with a Local search `-a random` :heavy_check_mark:
-- Repair linear relaxation solution `-a repairlinrelax_clp` :heavy_check_mark:
 - Local search with LocalSolver `-a localsolver` :heavy_check_mark:
-- Tree search algorithms based on Dantzig-Wolfe reformulation branching scheme
-  - Greedy `-a "cgh_greedy --lp-solver clp"` :heavy_check_mark:
-  - Limited discrepency search `-a "cgh_limiteddiscrepencysearch --lp-solver clp"` :x:
 
 ### Exact algorithms
 
@@ -51,9 +52,9 @@ Others heuristics and meta-heuristics:
   - with Gurobi `-a branchandcut_gurobi` :heavy_check_mark:
 
 - Branch-and-price
-  - `-a "branchandprice --lp-solver clp --tree-search-algorithm dfs --branching-rule most-integer"` :heavy_check_mark:
-  - `-a "branchandprice --lp-solver clp --tree-search-algorithm lds --branching-rule most-integer"` :heavy_check_mark:
-  - `-a "branchandprice --lp-solver clp --tree-search-algorithm bfs --branching-rule most-fractional"` :heavy_check_mark:
+  - `-a "branchandprice --lp-solver cplex --tree-search-algorithm dfs --branching-rule most-integer"` :heavy_check_mark:
+  - `-a "branchandprice --lp-solver cplex --tree-search-algorithm lds --branching-rule most-integer"` :heavy_check_mark:
+  - `-a "branchandprice --lp-solver cplex --tree-search-algorithm bfs --branching-rule most-fractional"` :heavy_check_mark:
 
 - Constraint programming
   - with Gecode `-a constraintprogramming_gecode` :heavy_check_mark:

@@ -52,6 +52,8 @@ struct CghLimitedDiscrepencySearchOutput: Output
 {
     CghLimitedDiscrepencySearchOutput(const Instance& ins, Info& info): Output(ins, info) { }
     CghLimitedDiscrepencySearchOutput& algorithm_end(Info& info);
+
+    Counter node_number = 0;
 };
 
 CghLimitedDiscrepencySearchOutput cgh_limiteddiscrepencysearch(const Instance& ins, CghLimitedDiscrepencySearchOptionalParameters p = {});

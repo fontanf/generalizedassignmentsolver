@@ -13,7 +13,7 @@ datas["chu1997"] = [("chu1997/" + c + m + n, "-f orlibrary") for c in ['a', 'b',
 datas["yagiura2004"] = [("yagiura2004/" + c + mn, "-f orlibrary") for c in ['c', 'd', 'e'] for mn in ["10400", "20400", "40400", "15900", "30900", "60900", "201600", "401600", "801600"]]
 
 directory_in = "data"
-directory_out = os.path.join("output", algorithm + (" --time-limit " + str(timelimit) if timelimit != None else ""), data)
+directory_out = os.path.join("output", algorithm + (" | " + str(timelimit) if timelimit != None else ""), data)
 if not os.path.exists(directory_out):
     os.makedirs(directory_out)
 

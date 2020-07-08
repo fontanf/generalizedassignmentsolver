@@ -79,6 +79,24 @@ CghGreedyOptionalParameters read_cgh_greedy_args(const std::vector<char*>& argv)
     return parameters;
 }
 
+CghLimitedDiscrepencySearchOptionalParameters read_cgh_limiteddiscrepencysearch_args(const std::vector<char*>& argv)
+{
+    CghLimitedDiscrepencySearchOptionalParameters parameters;
+    po::options_description desc("Allowed options");
+    desc.add_options()
+        ("lp-solver,s", po::value<std::string>(&parameters.lp_solver), "")
+        ;
+    po::variables_map vm;
+    po::store(po::parse_command_line((Counter)argv.size(), argv.data(), desc), vm);
+    try {
+        po::notify(vm);
+    } catch (po::required_option e) {
+        std::cout << desc << std::endl;;
+        throw "";
+    }
+    return parameters;
+}
+
 BranchAndPriceOptionalParameters read_branchandprice_args(const std::vector<char*>& argv)
 {
     BranchAndPriceOptionalParameters parameters;
@@ -285,7 +303,7 @@ Output generalizedassignmentsolver::run(
         parameters.info = info;
         return cgh_greedy(instance, parameters);
     } else if (algorithm_args[0] == "cgh_limiteddiscrepencysearch") {
-        CghLimitedDiscrepencySearchOptionalParameters parameters;
+        CghLimitedDiscrepencySearchOptionalParameters parameters = read_cgh_limiteddiscrepencysearch_args(algorithm_argv);
         parameters.info = info;
         return cgh_limiteddiscrepencysearch(instance, parameters);
 
