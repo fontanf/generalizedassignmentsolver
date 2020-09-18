@@ -39,7 +39,8 @@ struct BranchAndCutCbcOutput: Output
     BranchAndCutCbcOutput& algorithm_end(Info& info);
 };
 
-BranchAndCutCbcOutput branchandcut_cbc(const Instance& instance, BranchAndCutCbcOptionalParameters p = {});
+BranchAndCutCbcOutput branchandcut_cbc(const Instance& instance,
+        BranchAndCutCbcOptionalParameters parameters = {});
 
 }
 

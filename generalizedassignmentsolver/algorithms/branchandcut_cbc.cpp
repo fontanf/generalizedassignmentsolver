@@ -8,7 +8,7 @@
 #include "coin/CbcHeuristicDiveVectorLength.hpp"
 #include "coin/CbcLinked.hpp"
 #include "coin/CbcHeuristicGreedy.hpp"
-#include "coin/CbcHeuristicFPump.hpp"
+#include "coin/CbcHeuristicFPumparameters.hpp"
 #include "coin/CbcHeuristicLocal.hpp"
 #include "coin/CbcHeuristic.hpp"
 #include "coin/CbcHeuristicRINS.hpp"
@@ -58,28 +58,51 @@ class SolHandler: public CbcEventHandler
 public:
 
     virtual CbcAction event(CbcEvent whichEvent);
-    SolHandler(const Instance& instance, BranchAndCutCbcOptionalParameters& p, BranchAndCutCbcOutput& output):
-        CbcEventHandler(), instance_(instance), p_(p), output_(output) { }
-    SolHandler(CbcModel *model, const Instance& instance, BranchAndCutCbcOptionalParameters& p, BranchAndCutCbcOutput& output):
-        CbcEventHandler(model), instance_(instance), p_(p), output_(output) { }
+
+    SolHandler(
+            const Instance& instance,
+            BranchAndCutCbcOptionalParameters& parameters,
+            BranchAndCutCbcOutput& output):
+        CbcEventHandler(),
+        instance_(instance),
+        parameters_(parameters),
+        output_(output) { }
+
+    SolHandler(
+            CbcModel *model,
+            const Instance& instance,
+            BranchAndCutCbcOptionalParameters& parameters,
+            BranchAndCutCbcOutput& output):
+        CbcEventHandler(model),
+        instance_(instance),
+        parameters_(parameters),
+        output_(output) { }
+
     virtual ~SolHandler() { }
-    SolHandler(const SolHandler &rhs): CbcEventHandler(rhs), instance_(rhs.instance_), p_(rhs.p_), output_(rhs.output_) { }
+
+    SolHandler(const SolHandler &rhs):
+        CbcEventHandler(rhs),
+        instance_(rhs.instance_),
+        parameters_(rhs.parameters_),
+        output_(rhs.output_) { }
+
     SolHandler &operator=(const SolHandler &rhs)
     {
         if (this != &rhs) {
             CbcEventHandler::operator=(rhs);
-            //this->instance_    = rhs.instance_;
-            this->p_      = rhs.p_;
-            this->output_ = rhs.output_;
+            //this->instance_   = rhs.instance_;
+            this->parameters_ = rhs.parameters_;
+            this->output_     = rhs.output_;
         }
         return *this;
     }
+
     virtual CbcEventHandler *clone() const { return new SolHandler(*this); }
 
 private:
 
     const Instance& instance_;
-    BranchAndCutCbcOptionalParameters& p_;
+    BranchAndCutCbcOptionalParameters& parameters_;
     BranchAndCutCbcOutput& output_;
 
 };
@@ -90,7 +113,7 @@ CbcEventHandler::CbcAction SolHandler::event(CbcEvent whichEvent)
         return noAction;
 
     Cost lb = std::ceil(model_->getBestPossibleObjValue() - TOL);
-    output_.update_lower_bound(lb, std::stringstream(""), p_.info);
+    output_.update_lower_bound(lb, std::stringstream(""), parameters_.info);
 
     if ((whichEvent != solution && whichEvent != heuristicSolution)) // no solution found
         return noAction;
@@ -101,11 +124,11 @@ CbcEventHandler::CbcAction SolHandler::event(CbcEvent whichEvent)
 
     if (!output_.solution.feasible() || output_.solution.cost() > solver->getObjValue() + 0.5) {
         const double *solution = solver->getColSolution();
-        Solution sol_curr(instance_);
+        Solution solution(instance_);
         for (AltIdx k = 0; k < instance_.alternative_number(); ++k)
             if (solution[k] > 0.5)
-                sol_curr.set(k);
-        output_.update_solution(sol_curr, std::stringstream(""), p_.info);
+                solution.set(k);
+        output_.update_solution(solution, std::stringstream(""), parameters_.info);
     }
 
     return noAction;
@@ -179,15 +202,17 @@ CoinLP::CoinLP(const Instance& instance)
             row_starts.data(), number_of_elements_in_rows.data());
 }
 
-BranchAndCutCbcOutput generalizedassignmentsolver::branchandcut_cbc(const Instance& instance, BranchAndCutCbcOptionalParameters p)
+BranchAndCutCbcOutput generalizedassignmentsolver::branchandcut_cbc(
+        const Instance& instance,
+        BranchAndCutCbcOptionalParameters parameters)
 {
-    VER(p.info, "*** branchandcut_cbc ***" << std::endl);
+    VER(parameters.info, "*** branchandcut_cbc ***" << std::endl);
 
-    BranchAndCutCbcOutput output(instance, p.info);
+    BranchAndCutCbcOutput output(instance, parameters.info);
 
     ItemIdx n = instance.item_number();
     if (n == 0)
-        return output.algorithm_end(p.info);
+        return output.algorithm_end(parameters.info);
 
     CoinLP mat(instance);
 
@@ -209,7 +234,7 @@ BranchAndCutCbcOutput generalizedassignmentsolver::branchandcut_cbc(const Instan
     CbcModel model(solver1);
 
     // Callback
-    SolHandler sh(instance, p, output);
+    SolHandler sh(instance, parameters, output);
     model.passInEventHandler(&sh);
 
     // Reduce printout
@@ -283,53 +308,53 @@ BranchAndCutCbcOutput generalizedassignmentsolver::branchandcut_cbc(const Instan
     //model.addCutGenerator(&cutgen_twomir);
 
     // Set time limit
-    model.setMaximumSeconds(p.info.remaining_time());
+    model.setMaximumSeconds(parameters.info.remaining_time());
 
     // Add initial solution
     std::vector<double> sol_init(instance.alternative_number(), 0);
-    if (p.initial_solution != NULL && p.initial_solution->feasible()) {
+    if (parameters.initial_solution != NULL && parameters.initial_solution->feasible()) {
         for (AltIdx k = 0; k < instance.alternative_number(); ++k)
-            if (p.initial_solution->agent(instance.alternative(k).j) == instance.alternative(k).i)
+            if (parameters.initial_solution->agent(instance.alternative(k).j) == instance.alternative(k).i)
                 sol_init[k] = 1;
-        model.setBestSolution(sol_init.data(), instance.alternative_number(), p.initial_solution->cost());
+        model.setBestSolution(sol_init.data(), instance.alternative_number(), parameters.initial_solution->cost());
     }
 
     // Stop af first improvment
-    if (p.stop_at_first_improvment)
+    if (parameters.stop_at_first_improvment)
         model.setMaximumSolutions(1);
 
     // Do complete search
     model.branchAndBound();
 
     if (model.isProvenInfeasible()) {
-        output.update_lower_bound(instance.bound(), std::stringstream(""), p.info);
+        output.update_lower_bound(instance.bound(), std::stringstream(""), parameters.info);
     } else if (model.isProvenOptimal()) {
         if (!output.solution.feasible() || output.solution.cost() > model.getObjValue() + 0.5) {
             const double *solution = model.solver()->getColSolution();
-            Solution sol_curr(instance);
+            Solution solution(instance);
             for (AltIdx k = 0; k < instance.alternative_number(); ++k)
                 if (solution[k] > 0.5)
-                    sol_curr.set(k);
-            output.update_solution(sol_curr, std::stringstream(""), p.info);
+                    solution.set(k);
+            output.update_solution(solution, std::stringstream(""), parameters.info);
         }
-        output.update_lower_bound(output.solution.cost(), std::stringstream(""), p.info);
+        output.update_lower_bound(output.solution.cost(), std::stringstream(""), parameters.info);
     } else if (model.bestSolution() != NULL) {
         if (!output.solution.feasible() || output.solution.cost() > model.getObjValue() + 0.5) {
             const double *solution = model.solver()->getColSolution();
-            Solution sol_curr(instance);
+            Solution solution(instance);
             for (AltIdx k = 0; k < instance.alternative_number(); ++k)
                 if (solution[k] > 0.5)
-                    sol_curr.set(k);
-            output.update_solution(sol_curr, std::stringstream(""), p.info);
+                    solution.set(k);
+            output.update_solution(solution, std::stringstream(""), parameters.info);
         }
         Cost lb = std::ceil(model.getBestPossibleObjValue() - TOL);
-        output.update_lower_bound(lb, std::stringstream(""), p.info);
+        output.update_lower_bound(lb, std::stringstream(""), parameters.info);
     } else {
         Cost lb = std::ceil(model.getBestPossibleObjValue() - TOL);
-        output.update_lower_bound(lb, std::stringstream(""), p.info);
+        output.update_lower_bound(lb, std::stringstream(""), parameters.info);
     }
 
-    return output.algorithm_end(p.info);
+    return output.algorithm_end(parameters.info);
 }
 
 #endif

@@ -293,7 +293,7 @@ cc_test(
                 "//generalizedassignmentsolver:tester",
                 ":branchandcut_cplex",
         ],
-        copts = COINOR_COPTS,
+        copts = CPLEX_COPTS,
         timeout = "moderate",
 )
 
