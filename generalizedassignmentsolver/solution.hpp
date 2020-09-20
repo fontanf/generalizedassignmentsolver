@@ -71,7 +71,7 @@ public:
 
     void clear();
 
-    void write_cert(std::string filepath);
+    void write(std::string filepath);
     std::string to_string(AgentIdx i);
 
 private:

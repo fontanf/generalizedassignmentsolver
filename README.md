@@ -1,4 +1,4 @@
-# GeneralizedAssignmentSolver
+# Generalized Assignment Solver
 
 A solver for the Generalized Assignment Problem.
 

@@ -228,7 +228,7 @@ ItemIdx generalizedassignmentsolver::distance(const Solution& sol1, const Soluti
     return dist;
 }
 
-void Solution::write_cert(std::string filepath)
+void Solution::write(std::string filepath)
 {
     if (filepath.empty())
         return;
@@ -350,7 +350,7 @@ void Output::update_solution(const Solution& solution_new, const std::stringstre
         PUT(info, sol_str, "Value", solution.cost());
         PUT(info, sol_str, "Time", t);
         if (!info.output->onlywriteattheend)
-            solution.write_cert(info.output->certfile);
+            solution.write(info.output->certfile);
     }
 
     info.output->mutex_sol.unlock();
@@ -373,7 +373,7 @@ void Output::update_lower_bound(Cost lower_bound_new, const std::stringstream& s
         PUT(info, sol_str, "Value", lower_bound);
         PUT(info, sol_str, "Time", t);
         if (!info.output->onlywriteattheend)
-            solution.write_cert(info.output->certfile);
+            solution.write(info.output->certfile);
     }
 
     info.output->mutex_sol.unlock();
@@ -395,7 +395,7 @@ Output& Output::algorithm_end(Info& info)
             << "Time (s): " << time << std::endl);
 
     info.write_ini();
-    solution.write_cert(info.output->certfile);
+    solution.write(info.output->certfile);
     return *this;
 }
 
