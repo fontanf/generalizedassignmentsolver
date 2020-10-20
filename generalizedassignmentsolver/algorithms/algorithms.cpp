@@ -178,7 +178,11 @@ SimulatedAnnealingOptionalParameters read_simulatedannealing_args(const std::vec
 }
 
 Output generalizedassignmentsolver::run(
-        std::string algorithm, const Instance& instance, std::mt19937_64& generator, Info info)
+        std::string algorithm,
+        const Instance& instance,
+        const Solution& initial_solution,
+        std::mt19937_64& generator,
+        Info info)
 {
     std::vector<std::string> algorithm_args = po::split_unix(algorithm);
     std::vector<char*> algorithm_argv;
@@ -302,14 +306,17 @@ Output generalizedassignmentsolver::run(
     } else if (algorithm_args[0] == "localsearch") {
         LocalSearchOptionalParameters parameters = read_localsearch_args(algorithm_argv);
         parameters.info = info;
+        parameters.initial_solution = &initial_solution;
         return localsearch(instance, generator, parameters);
     } else if (algorithm_args[0] == "tabusearch") {
         TabuSearchOptionalParameters parameters = read_tabusearch_args(algorithm_argv);
         parameters.info = info;
+        parameters.initial_solution = &initial_solution;
         return tabusearch(instance, generator, parameters);
     } else if (algorithm_args[0] == "simulatedannealing") {
         SimulatedAnnealingOptionalParameters parameters = read_simulatedannealing_args(algorithm_argv);
         parameters.info = info;
+        parameters.initial_solution = &initial_solution;
         return simulatedannealing(instance, generator, parameters);
 #if LOCALocalSearchOLVER_FOUND
     } else if (algorithm_args[0] == "localsolver") {

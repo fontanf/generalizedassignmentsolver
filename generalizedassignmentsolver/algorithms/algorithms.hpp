@@ -5,7 +5,12 @@
 namespace generalizedassignmentsolver
 {
 
-Output run(std::string algorithm, const Instance& instance, std::mt19937_64& generator, Info info);
+Output run(
+        std::string algorithm,
+        const Instance& instance,
+        const Solution& initial_solution,
+        std::mt19937_64& generator,
+        Info info);
 
 }
 

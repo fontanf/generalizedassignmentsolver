@@ -27,9 +27,9 @@ int main(int argc, char *argv[])
         ("algorithm,a", po::value<std::string>(&algorithm), "set algorithm")
         ("input,i", po::value<std::string>(&instance_path)->required(), "set input file (required)")
         ("format,f", po::value<std::string>(&format), "set input file format (default: orlibrary)")
-        ("initsol", po::value<std::string>(&initial_solution_path), "set initial solution file")
+        ("initial-solution", po::value<std::string>(&initial_solution_path), "set initial solution file")
         ("output,o", po::value<std::string>(&output_path), "set output file")
-        ("cert,c", po::value<std::string>(&certificate_path), "set certificate file")
+        ("certificate,c", po::value<std::string>(&certificate_path), "set certificate file")
         ("time-limit,t", po::value<double>(&time_limit), "Time limit in seconds\n  ex: 3600")
         ("seed,s", po::value<int>(&seed), "seed")
         ("verbose,v", "")
@@ -55,6 +55,7 @@ int main(int argc, char *argv[])
     std::mt19937_64 gen(seed);
 
     Instance instance(instance_path, format);
+    Solution initial_solution(instance, initial_solution_path);
 
     Info info = Info()
         .set_verbose(vm.count("verbose"))
@@ -67,7 +68,7 @@ int main(int argc, char *argv[])
         .set_loglevelmax(loglevelmax)
         ;
 
-    run(algorithm, instance, gen, info);
+    run(algorithm, instance, initial_solution, gen, info);
 
     return 0;
 }
