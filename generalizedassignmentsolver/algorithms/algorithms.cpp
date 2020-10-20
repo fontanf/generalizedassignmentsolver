@@ -122,8 +122,8 @@ LocalSearchOptionalParameters read_localsearch_args(const std::vector<char*>& ar
     LocalSearchOptionalParameters parameters;
     po::options_description desc("Allowed options");
     desc.add_options()
-        ("iterations,i", po::value<Counter>(&parameters.iteration_limit), "")
-        ("iterations-without-improvment,w", po::value<Counter>(&parameters.iteration_without_improvment_limit), "")
+        ("iteration-limit,i", po::value<Counter>(&parameters.iteration_limit), "")
+        ("iteration-without-improvment-limit,w", po::value<Counter>(&parameters.iteration_without_improvment_limit), "")
         ;
     po::variables_map vm;
     po::store(po::parse_command_line((Counter)argv.size(), argv.data(), desc), vm);
@@ -142,8 +142,8 @@ TabuSearchOptionalParameters read_tabusearch_args(const std::vector<char*>& argv
     po::options_description desc("Allowed options");
     desc.add_options()
         (",l", po::value<Counter>(&parameters.l), "")
-        ("iterations,i", po::value<Counter>(&parameters.iteration_limit), "")
-        ("iterations-without-improvment,w", po::value<Counter>(&parameters.iteration_without_improvment_limit), "")
+        ("iteration-limit,i", po::value<Counter>(&parameters.iteration_limit), "")
+        ("iteration-without-improvment-limit,w", po::value<Counter>(&parameters.iteration_without_improvment_limit), "")
         ;
     po::variables_map vm;
     po::store(po::parse_command_line((Counter)argv.size(), argv.data(), desc), vm);
@@ -163,8 +163,8 @@ SimulatedAnnealingOptionalParameters read_simulatedannealing_args(const std::vec
     desc.add_options()
         ("beta,b", po::value<double>(&parameters.beta), "")
         (",l", po::value<double>(&parameters.l), "")
-        ("iterations,i", po::value<Counter>(&parameters.iteration_limit), "")
-        ("iterations-without-improvment,w", po::value<Counter>(&parameters.iteration_without_improvment_limit), "")
+        ("iteration-limit,i", po::value<Counter>(&parameters.iteration_limit), "")
+        ("iteration-without-improvment-limit,w", po::value<Counter>(&parameters.iteration_without_improvment_limit), "")
         ;
     po::variables_map vm;
     po::store(po::parse_command_line((Counter)argv.size(), argv.data(), desc), vm);
