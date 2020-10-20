@@ -10,6 +10,7 @@ timelimit  = sys.argv[3] if len(sys.argv) > 3 else None
 datas = {}
 datas["cattrysse1994"] = [("cattrysse1994/gap" + str(i) + "-" + str(j), "-f orlibrary") for i in range(1, 13) for j in range(0, 5)]
 datas["chu1997"] = [("chu1997/" + c + m + n, "-f orlibrary") for c in ['a', 'b', 'c', 'd'] for n in ["100", "200"] for m in ["05", "10", "20"]]
+datas["yagiura2004_e"] = [("yagiura2004/e" + m + n, "-f orlibrary") for n in ["100", "200"] for m in ["05", "10", "20"]]
 datas["yagiura2004"] = [("yagiura2004/" + c + mn, "-f orlibrary") for c in ['c', 'd', 'e'] for mn in ["10400", "20400", "40400", "15900", "30900", "60900", "201600", "401600", "801600"]]
 
 directory_in = "data"

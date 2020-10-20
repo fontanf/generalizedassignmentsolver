@@ -117,12 +117,33 @@ BranchAndPriceOptionalParameters read_branchandprice_args(const std::vector<char
     return parameters;
 }
 
+LocalSearchOptionalParameters read_localsearch_args(const std::vector<char*>& argv)
+{
+    LocalSearchOptionalParameters parameters;
+    po::options_description desc("Allowed options");
+    desc.add_options()
+        ("iterations,i", po::value<Counter>(&parameters.iteration_limit), "")
+        ("iterations-without-improvment,w", po::value<Counter>(&parameters.iteration_without_improvment_limit), "")
+        ;
+    po::variables_map vm;
+    po::store(po::parse_command_line((Counter)argv.size(), argv.data(), desc), vm);
+    try {
+        po::notify(vm);
+    } catch (po::required_option e) {
+        std::cout << desc << std::endl;;
+        throw "";
+    }
+    return parameters;
+}
+
 TabuSearchOptionalParameters read_tabusearch_args(const std::vector<char*>& argv)
 {
     TabuSearchOptionalParameters parameters;
     po::options_description desc("Allowed options");
     desc.add_options()
         (",l", po::value<Counter>(&parameters.l), "")
+        ("iterations,i", po::value<Counter>(&parameters.iteration_limit), "")
+        ("iterations-without-improvment,w", po::value<Counter>(&parameters.iteration_without_improvment_limit), "")
         ;
     po::variables_map vm;
     po::store(po::parse_command_line((Counter)argv.size(), argv.data(), desc), vm);
@@ -142,6 +163,8 @@ SimulatedAnnealingOptionalParameters read_simulatedannealing_args(const std::vec
     desc.add_options()
         ("beta,b", po::value<double>(&parameters.beta), "")
         (",l", po::value<double>(&parameters.l), "")
+        ("iterations,i", po::value<Counter>(&parameters.iteration_limit), "")
+        ("iterations-without-improvment,w", po::value<Counter>(&parameters.iteration_without_improvment_limit), "")
         ;
     po::variables_map vm;
     po::store(po::parse_command_line((Counter)argv.size(), argv.data(), desc), vm);
@@ -277,7 +300,7 @@ Output generalizedassignmentsolver::run(
         return repairlinrelax_clp(instance, linrelax_output, info);
 #endif
     } else if (algorithm_args[0] == "localsearch") {
-        LocalSearchOptionalParameters parameters;
+        LocalSearchOptionalParameters parameters = read_localsearch_args(algorithm_argv);
         parameters.info = info;
         return localsearch(instance, generator, parameters);
     } else if (algorithm_args[0] == "tabusearch") {
@@ -312,5 +335,6 @@ Output generalizedassignmentsolver::run(
         assert(false);
         return Output(instance, info);
     }
+
 }
 
