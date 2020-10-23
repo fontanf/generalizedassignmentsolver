@@ -11,7 +11,6 @@ int main(int argc, char *argv[])
     // Parse program options
     Generator data;
     std::string output_file = "";
-    std::string plot_file = "";
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "produce help message")
@@ -22,7 +21,6 @@ int main(int argc, char *argv[])
         (",x", po::value<double>(&data.x), "set x")
         (",s", po::value<Seed>(&data.s), "set seed")
         (",o", po::value<std::string>(&output_file), "set output file")
-        (",p", po::value<std::string>(&plot_file), "set plot file")
         ;
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -42,8 +40,6 @@ int main(int argc, char *argv[])
 
     if (output_file != "")
         ins.write(output_file);
-    if (plot_file != "")
-        ins.plot(plot_file);
 
     return 0;
 }

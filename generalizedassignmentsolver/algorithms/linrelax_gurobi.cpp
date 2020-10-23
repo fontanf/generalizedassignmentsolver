@@ -23,17 +23,18 @@ LinRelaxGurobiOutput generalizedassignmentsolver::linrelax_gurobi(const Instance
 
     ItemIdx n = instance.item_number();
     AgentIdx m = instance.agent_number();
-    AltIdx o = instance.alternative_number();
 
     GRBModel model(env);
 
     // Variables and objective
-    GRBVar* x = model.addVars(o);
-    for (AltIdx k=0; k<o; ++k) {
-        x[k].set(GRB_CharAttr_VType, GRB_CONTINUOUS);
-        x[k].set(GRB_DoubleAttr_LB, 0);
-        x[k].set(GRB_DoubleAttr_UB, 1);
-        x[k].set(GRB_DoubleAttr_Obj, instance.alternative(k).c);
+    std::vector<GRBVar*> x;
+    for (ItemIdx j = 0; j < n; j++) {
+        x.push_back(model.addVars(m, GRB_CONTINUOUS));
+        for (AgentIdx i = 0; i < m; i++) {
+            x[j][i].set(GRB_DoubleAttr_LB, 0);
+            x[j][i].set(GRB_DoubleAttr_UB, 1);
+            x[j][i].set(GRB_DoubleAttr_Obj, instance.cost(j, i));
+        }
     }
     model.set(GRB_IntAttr_ModelSense, GRB_MINIMIZE);
 
@@ -41,7 +42,7 @@ LinRelaxGurobiOutput generalizedassignmentsolver::linrelax_gurobi(const Instance
     for (AgentIdx i = 0; i < m; i++) {
         GRBLinExpr expr;
         for (ItemIdx j = 0; j < n; j++)
-            expr += x[instance.alternative_index(j, i)] * instance.alternative(j, i).w;
+            expr += instance.weight(j, i) * x[j][i];
         model.addConstr(expr <= instance.capacity(i));
     }
 
@@ -49,7 +50,7 @@ LinRelaxGurobiOutput generalizedassignmentsolver::linrelax_gurobi(const Instance
     for (ItemIdx j = 0; j < n; j++) {
         GRBLinExpr expr;
         for (AgentIdx i = 0; i < m; i++)
-            expr += x[instance.alternative_index(j, i)];
+            expr += x[j][i];
         model.addConstr(expr == 1);
     }
 
@@ -63,9 +64,11 @@ LinRelaxGurobiOutput generalizedassignmentsolver::linrelax_gurobi(const Instance
     // Get solution
     Cost lb = std::ceil(model.get(GRB_DoubleAttr_ObjVal) - TOL);
     output.update_lower_bound(lb, std::stringstream(""), info);
-    output.x = std::vector<double>(o, 0);
-    for (AltIdx k = 0; k < instance.alternative_number(); ++k)
-        output.x[k] = x[k].get(GRB_DoubleAttr_X);
+    for (ItemIdx j = 0; j < n; j++) {
+        output.x.push_back(std::vector<double>(m));
+        for (AgentIdx i = 0; i < m; i++)
+            output.x[j][i] = x[j][i].get(GRB_DoubleAttr_X);
+    }
 
     return output.algorithm_end(info);
 }

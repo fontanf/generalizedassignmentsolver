@@ -25,8 +25,6 @@ typedef int64_t ItemIdx;
 typedef int64_t ItemPos;
 typedef int64_t AgentIdx;
 typedef int64_t AgentPos;
-typedef int64_t AltIdx;
-typedef int64_t AltPos;
 typedef int64_t StateIdx;
 typedef int64_t Counter;
 typedef int64_t Seed;
@@ -36,7 +34,6 @@ class Solution;
 
 struct Alternative
 {
-    AltIdx k;
     ItemIdx j;
     AgentIdx i;
     Weight w;
@@ -48,7 +45,8 @@ struct Alternative
 struct Item
 {
     ItemIdx j;
-    std::vector<AltIdx> alt;
+    std::vector<Alternative> alternatives;
+
     Weight w; // total weight
     Cost c; // total cost
 
@@ -79,8 +77,8 @@ public:
     Instance(AgentIdx m);
     void set_name(std::string name) { name_ = name; }
     void set_capacity(AgentIdx i, Weight t) { t_[i] = t; }
-    void add_item();
-    void set_alternative(ItemIdx j, AgentIdx i, Weight w, Cost p);
+    inline void add_item();
+    inline void set_alternative(ItemIdx j, AgentIdx i, Weight w, Cost p);
     void clear();
 
     /** Constructor for test instances. */
@@ -101,26 +99,22 @@ public:
 
     std::string name() const { return name_; }
     const Item& item(ItemPos j) const { return items_[j]; }
-    AltIdx alternative_index(ItemIdx j, AgentIdx i) const { return items_[j].alt[i]; } 
-    const Alternative& alternative(AltPos k) const { return alternatives_[k]; }
-    const Alternative& alternative(ItemIdx j, AgentIdx i) const { return alternatives_[items_[j].alt[i]]; } 
 
     inline Cost cost_max()   const { return c_max_; }
     inline Cost weight_max() const { return w_max_; }
-    inline Cost profit(const Alternative& a)  const { return c_max_ - a.c; }
-    inline Cost profit(AltIdx k)              const { return profit(alternative(k)); }
-    inline Cost profit(ItemIdx j, AgentIdx i) const { return profit(alternative_index(i, j)); }
 
     ItemIdx item_number()       const { return items_.size(); }
     AgentIdx agent_number()     const { return t_.size(); }
-    AltIdx alternative_number() const { return alternatives_.size(); }
     Weight capacity(AgentIdx i) const { return t_[i]; }
+
+    inline Weight weight(ItemIdx j, AgentIdx i) const { return items_[j].alternatives[i].w; }
+    inline Cost cost(ItemIdx j, AgentIdx i) const { return items_[j].alternatives[i].c; }
+    inline Cost profit(ItemIdx j, AgentIdx i) const { return items_[j].c_max - items_[j].alternatives[i].c; }
 
     const Solution* optimal_solution() const { return sol_opt_.get(); }
     Cost optimum() const;
     Cost bound() const { return c_tot_ + 1; }
 
-    void plot(std::string filename);
     void write(std::string filename);
 
 private:
@@ -130,7 +124,6 @@ private:
 
     std::string name_;
     std::vector<Item> items_;
-    std::vector<Alternative> alternatives_;
     std::vector<Weight> t_;
     Cost c_max_ = -1;
     Cost c_tot_ = 0;
@@ -139,6 +132,47 @@ private:
     std::unique_ptr<Solution> sol_opt_;
 
 };
+
+void Instance::add_item()
+{
+    ItemIdx j = items_.size();
+    items_.push_back({});
+    items_[j].j = j;
+    items_[j].alternatives.resize(agent_number());
+    for (AgentIdx i = 0; i < agent_number(); ++i) {
+        items_[j].alternatives[i].j = j;
+        items_[j].alternatives[i].i = i;
+    }
+}
+
+void Instance::set_alternative(ItemIdx j, AgentIdx i, Weight w, Cost v)
+{
+    items_[j].alternatives[i].w = w;
+    items_[j].alternatives[i].c = v;
+    items_[j].w += w;
+    items_[j].c += v;
+    if (items_[j].i_cmin == -1 || items_[j].c_min > v) {
+        items_[j].i_cmin = i;
+        items_[j].c_min = v;
+    }
+    if (items_[j].i_wmin == -1 || items_[j].w_min > w) {
+        items_[j].i_wmin = i;
+        items_[j].w_min = w;
+    }
+    if (items_[j].c_max < v) {
+        items_[j].i_cmax = i;
+        items_[j].c_max = v;
+    }
+    if (items_[j].w_max < w) {
+        items_[j].i_wmax = i;
+        items_[j].w_max = w;
+    }
+    if (c_max_ < v)
+        c_max_ = v;
+    if (w_max_ < w)
+        w_max_ = w;
+    c_tot_ += v;
+}
 
 std::ostream& operator<<(std::ostream &os, const Alternative& alternative);
 std::ostream& operator<<(std::ostream &os, const Instance& instance);

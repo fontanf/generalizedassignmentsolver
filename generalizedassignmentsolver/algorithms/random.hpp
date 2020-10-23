@@ -5,8 +5,8 @@
 namespace generalizedassignmentsolver
 {
 
-Solution random_infeasible(const Instance& ins, std::mt19937_64& gen);
-Output random(const Instance& ins, std::mt19937_64& gen, Info info = Info());
+Solution random_infeasible(const Instance& instance, std::mt19937_64& generator);
+Output random(const Instance& instance, std::mt19937_64& generator, Info info = Info());
 
 }
 

@@ -12,7 +12,7 @@ struct LinRelaxGurobiOutput: Output
     LinRelaxGurobiOutput(const Instance& ins, Info& info): Output(ins, info) { }
     LinRelaxGurobiOutput& algorithm_end(Info& info);
 
-    std::vector<double> x;
+    std::vector<std::vector<double>> x;
 };
 
 LinRelaxGurobiOutput linrelax_gurobi(const Instance& ins, Info info = Info());

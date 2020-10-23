@@ -43,7 +43,6 @@ LocalSearchOutput generalizedassignmentsolver::localsearch(
     std::uniform_int_distribution<ItemIdx> dis_j2(0, n - 2);
     std::uniform_int_distribution<AgentIdx> dis_i(0, m - 2);
 
-    Cost v_curr = sol_curr.cost();
     Counter iteration_without_improvment = 0;
     for (; parameters.info.check_time();) {
         Counter x = dis_ss(generator);
@@ -53,10 +52,9 @@ LocalSearchOutput generalizedassignmentsolver::localsearch(
             AgentIdx i_old = sol_curr.agent(j);
             if (i >= i_old)
                 i++;
-            sol_curr.set(j, i);
-            if (!sol_curr.feasible() || v_curr < sol_curr.cost()) {
-                sol_curr.set(j, i_old);
-            }
+            if (sol_curr.weight(i) + instance.weight(j, i) <= instance.capacity(i)
+                    && instance.cost(j, i) <= instance.cost(j, i_old))
+                sol_curr.set(j, i);
         } else { // swap
             ItemIdx j1 = dis_j(generator);
             AgentIdx i1 = sol_curr.agent(j1);
@@ -66,11 +64,11 @@ LocalSearchOutput generalizedassignmentsolver::localsearch(
             AgentIdx i2 = sol_curr.agent(j2);
             if (i1 == i2)
                 continue;
-            sol_curr.set(j1, i2);
-            sol_curr.set(j2, i1);
-            if (!sol_curr.feasible() || v_curr < sol_curr.cost()) {
-                sol_curr.set(j1, i1);
-                sol_curr.set(j2, i2);
+            if (sol_curr.weight(i1) - instance.weight(j1, i1) + instance.weight(j2, i1) <= instance.capacity(i1)
+                    && sol_curr.weight(i2) - instance.weight(j2, i2) + instance.weight(j1, i2) <= instance.capacity(i2)
+                    && instance.cost(j1, i2) + instance.cost(j2, i1) <= instance.cost(j1, i1) + instance.cost(j2, i2)) {
+                sol_curr.set(j1, i2);
+                sol_curr.set(j2, i1);
             }
         }
         if (compare(output.solution, sol_curr)) {
@@ -121,8 +119,8 @@ TabuSearchOutput generalizedassignmentsolver::tabusearch(
             return output.algorithm_end(parameters.info);
         auto output_random = random(instance, generator, Info().set_timelimit(parameters.info.remaining_time()));
         sol_curr = output_random.solution;
-        output.update_solution(sol_curr, std::stringstream("initial solution"), parameters.info);
     }
+    output.update_solution(sol_curr, std::stringstream("initial solution"), parameters.info);
 
     AgentIdx m = instance.agent_number();
     ItemIdx  n = instance.item_number();
@@ -132,7 +130,6 @@ TabuSearchOutput generalizedassignmentsolver::tabusearch(
     std::uniform_int_distribution<AgentIdx> dis_i(0, m - 2);
 
     Counter l = std::min(parameters.l, n * m + n * (n + 1) / 4);
-    Cost v_curr = sol_curr.cost();
     Cost v_best = -1;
     ItemIdx j_best = -1;
     AgentIdx i_best = -1;
@@ -149,16 +146,16 @@ TabuSearchOutput generalizedassignmentsolver::tabusearch(
             AgentIdx i_old = sol_curr.agent(j);
             if (i >= i_old)
                 i++;
-            sol_curr.set(j, i);
-            if (sol_curr.feasible()) {
-                if (compare(output.solution, sol_curr)) {
-                    std::stringstream ss;
-                    ss << "it " << it;
-                    output.update_solution(sol_curr, ss, parameters.info);
-                    iteration_without_improvment = 0;
-                }
-                if (v_curr > sol_curr.cost()) {
-                    v_curr = sol_curr.cost();
+            if (sol_curr.weight(i) + instance.weight(j, i) <= instance.capacity(i)) {
+                Cost v_new = sol_curr.cost() - instance.cost(j, i_old) + instance.cost(j, i);
+                if (v_new < sol_curr.cost()) {
+                    sol_curr.set(j, i);
+                    if (compare(output.solution, sol_curr)) {
+                        std::stringstream ss;
+                        ss << "it " << it;
+                        output.update_solution(sol_curr, ss, parameters.info);
+                        iteration_without_improvment = 0;
+                    }
                     it = 0;
                     v_best = -1;
                     j_best = -1;
@@ -168,15 +165,14 @@ TabuSearchOutput generalizedassignmentsolver::tabusearch(
                     output.improving_move_number++;
                     continue;
                 }
-                if (v_best == -1 || v_best > sol_curr.cost()) {
-                    v_best = sol_curr.cost();
+                if (v_best == -1 || v_best > v_new) {
+                    v_best = v_new;
                     j_best = j;
                     i_best = i;
                     j1_best = -1;
                     j2_best = -1;
                 }
             }
-            sol_curr.set(j, i_old);
         } else { // swap
             ItemIdx j1 = dis_j(generator);
             AgentIdx i1 = sol_curr.agent(j1);
@@ -188,18 +184,21 @@ TabuSearchOutput generalizedassignmentsolver::tabusearch(
                 continue;
             output.iterations++;
             iteration_without_improvment++;
-            sol_curr.set(j1, i2);
-            sol_curr.set(j2, i1);
 
-            if (sol_curr.feasible()) {
-                if (compare(output.solution, sol_curr)) {
-                    std::stringstream ss;
-                    ss << "it " << it;
-                    output.update_solution(sol_curr, ss, parameters.info);
-                    iteration_without_improvment = 0;
-                }
-                if (v_curr > sol_curr.cost()) {
-                    v_curr = sol_curr.cost();
+            if (sol_curr.weight(i1) - instance.weight(j1, i1) + instance.weight(j2, i1) <= instance.capacity(i1)
+                    && sol_curr.weight(i2) - instance.weight(j2, i2) + instance.weight(j1, i2) <= instance.capacity(i2)) {
+                Cost v_new = sol_curr.cost()
+                    - instance.cost(j1, i1) - instance.cost(j2, i2)
+                    + instance.cost(j1, i2) + instance.cost(j2, i1);
+                if (v_new < sol_curr.cost()) {
+                    sol_curr.set(j1, i2);
+                    sol_curr.set(j2, i1);
+                    if (compare(output.solution, sol_curr)) {
+                        std::stringstream ss;
+                        ss << "it " << it;
+                        output.update_solution(sol_curr, ss, parameters.info);
+                        iteration_without_improvment = 0;
+                    }
                     it = 0;
                     v_best = -1;
                     j_best = -1;
@@ -209,17 +208,14 @@ TabuSearchOutput generalizedassignmentsolver::tabusearch(
                     output.improving_move_number++;
                     continue;
                 }
-                if (v_best == -1 || v_best > sol_curr.cost()) {
-                    v_best = sol_curr.cost();
+                if (v_best == -1 || v_best > v_new) {
+                    v_best = v_new;
                     j_best = -1;
                     i_best = -1;
                     j1_best = j1;
                     j2_best = j2;
                 }
             }
-
-            sol_curr.set(j1, i1);
-            sol_curr.set(j2, i2);
         }
 
         if (parameters.iteration_limit > 0
@@ -245,10 +241,13 @@ TabuSearchOutput generalizedassignmentsolver::tabusearch(
             i_best = -1;
             j1_best = -1;
             j2_best = -1;
-            v_curr = sol_curr.cost();
             output.degrading_move_number++;
         }
     }
+
+    std::stringstream ss;
+    output.update_solution(sol_curr, ss, parameters.info);
+    iteration_without_improvment = 0;
     return output.algorithm_end(parameters.info);
 }
 
@@ -292,8 +291,8 @@ SimulatedAnnealingOutput generalizedassignmentsolver::simulatedannealing(
     double t0 = 0;
     for (ItemIdx j = 0; j < n; ++j)
         for (AgentIdx i = 0; i < m; ++i)
-            if (t0 < instance.alternative(j, i).c)
-                t0 = instance.alternative(j, i).c;
+            if (t0 < instance.cost(j, i))
+                t0 = instance.cost(j, i);
     t0 /= 100;
 
     Counter it_max = 2 * (n * m + (n * (n + 1)) / 2);
@@ -309,10 +308,10 @@ SimulatedAnnealingOutput generalizedassignmentsolver::simulatedannealing(
                 AgentIdx i_old = sol_curr.agent(j);
                 if (i >= i_old)
                     i++;
-                sol_curr.set(j, i);
-                if (!sol_curr.feasible() || (v < sol_curr.cost()
-                            && dis(generator) > exp(((double)v - sol_curr.cost()) / t))) {
-                    sol_curr.set(j, i_old);
+                if (sol_curr.weight(i) + instance.weight(j, i) <= instance.capacity(i)) {
+                    Cost diff = instance.cost(j, i) - instance.cost(j, i_old);
+                    if (diff <= 0 || dis(generator) <= exp(-(double)diff / t))
+                        sol_curr.set(j, i);
                 }
             } else { // swap
                 ItemIdx j1 = dis_j(generator);
@@ -323,12 +322,14 @@ SimulatedAnnealingOutput generalizedassignmentsolver::simulatedannealing(
                 AgentIdx i2 = sol_curr.agent(j2);
                 if (i1 == i2)
                     continue;
-                sol_curr.set(j1, i2);
-                sol_curr.set(j2, i1);
-                if (!sol_curr.feasible() || (v < sol_curr.cost()
-                            && dis(generator) > exp(((double)v - sol_curr.cost()) / t))) {
-                    sol_curr.set(j1, i1);
-                    sol_curr.set(j2, i2);
+                if (sol_curr.weight(i1) - instance.weight(j1, i1) + instance.weight(j2, i1) <= instance.capacity(i1)
+                        && sol_curr.weight(i2) - instance.weight(j2, i2) + instance.weight(j1, i2) <= instance.capacity(i2)) {
+                    Cost diff = instance.cost(j1, i2) + instance.cost(j2, i1)
+                              - instance.cost(j1, i1) - instance.cost(j2, i2);
+                    if (diff <= 0 || dis(generator) <= exp(-(double)diff / t)) {
+                        sol_curr.set(j1, i2);
+                        sol_curr.set(j2, i1);
+                    }
                 }
             }
 

@@ -22,14 +22,14 @@ public:
 class DesirabilityCost: public Desirability
 {
 public:
-    DesirabilityCost(const Instance& ins): ins_(ins) { }
+    DesirabilityCost(const Instance& ins): instance(ins) { }
     double operator()(ItemIdx j, AgentIdx i) const
     {
-        return ins_.alternative(j, i).c;
+        return instance.cost(j, i);
     }
     std::string to_string() const { return "cij"; }
 private:
-    const Instance& ins_;
+    const Instance& instance;
 };
 
 /**
@@ -38,14 +38,14 @@ private:
 class DesirabilityWeight: public Desirability
 {
 public:
-    DesirabilityWeight(const Instance& ins): ins_(ins) { }
+    DesirabilityWeight(const Instance& ins): instance(ins) { }
     double operator()(ItemIdx j, AgentIdx i) const
     {
-        return ins_.alternative(j, i).w;
+        return instance.weight(j, i);
     }
     std::string to_string() const { return "wij"; }
 private:
-    const Instance& ins_;
+    const Instance& instance;
 };
 
 /**
@@ -54,15 +54,14 @@ private:
 class DesirabilityCostWeight: public Desirability
 {
 public:
-    DesirabilityCostWeight(const Instance& ins): ins_(ins) { }
+    DesirabilityCostWeight(const Instance& ins): instance(ins) { }
     double operator()(ItemIdx j, AgentIdx i) const
     {
-        const Alternative& a = ins_.alternative(j, i);
-        return a.c * a.w;
+        return instance.cost(j, i) * instance.cost(j, i);
     }
     std::string to_string() const { return "cij*wij"; }
 private:
-    const Instance& ins_;
+    const Instance& instance;
 };
 
 /**
@@ -72,15 +71,14 @@ private:
 class DesirabilityEfficiency: public Desirability
 {
 public:
-    DesirabilityEfficiency(const Instance& ins): ins_(ins) { }
+    DesirabilityEfficiency(const Instance& ins): instance(ins) { }
     double operator()(ItemIdx j, AgentIdx i) const
     {
-        const Alternative& a = ins_.alternative(j, i);
-        return (double)(a.c - ins_.item(j).c_max) / a.w;
+        return (double)(instance.cost(j, i) - instance.item(j).c_max) / instance.weight(j, i);
     }
     std::string to_string() const { return "-pij/wij"; }
 private:
-    const Instance& ins_;
+    const Instance& instance;
 };
 
 /**
@@ -89,14 +87,14 @@ private:
 class DesirabilityWeightCapacity: public Desirability
 {
 public:
-    DesirabilityWeightCapacity(const Instance& ins): ins_(ins) { }
+    DesirabilityWeightCapacity(const Instance& ins): instance(ins) { }
     double operator()(ItemIdx j, AgentIdx i) const
     {
-        return (double)ins_.alternative(j, i).w / ins_.capacity(i);
+        return (double)instance.weight(j, i) / instance.capacity(i);
     }
     std::string to_string() const { return "wij/ti"; }
 private:
-    const Instance& ins_;
+    const Instance& instance;
 };
 
 /**
@@ -106,20 +104,20 @@ class DesirabilityRcost1: public Desirability
 {
 public:
     DesirabilityRcost1(const Instance& ins, const std::vector<double>& v):
-        ins_(ins), v_(v) { }
+        instance(ins), v_(v) { }
     DesirabilityRcost1(const Instance& ins, const double* v):
-        ins_(ins), v_(ins.item_number())
+        instance(ins), v_(ins.item_number())
     {
         for (ItemIdx j=0; j<ins.item_number(); ++j)
             v_[j] = v[j];
     }
     double operator()(ItemIdx j, AgentIdx i) const
     {
-        return ins_.alternative(j, i).c - v_[j];
+        return instance.cost(j, i) - v_[j];
     }
     std::string to_string() const { return "cij-vj"; }
 private:
-    const Instance& ins_;
+    const Instance& instance;
     std::vector<double> v_;
 };
 
@@ -129,22 +127,21 @@ private:
 class DesirabilityRcost2: public Desirability
 {
 public:
-    DesirabilityRcost2(const Instance& ins, const std::vector<double>& u):
-        ins_(ins), u_(u) { }
-    DesirabilityRcost2(const Instance& ins, const double* u):
-        ins_(ins), u_(ins.agent_number())
+    DesirabilityRcost2(const Instance& instance, const std::vector<double>& u):
+        instance(instance), u_(u) { }
+    DesirabilityRcost2(const Instance& instance, const double* u):
+        instance(instance), u_(instance.agent_number())
     {
-        for (AgentIdx i=0; i<ins.agent_number(); ++i)
+        for (AgentIdx i = 0; i < instance.agent_number(); ++i)
             u_[i] = u[i];
     }
     double operator()(ItemIdx j, AgentIdx i) const
     {
-        const Alternative& a = ins_.alternative(j, i);
-        return a.c - u_[i] * a.w;
+        return instance.cost(j, i) - u_[i] * instance.weight(j, i);
     }
     std::string to_string() const { return "cij-uj*wij"; }
 private:
-    const Instance& ins_;
+    const Instance& instance;
     std::vector<double> u_;
 };
 

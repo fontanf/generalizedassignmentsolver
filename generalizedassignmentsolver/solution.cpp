@@ -94,58 +94,55 @@ void Solution::set(ItemIdx j, AgentIdx i)
         return;
 
     if (i_old != -1) {
-        const Alternative& a_old = instance().alternative(j, i_old);
+        Weight w_old = instance().weight(j, i_old);
+        Cost   c_old = instance().cost(j, i_old);
         if (agents_[i_old].weight <= instance().capacity(i_old)) {
-        } else if (agents_[i_old].weight - a_old.w >= instance().capacity(i_old)) {
-            agents_[i_old].overcapacity -= a_old.w;
-            total_overcapacity_         -= a_old.w;
-            agents_[i_old].pcost        -= agents_[i_old].penalty * a_old.w;
-            total_pcost_                -= agents_[i_old].penalty * a_old.w;
+        } else if (agents_[i_old].weight - w_old >= instance().capacity(i_old)) {
+            agents_[i_old].overcapacity -= w_old;
+            total_overcapacity_         -= w_old;
+            agents_[i_old].pcost        -= agents_[i_old].penalty * w_old;
+            total_pcost_                -= agents_[i_old].penalty * w_old;
         } else {
             agents_[i_old].overcapacity -= agents_[i_old].weight - instance().capacity(i_old);
             total_overcapacity_         -= agents_[i_old].weight - instance().capacity(i_old);
             agents_[i_old].pcost        -= agents_[i_old].penalty * (agents_[i_old].weight - instance().capacity(i_old));
             total_pcost_                -= agents_[i_old].penalty * (agents_[i_old].weight - instance().capacity(i_old));
         }
-        agents_[i_old].cost   -= a_old.c;
-        total_cost_           -= a_old.c;
-        agents_[i_old].pcost  -= a_old.c;
-        total_pcost_          -= a_old.c;
-        agents_[i_old].weight -= a_old.w;
-        total_weight_         -= a_old.w;
+        agents_[i_old].cost   -= c_old;
+        total_cost_           -= c_old;
+        agents_[i_old].pcost  -= c_old;
+        total_pcost_          -= c_old;
+        agents_[i_old].weight -= w_old;
+        total_weight_         -= w_old;
         n_--;
     }
 
     if (i != -1) {
-        const Alternative& a = instance().alternative(j, i);
+        Weight w = instance().weight(j, i);
+        Cost   c = instance().cost(j, i);
         if (agents_[i].weight >= instance().capacity(i)) {
-            agents_[i].overcapacity    += a.w;
-            total_overcapacity_        += a.w;
-            agents_[i].pcost           += agents_[i].penalty * a.w;
-            total_pcost_               += agents_[i].penalty * a.w;
-        } else if (agents_[i].weight + a.w <= instance().capacity(i)) {
+            agents_[i].overcapacity    += w;
+            total_overcapacity_        += w;
+            agents_[i].pcost           += agents_[i].penalty * w;
+            total_pcost_               += agents_[i].penalty * w;
+        } else if (agents_[i].weight + w <= instance().capacity(i)) {
         } else {
-            Weight w = agents_[i].weight + a.w - instance().capacity(i);
-            agents_[i].overcapacity += w;
-            total_overcapacity_     += w;
-            agents_[i].pcost        += agents_[i].penalty * w;
-            total_pcost_            += agents_[i].penalty * w;
+            Weight w_tmp = agents_[i].weight + w - instance().capacity(i);
+            agents_[i].overcapacity += w_tmp;
+            total_overcapacity_     += w_tmp;
+            agents_[i].pcost        += agents_[i].penalty * w_tmp;
+            total_pcost_            += agents_[i].penalty * w_tmp;
         }
-        agents_[i].cost   += a.c;
-        total_cost_       += a.c;
-        agents_[i].pcost  += a.c;
-        total_pcost_      += a.c;
-        agents_[i].weight += a.w;
-        total_weight_     += a.w;
+        agents_[i].cost   += c;
+        total_cost_       += c;
+        agents_[i].pcost  += c;
+        total_pcost_      += c;
+        agents_[i].weight += w;
+        total_weight_     += w;
         n_++;
     }
 
     x_[j] = i;
-}
-
-void Solution::set(AltIdx k)
-{
-    set(instance().alternative(k).j, instance().alternative(k).i);
 }
 
 void Solution::update_penalties(bool inc, PCost delta_inc, PCost delta_dec)
@@ -274,9 +271,9 @@ bool generalizedassignmentsolver::compare(const Solution& sol_best, const Soluti
 Output::Output(const Instance& instance, Info& info): solution(instance)
 {
     VER(info, std::left << std::setw(10) << "T (s)");
-    VER(info, std::left << std::setw(12) << "UB");
-    VER(info, std::left << std::setw(12) << "LB");
-    VER(info, std::left << std::setw(10) << "GAP");
+    VER(info, std::left << std::setw(14) << "UB");
+    VER(info, std::left << std::setw(14) << "LB");
+    VER(info, std::left << std::setw(14) << "GAP");
     VER(info, std::left << std::setw(10) << "GAP (%)");
     VER(info, "");
     VER(info, std::endl);
@@ -323,9 +320,9 @@ void Output::print(Info& info, const std::stringstream& s) const
     double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
 
     VER(info, std::left << std::setw(10) << t);
-    VER(info, std::left << std::setw(12) << upper_bound_string());
-    VER(info, std::left << std::setw(12) << lower_bound_string());
-    VER(info, std::left << std::setw(10) << gap_string());
+    VER(info, std::left << std::setw(14) << upper_bound_string());
+    VER(info, std::left << std::setw(14) << lower_bound_string());
+    VER(info, std::left << std::setw(14) << gap_string());
     VER(info, std::left << std::setw(10) << gap());
     VER(info, s.str() << std::endl);
 

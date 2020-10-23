@@ -38,11 +38,13 @@ struct ConstraintProgrammingGecodeOptionalParameters
 
 struct ConstraintProgrammingGecodeOutput: Output
 {
-    ConstraintProgrammingGecodeOutput(const Instance& ins, Info& info): Output(ins, info) { }
+    ConstraintProgrammingGecodeOutput(const Instance& instance, Info& info): Output(instance, info) { }
     ConstraintProgrammingGecodeOutput& algorithm_end(Info& info);
 };
 
-ConstraintProgrammingGecodeOutput constraintprogramming_gecode(const Instance& ins, ConstraintProgrammingGecodeOptionalParameters p = {});
+ConstraintProgrammingGecodeOutput constraintprogramming_gecode(
+        const Instance& instance,
+        ConstraintProgrammingGecodeOptionalParameters parameters = {});
 
 }
 

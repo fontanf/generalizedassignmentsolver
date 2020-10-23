@@ -20,7 +20,7 @@ ILOMIPINFOCALLBACK4(loggingCallback,
                     const Instance&, instance,
                     BranchAndCutCplexOptionalParameters&, parameters,
                     BranchAndCutCplexOutput&, output,
-                    IloNumVarArray, vars)
+                    std::vector<IloNumVarArray>&, x)
 {
     Cost lb = std::ceil(getBestObjValue() - TOL);
     output.update_lower_bound(lb, std::stringstream(""), parameters.info);
@@ -29,12 +29,16 @@ ILOMIPINFOCALLBACK4(loggingCallback,
         return;
 
     if (!output.solution.feasible() || output.solution.cost() > getIncumbentObjValue() + 0.5) {
+        AgentIdx m = instance.agent_number();
+        ItemIdx  n = instance.item_number();
         Solution solution(instance);
-        IloNumArray val(vars.getEnv());
-        getIncumbentValues(val, vars);
-        for (AltIdx k = 0; k < instance.alternative_number(); ++k)
-            if (val[k] > 0.5)
-                solution.set(k);
+        for (ItemIdx j = 0; j < n; ++j) {
+            IloNumArray val(x[j].getEnv());
+            getIncumbentValues(val, x[j]);
+            for (AgentIdx i = 0; i < m; ++i)
+                if (val[i] > 0.5)
+                    solution.set(j, i);
+        }
         output.update_solution(solution, std::stringstream(""), parameters.info);
     }
 }
@@ -47,9 +51,8 @@ BranchAndCutCplexOutput generalizedassignmentsolver::branchandcut_cplex(
 
     BranchAndCutCplexOutput output(instance, parameters.info);
 
-    ItemIdx n = instance.item_number();
+    ItemIdx  n = instance.item_number();
     AgentIdx m = instance.agent_number();
-    AltIdx o = instance.alternative_number();
 
     if (n == 0)
         return output.algorithm_end(parameters.info);
@@ -58,13 +61,15 @@ BranchAndCutCplexOutput generalizedassignmentsolver::branchandcut_cplex(
     IloModel model(env);
 
     // Variables
-    IloNumVarArray x(env, o, 0, 1, ILOBOOL);
+    std::vector<IloNumVarArray> x;
+    for (ItemIdx j = 0; j < n; j++)
+        x.push_back(IloNumVarArray(env, m, 0, 1, ILOBOOL));
 
     // Objective
     IloExpr expr(env);
     for (ItemIdx j = 0; j < n; j++)
         for (AgentIdx i = 0; i < m; i++)
-            expr += x[instance.alternative_index(j, i)] * instance.alternative(j, i).c;
+            expr += instance.cost(j, i) * x[j][i];
     IloObjective obj = IloMinimize(env, expr);
     model.add(obj);
 
@@ -72,7 +77,7 @@ BranchAndCutCplexOutput generalizedassignmentsolver::branchandcut_cplex(
     for (AgentIdx i = 0; i < m; i++) {
         IloExpr expr(env);
         for (ItemIdx j = 0; j < n; j++)
-            expr += x[instance.alternative_index(j, i)] * instance.alternative(j, i).w;
+            expr += instance.weight(j, i) * x[j][i];
         model.add(0 <= expr <= instance.capacity(i));
     }
 
@@ -80,18 +85,11 @@ BranchAndCutCplexOutput generalizedassignmentsolver::branchandcut_cplex(
     for (ItemIdx j = 0; j < n; j++) {
         IloExpr expr(env);
         for (AgentIdx i = 0; i < m; i++)
-            expr += x[instance.alternative_index(j, i)];
+            expr += x[j][i];
         model.add(expr == 1);
     }
 
     IloCplex cplex(model);
-
-    // Redirect standard output to log file
-    std::ofstream logfile("cplex.log");
-    cplex.setOut(logfile);
-
-    cplex.setParam(IloCplex::Param::MIP::Tolerances::MIPGap, 0.0); // Fix precision issue
-    cplex.setParam(IloCplex::Param::MIP::Strategy::File, 2); // Avoid running out of memory
 
     // Initial solution
     if (parameters.initial_solution != NULL && parameters.initial_solution->feasible()) {
@@ -100,7 +98,7 @@ BranchAndCutCplexOutput generalizedassignmentsolver::branchandcut_cplex(
         for (ItemIdx j = 0; j < n; ++j) {
             AgentIdx i_curr = parameters.initial_solution->agent(j);
             for (AgentIdx i = 0; i < m; ++i) {
-                startVar.add(x[instance.alternative_index(j, i)]);
+                startVar.add(x[j][i]);
                 startVal.add(((i == i_curr)? 1: 0));
             }
         }
@@ -108,6 +106,13 @@ BranchAndCutCplexOutput generalizedassignmentsolver::branchandcut_cplex(
         startVal.end();
         startVar.end();
     }
+
+    // Redirect standard output to log file
+    std::ofstream logfile("cplex.log");
+    cplex.setOut(logfile);
+
+    cplex.setParam(IloCplex::Param::MIP::Tolerances::MIPGap, 0.0); // Fix precision issue
+    cplex.setParam(IloCplex::Param::MIP::Strategy::File, 2); // Avoid running out of memory
 
     // Time limit
     if (parameters.info.timelimit != std::numeric_limits<double>::infinity())
@@ -124,18 +129,20 @@ BranchAndCutCplexOutput generalizedassignmentsolver::branchandcut_cplex(
     } else if (cplex.getStatus() == IloAlgorithm::Optimal) {
         if (!output.solution.feasible() || output.solution.cost() > cplex.getObjValue() + 0.5) {
             Solution solution(instance);
-            for (AltIdx k = 0; k < o; ++k)
-                if (cplex.getValue(x[k]) > 0.5)
-                    solution.set(k);
+            for (ItemIdx j = 0; j < n; j++)
+                for (AgentIdx i = 0; i < m; i++)
+                    if (cplex.getValue(x[j][i]) > 0.5)
+                        solution.set(j, i);
             output.update_solution(solution, std::stringstream(""), parameters.info);
         }
         output.update_lower_bound(output.solution.cost(), std::stringstream(""), parameters.info);
     } else if (cplex.isPrimalFeasible()) {
         if (!output.solution.feasible() || output.solution.cost() > cplex.getObjValue() + 0.5) {
             Solution solution(instance);
-            for (AltIdx k = 0; k < o; ++k)
-                if (cplex.getValue(x[k]) > 0.5)
-                    solution.set(k);
+            for (ItemIdx j = 0; j < n; j++)
+                for (AgentIdx i = 0; i < m; i++)
+                    if (cplex.getValue(x[j][i]) > 0.5)
+                        solution.set(j, i);
             output.update_solution(solution, std::stringstream(""), parameters.info);
         }
         Cost lb = std::ceil(cplex.getBestObjValue() - TOL);

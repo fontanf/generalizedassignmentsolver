@@ -44,9 +44,8 @@ public:
         for (AgentIdx i = 0; i < m; ++i) {
             kp_capacities_[i] = instance.capacity(i);
             for (ItemIdx j = 0; j < n; ++j) {
-                AltIdx k = instance.alternative_index(j, i);
-                if (p.fixed_alt != NULL && (*p.fixed_alt)[k] == 1)
-                    kp_capacities_[i] -= instance.alternative(k).w;
+                if (p.fixed_alt != NULL && (*p.fixed_alt)[j][i] == 1)
+                    kp_capacities_[i] -= instance.weight(j, i);
             }
             if (kp_capacities_[i] < 0)
                 std::cout << "ERROR i " << i << " c " << kp_capacities_[i] << std::endl;
@@ -89,26 +88,24 @@ double LagRelaxAssignmentLbfgsFunction::f(const column_vector& mu)
             l += mu(item_indices_[j]);
     std::fill(grad_.begin(), grad_.end(), 1);
 
-    Weight mult = 1000000;
+    Weight mult = 1;
     for (AgentIdx i = 0; i < m; ++i) {
         // Create knapsack instance
         knapsacksolver::Instance kp_instance;
         kp_instance.set_capacity(kp_capacities_[i]);
         knapsacksolver::ItemIdx j_kp = 0;
         for (ItemIdx j = 0; j < n; ++j) {
-            AltIdx k = instance_.alternative_index(j, i);
-            const Alternative& a = instance_.alternative(k);
-            if ((p_.fixed_alt != NULL && (*p_.fixed_alt)[k] >= 0)
-                    || a.w > kp_capacities_[i]) {
+            if ((p_.fixed_alt != NULL && (*p_.fixed_alt)[j][i] >= 0)
+                    || instance_.weight(j, i) > kp_capacities_[i]) {
                 kp_indices_[j] = -1;
                 continue;
             }
-            knapsacksolver::Profit profit = std::ceil(mult * mu(j) - mult * a.c);
+            knapsacksolver::Profit profit = std::ceil(mult * mu(j) - mult * instance_.cost(j, i));
             if (profit <= 0) {
                 kp_indices_[j] = -1;
                 continue;
             }
-            kp_instance.add_item(a.w, profit);
+            kp_instance.add_item(instance_.weight(j, i), profit);
             kp_indices_[j] = j_kp;
             j_kp++;
         }
@@ -121,9 +118,8 @@ double LagRelaxAssignmentLbfgsFunction::f(const column_vector& mu)
         // Update bound and gradient
         for (ItemIdx j = 0; j < n; ++j) {
             if (kp_indices_[j] >= 0 && kp_output.solution.contains_idx(kp_indices_[j])) {
-                AltIdx k = instance_.alternative_index(j, i);
                 grad_(item_indices_[j])--;
-                l += instance_.alternative(k).c - mu(item_indices_[j]);
+                l += instance_.cost(j, i) - mu(item_indices_[j]);
             }
         }
     }
@@ -145,8 +141,8 @@ LagRelaxAssignmentLbfgsOutput generalizedassignmentsolver::lagrelax_assignment_l
     std::vector<ItemIdx> item_indices(n, -2);
     for (ItemIdx j = 0; j < n; ++j) {
         for (AgentIdx i = 0; i < m; ++i) {
-            if (p.fixed_alt != NULL && (*p.fixed_alt)[instance.alternative_index(j, i)] == 1) {
-                c0 += instance.alternative(j, i).c;
+            if (p.fixed_alt != NULL && (*p.fixed_alt)[j][i] == 1) {
+                c0 += instance.cost(j, i);
                 item_indices[j] = -1;
                 break;
             }
@@ -237,13 +233,11 @@ double LagRelaxKnapsackLbfgsFunction::f(const column_vector& mu)
 
     for (ItemIdx j = 0; j < n; ++j) {
         // Solve the trivial Generalized Upper Bound Problem
-        AltIdx k_best = -1;
         AgentIdx i_best = -1;
         double rc_best = -1;
         for (AgentIdx i = 0; i < m; ++i) {
-            AltIdx k = instance_.alternative_index(j, i);
-            double rc = instance_.alternative(k).c - mu(i) * instance_.alternative(k).w;
-            if (k_best == -1
+            double rc = instance_.cost(j, i) - mu(i) * instance_.weight(j, i);
+            if (i_best == -1
                     || rc_best > rc
                     // If the minimum reduced cost of a job is reached for
                     // several agents, schedule the job on the agent with the
@@ -252,14 +246,13 @@ double LagRelaxKnapsackLbfgsFunction::f(const column_vector& mu)
                     // optimal bound (the one from the linear relaxation) for
                     // some instances.
                     || (rc_best == rc && grad_(i) > grad_(i_best))) {
-                k_best = k;
                 i_best = i;
                 rc_best = rc;
             }
         }
 
         // Update bound and gradient
-        grad_(i_best) -= instance_.alternative(k_best).w;
+        grad_(i_best) -= instance_.weight(j, i_best);
         l += rc_best;
     }
 

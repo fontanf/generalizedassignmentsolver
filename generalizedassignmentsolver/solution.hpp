@@ -61,7 +61,6 @@ public:
      */
 
     void set(ItemIdx j, AgentIdx i);
-    void set(AltIdx k);
 
     void comp(double c) { comp_ = c; }
 

@@ -10,15 +10,12 @@ using namespace generalizedassignmentsolver;
 std::vector<std::pair<ItemIdx, AgentIdx>> generalizedassignmentsolver::greedy_init(const Solution& solution, const Desirability& f)
 {
     const Instance& instance = solution.instance();
-    ItemIdx n = instance.item_number();
+    ItemIdx  n = instance.item_number();
     AgentIdx m = instance.agent_number();
-    std::vector<std::pair<ItemIdx, AgentIdx>> alt(instance.alternative_number());
-    for (ItemIdx j = 0; j < n; ++j) {
-        for (AgentIdx i = 0; i < m; ++i) {
-            AltIdx k = instance.alternative_index(j, i);
-            alt[k] = {j, i};
-        }
-    }
+    std::vector<std::pair<ItemIdx, AgentIdx>> alt;
+    for (ItemIdx j = 0; j < n; ++j)
+        for (AgentIdx i = 0; i < m; ++i)
+            alt.push_back({j, i});
     sort(alt.begin(), alt.end(), [&f](
                 const std::pair<ItemIdx, AgentIdx>& a,
                 const std::pair<ItemIdx, AgentIdx>& b) -> bool {
@@ -34,8 +31,7 @@ void generalizedassignmentsolver::greedy(Solution& solution, const std::vector<s
         if (solution.agent(j) != -1)
             continue;
         AgentIdx i = p.second;
-        const Alternative& a = instance.alternative(j, i);
-        if (solution.remaining_capacity(i) < a.w)
+        if (solution.remaining_capacity(i) < instance.weight(j, i))
             continue;
         solution.set(j, i);
         if (solution.full())
@@ -74,7 +70,7 @@ std::vector<std::vector<AgentIdx>> generalizedassignmentsolver::greedyregret_ini
 
 void generalizedassignmentsolver::greedyregret(Solution& solution, const Desirability& f,
         const std::vector<std::vector<AgentIdx>>& agents,
-        const std::vector<int>& fixed_alt)
+        const std::vector<std::vector<int>>& fixed_alt)
 {
     const Instance& instance = solution.instance();
     ItemIdx n = instance.item_number();
@@ -93,8 +89,8 @@ void generalizedassignmentsolver::greedyregret(Solution& solution, const Desirab
 
             while (i_first < m) {
                 AgentIdx i = agents[j][i_first];
-                if (instance.alternative(j, i).w > solution.remaining_capacity(i) ||
-                        (!fixed_alt.empty() && fixed_alt[instance.alternative_index(j, i)] != -1)) {
+                if (instance.weight(j, i) > solution.remaining_capacity(i) ||
+                        (!fixed_alt.empty() && fixed_alt[j][i] != -1)) {
                     i_first++;
                     if (i_first == i_second)
                         i_second++;
@@ -107,8 +103,8 @@ void generalizedassignmentsolver::greedyregret(Solution& solution, const Desirab
 
             while (i_second < m) {
                 AgentIdx i = agents[j][i_second];
-                if (instance.alternative(j, i).w > solution.remaining_capacity(i) ||
-                        (!fixed_alt.empty() && fixed_alt[instance.alternative_index(j, i)] != -1)) {
+                if (instance.weight(j, i) > solution.remaining_capacity(i) ||
+                        (!fixed_alt.empty() && fixed_alt[j][i] != -1)) {
                     i_second++;
                 } else {
                     break;
@@ -147,16 +143,15 @@ void nshift(Solution& solution)
     AgentIdx m = instance.agent_number();
     for (ItemIdx j = 0; j < n; ++j) {
         AgentIdx i_old = solution.agent(j);
-        const Alternative& a_old = instance.alternative(j, i_old);
         Cost c_best = 0;
         AgentIdx i_best = -1;
         for (AgentIdx i = 0; i < m; ++i) {
             if (i == i_old)
                 continue;
-            const Alternative& a = instance.alternative(j, i);
-            if (solution.remaining_capacity(i) >= a.w && c_best > a.c - a_old.c) {
+            if (solution.remaining_capacity(i) >= instance.weight(j, i)
+                    && c_best > instance.cost(j, i) - instance.cost(j, i_old)) {
                 i_best = i;
-                c_best = a.c - a_old.c;
+                c_best = instance.cost(j, i) - instance.cost(j, i_old);
             }
         }
         if (i_best != -1)
@@ -184,7 +179,7 @@ Output generalizedassignmentsolver::mthg(const Instance& instance, const Desirab
 
 void generalizedassignmentsolver::mthgregret(Solution& solution, const Desirability& f,
         const std::vector<std::vector<AgentIdx>>& agents,
-        const std::vector<int>& fixed_alt)
+        const std::vector<std::vector<int>>& fixed_alt)
 {
     greedyregret(solution, f, agents, fixed_alt);
     if (solution.feasible())

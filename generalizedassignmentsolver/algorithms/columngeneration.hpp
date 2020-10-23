@@ -14,7 +14,7 @@ struct ColGenOptionalParameters
 
     std::string lp_solver = "clp"; // "clp", "cplex"
     std::vector<std::vector<std::vector<ItemIdx>>>* columns = NULL;
-    std::vector<int>* fixed_alt = NULL; // -1: unfixed, 0: fixed to 0, 1: fixed to 1.
+    std::vector<std::vector<int>>* fixed_alt = NULL; // -1: unfixed, 0: fixed to 0, 1: fixed to 1.
     std::vector<int>* fixed_agents = NULL; // 0: unfixed, 1: fixed.
 };
 
@@ -27,7 +27,7 @@ struct ColGenOutput: Output
     std::vector<std::vector<std::vector<ItemIdx>>> columns;
     std::vector<std::pair<AgentIdx, ColIdx>> column_indices;
     std::vector<double> solution;
-    std::vector<double> x;
+    std::vector<std::vector<double>> x;
     Counter it = 0;
     Counter added_column_number = 0;
 };

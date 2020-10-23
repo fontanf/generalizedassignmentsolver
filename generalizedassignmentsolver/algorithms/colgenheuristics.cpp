@@ -39,7 +39,7 @@ CghGreedyOutput generalizedassignmentsolver::cgh_greedy(
 
     Solution solution(instance);
     std::vector<std::vector<std::vector<ItemIdx>>> columns(instance.agent_number());
-    std::vector<int> fixed_alternatives(instance.alternative_number(), -1);
+    std::vector<std::vector<int>> fixed_alternatives(instance.item_number(), std::vector<int>(instance.agent_number(), -1));
     std::vector<int> fixed_agents(instance.agent_number(), 0);
     ColGenOptionalParameters colgen_parameters;
     colgen_parameters.columns      = &columns;
@@ -68,8 +68,8 @@ CghGreedyOutput generalizedassignmentsolver::cgh_greedy(
         for (ItemIdx j: columns[i_best][colgen_output.column_indices[col_best].second]) {
             solution.set(j, i_best);
             for (AgentIdx i = 0; i < instance.agent_number(); ++i)
-                fixed_alternatives[instance.alternative_index(j, i)] = 0;
-            fixed_alternatives[instance.alternative_index(j, i_best)] = 1;
+                fixed_alternatives[j][i] = 0;
+            fixed_alternatives[j][i_best] = 1;
         }
         fixed_agents[i_best] = 1;
     }
@@ -103,7 +103,7 @@ CghLimitedDiscrepencySearchOutput generalizedassignmentsolver::cgh_limiteddiscre
 
     // Initialize column generation parameters.
     std::vector<std::vector<std::vector<ItemIdx>>> columns(instance.agent_number());
-    std::vector<int> fixed_alternatives(instance.alternative_number(), -1);
+    std::vector<std::vector<int>> fixed_alternatives(instance.item_number(), std::vector<int>(instance.agent_number(), -1));
     std::vector<int> fixed_agents(instance.agent_number(), 0);
     ColGenOptionalParameters colgen_parameters;
     colgen_parameters.columns      = &columns;
@@ -142,10 +142,11 @@ CghLimitedDiscrepencySearchOutput generalizedassignmentsolver::cgh_limiteddiscre
         // Initialize solution and fixed_agents, fixed_alternatives
         Solution solution(instance);
         std::vector<std::vector<ColIdx>> forbidden_columns(instance.agent_number());
-        std::fill(fixed_alternatives.begin(), fixed_alternatives.end(), -1);
+        for (ItemIdx j = 0; j < instance.item_number(); ++j)
+            std::fill(fixed_alternatives[j].begin(), fixed_alternatives[j].end(), -1);
         std::fill(fixed_agents.begin(), fixed_agents.end(), -1);
         auto node_tmp = node;
-        AltIdx depth = 0;
+        Counter depth = 0;
         while (node_tmp->father != nullptr) {
             AgentIdx i = node_tmp->i;
             auto     v = node_tmp->v;
@@ -154,8 +155,8 @@ CghLimitedDiscrepencySearchOutput generalizedassignmentsolver::cgh_limiteddiscre
                 for (ItemIdx j: columns[i][col]) {
                     solution.set(j, i);
                     for (AgentIdx i = 0; i < instance.agent_number(); ++i)
-                        fixed_alternatives[instance.alternative_index(j, i)] = 0;
-                    fixed_alternatives[instance.alternative_index(j, i)] = 1;
+                        fixed_alternatives[j][i] = 0;
+                    fixed_alternatives[j][i] = 1;
                 }
                 fixed_agents[i] = 1;
             } else {

@@ -14,11 +14,13 @@ struct ConstraintProgrammingCplexOptionalParameters
 
 struct ConstraintProgrammingCplexOutput: Output
 {
-    ConstraintProgrammingCplexOutput(const Instance& ins, Info& info): Output(ins, info) { }
+    ConstraintProgrammingCplexOutput(const Instance& instance, Info& info): Output(instance, info) { }
     ConstraintProgrammingCplexOutput& algorithm_end(Info& info);
 };
 
-ConstraintProgrammingCplexOutput constraintprogramming_cplex(const Instance& ins, ConstraintProgrammingCplexOptionalParameters p = {});
+ConstraintProgrammingCplexOutput constraintprogramming_cplex(
+        const Instance& instance,
+        ConstraintProgrammingCplexOptionalParameters parameters = {});
 
 }
 

@@ -193,30 +193,27 @@ void add_column(const Instance& instance,
     std::vector<ItemIdx> column = (*columns)[i][col_idx];
     if (column.size() > 0) {
         for (ItemIdx j2 = 0; j2 < column[0]; ++j2) {
-            AltIdx k2 = instance.alternative_index(j2, i);
-            if (parameters.fixed_alt != NULL && (*parameters.fixed_alt)[k2] == 1)
+            if (parameters.fixed_alt != NULL && (*parameters.fixed_alt)[j2][i] == 1)
                 return;
         }
     }
     for (auto it = column.begin(); it != column.end(); ++it) {
         ItemIdx j = *it;
-        AltIdx k = instance.alternative_index(j, i);
         // Check fixed variables
-        if (parameters.fixed_alt != NULL && (*parameters.fixed_alt)[k] == 0)
+        if (parameters.fixed_alt != NULL && (*parameters.fixed_alt)[j][i] == 0)
             return;
         ItemIdx j_suiv = (std::next(it) == column.end())? instance.item_number(): *std::next(it);
         for (ItemIdx j2 = j + 1; j2 < j_suiv; ++j2) {
-            AltIdx k2 = instance.alternative_index(j2, i);
-            if (parameters.fixed_alt != NULL && (*parameters.fixed_alt)[k2] == 1)
+            if (parameters.fixed_alt != NULL && (*parameters.fixed_alt)[j2][i] == 1)
                 return;
         }
         if (item_rows[j] == -1) {
-            t -= instance.alternative(k).w;
+            t -= instance.weight(j, i);
             continue;
         }
 
-        c += instance.alternative(k).c;
-        w += instance.alternative(k).w;
+        c += instance.cost(j, i);
+        w += instance.weight(j, i);
         rows.push_back(item_rows[j]);
     }
     col_indices.push_back({i, col_idx});
@@ -254,8 +251,8 @@ ColGenOutput generalizedassignmentsolver::columngeneration(
     std::vector<int> item_row(n, -2);
     for (ItemIdx j = 0; j < n; ++j) {
         for (AgentIdx i = 0; i < m; ++i) {
-            if (parameters.fixed_alt != NULL && (*parameters.fixed_alt)[instance.alternative_index(j, i)] == 1) {
-                c0 += instance.alternative(j, i).c;
+            if (parameters.fixed_alt != NULL && (*parameters.fixed_alt)[j][i] == 1) {
+                c0 += instance.cost(j, i);
                 item_row[j] = -1;
                 break;
             }
@@ -290,9 +287,8 @@ ColGenOutput generalizedassignmentsolver::columngeneration(
     for (AgentIdx i = 0; i < m; ++i) {
         capacities_kp[i] = instance.capacity(i);
         for (ItemIdx j = 0; j < n; ++j) {
-            AltIdx k = instance.alternative_index(j, i);
-            if (parameters.fixed_alt != NULL && (*parameters.fixed_alt)[k] == 1)
-                capacities_kp[i] -= instance.alternative(k).w;
+            if (parameters.fixed_alt != NULL && (*parameters.fixed_alt)[j][i] == 1)
+                capacities_kp[i] -= instance.weight(j, i);
         }
         if (capacities_kp[i] < 0)
             std::cout << "ERROR i " << i << " c " << capacities_kp[i] << std::endl;
@@ -366,20 +362,19 @@ ColGenOutput generalizedassignmentsolver::columngeneration(
             Cost rc_ub = std::ceil((mult * (- dual_sol[agent_row[i]])));
             ItemIdx j_kp = 0;
             for (ItemIdx j = 0; j < n; ++j) {
-                AltIdx k = instance.alternative_index(j, i);
-                const Alternative& a = instance.alternative(k);
-                knapsacksolver::Profit profit = std::floor(mult * dual_sol[item_row[j]]) - std::ceil(mult * a.c);
-                if (parameters.fixed_alt != NULL && (*parameters.fixed_alt)[k] == 1) {
+                knapsacksolver::Profit profit = std::floor(mult * dual_sol[item_row[j]])
+                    - std::ceil(mult * instance.cost(j, i));
+                if (parameters.fixed_alt != NULL && (*parameters.fixed_alt)[j][i] == 1) {
                     indices[j] = -2;
                     continue;
                 }
-                if ((parameters.fixed_alt != NULL && (*parameters.fixed_alt)[k] == 0)
+                if ((parameters.fixed_alt != NULL && (*parameters.fixed_alt)[j][i] == 0)
                         || profit <= 0
-                        || a.w > capacities_kp[i]) {
+                        || instance.weight(j, i) > capacities_kp[i]) {
                     indices[j] = -1;
                     continue;
                 }
-                instance_kp.add_item(a.w, profit);
+                instance_kp.add_item(instance.weight(j, i), profit);
                 indices[j] = j_kp;
                 j_kp++;
             }
@@ -413,16 +408,15 @@ ColGenOutput generalizedassignmentsolver::columngeneration(
         instance_kp.set_capacity(capacities_kp[i]);
         Cost rc_lb = std::floor((mult * (- dual_sol[agent_row[i]])));
         for (ItemIdx j = 0; j < n; ++j) {
-            AltIdx k = instance.alternative_index(j, i);
-            const Alternative& a = instance.alternative(k);
-            knapsacksolver::Profit profit = std::ceil(mult * dual_sol[item_row[j]]) - std::floor(mult * a.c);
-            if (parameters.fixed_alt != NULL && (*parameters.fixed_alt)[k] == 1)
+            knapsacksolver::Profit profit = std::ceil(mult * dual_sol[item_row[j]])
+                - std::floor(mult * instance.cost(j, i));
+            if (parameters.fixed_alt != NULL && (*parameters.fixed_alt)[j][i] == 1)
                 continue;
-            if ((parameters.fixed_alt != NULL && (*parameters.fixed_alt)[k] == 0)
+            if ((parameters.fixed_alt != NULL && (*parameters.fixed_alt)[j][i] == 0)
                     || profit <= 0
-                    || a.w > capacities_kp[i])
+                    || instance.weight(j, i) > capacities_kp[i])
                 continue;
-            instance_kp.add_item(a.w, profit);
+            instance_kp.add_item(instance.weight(j, i), profit);
         }
         auto output_kp = knapsacksolver::minknap(instance_kp);
         rc_lb -= output_kp.solution.profit();
@@ -435,12 +429,13 @@ ColGenOutput generalizedassignmentsolver::columngeneration(
 
     // Compute x
     output.solution = solver->solution();
-    output.x.resize(instance.alternative_number(), 0);
+    for (ItemIdx j = 0; j < n; ++j)
+        output.x.push_back(std::vector<double>(instance.agent_number(), 0));
     for (ColIdx col_idx = 1; col_idx < (int)output.column_indices.size(); ++col_idx) {
         AgentIdx i       = output.column_indices[col_idx].first;
         ColIdx col_idx_2 = output.column_indices[col_idx].second;
         for (ItemIdx j: (*columns)[i][col_idx_2])
-            output.x[instance.alternative_index(j, i)] += output.solution[col_idx];
+            output.x[j][i] += output.solution[col_idx];
     }
 
     return output.algorithm_end(parameters.info);

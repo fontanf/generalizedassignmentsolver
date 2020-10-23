@@ -25,7 +25,7 @@ public:
             const Instance& instance,
             BranchAndCutGurobiOptionalParameters& parameters,
             BranchAndCutGurobiOutput& output,
-            GRBVar* x):
+            std::vector<GRBVar*>& x):
         instance_(instance), parameters_(parameters), output_(output), x_(x) { }
 
 protected:
@@ -40,10 +40,12 @@ protected:
 
         if (!output_.solution.feasible() || output_.solution.cost() > getDoubleInfo(GRB_CB_MIPSOL_OBJ) + 0.5) {
             Solution solution(instance_);
-            AltIdx o = instance_.alternative_number();
-            for (AltIdx k = 0; k < o; ++k)
-                if (getSolution(x_[k]) > 0.5)
-                    solution.set(k);
+            AgentIdx m = instance_.agent_number();
+            ItemIdx  n = instance_.item_number();
+            for (ItemIdx j = 0; j < n; ++j)
+                for (AgentIdx i = 0; i < m; ++i)
+                    if (getSolution(x_[j][i]) > 0.5)
+                        solution.set(j, i);
             std::stringstream ss;
             output_.update_solution(solution, std::stringstream(""), parameters_.info);
         }
@@ -54,7 +56,7 @@ private:
     const Instance& instance_;
     BranchAndCutGurobiOptionalParameters& parameters_;
     BranchAndCutGurobiOutput& output_;
-    GRBVar* x_;
+    std::vector<GRBVar*>& x_;
 
 };
 
@@ -66,9 +68,8 @@ BranchAndCutGurobiOutput generalizedassignmentsolver::branchandcut_gurobi(
 
     BranchAndCutGurobiOutput output(instance, parameters.info);
 
-    ItemIdx n = instance.item_number();
+    ItemIdx  n = instance.item_number();
     AgentIdx m = instance.agent_number();
-    AltIdx o = instance.alternative_number();
 
     if (n == 0)
         return output.algorithm_end(parameters.info);
@@ -76,18 +77,21 @@ BranchAndCutGurobiOutput generalizedassignmentsolver::branchandcut_gurobi(
     GRBModel model(env);
 
     // Variables
-    GRBVar* x = model.addVars(o, GRB_BINARY);
+    std::vector<GRBVar*> x;
+    for (ItemIdx j = 0; j < n; j++)
+        x.push_back(model.addVars(m, GRB_BINARY));
 
     // Objective
-    for (AltIdx k = 0; k < o; ++k)
-        x[k].set(GRB_DoubleAttr_Obj, instance.alternative(k).c);
+    for (ItemIdx j = 0; j < n; j++)
+        for (AgentIdx i = 0; i < m; i++)
+            x[j][i].set(GRB_DoubleAttr_Obj, instance.cost(j, i));
     model.set(GRB_IntAttr_ModelSense, GRB_MINIMIZE);
 
     // Capacity constraints
     for (AgentIdx i = 0; i < m; i++) {
         GRBLinExpr expr;
         for (ItemIdx j = 0; j < n; j++)
-            expr += x[instance.alternative_index(j, i)] * instance.alternative(j, i).w;
+            expr += instance.weight(j, i) * x[j][i];
         model.addConstr(expr <= instance.capacity(i));
     }
 
@@ -95,7 +99,7 @@ BranchAndCutGurobiOutput generalizedassignmentsolver::branchandcut_gurobi(
     for (ItemIdx j = 0; j < n; j++) {
         GRBLinExpr expr;
         for (AgentIdx i = 0; i < m; i++)
-            expr += x[instance.alternative_index(j, i)];
+            expr += x[j][i];
         model.addConstr(expr == 1);
     }
 
@@ -103,7 +107,7 @@ BranchAndCutGurobiOutput generalizedassignmentsolver::branchandcut_gurobi(
     if (parameters.initial_solution != NULL && parameters.initial_solution->feasible())
         for (ItemIdx j = 0; j < n; ++j)
             for (AgentIdx i = 0; i < m; ++i)
-                x[instance.alternative_index(j, i)].set(GRB_DoubleAttr_Start, (parameters.initial_solution->agent(j) == i)? 1: 0);
+                x[j][i].set(GRB_DoubleAttr_Start, (parameters.initial_solution->agent(j) == i)? 1: 0);
 
     // Redirect standard output to log file
     model.set(GRB_StringParam_LogFile, "gurobi.log");
@@ -129,18 +133,20 @@ BranchAndCutGurobiOutput generalizedassignmentsolver::branchandcut_gurobi(
     } else if (optimstatus == GRB_OPTIMAL) {
         if (!output.solution.feasible() || output.solution.cost() > model.get(GRB_DoubleAttr_ObjVal) + 0.5) {
             Solution solution(instance);
-            for (AltIdx k = 0; k < o; ++k)
-                if (x[k].get(GRB_DoubleAttr_X) > 0.5)
-                    solution.set(k);
+            for (ItemIdx j = 0; j < n; ++j)
+                for (AgentIdx i = 0; i < m; ++i)
+                    if (x[j][i].get(GRB_DoubleAttr_X) > 0.5)
+                        solution.set(j, i);
             output.update_solution(solution, std::stringstream(""), parameters.info);
         }
         output.update_lower_bound(output.solution.cost(), std::stringstream(""), parameters.info);
     } else if (model.get(GRB_IntAttr_SolCount) > 0) {
         if (!output.solution.feasible() || output.solution.cost() > model.get(GRB_DoubleAttr_ObjVal) + 0.5) {
             Solution solution(instance);
-            for (AltIdx k = 0; k < o; ++k)
-                if (x[k].get(GRB_DoubleAttr_X) > 0.5)
-                    solution.set(k);
+            for (ItemIdx j = 0; j < n; ++j)
+                for (AgentIdx i = 0; i < m; ++i)
+                    if (x[j][i].get(GRB_DoubleAttr_X) > 0.5)
+                        solution.set(j, i);
             output.update_solution(solution, std::stringstream(""), parameters.info);
         }
         Cost lb = std::ceil(model.get(GRB_DoubleAttr_ObjBound) - TOL);
