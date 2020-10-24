@@ -1,7 +1,6 @@
 #include "generalizedassignmentsolver/algorithms/algorithms.hpp"
 
 #include "generalizedassignmentsolver/algorithms/linrelax_clp.hpp"
-#include "generalizedassignmentsolver/algorithms/linrelax_gurobi.hpp"
 #include "generalizedassignmentsolver/algorithms/lagrelax_volume.hpp"
 #include "generalizedassignmentsolver/algorithms/lagrelax_bundle.hpp"
 #include "generalizedassignmentsolver/algorithms/lagrelax_lbfgs.hpp"
@@ -196,6 +195,46 @@ RepairOptionalParameters read_repair_args(const std::vector<char*>& argv)
     return parameters;
 }
 
+BranchAndCutCplexOptionalParameters read_branchandcut_cplex_args(const std::vector<char*>& argv)
+{
+    BranchAndCutCplexOptionalParameters parameters;
+    po::options_description desc("Allowed options");
+    desc.add_options()
+        ("only-linear-relaxation", "")
+        ;
+    po::variables_map vm;
+    po::store(po::parse_command_line((Counter)argv.size(), argv.data(), desc), vm);
+    try {
+        po::notify(vm);
+    } catch (po::required_option e) {
+        std::cout << desc << std::endl;;
+        throw "";
+    }
+    if (vm.count("only-linear-relaxation"))
+        parameters.only_linear_relaxation = true;
+    return parameters;
+}
+
+BranchAndCutGurobiOptionalParameters read_branchandcut_gurobi_args(const std::vector<char*>& argv)
+{
+    BranchAndCutGurobiOptionalParameters parameters;
+    po::options_description desc("Allowed options");
+    desc.add_options()
+        ("only-linear-relaxation", "")
+        ;
+    po::variables_map vm;
+    po::store(po::parse_command_line((Counter)argv.size(), argv.data(), desc), vm);
+    try {
+        po::notify(vm);
+    } catch (po::required_option e) {
+        std::cout << desc << std::endl;;
+        throw "";
+    }
+    if (vm.count("only-linear-relaxation"))
+        parameters.only_linear_relaxation = true;
+    return parameters;
+}
+
 Output generalizedassignmentsolver::run(
         std::string algorithm,
         const Instance& instance,
@@ -218,10 +257,6 @@ Output generalizedassignmentsolver::run(
 #if COINOR_FOUND
     } else if (algorithm_args[0] == "linrelax_clp") {
         return linrelax_clp(instance, info);
-#endif
-#if GUROBI_FOUND
-    } else if (algorithm_args[0] == "linrelax_gurobi") {
-        return linrelax_gurobi(instance, info);
 #endif
 #if COINOR_FOUND
     } else if (algorithm_args[0] == "lagrelax_knapsack_volume") {
@@ -261,18 +296,18 @@ Output generalizedassignmentsolver::run(
 #endif
 #if CPLEX_FOUND
     } else if (algorithm_args[0] == "branchandcut_cplex") {
-        BranchAndCutCplexOptionalParameters parameters;
+        auto parameters = read_branchandcut_cplex_args(algorithm_argv);
         parameters.info = info;
         return branchandcut_cplex(instance, parameters);
 #endif
 #if GUROBI_FOUND
     } else if (algorithm_args[0] == "branchandcut_gurobi") {
-        BranchAndCutGurobiOptionalParameters parameters;
+        auto parameters = read_branchandcut_gurobi_args(algorithm_argv);
         parameters.info = info;
         return branchandcut_gurobi(instance, parameters);
 #endif
     } else if (algorithm_args[0] == "branchandprice") {
-        BranchAndPriceOptionalParameters parameters = read_branchandprice_args(algorithm_argv);
+        auto parameters = read_branchandprice_args(algorithm_argv);
         parameters.info = info;
         return branchandprice(instance, parameters);
 #if GECODE_FOUND

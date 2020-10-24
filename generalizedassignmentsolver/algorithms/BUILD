@@ -31,30 +31,6 @@ cc_test(
 ################################################################################
 
 cc_library(
-        name = "linrelax_gurobi",
-        hdrs = ["linrelax_gurobi.hpp"],
-        srcs = ["linrelax_gurobi.cpp"],
-        copts = GUROBI_COPTS,
-        deps = [
-                "//generalizedassignmentsolver:generalizedassignmentsolver"
-        ] + GUROBI_DEP,
-        visibility = ["//visibility:public"],
-)
-
-cc_test(
-        name = "linrelax_gurobi_test",
-        srcs = ["linrelax_gurobi_test.cpp"],
-        deps = [
-                "//generalizedassignmentsolver:tester",
-                ":linrelax_gurobi",
-        ],
-        copts = GUROBI_COPTS,
-        timeout = "moderate",
-)
-
-################################################################################
-
-cc_library(
         name = "lagrelax_bundle",
         hdrs = ["lagrelax_bundle.hpp"],
         srcs = ["lagrelax_bundle.cpp"],
@@ -169,10 +145,11 @@ cc_library(
         deps = [
                 "//generalizedassignmentsolver:generalizedassignmentsolver",
                 ":linrelax_clp",
+                ":branchandcut_cplex",
                 ":lagrelax_lbfgs",
                 ":random",
-        ],
-        copts = COINOR_COPTS,
+        ] + CPLEX_DEP,
+        copts = COINOR_COPTS + CPLEX_COPTS,
         visibility = ["//visibility:public"],
 )
 
@@ -404,7 +381,6 @@ cc_library(
         srcs = ["algorithms.cpp"],
         deps = [
                 ":linrelax_clp",
-                ":linrelax_gurobi",
                 ":lagrelax_volume",
                 ":lagrelax_bundle",
                 ":lagrelax_lbfgs",

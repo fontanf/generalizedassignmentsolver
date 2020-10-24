@@ -103,15 +103,30 @@ BranchAndCutGurobiOutput generalizedassignmentsolver::branchandcut_gurobi(
         model.addConstr(expr == 1);
     }
 
+    // Redirect standard output to log file
+    model.set(GRB_StringParam_LogFile, "gurobi.log");
+    model.set(GRB_IntParam_LogToConsole, 0);
+
+    if (parameters.only_linear_relaxation) {
+        for (ItemIdx j = 0; j < n; j++)
+            for (AgentIdx i = 0; i < m; i++)
+                x[j][i].set(GRB_CharAttr_VType, GRB_CONTINUOUS);
+        model.optimize();
+        Cost lb = std::ceil(model.get(GRB_DoubleAttr_ObjVal) - TOL);
+        output.update_lower_bound(lb, std::stringstream("linearrelaxation"), parameters.info);
+        for (ItemIdx j = 0; j < n; j++) {
+            output.x.push_back(std::vector<double>(m));
+            for (AgentIdx i = 0; i < m; i++)
+                output.x[j][i] = x[j][i].get(GRB_DoubleAttr_X);
+        }
+        return output.algorithm_end(parameters.info);
+    }
+
     // Initial solution
     if (parameters.initial_solution != NULL && parameters.initial_solution->feasible())
         for (ItemIdx j = 0; j < n; ++j)
             for (AgentIdx i = 0; i < m; ++i)
                 x[j][i].set(GRB_DoubleAttr_Start, (parameters.initial_solution->agent(j) == i)? 1: 0);
-
-    // Redirect standard output to log file
-    model.set(GRB_StringParam_LogFile, "gurobi.log");
-    model.set(GRB_IntParam_LogToConsole, 0);
 
     model.set(GRB_DoubleParam_MIPGap, 0); // Fix precision issue
     model.set(GRB_DoubleParam_NodefileStart, 0.5); // Avoid running out of memory

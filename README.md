@@ -10,9 +10,10 @@ This problem is interesting because many different optimization methods can and 
 
 - Linear relaxation
   - solved with CLP `-a linrelax_clp` :heavy_check_mark:
-  - solved with Gurobi `-a linrelax_gurobi` :heavy_check_mark:
+  - solved with Gurobi `-a branchandcut_gurobi --only-linear-relaxation` :heavy_check_mark:
+  - solved with Cplex `-a "branchandcut_cplex --only-linear-relaxation"` :heavy_check_mark:
 
-- Lagrangian relaxation of knapsack constraints
+- Lagrangian relaxation of knapsack constraints. The value of this relaxation is the same as the value of the linear relaxation. However, it might be cheaper to compute, especially on large instances.
   - solved with volume method `-a lagrelax_knapsack_volume` :heavy_check_mark:
   - solved with L-BFGS method `-a lagrelax_knapsack_lbfgs` :heavy_check_mark:
 

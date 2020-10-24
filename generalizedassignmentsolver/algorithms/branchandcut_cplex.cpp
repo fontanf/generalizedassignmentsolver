@@ -111,6 +111,22 @@ BranchAndCutCplexOutput generalizedassignmentsolver::branchandcut_cplex(
     std::ofstream logfile("cplex.log");
     cplex.setOut(logfile);
 
+    if (parameters.only_linear_relaxation) {
+        for (ItemIdx j = 0; j < n; j++)
+            for (AgentIdx i = 0; i < m; i++)
+                model.add(IloConversion(env, x[j][i], ILOFLOAT));
+        cplex.solve();
+        Cost lb = std::ceil(cplex.getObjValue() - TOL);
+        output.update_lower_bound(lb, std::stringstream("linearrelaxation"), parameters.info);
+        for (ItemIdx j = 0; j < n; j++) {
+            output.x.push_back(std::vector<double>(instance.agent_number(), 0));
+            for (AgentIdx i = 0; i < m; i++)
+                if (cplex.getValue(x[j][i]) > 0.5)
+                    output.x[j][i] = 1;
+        }
+        return output.algorithm_end(parameters.info);
+    }
+
     cplex.setParam(IloCplex::Param::MIP::Tolerances::MIPGap, 0.0); // Fix precision issue
     cplex.setParam(IloCplex::Param::MIP::Strategy::File, 2); // Avoid running out of memory
 

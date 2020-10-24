@@ -4,6 +4,9 @@
 #if COINOR_FOUND
 #include "generalizedassignmentsolver/algorithms/linrelax_clp.hpp"
 #endif
+#if CPLEX_FOUND
+#include "generalizedassignmentsolver/algorithms/branchandcut_cplex.hpp"
+#endif
 
 #include <set>
 #include <random>
@@ -20,7 +23,11 @@ std::istream& generalizedassignmentsolver::operator>>(std::istream& in, RepairIn
         initial_solution = RepairInitialSolution::CombinatorialRelaxation;
 #if COINOR_FOUND
     } else if (token == "linrelax_clp") {
-        initial_solution = RepairInitialSolution::LinRelaxClp;
+        initial_solution = RepairInitialSolution::LinearRelaxationClp;
+#endif
+#if CPLEX_FOUND
+    } else if (token == "linearrelaxation_cplex") {
+        initial_solution = RepairInitialSolution::LinearRelaxationCplex;
 #endif
     } else if (token == "lagrelax_knapsack_lbfgs") {
         initial_solution = RepairInitialSolution::LagrangianRelaxationKnapsackLbfgs;
@@ -67,6 +74,27 @@ Output generalizedassignmentsolver::repair(
             Cost c_best = -1;
             for (AgentIdx i=0; i<m; ++i) {
                 double x = output_linrelax_clp.x[j][i];
+                Cost c = instance.cost(j, i);
+                if (x > 0 && (c_best == -1 || c_best > c)) {
+                    i_best = i;
+                    c_best = c;
+                }
+            }
+            solution.set(j, i_best);
+        }
+        break;
+#endif
+#if CPLEX_FOUND
+    } case RepairInitialSolution::LinearRelaxationCplex: {
+        BranchAndCutCplexOptionalParameters parameters_linearrelaxation_cplex;
+        parameters_linearrelaxation_cplex.only_linear_relaxation = true;
+        auto output_linearrelaxation_cplex = branchandcut_cplex(instance, parameters_linearrelaxation_cplex);
+        output.update_lower_bound(output_linearrelaxation_cplex.lower_bound, std::stringstream("linearrelaxation_cplex"), parameters.info);
+        for (ItemIdx j = 0; j < n; ++j) {
+            AgentIdx i_best = -1;
+            Cost c_best = -1;
+            for (AgentIdx i=0; i<m; ++i) {
+                double x = output_linearrelaxation_cplex.x[j][i];
                 Cost c = instance.cost(j, i);
                 if (x > 0 && (c_best == -1 || c_best > c)) {
                     i_best = i;
@@ -218,6 +246,6 @@ Output generalizedassignmentsolver::repair(
     }
 
     output.update_solution(solution, std::stringstream(""), parameters.info);
-    return output;
+    return output.algorithm_end(parameters.info);
 }
 
