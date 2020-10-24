@@ -114,6 +114,7 @@ public:
     const Solution* optimal_solution() const { return sol_opt_.get(); }
     Cost optimum() const;
     Cost bound() const { return c_tot_ + 1; }
+    Cost combinatorial_relaxation() const { return c_min_sum_; }
 
     void write(std::string filename);
 
@@ -128,6 +129,7 @@ private:
     Cost c_max_ = -1;
     Cost c_tot_ = 0;
     Cost w_max_ = -1;
+    Cost c_min_sum_ = 0;
 
     std::unique_ptr<Solution> sol_opt_;
 
@@ -151,9 +153,12 @@ void Instance::set_alternative(ItemIdx j, AgentIdx i, Weight w, Cost v)
     items_[j].alternatives[i].c = v;
     items_[j].w += w;
     items_[j].c += v;
+    if (items_[j].i_cmin != -1 && items_[j].c_min > v)
+        c_min_sum_ -= items_[j].c_min;
     if (items_[j].i_cmin == -1 || items_[j].c_min > v) {
         items_[j].i_cmin = i;
         items_[j].c_min = v;
+        c_min_sum_ += v;
     }
     if (items_[j].i_wmin == -1 || items_[j].w_min > w) {
         items_[j].i_wmin = i;

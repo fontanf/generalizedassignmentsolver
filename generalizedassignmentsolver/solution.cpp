@@ -268,7 +268,9 @@ bool generalizedassignmentsolver::compare(const Solution& sol_best, const Soluti
 
 /*********************************** Output ***********************************/
 
-Output::Output(const Instance& instance, Info& info): solution(instance)
+Output::Output(const Instance& instance, Info& info):
+    solution(instance),
+    lower_bound(instance.combinatorial_relaxation())
 {
     VER(info, std::left << std::setw(10) << "T (s)");
     VER(info, std::left << std::setw(14) << "UB");
