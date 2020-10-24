@@ -41,8 +41,8 @@ git_repository(
 git_repository(
     name = "knapsacksolver",
     remote = "https://github.com/fontanf/knapsacksolver.git",
-    commit = "718c383f10f77df552ff93f21068839a59683f06",
-    shallow_since = "1585933275 +0200",
+    commit = "f0551f5eaa65a90525afca368db06ab4b0ddc9e9",
+    shallow_since = "1600590780 +0200",
 )
 
 http_archive(

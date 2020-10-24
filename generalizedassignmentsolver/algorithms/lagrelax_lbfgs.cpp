@@ -88,7 +88,7 @@ double LagRelaxAssignmentLbfgsFunction::f(const column_vector& mu)
             l += mu(item_indices_[j]);
     std::fill(grad_.begin(), grad_.end(), 1);
 
-    Weight mult = 1;
+    Weight mult = 10000;
     for (AgentIdx i = 0; i < m; ++i) {
         // Create knapsack instance
         knapsacksolver::Instance kp_instance;
@@ -113,7 +113,7 @@ double LagRelaxAssignmentLbfgsFunction::f(const column_vector& mu)
         // Solve knapsack instance
         //auto kp_output = knapsacksolver::bellman_array_all(kp_instance, Info().set_verbose(false));
         auto kp_output = knapsacksolver::minknap(kp_instance);
-        //std::cout << "i " << i << " opt " << sol.profit() << std::endl;
+        //std::cout << "i " << i << " opt " << kp_output.solution.profit() << std::endl;
 
         // Update bound and gradient
         for (ItemIdx j = 0; j < n; ++j) {
@@ -205,16 +205,23 @@ class LagRelaxKnapsackLbfgsFunction
 
 public:
 
-    LagRelaxKnapsackLbfgsFunction(const Instance& instance): instance_(instance), grad_(instance.agent_number()) {  }
+    LagRelaxKnapsackLbfgsFunction(const Instance& instance):
+        instance_(instance),
+        x_(instance.item_number()),
+        grad_(instance.agent_number())
+    {  }
     virtual ~LagRelaxKnapsackLbfgsFunction() { };
 
     double f(const column_vector& x);
 
     const column_vector der(const column_vector& x) const { (void)x; return grad_; }
 
+    AgentIdx agent(ItemIdx j) const { return x_(j); }
+
 private:
 
     const Instance& instance_;
+    column_vector x_;
     column_vector grad_;
 
 };
@@ -253,6 +260,7 @@ double LagRelaxKnapsackLbfgsFunction::f(const column_vector& mu)
 
         // Update bound and gradient
         grad_(i_best) -= instance_.weight(j, i_best);
+        x_(j) = i_best;
         l += rc_best;
     }
 
@@ -265,6 +273,7 @@ LagRelaxKnapsackLbfgsOutput generalizedassignmentsolver::lagrelax_knapsack_lbfgs
     LagRelaxKnapsackLbfgsOutput output(instance, info);
 
     AgentIdx m = instance.agent_number();
+    ItemIdx  n = instance.item_number();
 
     // Initialize multipliers
     column_vector mu(m);
@@ -299,6 +308,11 @@ LagRelaxKnapsackLbfgsOutput generalizedassignmentsolver::lagrelax_knapsack_lbfgs
     output.multipliers.resize(m);
     for (AgentIdx i = 0; i < m; ++i)
         output.multipliers[i] = mu(i);
+    func.f(mu);
+    for (ItemIdx j = 0; j < n; ++j) {
+        output.x.push_back(std::vector<double>(instance.agent_number(), 0));
+        output.x[j][func.agent(j)] = 1;
+    }
 
     return output.algorithm_end(info);
 }

@@ -2,18 +2,39 @@
 
 #include "generalizedassignmentsolver/solution.hpp"
 
-#if COINOR_FOUND
-#include "generalizedassignmentsolver/algorithms/linrelax_clp.hpp"
-#endif
-
 namespace generalizedassignmentsolver
 {
 
-Output repairgreedy(const Instance& ins, Info info = Info());
-Output repaircombrelax(const Instance& ins, Info info = Info());
+enum class RepairInitialSolution
+{
+    CombinatorialRelaxation,
 #if COINOR_FOUND
-Output repairlinrelax_clp(const Instance& ins, const LinRelaxClpOutput& linrelax_output, Info info = Info());
+    LinearRelaxationClp,
 #endif
+    LagrangianRelaxationKnapsackLbfgs,
+};
+std::istream& operator>>(std::istream& in, RepairInitialSolution& initial_solution);
+
+struct RepairOptionalParameters
+{
+    Info info = Info();
+
+    RepairInitialSolution initial_solution;
+    Counter l = -1;
+};
+
+struct RepairOutput: Output
+{
+    RepairOutput(const Instance& instance, Info& info): Output(instance, info) { }
+    RepairOutput& algorithm_end(Info& info);
+
+    Counter iterations = 0;
+};
+
+Output repair(
+        const Instance& instance,
+        std::mt19937_64& generator,
+        RepairOptionalParameters parameters = {});
 
 }
 

@@ -177,6 +177,25 @@ SimulatedAnnealingOptionalParameters read_simulatedannealing_args(const std::vec
     return parameters;
 }
 
+RepairOptionalParameters read_repair_args(const std::vector<char*>& argv)
+{
+    RepairOptionalParameters parameters;
+    po::options_description desc("Allowed options");
+    desc.add_options()
+        ("initial-solution,i", po::value<RepairInitialSolution>(&parameters.initial_solution), "")
+        (",l", po::value<Counter>(&parameters.l), "")
+        ;
+    po::variables_map vm;
+    po::store(po::parse_command_line((Counter)argv.size(), argv.data(), desc), vm);
+    try {
+        po::notify(vm);
+    } catch (po::required_option e) {
+        std::cout << desc << std::endl;;
+        throw "";
+    }
+    return parameters;
+}
+
 Output generalizedassignmentsolver::run(
         std::string algorithm,
         const Instance& instance,
@@ -290,19 +309,10 @@ Output generalizedassignmentsolver::run(
         std::string desirability_string = read_desiralibity_args(algorithm_argv);
         std::unique_ptr<Desirability> f = desirability(desirability_string, instance);
         return mthgregret(instance, *f, info);
-#if COINOR_FOUND
-    } else if (algorithm_args[0] == "repaircombrelax") {
-        return repaircombrelax(instance, info);
-#endif
-#if COINOR_FOUND
-    } else if (algorithm_args[0] == "repairgreedy") {
-        return repairgreedy(instance, info);
-#endif
-#if COINOR_FOUND
-    } else if (algorithm_args[0] == "repairlinrelax_clp") {
-        LinRelaxClpOutput linrelax_output = linrelax_clp(instance);
-        return repairlinrelax_clp(instance, linrelax_output, info);
-#endif
+    } else if (algorithm_args[0] == "repair") {
+        RepairOptionalParameters parameters = read_repair_args(algorithm_argv);
+        parameters.info = info;
+        return repair(instance, generator, parameters);
     } else if (algorithm_args[0] == "localsearch") {
         LocalSearchOptionalParameters parameters = read_localsearch_args(algorithm_argv);
         parameters.info = info;

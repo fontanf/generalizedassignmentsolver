@@ -169,6 +169,7 @@ cc_library(
         deps = [
                 "//generalizedassignmentsolver:generalizedassignmentsolver",
                 ":linrelax_clp",
+                ":lagrelax_lbfgs",
                 ":random",
         ],
         copts = COINOR_COPTS,
