@@ -53,30 +53,13 @@ Others heuristics:
   - with Gurobi `-a branchandcut_gurobi` :heavy_check_mark:
 
 - Branch-and-price
+  - `-a "branchandprice --lp-solver cplex --tree-search-algorithm bfs --branching-rule most-fractional"` :heavy_check_mark:
   - `-a "branchandprice --lp-solver cplex --tree-search-algorithm dfs --branching-rule most-integer"` :heavy_check_mark:
   - `-a "branchandprice --lp-solver cplex --tree-search-algorithm lds --branching-rule most-integer"` :heavy_check_mark:
-  - `-a "branchandprice --lp-solver cplex --tree-search-algorithm bfs --branching-rule most-fractional"` :heavy_check_mark:
 
 - Constraint programming
   - with Gecode `-a constraintprogramming_gecode` :heavy_check_mark:
   - with CPLEX `-a constraintprogramming_cplex` :heavy_check_mark:
-
-## Notes
-
-### Linear relaxation gap
-
-The largest gap between the lower bound from the linear relaxation and the best known upper bound is 1.93%.
-
-### Lagrangian relaxation implementation
-
-The bound from the lagrangian relaxation of knapsack constraints is theoritically equal to the bound from the linear relaxation. The optimal bounds are found by the L-BGFS algorithm from DLib; however, the volume method stays rather far from it. 
-
-The same happens for the bound obtained by solving the lagrangian relaxation of assignment constraints; the Volume method give poor results while the L-BFGS algorithm returns the best known ones found in "An exact method with variable fixing for solving the generalized assignment problem" (Posta et al., 2011).
-
-### Finding a feasible solution
-
-* [mthgregret -f wij/ti](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/generalizedassignment/master/bench/mthgregret_f_wij_ti.json)
-* [random](https://librallu.gitlab.io/splitted-cell-viz/?u=https://raw.githubusercontent.com/fontanf/generalizedassignment/master/bench/random.json)
 
 ## Usage (command line)
 
@@ -124,9 +107,8 @@ Checker:
 
 Run benchmarks:
 ```shell
-bazel build -- //...
-python3 generalizedassignmentsolver/bench.py yagiura2004 "mthg -f wij/ti"          # no time limit
-python3 generalizedassignmentsolver/bench.py yagiura2004 "branchandcut_gurobi" 60  # 1m time limit
+python3 ../optimizationtools/optimizationtools/bench_run.py --algorithms "mthg -f cij" "mthg -f wij" "mthg -f cij*wij" "mthg -f -pij/wij" "mthg -f wij/ti" "random"
+python3 ../optimizationtools/optimizationtools/bench_process.py --benchmark heuristicshort --labels "mthg -f cij" "mthg -f wij" "mthg -f cij*wij" "mthg -f -pij/wij" "mthg -f wij/ti" "random" --timelimit 0.1
 ```
 
 ## Optional dependencies
@@ -141,7 +123,6 @@ Install (https://coin-or.github.io/coinbrew/):
 ```shell
 git clone https://www.github.com/coin-or/coinbrew
 cd coinbrew
-./coinbrew fetch build Dip --no-prompt
 ./coinbrew fetch build Vol --no-prompt
 ```
 
