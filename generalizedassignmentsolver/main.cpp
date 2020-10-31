@@ -68,6 +68,9 @@ int main(int argc, char *argv[])
         .set_loglevelmax(loglevelmax)
         ;
 
+    VER(info, "Items:   " << instance.item_number() << std::endl);
+    VER(info, "Agents:  " << instance.agent_number() << std::endl);
+
     run(algorithm, instance, initial_solution, gen, info);
 
     return 0;

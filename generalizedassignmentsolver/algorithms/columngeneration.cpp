@@ -362,15 +362,17 @@ ColGenOutput generalizedassignmentsolver::columngeneration(
             Cost rc_ub = std::ceil((mult * (- dual_sol[agent_row[i]])));
             ItemIdx j_kp = 0;
             for (ItemIdx j = 0; j < n; ++j) {
-                knapsacksolver::Profit profit = std::floor(mult * dual_sol[item_row[j]])
-                    - std::ceil(mult * instance.cost(j, i));
                 if (parameters.fixed_alt != NULL && (*parameters.fixed_alt)[j][i] == 1) {
                     indices[j] = -2;
                     continue;
                 }
-                if ((parameters.fixed_alt != NULL && (*parameters.fixed_alt)[j][i] == 0)
-                        || profit <= 0
-                        || instance.weight(j, i) > capacities_kp[i]) {
+                if ((parameters.fixed_alt != NULL && (*parameters.fixed_alt)[j][i] == 0)) {
+                    indices[j] = -1;
+                    continue;
+                }
+                knapsacksolver::Profit profit = std::floor(mult * dual_sol[item_row[j]])
+                    - std::ceil(mult * instance.cost(j, i));
+                if (profit <= 0 || instance.weight(j, i) > capacities_kp[i]) {
                     indices[j] = -1;
                     continue;
                 }
@@ -408,13 +410,13 @@ ColGenOutput generalizedassignmentsolver::columngeneration(
         instance_kp.set_capacity(capacities_kp[i]);
         Cost rc_lb = std::floor((mult * (- dual_sol[agent_row[i]])));
         for (ItemIdx j = 0; j < n; ++j) {
-            knapsacksolver::Profit profit = std::ceil(mult * dual_sol[item_row[j]])
-                - std::floor(mult * instance.cost(j, i));
             if (parameters.fixed_alt != NULL && (*parameters.fixed_alt)[j][i] == 1)
                 continue;
-            if ((parameters.fixed_alt != NULL && (*parameters.fixed_alt)[j][i] == 0)
-                    || profit <= 0
-                    || instance.weight(j, i) > capacities_kp[i])
+            if (parameters.fixed_alt != NULL && (*parameters.fixed_alt)[j][i] == 0)
+                continue;
+            knapsacksolver::Profit profit = std::ceil(mult * dual_sol[item_row[j]])
+                - std::floor(mult * instance.cost(j, i));
+            if (profit <= 0 || instance.weight(j, i) > capacities_kp[i])
                 continue;
             instance_kp.add_item(instance.weight(j, i), profit);
         }

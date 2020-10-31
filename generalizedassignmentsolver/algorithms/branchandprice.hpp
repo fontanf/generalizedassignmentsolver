@@ -10,7 +10,7 @@ struct BranchAndPriceOptionalParameters
     Info info = Info();
 
     std::string lp_solver = "clp"; // "clp", "cplex"
-    std::string tree_search_algorithm = "dfs"; // "dfs", "bfs", "lds"
+    std::string tree_search_algorithm = "bfs"; // "dfs", "bfs", "lds"
     std::string branching_rule = "most-fractional"; // "most-fractional", "most-integer"
 };
 
