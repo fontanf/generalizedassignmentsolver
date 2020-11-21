@@ -107,9 +107,11 @@ Checker:
 
 Run benchmarks:
 ```shell
-python3 ../optimizationtools/optimizationtools/bench_run.py --algorithms "mthg -f cij" "mthg -f wij" "mthg -f cij*wij" "mthg -f -pij/wij" "mthg -f wij/ti" "random"
-python3 ../optimizationtools/optimizationtools/bench_process.py --benchmark heuristicshort --labels "mthg -f cij" "mthg -f wij" "mthg -f cij*wij" "mthg -f -pij/wij" "mthg -f wij/ti" "random" --timelimit 0.1
+python3 ../optimizationtools/optimizationtools/bench_run.py --algorithms "mthg -f cij" "mthg -f wij" "mthg -f cij*wij" "mthg -f -pij/wij" "mthg -f wij/ti" "mthgregret -f cij" "mthgregret -f wij" "mthgregret -f cij*wij" "mthgregret -f -pij/wij" "mthgregret -f wij/ti" "random"
+python3 ../optimizationtools/optimizationtools/bench_process.py --benchmark heuristicshort --labels "mthg -f cij" "mthg -f wij" "mthg -f cij*wij" "mthg -f -pij/wij" "mthg -f wij/ti" "mthgregret -f cij" "mthgregret -f wij" "mthgregret -f cij*wij" "mthgregret -f -pij/wij" "mthgregret -f wij/ti" "random" --timelimit 0.1
 ```
+
+![heuristicshort](img/heuristicshort.png?raw=true "heuristicshort")
 
 ## Optional dependencies
 
