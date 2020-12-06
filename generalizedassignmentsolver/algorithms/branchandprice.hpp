@@ -2,6 +2,8 @@
 
 #include "generalizedassignmentsolver/solution.hpp"
 
+#include "generalizedassignmentsolver/algorithms/columngeneration.hpp"
+
 namespace generalizedassignmentsolver
 {
 

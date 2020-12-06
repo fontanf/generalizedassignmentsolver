@@ -41,7 +41,7 @@ CghGreedyOutput generalizedassignmentsolver::cgh_greedy(
     std::vector<std::vector<std::vector<ItemIdx>>> columns(instance.agent_number());
     std::vector<std::vector<int>> fixed_alternatives(instance.item_number(), std::vector<int>(instance.agent_number(), -1));
     std::vector<int> fixed_agents(instance.agent_number(), 0);
-    ColGenOptionalParameters colgen_parameters;
+    ColumnGenerationOptionalParameters colgen_parameters;
     colgen_parameters.columns      = &columns;
     colgen_parameters.fixed_alt    = &fixed_alternatives;
     colgen_parameters.fixed_agents = &fixed_agents;
@@ -105,7 +105,7 @@ CghLimitedDiscrepencySearchOutput generalizedassignmentsolver::cgh_limiteddiscre
     std::vector<std::vector<std::vector<ItemIdx>>> columns(instance.agent_number());
     std::vector<std::vector<int>> fixed_alternatives(instance.item_number(), std::vector<int>(instance.agent_number(), -1));
     std::vector<int> fixed_agents(instance.agent_number(), 0);
-    ColGenOptionalParameters colgen_parameters;
+    ColumnGenerationOptionalParameters colgen_parameters;
     colgen_parameters.columns      = &columns;
     colgen_parameters.fixed_alt    = &fixed_alternatives;
     colgen_parameters.fixed_agents = &fixed_agents;

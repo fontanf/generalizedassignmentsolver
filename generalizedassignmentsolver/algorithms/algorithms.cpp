@@ -25,7 +25,7 @@ namespace po = boost::program_options;
 
 std::string read_desiralibity_args(const std::vector<char*>& argv)
 {
-    ColGenOptionalParameters parameters;
+    ColumnGenerationOptionalParameters parameters;
     po::options_description desc("Allowed options");
     std::string desirability = "cij";
     desc.add_options()
@@ -42,9 +42,9 @@ std::string read_desiralibity_args(const std::vector<char*>& argv)
     return desirability;
 }
 
-ColGenOptionalParameters read_columngeneration_args(const std::vector<char*>& argv)
+ColumnGenerationOptionalParameters read_columngeneration_args(const std::vector<char*>& argv)
 {
-    ColGenOptionalParameters parameters;
+    ColumnGenerationOptionalParameters parameters;
     po::options_description desc("Allowed options");
     desc.add_options()
         ("lp-solver,s", po::value<std::string>(&parameters.lp_solver), "")
@@ -281,7 +281,7 @@ Output generalizedassignmentsolver::run(
         parameters.info = info;
         return lagrelax_assignment_lbfgs(instance, parameters);
     } else if (algorithm_args[0] == "columngeneration") {
-        ColGenOptionalParameters parameters = read_columngeneration_args(algorithm_argv);
+        ColumnGenerationOptionalParameters parameters = read_columngeneration_args(algorithm_argv);
         parameters.info = info;
         return columngeneration(instance, parameters);
 

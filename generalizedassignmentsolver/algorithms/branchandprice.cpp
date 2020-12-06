@@ -1,6 +1,5 @@
 #include "generalizedassignmentsolver/algorithms/branchandprice.hpp"
 
-#include "generalizedassignmentsolver/algorithms/columngeneration.hpp"
 #include "generalizedassignmentsolver/algorithms/greedy.hpp"
 
 #include <queue>
@@ -38,7 +37,7 @@ BranchAndPriceOutput generalizedassignmentsolver::branchandprice(
     // Initialize column generation parameters.
     std::vector<std::vector<std::vector<ItemIdx>>> columns(instance.agent_number());
     std::vector<std::vector<int>> fixed_alternatives(instance.item_number(), std::vector<int>(instance.agent_number(), -1));
-    ColGenOptionalParameters colgen_parameters;
+    ColumnGenerationOptionalParameters colgen_parameters;
     colgen_parameters.columns   = &columns;
     colgen_parameters.fixed_alt = &fixed_alternatives;
     colgen_parameters.lp_solver = parameters.lp_solver;

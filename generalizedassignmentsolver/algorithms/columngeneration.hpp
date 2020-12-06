@@ -2,13 +2,18 @@
 
 #include "generalizedassignmentsolver/solution.hpp"
 
+#include "optimizationtools/column_generation_solver.hpp"
+
 #include "knapsacksolver/algorithms/minknap.hpp"
 #include "knapsacksolver/algorithms/bellman.hpp"
 
 namespace generalizedassignmentsolver
 {
 
-struct ColGenOptionalParameters
+typedef optimizationtools::ColumnGenerationSolver::ColIdx ColIdx;
+typedef optimizationtools::ColumnGenerationSolver::RowIdx RowIdx;
+
+struct ColumnGenerationOptionalParameters
 {
     Info info = Info();
 
@@ -18,10 +23,10 @@ struct ColGenOptionalParameters
     std::vector<int>* fixed_agents = NULL; // 0: unfixed, 1: fixed.
 };
 
-struct ColGenOutput: Output
+struct ColumnGenerationOutput: Output
 {
-    ColGenOutput(const Instance& instance, Info& info): Output(instance, info) { }
-    ColGenOutput& algorithm_end(Info& info);
+    ColumnGenerationOutput(const Instance& instance, Info& info): Output(instance, info) { }
+    ColumnGenerationOutput& algorithm_end(Info& info);
 
     /** Left empty if parameters.columns != NULL. */
     std::vector<std::vector<std::vector<ItemIdx>>> columns;
@@ -32,7 +37,9 @@ struct ColGenOutput: Output
     Counter added_column_number = 0;
 };
 
-ColGenOutput columngeneration(const Instance& instance, ColGenOptionalParameters parameters = {});
+ColumnGenerationOutput columngeneration(
+        const Instance& instance,
+        ColumnGenerationOptionalParameters parameters = {});
 
 }
 

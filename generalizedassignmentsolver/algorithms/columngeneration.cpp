@@ -1,170 +1,8 @@
 #include "generalizedassignmentsolver/algorithms/columngeneration.hpp"
 
-#if CPLEX_FOUND
-#include <ilcplex/ilocplex.h>
-#endif
-
-#if COINOR_FOUND
-#include <coin/ClpModel.hpp>
-#include <coin/OsiClpSolverInterface.hpp>
-#endif
-
 using namespace generalizedassignmentsolver;
 
-class ColGenSolver
-{
-
-public:
-
-    virtual ~ColGenSolver() { }
-    virtual void add_column(std::vector<int> rows, Cost c) = 0;
-    virtual void solve() = 0;
-    virtual double objective() = 0;
-    virtual std::vector<double>& dual_solution() = 0;
-    virtual std::vector<double> solution() = 0;
-};
-
-#if COINOR_FOUND
-
-class ColGenSolverClp: public ColGenSolver
-{
-
-public:
-
-    ColGenSolverClp(AgentIdx agent_constraint_number, ItemIdx item_constraint_number):
-        m_(agent_constraint_number),
-        n_(item_constraint_number),
-        ones_(m_ + n_, 1),
-        dual_sol_vd_(m_ + n_)
-    {
-        model_.messageHandler()->setLogLevel(0);
-        for (AgentIdx i = 0; i < agent_constraint_number; ++i)
-            model_.addRow(0, NULL, NULL, 0, 1);
-        for (ItemIdx j = 0; j < item_constraint_number; ++j)
-            model_.addRow(0, NULL, NULL, 1, item_constraint_number);
-    }
-
-    virtual ~ColGenSolverClp() { }
-
-    void add_column(std::vector<int> rows, Cost c)
-    {
-        model_.addColumn(rows.size(), rows.data(), ones_.data(), 0.0, 1, c);
-    }
-
-    void solve() { model_.primal(); }
-
-    double objective() { return model_.objectiveValue(); }
-
-    std::vector<double>& dual_solution()
-    {
-        double* dual_sol = model_.dualRowSolution();
-        for (int row = 0; row < m_ + n_; ++ row)
-            dual_sol_vd_[row] = dual_sol[row];
-        return dual_sol_vd_;
-    }
-
-    std::vector<double> solution()
-    {
-        const double* solution = model_.getColSolution();
-        std::vector<double> sol(model_.numberColumns());
-        for (int col = 0; col < model_.numberColumns(); ++col)
-            sol[col] = solution[col];
-        return sol;
-    }
-
-private:
-
-    AgentIdx m_;
-    ItemIdx n_;
-    ClpSimplex model_;
-    std::vector<double> ones_;
-    std::vector<double> dual_sol_vd_;
-
-};
-
-#endif
-
-#if CPLEX_FOUND
-
-ILOSTLBEGIN
-
-class ColGenSolverCplex: public ColGenSolver
-{
-
-public:
-
-    ColGenSolverCplex(AgentIdx agent_constraint_number, ItemIdx item_constraint_number):
-        m_(agent_constraint_number),
-        n_(item_constraint_number),
-        model_(env_),
-        obj_(env_),
-        range_(env_),
-        cplex_(model_),
-        dual_sol_(env_, m_ + n_),
-        dual_sol_vd_(m_ + n_)
-    {
-        obj_.setSense(IloObjective::Minimize);
-        model_.add(obj_);
-        for (AgentIdx i = 0; i < m_; ++i)
-            range_.add(IloRange(env_, -IloInfinity, 1));
-        for (ItemIdx j = 0; j < n_; ++j)
-            range_.add(IloRange(env_, 1, IloInfinity));
-        model_.add(range_);
-        cplex_.setOut(env_.getNullStream()); // Remove standard output
-    }
-
-    virtual ~ColGenSolverCplex()
-    {
-        env_.end();
-    }
-
-    void add_column(std::vector<int> rows, Cost c)
-    {
-        IloNumColumn col = obj_(c);
-        for (int i: rows)
-            col += range_[i](1);
-        vars_.push_back(IloNumVar(col, 0, 1, ILOFLOAT));
-        model_.add(vars_.back());
-    }
-
-    void solve() { cplex_.solve(); }
-
-    double objective() { return cplex_.getObjValue(); }
-
-    std::vector<double>& dual_solution()
-    {
-        cplex_.getDuals(dual_sol_, range_);
-        for (int row = 0; row < m_ + n_; ++ row)
-            dual_sol_vd_[row] = dual_sol_[row];
-        return dual_sol_vd_;
-    }
-
-    std::vector<double> solution()
-    {
-        std::vector<double> sol(vars_.size());
-        for (int col = 0; col < (int)vars_.size(); ++col)
-            sol[col] = cplex_.getValue(vars_[col]);
-        return sol;
-    }
-
-private:
-
-    AgentIdx m_;
-    ItemIdx n_;
-    IloEnv env_;
-    IloModel model_;
-    IloObjective obj_;
-    IloRangeArray range_;
-    IloCplex cplex_;
-    std::vector<IloNumVar> vars_;
-    IloNumArray dual_sol_;
-    std::vector<double> dual_sol_vd_;
-
-};
-
-#endif
-
-ColGenOutput& ColGenOutput::algorithm_end(Info& info)
+ColumnGenerationOutput& ColumnGenerationOutput::algorithm_end(Info& info)
 {
     PUT(info, "Algorithm", "Iterations", it);
     PUT(info, "Algorithm", "AddedColumns", added_column_number);
@@ -175,8 +13,8 @@ ColGenOutput& ColGenOutput::algorithm_end(Info& info)
 }
 
 void add_column(const Instance& instance,
-        ColGenOptionalParameters& parameters,
-        ColGenSolver& solver,
+        ColumnGenerationOptionalParameters& parameters,
+        optimizationtools::ColumnGenerationSolver& solver,
         std::vector<std::vector<std::vector<ItemIdx>>>* columns,
         AgentIdx i,
         ColIdx col_idx,
@@ -184,8 +22,8 @@ void add_column(const Instance& instance,
         const std::vector<int>& agent_rows,
         const std::vector<int>& item_rows)
 {
-    std::vector<int> rows;
-    rows.push_back(agent_rows[i]);
+    std::vector<RowIdx> row_indices;
+    row_indices.push_back(agent_rows[i]);
     Cost c = 0;
     Weight w = 0;
     Weight t = instance.capacity(i);
@@ -214,7 +52,7 @@ void add_column(const Instance& instance,
 
         c += instance.cost(j, i);
         w += instance.weight(j, i);
-        rows.push_back(item_rows[j]);
+        row_indices.push_back(item_rows[j]);
     }
     col_indices.push_back({i, col_idx});
 
@@ -224,14 +62,14 @@ void add_column(const Instance& instance,
             //std::cout << j << " ";
         //std::cout << std::endl;
     //}
-    solver.add_column(rows, c);
+    solver.add_column(row_indices, std::vector<double>(row_indices.size(), 1), c);
 }
 
-ColGenOutput generalizedassignmentsolver::columngeneration(
-        const Instance& instance, ColGenOptionalParameters parameters)
+ColumnGenerationOutput generalizedassignmentsolver::columngeneration(
+        const Instance& instance, ColumnGenerationOptionalParameters parameters)
 {
     VER(parameters.info, "*** columngeneration --lp-solver " << parameters.lp_solver << " ***" << std::endl);
-    ColGenOutput output(instance, parameters.info);
+    ColumnGenerationOutput output(instance, parameters.info);
 
     ItemIdx n = instance.item_number();
     AgentIdx m = instance.agent_number();
@@ -264,15 +102,30 @@ ColGenOutput generalizedassignmentsolver::columngeneration(
     }
     ItemIdx item_constraint_number = row_idx - agent_constraint_number;
 
+    std::vector<optimizationtools::ColumnGenerationSolver::Value> row_lower_bounds;
+    std::vector<optimizationtools::ColumnGenerationSolver::Value> row_upper_bounds;
+    for (AgentPos i = 0; i < agent_constraint_number; ++i) {
+        row_lower_bounds.push_back(0);
+        row_upper_bounds.push_back(1);
+    }
+    for (ItemPos j = 0; j < item_constraint_number; ++j) {
+        row_lower_bounds.push_back(1);
+        row_upper_bounds.push_back(item_constraint_number);
+    }
+
     // Initialize solver
-    std::unique_ptr<ColGenSolver> solver = NULL;
+    std::unique_ptr<optimizationtools::ColumnGenerationSolver> solver = NULL;
 #if CPLEX_FOUND
     if (parameters.lp_solver == "cplex")
-        solver = std::unique_ptr<ColGenSolver>(new ColGenSolverCplex(agent_constraint_number, item_constraint_number));
+        solver = std::unique_ptr<optimizationtools::ColumnGenerationSolver>(
+                new optimizationtools::ColumnGenerationSolverCplex(
+                    row_lower_bounds, row_upper_bounds));
 #endif
 #if COINOR_FOUND
     if (parameters.lp_solver == "clp")
-        solver = std::unique_ptr<ColGenSolver>(new ColGenSolverClp(agent_constraint_number, item_constraint_number));
+        solver = std::unique_ptr<optimizationtools::ColumnGenerationSolver>(
+                new optimizationtools::ColumnGenerationSolverClp(
+                    row_lower_bounds, row_upper_bounds));
 #endif
     if (solver == NULL)
         return output.algorithm_end(parameters.info);
@@ -295,9 +148,12 @@ ColGenOutput generalizedassignmentsolver::columngeneration(
     }
 
     // Add initial columns
-    std::vector<int> rows(item_constraint_number);
+    std::vector<RowIdx> rows(item_constraint_number);
     std::iota(rows.begin(), rows.end(), agent_constraint_number);
-    solver->add_column(rows, 10 * instance.bound());
+    solver->add_column(
+            rows,
+            std::vector<optimizationtools::ColumnGenerationSolver::Value>(rows.size(), 1),
+            10 * instance.bound());
     output.column_indices.push_back({-1, -1});
 
     std::vector<std::vector<std::vector<ItemIdx>>>* columns;
@@ -331,7 +187,6 @@ ColGenOutput generalizedassignmentsolver::columngeneration(
                 << " | C " << std::setw(10) << c0 + solver->objective()
                 << " | COL " << std::setw(10) << output.added_column_number
                 << std::endl);
-        std::vector<double>& dual_sol = solver->dual_solution();
 
         // Find and add new columns
         found = false;
@@ -359,7 +214,7 @@ ColGenOutput generalizedassignmentsolver::columngeneration(
 
             instance_kp.clear();
             instance_kp.set_capacity(capacities_kp[i]);
-            Cost rc_ub = std::ceil((mult * (- dual_sol[agent_row[i]])));
+            Cost rc_ub = std::ceil((mult * (- solver->dual(agent_row[i]))));
             ItemIdx j_kp = 0;
             for (ItemIdx j = 0; j < n; ++j) {
                 if (parameters.fixed_alt != NULL && (*parameters.fixed_alt)[j][i] == 1) {
@@ -370,7 +225,7 @@ ColGenOutput generalizedassignmentsolver::columngeneration(
                     indices[j] = -1;
                     continue;
                 }
-                knapsacksolver::Profit profit = std::floor(mult * dual_sol[item_row[j]])
+                knapsacksolver::Profit profit = std::floor(mult * solver->dual(item_row[j]))
                     - std::ceil(mult * instance.cost(j, i));
                 if (profit <= 0 || instance.weight(j, i) > capacities_kp[i]) {
                     indices[j] = -1;
@@ -400,7 +255,6 @@ ColGenOutput generalizedassignmentsolver::columngeneration(
     // Compute the bound
     // Solve LP
     solver->solve();
-    std::vector<double>& dual_sol = solver->dual_solution();
 
     Cost lb = std::floor(mult * solver->objective());
     for (AgentIdx i = 0; i < m; ++i) {
@@ -408,13 +262,13 @@ ColGenOutput generalizedassignmentsolver::columngeneration(
             continue;
         instance_kp.clear();
         instance_kp.set_capacity(capacities_kp[i]);
-        Cost rc_lb = std::floor((mult * (- dual_sol[agent_row[i]])));
+        Cost rc_lb = std::floor((mult * (- solver->dual(agent_row[i]))));
         for (ItemIdx j = 0; j < n; ++j) {
             if (parameters.fixed_alt != NULL && (*parameters.fixed_alt)[j][i] == 1)
                 continue;
             if (parameters.fixed_alt != NULL && (*parameters.fixed_alt)[j][i] == 0)
                 continue;
-            knapsacksolver::Profit profit = std::ceil(mult * dual_sol[item_row[j]])
+            knapsacksolver::Profit profit = std::ceil(mult * solver->dual(item_row[j]))
                 - std::floor(mult * instance.cost(j, i));
             if (profit <= 0 || instance.weight(j, i) > capacities_kp[i])
                 continue;
@@ -430,7 +284,9 @@ ColGenOutput generalizedassignmentsolver::columngeneration(
     output.update_lower_bound(lb, std::stringstream(""), parameters.info);
 
     // Compute x
-    output.solution = solver->solution();
+    output.solution.resize(solver->column_number());
+    for (ColIdx col = 0; col < solver->column_number(); ++col)
+        output.solution[col] = solver->primal(col);
     for (ItemIdx j = 0; j < n; ++j)
         output.x.push_back(std::vector<double>(instance.agent_number(), 0));
     for (ColIdx col_idx = 1; col_idx < (int)output.column_indices.size(); ++col_idx) {

@@ -161,6 +161,7 @@ cc_library(
         srcs = ["columngeneration.cpp"],
         deps = [
                 "//generalizedassignmentsolver:generalizedassignmentsolver",
+                "@optimizationtools//optimizationtools:column_generation_solver",
                 "@knapsacksolver//knapsacksolver/algorithms:minknap",
                 "@knapsacksolver//knapsacksolver/algorithms:bellman",
         ] + CPLEX_DEP + COINOR_DEP,

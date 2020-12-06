@@ -28,7 +28,6 @@ typedef int64_t AgentPos;
 typedef int64_t StateIdx;
 typedef int64_t Counter;
 typedef int64_t Seed;
-typedef int64_t ColIdx;
 
 class Solution;
 
