@@ -10,16 +10,16 @@ Output branchandcut_cbc_test(Instance& instance)
     Info info = Info()
         .set_verbose(true)
         ;
-    BranchAndCutCbcOptionalParameters p;
-    p.info = info;
-    return branchandcut_cbc(instance, p);
+    BranchAndCutCbcOptionalParameters parameters;
+    parameters.info = info;
+    return branchandcut_cbc(instance, parameters);
 }
 
-std::vector<Output (*)(Instance&)> f = {
+std::vector<Output (*)(Instance&)> branchandcut_cbc_tests = {
         branchandcut_cbc_test,
 };
 
-TEST(BranchAndCutCbc, TEST) { test(TEST, f, SOPT); }
+TEST(BranchAndCutCbc, TEST) { test(TEST, branchandcut_cbc_tests, SOPT); }
 
 #endif
 

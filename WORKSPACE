@@ -34,8 +34,8 @@ cc_library(
 git_repository(
     name = "optimizationtools",
     remote = "https://github.com/fontanf/optimizationtools.git",
-    commit = "586552c8550fa19c274ea6343e83d228449ea9d7",
-    shallow_since = "1607273236 +0100",
+    commit = "b51d64c7428acfde1ad8798404b1be9b413a1248",
+    shallow_since = "1609062649 +0100",
 )
 
 local_repository(
@@ -44,10 +44,22 @@ local_repository(
 )
 
 git_repository(
+    name = "columngenerationsolver",
+    remote = "https://github.com/fontanf/columngenerationsolver.git",
+    commit = "ddf6da508b5565ab890313936fb418cd442f2108",
+    shallow_since = "1609672269 +0100",
+)
+
+local_repository(
+    name = "columngenerationsolver_",
+    path = "../columngenerationsolver/",
+)
+
+git_repository(
     name = "knapsacksolver",
     remote = "https://github.com/fontanf/knapsacksolver.git",
-    commit = "f0551f5eaa65a90525afca368db06ab4b0ddc9e9",
-    shallow_since = "1600590780 +0200",
+    commit = "bc4ffc72a301c9aa033b969ff54d3c3396de2b8f",
+    shallow_since = "1609063241 +0100",
 )
 
 http_archive(
@@ -67,20 +79,14 @@ cc_library(
 )
 
 new_local_repository(
-    name = "gurobi",
-    path = "/home/florian/Programmes/gurobi811/linux64/",
+    name = "coinor",
+    path = "/home/florian/Programmes/coinbrew/",
     build_file_content = """
 cc_library(
-    name = "gurobi",
-    hdrs = [
-            "include/gurobi_c.h",
-            "include/gurobi_c++.h",
-    ],
-    strip_include_prefix = "include/",
-    srcs = [
-            "lib/libgurobi_c++.a",
-            "lib/libgurobi81.so",
-    ],
+    name = "coinor",
+    hdrs = glob(["dist/include/**/*.h*"], exclude_directories = 0),
+    strip_include_prefix = "dist/include/",
+    srcs = glob(["dist/lib/**/*.so"], exclude_directories = 0),
     visibility = ["//visibility:public"],
 )
 """,
@@ -125,12 +131,32 @@ cc_library(
 )
 
 new_local_repository(
+    name = "gurobi",
+    path = "/home/florian/Programmes/gurobi811/linux64/",
+    build_file_content = """
+cc_library(
+    name = "gurobi",
+    hdrs = [
+            "include/gurobi_c.h",
+            "include/gurobi_c++.h",
+    ],
+    strip_include_prefix = "include/",
+    srcs = [
+            "lib/libgurobi_c++.a",
+            "lib/libgurobi81.so",
+    ],
+    visibility = ["//visibility:public"],
+)
+""",
+)
+
+new_local_repository(
     name = "gecode",
     path = "/home/florian/Programmes/gecode-release-6.2.0/",
     build_file_content = """
 cc_library(
     name = "gecode",
-    hdrs = glob(["**/*.h"]),
+    hdrs = glob(["gecode/**/*.h*"], exclude_directories = 0),
     srcs = [
             "libgecodedriver.so",
             "libgecodeflatzinc.so",
@@ -149,26 +175,12 @@ cc_library(
 )
 
 new_local_repository(
-    name = "coinor",
-    path = "/home/florian/Programmes/coinbrew/",
-    build_file_content = """
-cc_library(
-    name = "coinor",
-    hdrs = glob(["dist/include/**/*.h", exclude_directories = 0]),
-    strip_include_prefix = "dist/include/",
-    srcs = glob(["dist/lib/**/*.so", exclude_directories = 0]),
-    visibility = ["//visibility:public"],
-)
-""",
-)
-
-new_local_repository(
     name = "localsolver",
     path = "/opt/localsolver_8_5",
     build_file_content = """
 cc_library(
     name = "localsolver",
-    hdrs = glob(["include/**/*.h", exclude_directories = 0]),
+    hdrs = glob(["include/**/*.h"], exclude_directories = 0),
     strip_include_prefix = "include/",
     srcs = glob(["lib/**/*.a", exclude_directories = 0]),
     linkopts = ["-lpthread"],

@@ -2,13 +2,11 @@
 
 #include "generalizedassignmentsolver/algorithms/linrelax_clp.hpp"
 #include "generalizedassignmentsolver/algorithms/lagrelax_volume.hpp"
-#include "generalizedassignmentsolver/algorithms/lagrelax_bundle.hpp"
 #include "generalizedassignmentsolver/algorithms/lagrelax_lbfgs.hpp"
 #include "generalizedassignmentsolver/algorithms/columngeneration.hpp"
 #include "generalizedassignmentsolver/algorithms/branchandcut_cbc.hpp"
 #include "generalizedassignmentsolver/algorithms/branchandcut_cplex.hpp"
 #include "generalizedassignmentsolver/algorithms/branchandcut_gurobi.hpp"
-#include "generalizedassignmentsolver/algorithms/branchandprice.hpp"
 #include "generalizedassignmentsolver/algorithms/constraintprogramming_gecode.hpp"
 #include "generalizedassignmentsolver/algorithms/constraintprogramming_cplex.hpp"
 #include "generalizedassignmentsolver/algorithms/random.hpp"
@@ -16,7 +14,6 @@
 #include "generalizedassignmentsolver/algorithms/repair.hpp"
 #include "generalizedassignmentsolver/algorithms/localsearch.hpp"
 #include "generalizedassignmentsolver/algorithms/localsolver.hpp"
-#include "generalizedassignmentsolver/algorithms/colgenheuristics.hpp"
 
 #include <boost/program_options.hpp>
 
@@ -35,7 +32,7 @@ std::string read_desiralibity_args(const std::vector<char*>& argv)
     po::store(po::parse_command_line((Counter)argv.size(), argv.data(), desc), vm);
     try {
         po::notify(vm);
-    } catch (po::required_option e) {
+    } catch (const po::required_option& e) {
         std::cout << desc << std::endl;;
         throw "";
     }
@@ -47,69 +44,13 @@ ColumnGenerationOptionalParameters read_columngeneration_args(const std::vector<
     ColumnGenerationOptionalParameters parameters;
     po::options_description desc("Allowed options");
     desc.add_options()
-        ("lp-solver,s", po::value<std::string>(&parameters.lp_solver), "")
+        ("linear-programming-solver,s", po::value<columngenerationsolver::LinearProgrammingSolver>(&parameters.linear_programming_solver), "")
         ;
     po::variables_map vm;
     po::store(po::parse_command_line((Counter)argv.size(), argv.data(), desc), vm);
     try {
         po::notify(vm);
-    } catch (po::required_option e) {
-        std::cout << desc << std::endl;;
-        throw "";
-    }
-    return parameters;
-}
-
-CghGreedyOptionalParameters read_cgh_greedy_args(const std::vector<char*>& argv)
-{
-    CghGreedyOptionalParameters parameters;
-    po::options_description desc("Allowed options");
-    desc.add_options()
-        ("lp-solver,s", po::value<std::string>(&parameters.lp_solver), "")
-        ;
-    po::variables_map vm;
-    po::store(po::parse_command_line((Counter)argv.size(), argv.data(), desc), vm);
-    try {
-        po::notify(vm);
-    } catch (po::required_option e) {
-        std::cout << desc << std::endl;;
-        throw "";
-    }
-    return parameters;
-}
-
-CghLimitedDiscrepencySearchOptionalParameters read_cgh_limiteddiscrepencysearch_args(const std::vector<char*>& argv)
-{
-    CghLimitedDiscrepencySearchOptionalParameters parameters;
-    po::options_description desc("Allowed options");
-    desc.add_options()
-        ("lp-solver,s", po::value<std::string>(&parameters.lp_solver), "")
-        ;
-    po::variables_map vm;
-    po::store(po::parse_command_line((Counter)argv.size(), argv.data(), desc), vm);
-    try {
-        po::notify(vm);
-    } catch (po::required_option e) {
-        std::cout << desc << std::endl;;
-        throw "";
-    }
-    return parameters;
-}
-
-BranchAndPriceOptionalParameters read_branchandprice_args(const std::vector<char*>& argv)
-{
-    BranchAndPriceOptionalParameters parameters;
-    po::options_description desc("Allowed options");
-    desc.add_options()
-        ("lp-solver,s", po::value<std::string>(&parameters.lp_solver), "")
-        ("tree-search-algorithm,t", po::value<std::string>(&parameters.tree_search_algorithm), "")
-        ("branching-rule,b", po::value<std::string>(&parameters.branching_rule), "")
-        ;
-    po::variables_map vm;
-    po::store(po::parse_command_line((Counter)argv.size(), argv.data(), desc), vm);
-    try {
-        po::notify(vm);
-    } catch (po::required_option e) {
+    } catch (const po::required_option& e) {
         std::cout << desc << std::endl;;
         throw "";
     }
@@ -128,7 +69,7 @@ LocalSearchOptionalParameters read_localsearch_args(const std::vector<char*>& ar
     po::store(po::parse_command_line((Counter)argv.size(), argv.data(), desc), vm);
     try {
         po::notify(vm);
-    } catch (po::required_option e) {
+    } catch (const po::required_option& e) {
         std::cout << desc << std::endl;;
         throw "";
     }
@@ -148,7 +89,7 @@ TabuSearchOptionalParameters read_tabusearch_args(const std::vector<char*>& argv
     po::store(po::parse_command_line((Counter)argv.size(), argv.data(), desc), vm);
     try {
         po::notify(vm);
-    } catch (po::required_option e) {
+    } catch (const po::required_option& e) {
         std::cout << desc << std::endl;;
         throw "";
     }
@@ -169,7 +110,7 @@ SimulatedAnnealingOptionalParameters read_simulatedannealing_args(const std::vec
     po::store(po::parse_command_line((Counter)argv.size(), argv.data(), desc), vm);
     try {
         po::notify(vm);
-    } catch (po::required_option e) {
+    } catch (const po::required_option& e) {
         std::cout << desc << std::endl;;
         throw "";
     }
@@ -188,7 +129,7 @@ RepairOptionalParameters read_repair_args(const std::vector<char*>& argv)
     po::store(po::parse_command_line((Counter)argv.size(), argv.data(), desc), vm);
     try {
         po::notify(vm);
-    } catch (po::required_option e) {
+    } catch (const po::required_option& e) {
         std::cout << desc << std::endl;;
         throw "";
     }
@@ -206,7 +147,7 @@ BranchAndCutCplexOptionalParameters read_branchandcut_cplex_args(const std::vect
     po::store(po::parse_command_line((Counter)argv.size(), argv.data(), desc), vm);
     try {
         po::notify(vm);
-    } catch (po::required_option e) {
+    } catch (const po::required_option& e) {
         std::cout << desc << std::endl;;
         throw "";
     }
@@ -215,6 +156,7 @@ BranchAndCutCplexOptionalParameters read_branchandcut_cplex_args(const std::vect
     return parameters;
 }
 
+#if GUROBI_FOUND
 BranchAndCutGurobiOptionalParameters read_branchandcut_gurobi_args(const std::vector<char*>& argv)
 {
     BranchAndCutGurobiOptionalParameters parameters;
@@ -226,7 +168,7 @@ BranchAndCutGurobiOptionalParameters read_branchandcut_gurobi_args(const std::ve
     po::store(po::parse_command_line((Counter)argv.size(), argv.data(), desc), vm);
     try {
         po::notify(vm);
-    } catch (po::required_option e) {
+    } catch (const po::required_option& e) {
         std::cout << desc << std::endl;;
         throw "";
     }
@@ -234,6 +176,7 @@ BranchAndCutGurobiOptionalParameters read_branchandcut_gurobi_args(const std::ve
         parameters.only_linear_relaxation = true;
     return parameters;
 }
+#endif
 
 Output generalizedassignmentsolver::run(
         std::string algorithm,
@@ -262,19 +205,11 @@ Output generalizedassignmentsolver::run(
     } else if (algorithm_args[0] == "lagrelax_knapsack_volume") {
         return lagrelax_knapsack_volume(instance, info);
 #endif
-#if COINOR_FOUND
-    } else if (algorithm_args[0] == "lagrelax_knapsack_bundle") {
-        return lagrelax_knapsack_bundle(instance, info);
-#endif
     } else if (algorithm_args[0] == "lagrelax_knapsack_lbfgs") {
         return lagrelax_knapsack_lbfgs(instance, info);
 #if COINOR_FOUND
     } else if (algorithm_args[0] == "lagrelax_assignment_volume") {
         return lagrelax_assignment_volume(instance, info);
-#endif
-#if COINOR_FOUND
-    } else if (algorithm_args[0] == "lagrelax_assignment_bundle") {
-        return lagrelax_assignment_bundle(instance, info);
 #endif
     } else if (algorithm_args[0] == "lagrelax_assignment_lbfgs") {
         LagRelaxAssignmentLbfgsOptionalParameters parameters;
@@ -306,10 +241,6 @@ Output generalizedassignmentsolver::run(
         parameters.info = info;
         return branchandcut_gurobi(instance, parameters);
 #endif
-    } else if (algorithm_args[0] == "branchandprice") {
-        auto parameters = read_branchandprice_args(algorithm_argv);
-        parameters.info = info;
-        return branchandprice(instance, parameters);
 #if GECODE_FOUND
     } else if (algorithm_args[0] == "constraintprogramming_gecode") {
         ConstraintProgrammingGecodeOptionalParameters parameters;
@@ -369,21 +300,17 @@ Output generalizedassignmentsolver::run(
         parameters.info = info;
         return localsolver(instance, parameters);
 #endif
-    } else if (algorithm_args[0] == "cgh_restrictedmaster") {
-        CghRestrictedMasterOptionalParameters parameters;
+    } else if (algorithm_args[0] == "columngenerationheuristic_greedy") {
+        ColumnGenerationOptionalParameters parameters = read_columngeneration_args(algorithm_argv);
         parameters.info = info;
-        return cgh_restrictedmaster(instance, parameters);
-    } else if (algorithm_args[0] == "cgh_greedy") {
-        CghGreedyOptionalParameters parameters = read_cgh_greedy_args(algorithm_argv);
+        return columngenerationheuristic_greedy(instance, parameters);
+    } else if (algorithm_args[0] == "columngenerationheuristic_limiteddiscrepancysearch") {
+        ColumnGenerationOptionalParameters parameters = read_columngeneration_args(algorithm_argv);
         parameters.info = info;
-        return cgh_greedy(instance, parameters);
-    } else if (algorithm_args[0] == "cgh_limiteddiscrepencysearch") {
-        CghLimitedDiscrepencySearchOptionalParameters parameters = read_cgh_limiteddiscrepencysearch_args(algorithm_argv);
-        parameters.info = info;
-        return cgh_limiteddiscrepencysearch(instance, parameters);
+        return columngenerationheuristic_limiteddiscrepancysearch(instance, parameters);
 
     } else {
-        std::cerr << "\033[31m" << "ERROR, unknown algorithm: " << algorithm_argv[0] << "\033[0m" << std::endl;
+        std::cerr << "\033[31m" << "ERROR, unknown algorithm: '" << algorithm_argv[0] << "'.\033[0m" << std::endl;
         assert(false);
         return Output(instance, info);
     }

@@ -52,7 +52,7 @@ Instance::Instance(std::string filepath, std::string format): name_(filepath)
     } else if (format == "standard") {
         read_standard(file);
     } else {
-        std::cerr << "ERROR, instance format unknown: " << format << std::endl;
+        std::cerr << "\033[31m" << "ERROR, unknown instance format \"" << format << "\"" << "\033[0m" << std::endl;
     }
 
     file.close();

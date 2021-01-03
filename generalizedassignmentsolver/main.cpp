@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
     }
     try {
         po::notify(vm);
-    } catch (po::required_option e) {
+    } catch (const po::required_option& e) {
         std::cout << desc << std::endl;;
         return 1;
     }
@@ -68,8 +68,8 @@ int main(int argc, char *argv[])
         .set_loglevelmax(loglevelmax)
         ;
 
-    VER(info, "Items:   " << instance.item_number() << std::endl);
     VER(info, "Agents:  " << instance.agent_number() << std::endl);
+    VER(info, "Items:   " << instance.item_number() << std::endl);
 
     run(algorithm, instance, initial_solution, gen, info);
 

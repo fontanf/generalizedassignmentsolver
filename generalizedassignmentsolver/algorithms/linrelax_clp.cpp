@@ -20,6 +20,9 @@ LinRelaxClpOutput generalizedassignmentsolver::linrelax_clp(const Instance& inst
 {
     VER(info, "*** linrelax_clp ***" << std::endl);
 
+    ItemIdx  n = instance.item_number();
+    AgentIdx m = instance.agent_number();
+
     LinRelaxClpOutput output(instance, info);
 
     CoinLP mat(instance);
@@ -39,10 +42,11 @@ LinRelaxClpOutput generalizedassignmentsolver::linrelax_clp(const Instance& inst
     // Get solution
     Cost lb = std::ceil(model.getObjValue() - TOL);
     output.update_lower_bound(lb, std::stringstream(""), info);
-    output.x = std::vector<double>(instance.alternative_number(), 0);
+    output.x.resize(n, std::vector<double>(m));
     const double *solution = model.getColSolution();
-    for (AltIdx k = 0; k < instance.alternative_number(); ++k)
-        output.x[k] = solution[k];
+    for (ItemIdx j = 0; j < n; ++j)
+        for (AgentIdx i = 0; i < m; ++i)
+            output.x[i][j] = solution[m * j + i];
 
     return output.algorithm_end(info);
 }

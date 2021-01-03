@@ -21,7 +21,7 @@ This problem is interesting because many different optimization methods can and 
   - solved with volume method `-a lagrelax_assignment_volume` :heavy_check_mark:
   - solved with L-BFGS method `-a lagrelax_assignment_lbfgs` :heavy_check_mark:
 
-- Column generation `-a "columngeneration --lp-solver clp"` :heavy_check_mark: `-a "columngeneration --lp-solver cplex"` :heavy_check_mark:
+- Column generation `-a "columngeneration --linear-programming-solver clp"` :heavy_check_mark: `-a "columngeneration --linear-programming-solver cplex"` :heavy_check_mark:
 
 ### Upper bounds
 
@@ -38,8 +38,8 @@ Classical local search algorithms based on the shift-swap neighborhood:
 
 Tree search algorithms based on the Dantzig-Wolfe reformulation branching scheme (i.e. column generation heuristics) inspired by "Primal Heuristics for Branch and Price: The Assets of
 Diving Methods" (Sadykov et al., 2019):
-- Greedy `-a "cgh_greedy --lp-solver cplex"` :heavy_check_mark:
-- Limited discrepency search `-a "cgh_limiteddiscrepencysearch --lp-solver cplex"` :heavy_check_mark:
+- Greedy `-a "columngenerationheuristic_greedy --linear-programming-solver cplex"` :heavy_check_mark:
+- Limited discrepency search `-a "columngenerationheuristic_limiteddiscrepancysearch --linear-programming-solver cplex"` :heavy_check_mark:
 
 Others heuristics:
 - Random feasible solution found with a Local search `-a random` :heavy_check_mark:
@@ -51,11 +51,6 @@ Others heuristics:
   - with CBC `-a branchandcut_cbc` :heavy_check_mark:
   - with CPLEX `-a branchandcut_cplex` :heavy_check_mark:
   - with Gurobi `-a branchandcut_gurobi` :heavy_check_mark:
-
-- Branch-and-price
-  - `-a "branchandprice --lp-solver cplex --tree-search-algorithm bfs --branching-rule most-fractional"` :heavy_check_mark:
-  - `-a "branchandprice --lp-solver cplex --tree-search-algorithm dfs --branching-rule most-integer"` :heavy_check_mark:
-  - `-a "branchandprice --lp-solver cplex --tree-search-algorithm lds --branching-rule most-integer"` :heavy_check_mark:
 
 - Constraint programming
   - with Gecode `-a constraintprogramming_gecode` :heavy_check_mark:

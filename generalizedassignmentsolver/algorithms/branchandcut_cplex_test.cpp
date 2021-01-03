@@ -5,21 +5,21 @@
 
 using namespace generalizedassignmentsolver;
 
-Output branchandcut_cplex_test(Instance& ins)
+Output branchandcut_cplex_test(Instance& instance)
 {
     Info info = Info()
         .set_verbose(true)
         ;
-    BranchAndCutCplexOptionalParameters p;
-    p.info = info;
-    return branchandcut_cplex(ins, p);
+    BranchAndCutCplexOptionalParameters parameters;
+    parameters.info = info;
+    return branchandcut_cplex(instance, parameters);
 }
 
-std::vector<Output (*)(Instance&)> f = {
+std::vector<Output (*)(Instance&)> branchandcut_cplex_tests = {
         branchandcut_cplex_test,
 };
 
-TEST(BranchAndCutCplex, TEST) { test(TEST, f, SOPT); }
+TEST(BranchAndCutCplex, TEST) { test(TEST, branchandcut_cplex_tests, SOPT); }
 
 #endif
 

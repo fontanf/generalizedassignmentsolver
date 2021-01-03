@@ -5,17 +5,17 @@
 
 using namespace generalizedassignmentsolver;
 
-Output constraintprogramming_gecode_test(Instance& ins)
+Output constraintprogramming_gecode_test(Instance& instance)
 {
-    ConstraintProgrammingGecodeOptionalParameters p;
-    return constraintprogramming_gecode(ins, p);
+    ConstraintProgrammingGecodeOptionalParameters parameters;
+    return constraintprogramming_gecode(instance, parameters);
 }
 
 std::vector<Output (*)(Instance&)> f = {
         constraintprogramming_gecode_test,
 };
 
-TEST(BranchAndCutCbc, TEST) { test(TEST, f, SOPT); }
+TEST(ConstraintProgrammingGecode, TEST) { test(TEST, f, SOPT); }
 
 #endif
 

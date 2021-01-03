@@ -8,7 +8,6 @@
 #include "coin/CbcHeuristicDiveVectorLength.hpp"
 #include "coin/CbcLinked.hpp"
 #include "coin/CbcHeuristicGreedy.hpp"
-#include "coin/CbcHeuristicFPumparameters.hpp"
 #include "coin/CbcHeuristicLocal.hpp"
 #include "coin/CbcHeuristic.hpp"
 #include "coin/CbcHeuristicRINS.hpp"
@@ -118,16 +117,20 @@ CbcEventHandler::CbcAction SolHandler::event(CbcEvent whichEvent)
     if ((whichEvent != solution && whichEvent != heuristicSolution)) // no solution found
         return noAction;
 
+    ItemIdx  n = instance_.item_number();
+    AgentIdx m = instance_.agent_number();
+
     OsiSolverInterface *origSolver = model_->solver();
     const OsiSolverInterface *pps = model_->postProcessedSolver(1);
     const OsiSolverInterface *solver = pps? pps: origSolver;
 
     if (!output_.solution.feasible() || output_.solution.cost() > solver->getObjValue() + 0.5) {
-        const double *solution = solver->getColSolution();
+        const double *solution_cbc = solver->getColSolution();
         Solution solution(instance_);
-        for (AltIdx k = 0; k < instance_.alternative_number(); ++k)
-            if (solution[k] > 0.5)
-                solution.set(k);
+        for (ItemIdx j = 0; j < n; ++j)
+            for (AgentIdx i = 0; i < m; ++i)
+                if (solution_cbc[m * j + i] > 0.5)
+                    solution.set(j, i);
         output_.update_solution(solution, std::stringstream(""), parameters_.info);
     }
 
@@ -142,14 +145,15 @@ CoinLP::CoinLP(const Instance& instance)
     AgentIdx m = instance.agent_number();
 
     // Variables
-    int col_number = instance.alternative_number();
+    int col_number = m * n;
     col_lower.resize(col_number, 0);
     col_upper.resize(col_number, 1);
 
     // Objective
     objective = std::vector<double>(col_number);
-    for (AltIdx k = 0; k < col_number; ++k)
-        objective[k] = instance.alternative(k).c;
+    for (AgentIdx i = 0; i < m; ++i)
+        for (ItemIdx j = 0; j < n; ++j)
+            objective[m * j + i] = instance.cost(j, i);
 
     // Constraints
     int row_number = 0; // will be increased each time we add a constraint
@@ -168,7 +172,7 @@ CoinLP::CoinLP(const Instance& instance)
         // Add elements
         for (AgentIdx i = 0; i < m; ++i) {
             elements.push_back(1);
-            element_columns.push_back(instance.alternative_index(j, i));
+            element_columns.push_back(m * j + i);
             number_of_elements_in_rows.back()++;
         }
         // Add row bounds
@@ -185,8 +189,8 @@ CoinLP::CoinLP(const Instance& instance)
         row_number++;
         // Add row elements
         for (ItemIdx j = 0; j < n; ++j) {
-            elements.push_back(instance.alternative(j, i).w);
-            element_columns.push_back(instance.alternative_index(j, i));
+            elements.push_back(instance.weight(j, i));
+            element_columns.push_back(m * j + i);
             number_of_elements_in_rows.back()++;
         }
         // Add row bounds
@@ -211,6 +215,7 @@ BranchAndCutCbcOutput generalizedassignmentsolver::branchandcut_cbc(
     BranchAndCutCbcOutput output(instance, parameters.info);
 
     ItemIdx n = instance.item_number();
+    AgentIdx m = instance.agent_number();
     if (n == 0)
         return output.algorithm_end(parameters.info);
 
@@ -227,8 +232,9 @@ BranchAndCutCbcOutput generalizedassignmentsolver::branchandcut_cbc(
               mat.objective.data(), mat.row_lower.data(), mat.row_upper.data());
 
     // Mark integer
-    for (AltIdx k = 0; k < instance.alternative_number(); ++k)
-        solver1.setInteger(k);
+    for (ItemIdx j = 0; j < n; ++j)
+        for (AgentIdx i = 0; i < m; ++i)
+            solver1.setInteger(m * j + i);
 
     // Pass data and solver to CbcModel
     CbcModel model(solver1);
@@ -311,12 +317,13 @@ BranchAndCutCbcOutput generalizedassignmentsolver::branchandcut_cbc(
     model.setMaximumSeconds(parameters.info.remaining_time());
 
     // Add initial solution
-    std::vector<double> sol_init(instance.alternative_number(), 0);
+    std::vector<double> sol_init(m * n, 0);
     if (parameters.initial_solution != NULL && parameters.initial_solution->feasible()) {
-        for (AltIdx k = 0; k < instance.alternative_number(); ++k)
-            if (parameters.initial_solution->agent(instance.alternative(k).j) == instance.alternative(k).i)
-                sol_init[k] = 1;
-        model.setBestSolution(sol_init.data(), instance.alternative_number(), parameters.initial_solution->cost());
+        for (ItemIdx j = 0; j < n; ++j)
+            for (AgentIdx i = 0; i < m; ++i)
+                if (parameters.initial_solution->agent(j) == i)
+                    sol_init[m * j + i] = 1;
+        model.setBestSolution(sol_init.data(), m * n, parameters.initial_solution->cost());
     }
 
     // Stop af first improvment
@@ -330,21 +337,23 @@ BranchAndCutCbcOutput generalizedassignmentsolver::branchandcut_cbc(
         output.update_lower_bound(instance.bound(), std::stringstream(""), parameters.info);
     } else if (model.isProvenOptimal()) {
         if (!output.solution.feasible() || output.solution.cost() > model.getObjValue() + 0.5) {
-            const double *solution = model.solver()->getColSolution();
+            const double *solution_cbc = model.solver()->getColSolution();
             Solution solution(instance);
-            for (AltIdx k = 0; k < instance.alternative_number(); ++k)
-                if (solution[k] > 0.5)
-                    solution.set(k);
+            for (ItemIdx j = 0; j < n; ++j)
+                for (AgentIdx i = 0; i < m; ++i)
+                    if (solution_cbc[m * j + i] > 0.5)
+                        solution.set(j, i);
             output.update_solution(solution, std::stringstream(""), parameters.info);
         }
         output.update_lower_bound(output.solution.cost(), std::stringstream(""), parameters.info);
     } else if (model.bestSolution() != NULL) {
         if (!output.solution.feasible() || output.solution.cost() > model.getObjValue() + 0.5) {
-            const double *solution = model.solver()->getColSolution();
+            const double *solution_cbc = model.solver()->getColSolution();
             Solution solution(instance);
-            for (AltIdx k = 0; k < instance.alternative_number(); ++k)
-                if (solution[k] > 0.5)
-                    solution.set(k);
+            for (ItemIdx j = 0; j < n; ++j)
+                for (AgentIdx i = 0; i < m; ++i)
+                    if (solution_cbc[m * j + i] > 0.5)
+                        solution.set(j, i);
             output.update_solution(solution, std::stringstream(""), parameters.info);
         }
         Cost lb = std::ceil(model.getBestPossibleObjValue() - TOL);

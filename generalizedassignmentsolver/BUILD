@@ -57,7 +57,6 @@ cc_binary(
         srcs = ["main.cpp"],
         deps = [
                 "//generalizedassignmentsolver/algorithms:algorithms",
-                "@boost//:program_options",
         ],
         data = ["//data:data"],
 )

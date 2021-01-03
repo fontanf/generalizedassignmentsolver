@@ -5,17 +5,17 @@
 
 using namespace generalizedassignmentsolver;
 
-Output constraintprogramming_cplex_test(Instance& ins)
+Output constraintprogramming_cplex_test(Instance& instance)
 {
-    ConstraintProgrammingCplexOptionalParameters p;
-    return constraintprogramming_cplex(ins, p);
+    ConstraintProgrammingCplexOptionalParameters parameters;
+    return constraintprogramming_cplex(instance, parameters);
 }
 
-std::vector<Output (*)(Instance&)> f = {
+std::vector<Output (*)(Instance&)> constraintprogramming_cplex_tests = {
         constraintprogramming_cplex_test,
 };
 
-TEST(MILP, TEST) { test(TEST, f, SOPT); }
+TEST(MILP, TEST) { test(TEST, constraintprogramming_cplex_tests, SOPT); }
 
 #endif
 

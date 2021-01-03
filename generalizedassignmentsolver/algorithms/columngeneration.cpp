@@ -2,300 +2,292 @@
 
 using namespace generalizedassignmentsolver;
 
+/**
+ * The linear programming formulation of the Generalized Assignment Problem
+ * based on Dantzig–Wolfe decomposition is written as follows:
+ *
+ * Variables:
+ * - yᵢᵏ ∈ {0, 1} representing a set of items for agent i.
+ *   yᵢᵏ = 1 iff the corresponding set of items is assigned to agent i.
+ *   xⱼᵢᵏ = 1 iff yᵢᵏ contains item j, otherwise 0.
+ *
+ * Program:
+ *
+ * min ∑ᵢ ∑ₖ (∑ⱼ cᵢⱼ xⱼᵢᵏ) yᵢᵏ
+ *                                      Note that (∑ⱼ cᵢⱼ xⱼᵏ) is a constant.
+ *
+ * 0 <= ∑ₖ yᵢᵏ <= 1      for all agents i
+ *                          (not more than 1 packing selected for each agent)
+ *                                                         Dual variables: uᵢ
+ * 1 <= ∑ₖ xⱼᵢᵏ yᵢᵏ <= 1  for all items j
+ *                                          (each item selected exactly once)
+ *                                                         Dual variables: vⱼ
+ *
+ * The pricing problem consists in finding a variable of negative reduced cost.
+ * The reduced cost of a variable yᵏ is given by:
+ * rc(yᵢᵏ) = ∑ⱼ cᵢⱼ xⱼᵢᵏ - uᵢ - ∑ⱼ xⱼᵢᵏ vⱼ
+ *         = - ∑ⱼ (vⱼ - cᵢⱼ) xⱼᵢᵏ - uᵢ
+ *
+ * Therefore, finding a variable of minium reduced cost reduces to solving
+ * m Knapsack Problems with items with profit (vⱼ - cᵢⱼ).
+ *
+ */
+
 ColumnGenerationOutput& ColumnGenerationOutput::algorithm_end(Info& info)
 {
-    PUT(info, "Algorithm", "Iterations", it);
+    PUT(info, "Algorithm", "Iterations", iteration_number);
     PUT(info, "Algorithm", "AddedColumns", added_column_number);
     Output::algorithm_end(info);
-    VER(info, "Iterations: " << it << std::endl);
+    VER(info, "Iterations: " << iteration_number << std::endl);
     VER(info, "Added columns: " << added_column_number << std::endl);
     return *this;
 }
 
-void add_column(const Instance& instance,
-        ColumnGenerationOptionalParameters& parameters,
-        optimizationtools::ColumnGenerationSolver& solver,
-        std::vector<std::vector<std::vector<ItemIdx>>>* columns,
-        AgentIdx i,
-        ColIdx col_idx,
-        std::vector<std::pair<AgentIdx, ColIdx>>& col_indices,
-        const std::vector<int>& agent_rows,
-        const std::vector<int>& item_rows)
+ColumnGenerationHeuristicGreedyOutput& ColumnGenerationHeuristicGreedyOutput::algorithm_end(Info& info)
 {
-    std::vector<RowIdx> row_indices;
-    row_indices.push_back(agent_rows[i]);
-    Cost c = 0;
-    Weight w = 0;
-    Weight t = instance.capacity(i);
-
-    std::vector<ItemIdx> column = (*columns)[i][col_idx];
-    if (column.size() > 0) {
-        for (ItemIdx j2 = 0; j2 < column[0]; ++j2) {
-            if (parameters.fixed_alt != NULL && (*parameters.fixed_alt)[j2][i] == 1)
-                return;
-        }
-    }
-    for (auto it = column.begin(); it != column.end(); ++it) {
-        ItemIdx j = *it;
-        // Check fixed variables
-        if (parameters.fixed_alt != NULL && (*parameters.fixed_alt)[j][i] == 0)
-            return;
-        ItemIdx j_suiv = (std::next(it) == column.end())? instance.item_number(): *std::next(it);
-        for (ItemIdx j2 = j + 1; j2 < j_suiv; ++j2) {
-            if (parameters.fixed_alt != NULL && (*parameters.fixed_alt)[j2][i] == 1)
-                return;
-        }
-        if (item_rows[j] == -1) {
-            t -= instance.weight(j, i);
-            continue;
-        }
-
-        c += instance.cost(j, i);
-        w += instance.weight(j, i);
-        row_indices.push_back(item_rows[j]);
-    }
-    col_indices.push_back({i, col_idx});
-
-    //if (i == 8 || i == 9) {
-        //std::cout << "add_column i " << i << " c " << c << " items ";
-        //for (ItemIdx j: (*columns)[i][col_idx])
-            //std::cout << j << " ";
-        //std::cout << std::endl;
-    //}
-    solver.add_column(row_indices, std::vector<double>(row_indices.size(), 1), c);
+    Output::algorithm_end(info);
+    return *this;
 }
+
+ColumnGenerationHeuristicLimitedDiscrepancySearchOutput& ColumnGenerationHeuristicLimitedDiscrepancySearchOutput::algorithm_end(Info& info)
+{
+    Output::algorithm_end(info);
+    return *this;
+}
+
+class PricingSolver: public columngenerationsolver::PricingSolver
+{
+
+public:
+
+    PricingSolver(const Instance& instance):
+        instance_(instance),
+        fixed_items_(instance.item_number()),
+        fixed_agents_(instance.agent_number())
+    {  }
+
+    virtual void initialize_pricing(
+            const std::vector<Column>& columns,
+            const std::vector<std::pair<ColIdx, Value>>& fixed_columns);
+
+    virtual std::vector<Column> solve_pricing(
+            const std::vector<Value>& duals);
+
+private:
+
+    const Instance& instance_;
+
+    std::vector<int8_t> fixed_items_;
+    std::vector<int8_t> fixed_agents_;
+
+    std::vector<ItemIdx> kp2gap_;
+
+};
+
+columngenerationsolver::Parameters get_parameters(
+        const Instance& instance,
+        columngenerationsolver::LinearProgrammingSolver linear_programming_solver)
+{
+    AgentIdx m = instance.agent_number();
+    ItemIdx n = instance.item_number();
+    columngenerationsolver::Parameters p(m + n);
+
+    p.objective_sense = columngenerationsolver::ObjectiveSense::Min;
+    p.column_lower_bound = 0;
+    p.column_upper_bound = 1;
+    // Row lower bounds.
+    std::fill(p.row_lower_bounds.begin(), p.row_lower_bounds.begin() + m, 0);
+    std::fill(p.row_lower_bounds.begin() + m, p.row_lower_bounds.end(), 1);
+    // Row upper bounds.
+    std::fill(p.row_upper_bounds.begin(), p.row_upper_bounds.begin() + m, 1);
+    std::fill(p.row_upper_bounds.begin() + m, p.row_upper_bounds.end(), 1);
+    // Row coefficent lower bounds.
+    std::fill(p.row_coefficient_lower_bounds.begin(), p.row_coefficient_lower_bounds.end(), 0);
+    // Row coefficent upper bounds.
+    std::fill(p.row_coefficient_upper_bounds.begin(), p.row_coefficient_upper_bounds.end(), 1);
+    // Dummy column objective coefficient.
+    p.dummy_column_objective_coefficient = instance.bound();
+    // Pricing solver.
+    p.pricing_solver = std::unique_ptr<columngenerationsolver::PricingSolver>(
+            new PricingSolver(instance));
+    p.linear_programming_solver = linear_programming_solver;
+    return p;
+}
+
+Solution columns2solution(
+        const Instance& instance,
+        const std::vector<Column>& columns,
+        const std::vector<std::pair<ColIdx, Value>>& column_solution)
+{
+    AgentIdx m = instance.agent_number();
+    Solution solution(instance);
+    for (auto pair: column_solution) {
+        ColIdx col_idx = pair.first;
+        Value value = pair.second;
+        if (value < 0.5)
+            continue;
+        const Column& column = columns[col_idx];
+        AgentIdx i = 0;
+        for (RowIdx row_pos = 0; row_pos < (RowIdx)column.row_indices.size(); ++row_pos)
+            if (column.row_indices[row_pos] < m && column.row_coefficients[row_pos] > 0.5)
+                i = column.row_indices[row_pos];
+        for (RowIdx row_pos = 0; row_pos < (RowIdx)column.row_indices.size(); ++row_pos)
+            if (column.row_indices[row_pos] >= m && column.row_coefficients[row_pos] > 0.5)
+                solution.set(column.row_indices[row_pos] - m, i);
+    }
+    return solution;
+}
+
+void PricingSolver::initialize_pricing(
+            const std::vector<Column>& columns,
+            const std::vector<std::pair<ColIdx, Value>>& fixed_columns)
+{
+    std::fill(fixed_items_.begin(), fixed_items_.end(), -1);
+    std::fill(fixed_agents_.begin(), fixed_agents_.end(), -1);
+    for (auto p: fixed_columns) {
+        const Column& column = columns[p.first];
+        Value value = p.second;
+        if (value < 0.5)
+            continue;
+        for (RowIdx row_pos = 0; row_pos < (RowIdx)column.row_indices.size(); ++row_pos) {
+            RowIdx row_index = column.row_indices[row_pos];
+            Value row_coefficient = column.row_coefficients[row_pos];
+            if (row_coefficient < 0.5)
+                continue;
+            if (row_index < instance_.agent_number()) {
+                fixed_agents_[row_index] = 1;
+            } else {
+                fixed_items_[row_index - instance_.agent_number()] = 1;
+            }
+        }
+    }
+}
+
+std::vector<Column> PricingSolver::solve_pricing(
+            const std::vector<Value>& duals)
+{
+    AgentIdx m = instance_.agent_number();
+    ItemIdx n = instance_.item_number();
+    std::vector<Column> columns;
+    knapsacksolver::Profit mult = 10000;
+    for (AgentIdx i = 0; i < instance_.agent_number(); ++i) {
+        if (fixed_agents_[i] == 1)
+            continue;
+        // Build knapsack instance.
+        knapsacksolver::Instance instance_kp;
+        instance_kp.set_capacity(instance_.capacity(i));
+        kp2gap_.clear();
+        for (ItemIdx j = 0; j < n; ++j) {
+            if (fixed_items_[j] == 1)
+                continue;
+            knapsacksolver::Profit profit = std::floor(mult * duals[m + j])
+                    - std::ceil(mult * instance_.cost(j, i));
+            if (profit <= 0 || instance_.weight(j, i) > instance_.capacity(i))
+                continue;
+            instance_kp.add_item(instance_.weight(j, i), profit);
+            kp2gap_.push_back(j);
+        }
+
+        // Solve knapsack instance.
+        auto output_kp = knapsacksolver::minknap(instance_kp);
+
+        // Retrieve column.
+        Column column;
+        column.row_indices.push_back(i);
+        column.row_coefficients.push_back(1);
+        for (knapsacksolver::ItemIdx j = 0; j < instance_kp.item_number(); ++j) {
+            if (output_kp.solution.contains_idx(j)) {
+                column.row_indices.push_back(m + kp2gap_[j]);
+                column.row_coefficients.push_back(1);
+                column.objective_coefficient += instance_.cost(kp2gap_[j], i);
+            }
+        }
+        columns.push_back(column);
+    }
+    return columns;
+}
+
+/******************************************************************************/
 
 ColumnGenerationOutput generalizedassignmentsolver::columngeneration(
         const Instance& instance, ColumnGenerationOptionalParameters parameters)
 {
-    VER(parameters.info, "*** columngeneration --lp-solver " << parameters.lp_solver << " ***" << std::endl);
+    VER(parameters.info, "*** columngeneration"
+            << " --linear-programming-solver " << parameters.linear_programming_solver
+            << " ***" << std::endl);
     ColumnGenerationOutput output(instance, parameters.info);
 
-    ItemIdx n = instance.item_number();
-    AgentIdx m = instance.agent_number();
+    columngenerationsolver::Parameters p = get_parameters(
+            instance, parameters.linear_programming_solver);
+    columngenerationsolver::ColumnGenerationOptionalParameters op;
+    op.info.set_timelimit(parameters.info.remaining_time());
+    auto columngeneration_output = columngenerationsolver::columngeneration(p, op);
 
-    // Handle fixed variables and fixed agents.
-    std::vector<int> agent_row(m, -2);
-    int row_idx = 0;
-    for (AgentIdx i = 0; i < m; ++i) {
-        if (parameters.fixed_agents != NULL && (*parameters.fixed_agents)[i] == 1)
-            continue;
-        agent_row[i] = row_idx;
-        row_idx++;
-    }
-    AgentIdx agent_constraint_number = row_idx;
-
-    Cost c0 = 0;
-    std::vector<int> item_row(n, -2);
-    for (ItemIdx j = 0; j < n; ++j) {
-        for (AgentIdx i = 0; i < m; ++i) {
-            if (parameters.fixed_alt != NULL && (*parameters.fixed_alt)[j][i] == 1) {
-                c0 += instance.cost(j, i);
-                item_row[j] = -1;
-                break;
-            }
-        }
-        if (item_row[j] == -2) {
-            item_row[j] = row_idx;
-            row_idx++;
-        }
-    }
-    ItemIdx item_constraint_number = row_idx - agent_constraint_number;
-
-    std::vector<optimizationtools::ColumnGenerationSolver::Value> row_lower_bounds;
-    std::vector<optimizationtools::ColumnGenerationSolver::Value> row_upper_bounds;
-    for (AgentPos i = 0; i < agent_constraint_number; ++i) {
-        row_lower_bounds.push_back(0);
-        row_upper_bounds.push_back(1);
-    }
-    for (ItemPos j = 0; j < item_constraint_number; ++j) {
-        row_lower_bounds.push_back(1);
-        row_upper_bounds.push_back(item_constraint_number);
-    }
-
-    // Initialize solver
-    std::unique_ptr<optimizationtools::ColumnGenerationSolver> solver = NULL;
-#if CPLEX_FOUND
-    if (parameters.lp_solver == "cplex")
-        solver = std::unique_ptr<optimizationtools::ColumnGenerationSolver>(
-                new optimizationtools::ColumnGenerationSolverCplex(
-                    row_lower_bounds, row_upper_bounds));
-#endif
-#if COINOR_FOUND
-    if (parameters.lp_solver == "clp")
-        solver = std::unique_ptr<optimizationtools::ColumnGenerationSolver>(
-                new optimizationtools::ColumnGenerationSolverClp(
-                    row_lower_bounds, row_upper_bounds));
-#endif
-    if (solver == NULL)
-        return output.algorithm_end(parameters.info);
-
-    // KP utils
-    knapsacksolver::Instance instance_kp;
-    // indices[j] == -2: item j is not in KP but belong to the column.
-    //            == -1: item j is not in KP and does not belong to the column.
-    //            >=  0: item j is the item of index indices[j] in KP.
-    std::vector<knapsacksolver::ItemIdx> indices(n);
-    std::vector<knapsacksolver::Weight> capacities_kp(m);
-    for (AgentIdx i = 0; i < m; ++i) {
-        capacities_kp[i] = instance.capacity(i);
-        for (ItemIdx j = 0; j < n; ++j) {
-            if (parameters.fixed_alt != NULL && (*parameters.fixed_alt)[j][i] == 1)
-                capacities_kp[i] -= instance.weight(j, i);
-        }
-        if (capacities_kp[i] < 0)
-            std::cout << "ERROR i " << i << " c " << capacities_kp[i] << std::endl;
-    }
-
-    // Add initial columns
-    std::vector<RowIdx> rows(item_constraint_number);
-    std::iota(rows.begin(), rows.end(), agent_constraint_number);
-    solver->add_column(
-            rows,
-            std::vector<optimizationtools::ColumnGenerationSolver::Value>(rows.size(), 1),
-            10 * instance.bound());
-    output.column_indices.push_back({-1, -1});
-
-    std::vector<std::vector<std::vector<ItemIdx>>>* columns;
-    if (parameters.columns == NULL) {
-        output.columns.resize(m);
-        columns = &output.columns;
-    } else {
-        columns = parameters.columns;
-        for (AgentIdx i = 0; i < m; ++i) {
-            if (parameters.fixed_agents != NULL && (*parameters.fixed_agents)[i] == 1)
-                continue;
-            for (ColIdx col_idx = 0; col_idx < (ColIdx)(*columns)[i].size(); ++col_idx)
-                add_column(instance, parameters, *solver, columns, i, col_idx, output.column_indices, agent_row, item_row);
-        }
-    }
-
-    bool found = true;
-    Weight mult = 100000;
-    while (found) {
-        output.it++;
-
-        // Check time
-        if (!parameters.info.check_time())
-            break;
-
-        // Solve LP
-        solver->solve();
-        VER(parameters.info,
-                "It " << std::setw(8) << output.it
-                << " | T " << std::setw(10) << parameters.info.elapsed_time()
-                << " | C " << std::setw(10) << c0 + solver->objective()
-                << " | COL " << std::setw(10) << output.added_column_number
-                << std::endl);
-
-        // Find and add new columns
-        found = false;
-        for (AgentIdx i = 0; i < m; ++i) {
-            if (agent_row[i] < 0)
-                continue;
-
-            // uᵢ: dual value associated with agent constraints (uᵢ ≤ 0).
-            // vⱼ: dual value associated with item constraints.
-            // xᵢⱼᵏ = 1 if yᵢᵏ contains item j
-            //      = 0 otherwise
-            // Reduced cost rcᵢᵏ = ∑ⱼ xᵢⱼᵏ cᵢⱼ - (uᵢ + ∑ⱼ xᵢⱼᵏ vⱼ)
-            //                   = ∑ⱼ xᵢⱼᵏ (cᵢⱼ - vⱼ) - uᵢ
-            // The algorithm that solves KP takes positive integers as input.
-            // * positive => the profit in KP are vⱼ - cᵢⱼ and its optimum is
-            //   > 0.
-            // * integers => we round down the profits to get an upper bound of
-            //   the minimum reduced cost.
-            // We need an upper bound on the minimum reduced cost in order to
-            // know when to stoparameters.
-            // At the end, we will need a lower bound on the minimum reduced
-            // cost in order to compute the bound.
-            // Upper bound on the reduced cost rcubᵢᵏ = - opt(KPfloor) + ⌈-uᵢ⌉
-            // Lower bound on the reduced cost rclbᵢᵏ = - opt(KPceil)  + ⌊-uᵢ⌋
-
-            instance_kp.clear();
-            instance_kp.set_capacity(capacities_kp[i]);
-            Cost rc_ub = std::ceil((mult * (- solver->dual(agent_row[i]))));
-            ItemIdx j_kp = 0;
-            for (ItemIdx j = 0; j < n; ++j) {
-                if (parameters.fixed_alt != NULL && (*parameters.fixed_alt)[j][i] == 1) {
-                    indices[j] = -2;
-                    continue;
-                }
-                if ((parameters.fixed_alt != NULL && (*parameters.fixed_alt)[j][i] == 0)) {
-                    indices[j] = -1;
-                    continue;
-                }
-                knapsacksolver::Profit profit = std::floor(mult * solver->dual(item_row[j]))
-                    - std::ceil(mult * instance.cost(j, i));
-                if (profit <= 0 || instance.weight(j, i) > capacities_kp[i]) {
-                    indices[j] = -1;
-                    continue;
-                }
-                instance_kp.add_item(instance.weight(j, i), profit);
-                indices[j] = j_kp;
-                j_kp++;
-            }
-            auto output_kp = knapsacksolver::minknap(instance_kp);
-            rc_ub -= output_kp.solution.profit();
-            //std::cout << "i " << i << " rc_ub " << rc_ub << " opt(kp) " << output_kp.solution.profit() << " vi " << (Cost)std::ceil((mult * (- dual_sol[agent_row[i]]))) << std::endl;
-            if (rc_ub >= 0)
-                continue;
-
-            found = true;
-            (*columns)[i].push_back({});
-            for (ItemIdx j = 0; j < n; ++j)
-                if (indices[j] == -2
-                        || (indices[j] >= 0 && output_kp.solution.contains_idx(indices[j])))
-                    (*columns)[i].back().push_back(j);
-            add_column(instance, parameters, *solver, columns, i, (*columns)[i].size() - 1, output.column_indices, agent_row, item_row);
-            output.added_column_number++;
-        }
-    }
-
-    // Compute the bound
-    // Solve LP
-    solver->solve();
-
-    Cost lb = std::floor(mult * solver->objective());
-    for (AgentIdx i = 0; i < m; ++i) {
-        if (agent_row[i] < 0)
-            continue;
-        instance_kp.clear();
-        instance_kp.set_capacity(capacities_kp[i]);
-        Cost rc_lb = std::floor((mult * (- solver->dual(agent_row[i]))));
-        for (ItemIdx j = 0; j < n; ++j) {
-            if (parameters.fixed_alt != NULL && (*parameters.fixed_alt)[j][i] == 1)
-                continue;
-            if (parameters.fixed_alt != NULL && (*parameters.fixed_alt)[j][i] == 0)
-                continue;
-            knapsacksolver::Profit profit = std::ceil(mult * solver->dual(item_row[j]))
-                - std::floor(mult * instance.cost(j, i));
-            if (profit <= 0 || instance.weight(j, i) > capacities_kp[i])
-                continue;
-            instance_kp.add_item(instance.weight(j, i), profit);
-        }
-        auto output_kp = knapsacksolver::minknap(instance_kp);
-        rc_lb -= output_kp.solution.profit();
-        lb += rc_lb;
-        //std::cout << rc_lb << std::endl;
-    }
-
-    lb = c0 + std::ceil((double)lb / mult);
-    output.update_lower_bound(lb, std::stringstream(""), parameters.info);
-
-    // Compute x
-    output.solution.resize(solver->column_number());
-    for (ColIdx col = 0; col < solver->column_number(); ++col)
-        output.solution[col] = solver->primal(col);
-    for (ItemIdx j = 0; j < n; ++j)
-        output.x.push_back(std::vector<double>(instance.agent_number(), 0));
-    for (ColIdx col_idx = 1; col_idx < (int)output.column_indices.size(); ++col_idx) {
-        AgentIdx i       = output.column_indices[col_idx].first;
-        ColIdx col_idx_2 = output.column_indices[col_idx].second;
-        for (ItemIdx j: (*columns)[i][col_idx_2])
-            output.x[j][i] += output.solution[col_idx];
-    }
-
+    output.update_lower_bound(
+            std::ceil(columngeneration_output.solution_value - TOL),
+            std::stringstream(""),
+            parameters.info);
+    output.added_column_number = columngeneration_output.added_column_number;
+    output.iteration_number = columngeneration_output.iteration_number;
     return output.algorithm_end(parameters.info);
 }
 
+ColumnGenerationHeuristicGreedyOutput generalizedassignmentsolver::columngenerationheuristic_greedy(
+        const Instance& instance, ColumnGenerationOptionalParameters parameters)
+{
+    VER(parameters.info, "*** columngenerationheuristic_greedy"
+            << " --linear-programming-solver " << parameters.linear_programming_solver
+            << " ***" << std::endl);
+    ColumnGenerationHeuristicGreedyOutput output(instance, parameters.info);
+
+    columngenerationsolver::Parameters p = get_parameters(
+            instance, parameters.linear_programming_solver);
+    columngenerationsolver::GreedyOptionalParameters op;
+    op.info.set_timelimit(parameters.info.remaining_time());
+    auto output_greedy = columngenerationsolver::greedy(p, op);
+
+    output.update_lower_bound(
+            std::ceil(output_greedy.bound - TOL),
+            std::stringstream(""),
+            parameters.info);
+    if (output_greedy.solution.size() > 0)
+        output.update_solution(
+                columns2solution(instance, p.columns, output_greedy.solution),
+                std::stringstream(""),
+                parameters.info);
+    return output.algorithm_end(parameters.info);
+}
+
+ColumnGenerationHeuristicLimitedDiscrepancySearchOutput generalizedassignmentsolver::columngenerationheuristic_limiteddiscrepancysearch(
+        const Instance& instance, ColumnGenerationOptionalParameters parameters)
+{
+    VER(parameters.info, "*** columngenerationheuristic_limiteddiscrepancysearch"
+            << " --linear-programming-solver " << parameters.linear_programming_solver
+            << " ***" << std::endl);
+    ColumnGenerationHeuristicLimitedDiscrepancySearchOutput output(instance, parameters.info);
+
+    columngenerationsolver::Parameters p = get_parameters(
+            instance, parameters.linear_programming_solver);
+    columngenerationsolver::LimitedDiscrepancySearchOptionalParameters op;
+    op.new_bound_callback = [&instance, &parameters, &p, &output](
+                const columngenerationsolver::LimitedDiscrepancySearchOutput& o)
+        {
+            std::stringstream ss;
+            ss << "node " << o.node_number;
+            if (o.solution.size() > 0) {
+                ss << " discrepancy " << o.solution_discrepancy;
+                output.update_solution(
+                        columns2solution(instance, p.columns, o.solution),
+                        ss,
+                        parameters.info);
+            }
+            output.update_lower_bound(
+                    std::ceil(o.bound - TOL),
+                    ss,
+                    parameters.info);
+        };
+    op.info.set_timelimit(parameters.info.remaining_time());
+
+    auto output_limiteddiscrepancysearch = columngenerationsolver::limiteddiscrepancysearch( p, op);
+    return output.algorithm_end(parameters.info);
+}

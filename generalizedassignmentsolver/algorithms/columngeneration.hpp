@@ -2,7 +2,7 @@
 
 #include "generalizedassignmentsolver/solution.hpp"
 
-#include "optimizationtools/column_generation_solver.hpp"
+#include "columngenerationsolver/columngenerationsolver.hpp"
 
 #include "knapsacksolver/algorithms/minknap.hpp"
 #include "knapsacksolver/algorithms/bellman.hpp"
@@ -10,17 +10,17 @@
 namespace generalizedassignmentsolver
 {
 
-typedef optimizationtools::ColumnGenerationSolver::ColIdx ColIdx;
-typedef optimizationtools::ColumnGenerationSolver::RowIdx RowIdx;
+typedef columngenerationsolver::RowIdx RowIdx;
+typedef columngenerationsolver::ColIdx ColIdx;
+typedef columngenerationsolver::Value Value;
+typedef columngenerationsolver::Column Column;
+typedef columngenerationsolver::LinearProgrammingSolver LinearProgrammingSolver;
 
 struct ColumnGenerationOptionalParameters
 {
     Info info = Info();
 
-    std::string lp_solver = "clp"; // "clp", "cplex"
-    std::vector<std::vector<std::vector<ItemIdx>>>* columns = NULL;
-    std::vector<std::vector<int>>* fixed_alt = NULL; // -1: unfixed, 0: fixed to 0, 1: fixed to 1.
-    std::vector<int>* fixed_agents = NULL; // 0: unfixed, 1: fixed.
+    LinearProgrammingSolver linear_programming_solver = LinearProgrammingSolver::CLP;
 };
 
 struct ColumnGenerationOutput: Output
@@ -28,16 +28,43 @@ struct ColumnGenerationOutput: Output
     ColumnGenerationOutput(const Instance& instance, Info& info): Output(instance, info) { }
     ColumnGenerationOutput& algorithm_end(Info& info);
 
-    /** Left empty if parameters.columns != NULL. */
-    std::vector<std::vector<std::vector<ItemIdx>>> columns;
-    std::vector<std::pair<AgentIdx, ColIdx>> column_indices;
     std::vector<double> solution;
     std::vector<std::vector<double>> x;
-    Counter it = 0;
+    Counter iteration_number = 0;
     Counter added_column_number = 0;
 };
 
 ColumnGenerationOutput columngeneration(
+        const Instance& instance,
+        ColumnGenerationOptionalParameters parameters = {});
+
+/******************************************************************************/
+
+struct ColumnGenerationHeuristicGreedyOutput: Output
+{
+    ColumnGenerationHeuristicGreedyOutput(const Instance& instance, Info& info): Output(instance, info) { }
+    ColumnGenerationHeuristicGreedyOutput& algorithm_end(Info& info);
+
+    std::vector<double> solution;
+    std::vector<std::vector<double>> x;
+};
+
+ColumnGenerationHeuristicGreedyOutput columngenerationheuristic_greedy(
+        const Instance& instance,
+        ColumnGenerationOptionalParameters parameters = {});
+
+/******************************************************************************/
+
+struct ColumnGenerationHeuristicLimitedDiscrepancySearchOutput: Output
+{
+    ColumnGenerationHeuristicLimitedDiscrepancySearchOutput(const Instance& instance, Info& info): Output(instance, info) { }
+    ColumnGenerationHeuristicLimitedDiscrepancySearchOutput& algorithm_end(Info& info);
+
+    std::vector<double> solution;
+    std::vector<std::vector<double>> x;
+};
+
+ColumnGenerationHeuristicLimitedDiscrepancySearchOutput columngenerationheuristic_limiteddiscrepancysearch(
         const Instance& instance,
         ColumnGenerationOptionalParameters parameters = {});
 

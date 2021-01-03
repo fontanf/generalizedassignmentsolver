@@ -14,7 +14,7 @@ struct LagRelaxAssignmentVolumeOutput: Output
     LagRelaxAssignmentVolumeOutput(const Instance& ins, Info& info): Output(ins, info) { }
     LagRelaxAssignmentVolumeOutput& algorithm_end(Info& info);
 
-    std::vector<double> x; // vector of size ins.alternative_number()
+    std::vector<std::vector<double>> x;
     std::vector<double> multipliers; // vector of size ins.item_number()
 };
 
@@ -27,7 +27,7 @@ struct LagRelaxKnapsackVolumeOutput: Output
     LagRelaxKnapsackVolumeOutput(const Instance& ins, Info& info): Output(ins, info) { }
     LagRelaxKnapsackVolumeOutput& algorithm_end(Info& info);
 
-    std::vector<double> x; // vector of size ins.alternative_number()
+    std::vector<std::vector<double>> x;
     std::vector<double> multipliers; // vector of size ins.agent_number()
 };
 
