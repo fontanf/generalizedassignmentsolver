@@ -44,7 +44,7 @@ ColumnGenerationOptionalParameters read_columngeneration_args(const std::vector<
     ColumnGenerationOptionalParameters parameters;
     po::options_description desc("Allowed options");
     desc.add_options()
-        ("linear-programming-solver,s", po::value<columngenerationsolver::LinearProgrammingSolver>(&parameters.linear_programming_solver), "")
+        ("linear-programming-solver,s", po::value<std::string>(&parameters.linear_programming_solver), "")
         ;
     po::variables_map vm;
     po::store(po::parse_command_line((Counter)argv.size(), argv.data(), desc), vm);

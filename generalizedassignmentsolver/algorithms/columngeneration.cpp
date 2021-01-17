@@ -1,10 +1,11 @@
 #include "generalizedassignmentsolver/algorithms/columngeneration.hpp"
 
-using namespace generalizedassignmentsolver;
+#include "columngenerationsolver/algorithms/greedy.hpp"
+#include "columngenerationsolver/algorithms/limited_discrepancy_search.hpp"
 
 /**
- * The linear programming formulation of the Generalized Assignment Problem
- * based on Dantzig–Wolfe decomposition is written as follows:
+ * The linear programming formulation of the problem based on Dantzig–Wolfe
+ * decomposition is written as follows:
  *
  * Variables:
  * - yᵢᵏ ∈ {0, 1} representing a set of items for agent i.
@@ -32,6 +33,13 @@ using namespace generalizedassignmentsolver;
  * m Knapsack Problems with items with profit (vⱼ - cᵢⱼ).
  *
  */
+
+using namespace generalizedassignmentsolver;
+
+typedef columngenerationsolver::RowIdx RowIdx;
+typedef columngenerationsolver::ColIdx ColIdx;
+typedef columngenerationsolver::Value Value;
+typedef columngenerationsolver::Column Column;
 
 ColumnGenerationOutput& ColumnGenerationOutput::algorithm_end(Info& info)
 {
@@ -66,7 +74,7 @@ public:
         fixed_agents_(instance.agent_number())
     {  }
 
-    virtual void initialize_pricing(
+    virtual std::vector<ColIdx> initialize_pricing(
             const std::vector<Column>& columns,
             const std::vector<std::pair<ColIdx, Value>>& fixed_columns);
 
@@ -84,9 +92,7 @@ private:
 
 };
 
-columngenerationsolver::Parameters get_parameters(
-        const Instance& instance,
-        columngenerationsolver::LinearProgrammingSolver linear_programming_solver)
+columngenerationsolver::Parameters get_parameters(const Instance& instance)
 {
     AgentIdx m = instance.agent_number();
     ItemIdx n = instance.item_number();
@@ -110,23 +116,20 @@ columngenerationsolver::Parameters get_parameters(
     // Pricing solver.
     p.pricing_solver = std::unique_ptr<columngenerationsolver::PricingSolver>(
             new PricingSolver(instance));
-    p.linear_programming_solver = linear_programming_solver;
     return p;
 }
 
 Solution columns2solution(
         const Instance& instance,
-        const std::vector<Column>& columns,
-        const std::vector<std::pair<ColIdx, Value>>& column_solution)
+        const std::vector<std::pair<Column, Value>>& columns)
 {
     AgentIdx m = instance.agent_number();
     Solution solution(instance);
-    for (auto pair: column_solution) {
-        ColIdx col_idx = pair.first;
+    for (const auto& pair: columns) {
+        const Column& column = pair.first;
         Value value = pair.second;
         if (value < 0.5)
             continue;
-        const Column& column = columns[col_idx];
         AgentIdx i = 0;
         for (RowIdx row_pos = 0; row_pos < (RowIdx)column.row_indices.size(); ++row_pos)
             if (column.row_indices[row_pos] < m && column.row_coefficients[row_pos] > 0.5)
@@ -138,7 +141,7 @@ Solution columns2solution(
     return solution;
 }
 
-void PricingSolver::initialize_pricing(
+std::vector<ColIdx> PricingSolver::initialize_pricing(
             const std::vector<Column>& columns,
             const std::vector<std::pair<ColIdx, Value>>& fixed_columns)
 {
@@ -161,6 +164,7 @@ void PricingSolver::initialize_pricing(
             }
         }
     }
+    return {};
 }
 
 std::vector<Column> PricingSolver::solve_pricing(
@@ -173,7 +177,7 @@ std::vector<Column> PricingSolver::solve_pricing(
     for (AgentIdx i = 0; i < instance_.agent_number(); ++i) {
         if (fixed_agents_[i] == 1)
             continue;
-        // Build knapsack instance.
+        // Build subproblem instance.
         knapsacksolver::Instance instance_kp;
         instance_kp.set_capacity(instance_.capacity(i));
         kp2gap_.clear();
@@ -188,7 +192,7 @@ std::vector<Column> PricingSolver::solve_pricing(
             kp2gap_.push_back(j);
         }
 
-        // Solve knapsack instance.
+        // Solve subproblem instance.
         auto output_kp = knapsacksolver::minknap(instance_kp);
 
         // Retrieve column.
@@ -217,10 +221,11 @@ ColumnGenerationOutput generalizedassignmentsolver::columngeneration(
             << " ***" << std::endl);
     ColumnGenerationOutput output(instance, parameters.info);
 
-    columngenerationsolver::Parameters p = get_parameters(
-            instance, parameters.linear_programming_solver);
+    columngenerationsolver::Parameters p = get_parameters(instance);
     columngenerationsolver::ColumnGenerationOptionalParameters op;
     op.info.set_timelimit(parameters.info.remaining_time());
+    op.linear_programming_solver
+        = columngenerationsolver::s2lps(parameters.linear_programming_solver);
     auto columngeneration_output = columngenerationsolver::columngeneration(p, op);
 
     output.update_lower_bound(
@@ -240,10 +245,11 @@ ColumnGenerationHeuristicGreedyOutput generalizedassignmentsolver::columngenerat
             << " ***" << std::endl);
     ColumnGenerationHeuristicGreedyOutput output(instance, parameters.info);
 
-    columngenerationsolver::Parameters p = get_parameters(
-            instance, parameters.linear_programming_solver);
+    columngenerationsolver::Parameters p = get_parameters(instance);
     columngenerationsolver::GreedyOptionalParameters op;
     op.info.set_timelimit(parameters.info.remaining_time());
+    op.columngeneration_parameters.linear_programming_solver
+        = columngenerationsolver::s2lps(parameters.linear_programming_solver);
     auto output_greedy = columngenerationsolver::greedy(p, op);
 
     output.update_lower_bound(
@@ -252,7 +258,7 @@ ColumnGenerationHeuristicGreedyOutput generalizedassignmentsolver::columngenerat
             parameters.info);
     if (output_greedy.solution.size() > 0)
         output.update_solution(
-                columns2solution(instance, p.columns, output_greedy.solution),
+                columns2solution(instance, output_greedy.solution),
                 std::stringstream(""),
                 parameters.info);
     return output.algorithm_end(parameters.info);
@@ -266,10 +272,11 @@ ColumnGenerationHeuristicLimitedDiscrepancySearchOutput generalizedassignmentsol
             << " ***" << std::endl);
     ColumnGenerationHeuristicLimitedDiscrepancySearchOutput output(instance, parameters.info);
 
-    columngenerationsolver::Parameters p = get_parameters(
-            instance, parameters.linear_programming_solver);
+    columngenerationsolver::Parameters p = get_parameters(instance);
     columngenerationsolver::LimitedDiscrepancySearchOptionalParameters op;
-    op.new_bound_callback = [&instance, &parameters, &p, &output](
+    op.columngeneration_parameters.linear_programming_solver
+        = columngenerationsolver::s2lps(parameters.linear_programming_solver);
+    op.new_bound_callback = [&instance, &parameters, &output](
                 const columngenerationsolver::LimitedDiscrepancySearchOutput& o)
         {
             std::stringstream ss;
@@ -277,7 +284,7 @@ ColumnGenerationHeuristicLimitedDiscrepancySearchOutput generalizedassignmentsol
             if (o.solution.size() > 0) {
                 ss << " discrepancy " << o.solution_discrepancy;
                 output.update_solution(
-                        columns2solution(instance, p.columns, o.solution),
+                        columns2solution(instance, o.solution),
                         ss,
                         parameters.info);
             }

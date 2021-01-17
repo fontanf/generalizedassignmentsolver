@@ -2,25 +2,17 @@
 
 #include "generalizedassignmentsolver/solution.hpp"
 
-#include "columngenerationsolver/columngenerationsolver.hpp"
-
 #include "knapsacksolver/algorithms/minknap.hpp"
 #include "knapsacksolver/algorithms/bellman.hpp"
 
 namespace generalizedassignmentsolver
 {
 
-typedef columngenerationsolver::RowIdx RowIdx;
-typedef columngenerationsolver::ColIdx ColIdx;
-typedef columngenerationsolver::Value Value;
-typedef columngenerationsolver::Column Column;
-typedef columngenerationsolver::LinearProgrammingSolver LinearProgrammingSolver;
-
 struct ColumnGenerationOptionalParameters
 {
     Info info = Info();
 
-    LinearProgrammingSolver linear_programming_solver = LinearProgrammingSolver::CLP;
+    std::string linear_programming_solver = "CLP";
 };
 
 struct ColumnGenerationOutput: Output
