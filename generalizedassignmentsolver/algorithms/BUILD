@@ -41,6 +41,7 @@ cc_library(
                 "algorithms.cpp"],
         deps = [
                 "//generalizedassignmentsolver:generalizedassignmentsolver",
+                "@localsearchsolver//localsearchsolver:localsearchsolver",
                 "@columngenerationsolver//columngenerationsolver:columngenerationsolver",
                 "@knapsacksolver//knapsacksolver/algorithms:minknap",
                 "@knapsacksolver//knapsacksolver/algorithms:bellman",

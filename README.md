@@ -31,13 +31,9 @@ Polynomial algorithms from "Generalized Assignment Problems" (Martello et al., 1
 - MTHG, basic greedy (+ n shifts) `-a "mthg -f wij"` :heavy_check_mark:
 - MTHG, greedy with regret measure (+ n shifts) `-a "mthgregret -f wij"` :heavy_check_mark:
 
-Classical local search algorithms based on the shift-swap neighborhood:
-- Local search `-a "localsearch --iteration-limit 1000000 --iteration-without-improvment-limit 100000"` :heavy_check_mark:
-- Tabu search `-a "tabusearch -l 10000 --iteration-limit 1000000 --iteration-without-improvment-limit 100000"` :heavy_check_mark:
-- Simulated annealing `-a "simulatedannealing --beta 0.999 -l 1000000 --iteration-limit 1000000 --iteration-without-improvment-limit 100000"` :heavy_check_mark:
+Local search algorithm implemented with [fontanf/localsearchsolver](https://github.com/fontanf/localsearchsolver) `-a "localsearch --threads 3"` :heavy_check_mark:
 
-Tree search algorithms based on the Dantzig-Wolfe reformulation branching scheme (i.e. column generation heuristics) inspired by "Primal Heuristics for Branch and Price: The Assets of
-Diving Methods" (Sadykov et al., 2019):
+Tree search algorithms based on the Dantzig-Wolfe reformulation branching scheme (i.e. column generation heuristics) implemented with [fontanf/columngenerationsolver](https://github.com/fontanf/columngenerationsolver):
 - Greedy `-a "columngenerationheuristic_greedy --linear-programming-solver cplex"` :heavy_check_mark:
 - Limited discrepency search `-a "columngenerationheuristic_limiteddiscrepancysearch --linear-programming-solver cplex"` :heavy_check_mark:
 

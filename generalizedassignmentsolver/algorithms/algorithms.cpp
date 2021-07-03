@@ -62,49 +62,7 @@ LocalSearchOptionalParameters read_localsearch_args(const std::vector<char*>& ar
     LocalSearchOptionalParameters parameters;
     po::options_description desc("Allowed options");
     desc.add_options()
-        ("iteration-limit,i", po::value<Counter>(&parameters.iteration_limit), "")
-        ("iteration-without-improvment-limit,w", po::value<Counter>(&parameters.iteration_without_improvment_limit), "")
-        ;
-    po::variables_map vm;
-    po::store(po::parse_command_line((Counter)argv.size(), argv.data(), desc), vm);
-    try {
-        po::notify(vm);
-    } catch (const po::required_option& e) {
-        std::cout << desc << std::endl;;
-        throw "";
-    }
-    return parameters;
-}
-
-TabuSearchOptionalParameters read_tabusearch_args(const std::vector<char*>& argv)
-{
-    TabuSearchOptionalParameters parameters;
-    po::options_description desc("Allowed options");
-    desc.add_options()
-        (",l", po::value<Counter>(&parameters.l), "")
-        ("iteration-limit,i", po::value<Counter>(&parameters.iteration_limit), "")
-        ("iteration-without-improvment-limit,w", po::value<Counter>(&parameters.iteration_without_improvment_limit), "")
-        ;
-    po::variables_map vm;
-    po::store(po::parse_command_line((Counter)argv.size(), argv.data(), desc), vm);
-    try {
-        po::notify(vm);
-    } catch (const po::required_option& e) {
-        std::cout << desc << std::endl;;
-        throw "";
-    }
-    return parameters;
-}
-
-SimulatedAnnealingOptionalParameters read_simulatedannealing_args(const std::vector<char*>& argv)
-{
-    SimulatedAnnealingOptionalParameters parameters;
-    po::options_description desc("Allowed options");
-    desc.add_options()
-        ("beta,b", po::value<double>(&parameters.beta), "")
-        (",l", po::value<double>(&parameters.l), "")
-        ("iteration-limit,i", po::value<Counter>(&parameters.iteration_limit), "")
-        ("iteration-without-improvment-limit,w", po::value<Counter>(&parameters.iteration_without_improvment_limit), "")
+        ("threads,t", po::value<Counter>(&parameters.thread_number), "")
         ;
     po::variables_map vm;
     po::store(po::parse_command_line((Counter)argv.size(), argv.data(), desc), vm);
@@ -284,16 +242,6 @@ Output generalizedassignmentsolver::run(
         parameters.info = info;
         parameters.initial_solution = &initial_solution;
         return localsearch(instance, generator, parameters);
-    } else if (algorithm_args[0] == "tabusearch") {
-        TabuSearchOptionalParameters parameters = read_tabusearch_args(algorithm_argv);
-        parameters.info = info;
-        parameters.initial_solution = &initial_solution;
-        return tabusearch(instance, generator, parameters);
-    } else if (algorithm_args[0] == "simulatedannealing") {
-        SimulatedAnnealingOptionalParameters parameters = read_simulatedannealing_args(algorithm_argv);
-        parameters.info = info;
-        parameters.initial_solution = &initial_solution;
-        return simulatedannealing(instance, generator, parameters);
 #if LOCALocalSearchOLVER_FOUND
     } else if (algorithm_args[0] == "localsolver") {
         LocalSolverOptionalParameters parameters;

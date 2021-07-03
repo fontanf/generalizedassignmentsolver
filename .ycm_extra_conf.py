@@ -19,6 +19,7 @@ def Settings(**kwargs):
                 '-I', './bazel-generalizedassignmentsolver/external/googletest/googletest/include/',
                 '-I', './bazel-generalizedassignmentsolver/external/boost/',
                 '-I', './bazel-generalizedassignmentsolver/external/optimizationtools/',
+                '-I', './bazel-generalizedassignmentsolver/external/localsearchsolver/',
                 '-I', './bazel-generalizedassignmentsolver/external/columngenerationsolver/',
                 # '-I', './../columngenerationsolver/',
                 '-I', './bazel-generalizedassignmentsolver/external/knapsacksolver/',
