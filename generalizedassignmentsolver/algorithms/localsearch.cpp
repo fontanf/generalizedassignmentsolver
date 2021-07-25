@@ -301,21 +301,7 @@ public:
         return os;
     }
 
-    inline void write(
-            const Solution& solution,
-            std::string filepath) const
-    {
-        if (filepath.empty())
-            return;
-        std::ofstream cert(filepath);
-        if (!cert.good()) {
-            std::cerr << "\033[31m" << "ERROR, unable to open file \"" << filepath << "\"" << "\033[0m" << std::endl;
-            return;
-        }
-
-        for (AgentIdx i: solution.agents)
-            cert << i << " ";
-    }
+    inline void write(const Solution&, std::string) const { return; }
 
 private:
 

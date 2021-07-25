@@ -4,9 +4,9 @@
 #include "generalizedassignmentsolver/algorithms/lagrelax_volume.hpp"
 #include "generalizedassignmentsolver/algorithms/lagrelax_lbfgs.hpp"
 #include "generalizedassignmentsolver/algorithms/columngeneration.hpp"
-#include "generalizedassignmentsolver/algorithms/branchandcut_cbc.hpp"
-#include "generalizedassignmentsolver/algorithms/branchandcut_cplex.hpp"
-#include "generalizedassignmentsolver/algorithms/branchandcut_gurobi.hpp"
+#include "generalizedassignmentsolver/algorithms/milp_cbc.hpp"
+#include "generalizedassignmentsolver/algorithms/milp_cplex.hpp"
+#include "generalizedassignmentsolver/algorithms/milp_gurobi.hpp"
 #include "generalizedassignmentsolver/algorithms/constraintprogramming_gecode.hpp"
 #include "generalizedassignmentsolver/algorithms/constraintprogramming_cplex.hpp"
 #include "generalizedassignmentsolver/algorithms/random.hpp"
@@ -94,9 +94,9 @@ RepairOptionalParameters read_repair_args(const std::vector<char*>& argv)
     return parameters;
 }
 
-BranchAndCutCplexOptionalParameters read_branchandcut_cplex_args(const std::vector<char*>& argv)
+MilpCplexOptionalParameters read_milp_cplex_args(const std::vector<char*>& argv)
 {
-    BranchAndCutCplexOptionalParameters parameters;
+    MilpCplexOptionalParameters parameters;
     po::options_description desc("Allowed options");
     desc.add_options()
         ("only-linear-relaxation", "")
@@ -115,9 +115,9 @@ BranchAndCutCplexOptionalParameters read_branchandcut_cplex_args(const std::vect
 }
 
 #if GUROBI_FOUND
-BranchAndCutGurobiOptionalParameters read_branchandcut_gurobi_args(const std::vector<char*>& argv)
+MilpGurobiOptionalParameters read_milp_gurobi_args(const std::vector<char*>& argv)
 {
-    BranchAndCutGurobiOptionalParameters parameters;
+    MilpGurobiOptionalParameters parameters;
     po::options_description desc("Allowed options");
     desc.add_options()
         ("only-linear-relaxation", "")
@@ -182,22 +182,22 @@ Output generalizedassignmentsolver::run(
      * Exact algorithms
      */
 #if COINOR_FOUND
-    } else if (algorithm_args[0] == "branchandcut_cbc") {
-        BranchAndCutCbcOptionalParameters parameters;
+    } else if (algorithm_args[0] == "milp_cbc") {
+        MilpCbcOptionalParameters parameters;
         parameters.info = info;
-        return branchandcut_cbc(instance, parameters);
+        return milp_cbc(instance, parameters);
 #endif
 #if CPLEX_FOUND
-    } else if (algorithm_args[0] == "branchandcut_cplex") {
-        auto parameters = read_branchandcut_cplex_args(algorithm_argv);
+    } else if (algorithm_args[0] == "milp_cplex") {
+        auto parameters = read_milp_cplex_args(algorithm_argv);
         parameters.info = info;
-        return branchandcut_cplex(instance, parameters);
+        return milp_cplex(instance, parameters);
 #endif
 #if GUROBI_FOUND
-    } else if (algorithm_args[0] == "branchandcut_gurobi") {
-        auto parameters = read_branchandcut_gurobi_args(algorithm_argv);
+    } else if (algorithm_args[0] == "milp_gurobi") {
+        auto parameters = read_milp_gurobi_args(algorithm_argv);
         parameters.info = info;
-        return branchandcut_gurobi(instance, parameters);
+        return milp_gurobi(instance, parameters);
 #endif
 #if GECODE_FOUND
     } else if (algorithm_args[0] == "constraintprogramming_gecode") {

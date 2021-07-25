@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
 
     // Parse program options
 
-    std::string algorithm = "branchandcut_cbc";
+    std::string algorithm = "milp_cbc";
     std::string instance_path = "";
     std::string format = "orlibrary";
     std::string output_path = "";

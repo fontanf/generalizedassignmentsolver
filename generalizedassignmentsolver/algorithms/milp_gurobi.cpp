@@ -1,6 +1,6 @@
 #if GUROBI_FOUND
 
-#include "generalizedassignmentsolver/algorithms/branchandcut_gurobi.hpp"
+#include "generalizedassignmentsolver/algorithms/milp_gurobi.hpp"
 
 #include "gurobi_c++.h"
 
@@ -10,21 +10,21 @@
 
 using namespace generalizedassignmentsolver;
 
-BranchAndCutGurobiOutput& BranchAndCutGurobiOutput::algorithm_end(Info& info)
+MilpGurobiOutput& MilpGurobiOutput::algorithm_end(Info& info)
 {
     Output::algorithm_end(info);
     return *this;
 }
 
-class BranchAndCutGurobiCallback: public GRBCallback
+class MilpGurobiCallback: public GRBCallback
 {
 
 public:
 
-    BranchAndCutGurobiCallback(
+    MilpGurobiCallback(
             const Instance& instance,
-            BranchAndCutGurobiOptionalParameters& parameters,
-            BranchAndCutGurobiOutput& output,
+            MilpGurobiOptionalParameters& parameters,
+            MilpGurobiOutput& output,
             std::vector<GRBVar*>& x):
         instance_(instance), parameters_(parameters), output_(output), x_(x) { }
 
@@ -54,19 +54,19 @@ protected:
 private:
 
     const Instance& instance_;
-    BranchAndCutGurobiOptionalParameters& parameters_;
-    BranchAndCutGurobiOutput& output_;
+    MilpGurobiOptionalParameters& parameters_;
+    MilpGurobiOutput& output_;
     std::vector<GRBVar*>& x_;
 
 };
 
-BranchAndCutGurobiOutput generalizedassignmentsolver::branchandcut_gurobi(
-        const Instance& instance, BranchAndCutGurobiOptionalParameters parameters)
+MilpGurobiOutput generalizedassignmentsolver::milp_gurobi(
+        const Instance& instance, MilpGurobiOptionalParameters parameters)
 {
     GRBEnv env;
-    VER(parameters.info, "*** branchandcut_gurobi ***" << std::endl);
+    VER(parameters.info, "*** milp_gurobi ***" << std::endl);
 
-    BranchAndCutGurobiOutput output(instance, parameters.info);
+    MilpGurobiOutput output(instance, parameters.info);
 
     ItemIdx  n = instance.item_number();
     AgentIdx m = instance.agent_number();
@@ -136,7 +136,7 @@ BranchAndCutGurobiOutput generalizedassignmentsolver::branchandcut_gurobi(
         model.set(GRB_DoubleParam_TimeLimit, parameters.info.timelimit);
 
     // Callback
-    BranchAndCutGurobiCallback cb = BranchAndCutGurobiCallback(instance, parameters, output, x);
+    MilpGurobiCallback cb = MilpGurobiCallback(instance, parameters, output, x);
     model.setCallback(&cb);
 
     // Optimize

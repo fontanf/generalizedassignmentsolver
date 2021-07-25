@@ -1,7 +1,7 @@
 #if GUROBI_FOUND
 
 #include "generalizedassignmentsolver/tester.hpp"
-#include "generalizedassignmentsolver/algorithms/branchandcut_gurobi.hpp"
+#include "generalizedassignmentsolver/algorithms/milp_gurobi.hpp"
 
 using namespace generalizedassignmentsolver;
 
@@ -9,17 +9,17 @@ using namespace generalizedassignmentsolver;
 // unable to find the license file.
 
 /*
-Cost branchandcut_gurobi_test(Instance& ins)
+Cost milp_gurobi_test(Instance& ins)
 {
     Solution sol(ins);
     Cost lb = 0;
-    BranchAndCutGurobiData d {.ins = ins, .sol = sol, .lb = lb, .info = Info().set_verbose(true)};
+    MilpGurobiData d {.ins = ins, .sol = sol, .lb = lb, .info = Info().set_verbose(true)};
     std::cout << "toto" << std::endl;
-    return branchandcut_gurobi(d).cost();
+    return milp_gurobi(d).cost();
 }
 
 std::vector<Cost (*)(Instance&)> f = {
-        branchandcut_gurobi_test,
+        milp_gurobi_test,
 };
 
 TEST(BRANCHANDCUT_GUROBI, TEST) { test(TEST, f); }

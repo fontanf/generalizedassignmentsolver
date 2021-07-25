@@ -1,6 +1,6 @@
 #if CPLEX_FOUND
 
-#include "generalizedassignmentsolver/algorithms/branchandcut_cplex.hpp"
+#include "generalizedassignmentsolver/algorithms/milp_cplex.hpp"
 
 #include <ilcplex/ilocplex.h>
 
@@ -8,7 +8,7 @@ using namespace generalizedassignmentsolver;
 
 ILOSTLBEGIN
 
-BranchAndCutCplexOutput& BranchAndCutCplexOutput::algorithm_end(Info& info)
+MilpCplexOutput& MilpCplexOutput::algorithm_end(Info& info)
 {
     //PUT(info, "Algorithm", "Iterations", it);
     Output::algorithm_end(info);
@@ -18,8 +18,8 @@ BranchAndCutCplexOutput& BranchAndCutCplexOutput::algorithm_end(Info& info)
 
 ILOMIPINFOCALLBACK4(loggingCallback,
                     const Instance&, instance,
-                    BranchAndCutCplexOptionalParameters&, parameters,
-                    BranchAndCutCplexOutput&, output,
+                    MilpCplexOptionalParameters&, parameters,
+                    MilpCplexOutput&, output,
                     std::vector<IloNumVarArray>&, x)
 {
     Cost lb = std::ceil(getBestObjValue() - TOL);
@@ -43,13 +43,13 @@ ILOMIPINFOCALLBACK4(loggingCallback,
     }
 }
 
-BranchAndCutCplexOutput generalizedassignmentsolver::branchandcut_cplex(
+MilpCplexOutput generalizedassignmentsolver::milp_cplex(
         const Instance& instance,
-        BranchAndCutCplexOptionalParameters parameters)
+        MilpCplexOptionalParameters parameters)
 {
-    VER(parameters.info, "*** branchandcut_cplex ***" << std::endl);
+    VER(parameters.info, "*** milp_cplex ***" << std::endl);
 
-    BranchAndCutCplexOutput output(instance, parameters.info);
+    MilpCplexOutput output(instance, parameters.info);
 
     ItemIdx  n = instance.item_number();
     AgentIdx m = instance.agent_number();

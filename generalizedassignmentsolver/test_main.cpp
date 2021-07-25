@@ -1,4 +1,4 @@
-#include "generalizedassignmentsolver/algorithms/branchandcut_cbc.hpp"
+#include "generalizedassignmentsolver/algorithms/milp_cbc.hpp"
 
 #include "generalizedassignmentsolver/tester.hpp"
 #include "generalizedassignmentsolver/generator.hpp"

@@ -25,7 +25,7 @@ struct CoinLP
     CoinPackedMatrix matrix;
 };
 
-struct BranchAndCutCbcOptionalParameters
+struct MilpCbcOptionalParameters
 {
     Info info = Info();
 
@@ -33,14 +33,14 @@ struct BranchAndCutCbcOptionalParameters
     bool stop_at_first_improvment = false;
 };
 
-struct BranchAndCutCbcOutput: Output
+struct MilpCbcOutput: Output
 {
-    BranchAndCutCbcOutput(const Instance& instance, Info& info): Output(instance, info) { }
-    BranchAndCutCbcOutput& algorithm_end(Info& info);
+    MilpCbcOutput(const Instance& instance, Info& info): Output(instance, info) { }
+    MilpCbcOutput& algorithm_end(Info& info);
 };
 
-BranchAndCutCbcOutput branchandcut_cbc(const Instance& instance,
-        BranchAndCutCbcOptionalParameters parameters = {});
+MilpCbcOutput milp_cbc(const Instance& instance,
+        MilpCbcOptionalParameters parameters = {});
 
 }
 

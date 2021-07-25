@@ -1,6 +1,6 @@
 #if COINOR_FOUND
 
-#include "generalizedassignmentsolver/algorithms/branchandcut_cbc.hpp"
+#include "generalizedassignmentsolver/algorithms/milp_cbc.hpp"
 
 #include "coin/CbcHeuristicDiveCoefficient.hpp"
 #include "coin/CbcHeuristicDiveFractional.hpp"
@@ -41,7 +41,7 @@
 
 using namespace generalizedassignmentsolver;
 
-BranchAndCutCbcOutput& BranchAndCutCbcOutput::algorithm_end(Info& info)
+MilpCbcOutput& MilpCbcOutput::algorithm_end(Info& info)
 {
     //PUT(info, "Algorithm", "Iterations", it);
     Output::algorithm_end(info);
@@ -60,8 +60,8 @@ public:
 
     SolHandler(
             const Instance& instance,
-            BranchAndCutCbcOptionalParameters& parameters,
-            BranchAndCutCbcOutput& output):
+            MilpCbcOptionalParameters& parameters,
+            MilpCbcOutput& output):
         CbcEventHandler(),
         instance_(instance),
         parameters_(parameters),
@@ -70,8 +70,8 @@ public:
     SolHandler(
             CbcModel *model,
             const Instance& instance,
-            BranchAndCutCbcOptionalParameters& parameters,
-            BranchAndCutCbcOutput& output):
+            MilpCbcOptionalParameters& parameters,
+            MilpCbcOutput& output):
         CbcEventHandler(model),
         instance_(instance),
         parameters_(parameters),
@@ -101,8 +101,8 @@ public:
 private:
 
     const Instance& instance_;
-    BranchAndCutCbcOptionalParameters& parameters_;
-    BranchAndCutCbcOutput& output_;
+    MilpCbcOptionalParameters& parameters_;
+    MilpCbcOutput& output_;
 
 };
 
@@ -206,13 +206,13 @@ CoinLP::CoinLP(const Instance& instance)
             row_starts.data(), number_of_elements_in_rows.data());
 }
 
-BranchAndCutCbcOutput generalizedassignmentsolver::branchandcut_cbc(
+MilpCbcOutput generalizedassignmentsolver::milp_cbc(
         const Instance& instance,
-        BranchAndCutCbcOptionalParameters parameters)
+        MilpCbcOptionalParameters parameters)
 {
-    VER(parameters.info, "*** branchandcut_cbc ***" << std::endl);
+    VER(parameters.info, "*** milp_cbc ***" << std::endl);
 
-    BranchAndCutCbcOutput output(instance, parameters.info);
+    MilpCbcOutput output(instance, parameters.info);
 
     ItemIdx n = instance.item_number();
     AgentIdx m = instance.agent_number();

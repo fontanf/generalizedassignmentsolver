@@ -10,8 +10,8 @@ This problem is interesting because many different optimization methods can and 
 
 - Linear relaxation
   - solved with CLP `-a linrelax_clp` :heavy_check_mark:
-  - solved with Gurobi `-a "branchandcut_gurobi --only-linear-relaxation"` :heavy_check_mark:
-  - solved with Cplex `-a "branchandcut_cplex --only-linear-relaxation"` :heavy_check_mark:
+  - solved with Gurobi `-a "milp_gurobi --only-linear-relaxation"` :heavy_check_mark:
+  - solved with Cplex `-a "milp_cplex --only-linear-relaxation"` :heavy_check_mark:
 
 - Lagrangian relaxation of knapsack constraints. The value of this relaxation is the same as the value of the linear relaxation. However, it might be cheaper to compute, especially on large instances.
   - solved with volume method `-a lagrelax_knapsack_volume` :heavy_check_mark:
@@ -43,10 +43,10 @@ Others heuristics:
 
 ### Exact algorithms
 
-- Branch-and-cut
-  - with CBC `-a branchandcut_cbc` :heavy_check_mark:
-  - with CPLEX `-a branchandcut_cplex` :heavy_check_mark:
-  - with Gurobi `-a branchandcut_gurobi` :heavy_check_mark:
+- Mixed-Integer Linear Programs
+  - with CBC `-a milp_cbc` :heavy_check_mark:
+  - with CPLEX `-a milp_cplex` :heavy_check_mark:
+  - with Gurobi `-a milp_gurobi` :heavy_check_mark:
 
 - Constraint programming
   - with Gecode `-a constraintprogramming_gecode` :heavy_check_mark:

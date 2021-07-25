@@ -5,7 +5,7 @@
 #include "generalizedassignmentsolver/algorithms/linrelax_clp.hpp"
 #endif
 #if CPLEX_FOUND
-#include "generalizedassignmentsolver/algorithms/branchandcut_cplex.hpp"
+#include "generalizedassignmentsolver/algorithms/milp_cplex.hpp"
 #endif
 
 #include <set>
@@ -86,9 +86,9 @@ Output generalizedassignmentsolver::repair(
 #endif
 #if CPLEX_FOUND
     } case RepairInitialSolution::LinearRelaxationCplex: {
-        BranchAndCutCplexOptionalParameters parameters_linearrelaxation_cplex;
+        MilpCplexOptionalParameters parameters_linearrelaxation_cplex;
         parameters_linearrelaxation_cplex.only_linear_relaxation = true;
-        auto output_linearrelaxation_cplex = branchandcut_cplex(instance, parameters_linearrelaxation_cplex);
+        auto output_linearrelaxation_cplex = milp_cplex(instance, parameters_linearrelaxation_cplex);
         output.update_lower_bound(output_linearrelaxation_cplex.lower_bound, std::stringstream("linearrelaxation_cplex"), parameters.info);
         for (ItemIdx j = 0; j < n; ++j) {
             AgentIdx i_best = -1;

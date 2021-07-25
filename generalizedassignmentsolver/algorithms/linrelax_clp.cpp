@@ -1,7 +1,7 @@
 #if COINOR_FOUND
 
 #include "generalizedassignmentsolver/algorithms/linrelax_clp.hpp"
-#include "generalizedassignmentsolver/algorithms/branchandcut_cbc.hpp"
+#include "generalizedassignmentsolver/algorithms/milp_cbc.hpp"
 
 #include <coin/ClpModel.hpp>
 #include <coin/OsiClpSolverInterface.hpp>
