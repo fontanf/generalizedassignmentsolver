@@ -135,8 +135,8 @@ LocalSolverOutput generalizedassignmentsolver::localsolver(const Instance& ins, 
     model.close();
 
     // Time limit
-    if (p.info.timelimit != std::numeric_limits<double>::infinity())
-        localsolver.getParam().setTimeLimit(p.info.timelimit);
+    if (p.info.time_limit != std::numeric_limits<double>::infinity())
+        localsolver.getParam().setTimeLimit(p.info.time_limit);
 
     // Custom callback
     MyCallback cb(output, p, agents);

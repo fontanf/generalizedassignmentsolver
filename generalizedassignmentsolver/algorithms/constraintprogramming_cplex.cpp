@@ -72,8 +72,8 @@ ConstraintProgrammingCplexOutput generalizedassignmentsolver::constraintprogramm
     cp.setOut(env.getNullStream());
 
     // Time limit
-    if (parameters.info.timelimit != std::numeric_limits<double>::infinity())
-        cp.setParameter(IloCP::TimeLimit, parameters.info.timelimit);
+    if (parameters.info.time_limit != std::numeric_limits<double>::infinity())
+        cp.setParameter(IloCP::TimeLimit, parameters.info.time_limit);
 
     // Solve
     cp.startNewSearch();

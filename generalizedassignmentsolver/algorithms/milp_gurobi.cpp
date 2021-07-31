@@ -132,8 +132,8 @@ MilpGurobiOutput generalizedassignmentsolver::milp_gurobi(
     model.set(GRB_DoubleParam_NodefileStart, 0.5); // Avoid running out of memory
 
     // Time limit
-    if (parameters.info.timelimit != std::numeric_limits<double>::infinity())
-        model.set(GRB_DoubleParam_TimeLimit, parameters.info.timelimit);
+    if (parameters.info.time_limit != std::numeric_limits<double>::infinity())
+        model.set(GRB_DoubleParam_TimeLimit, parameters.info.time_limit);
 
     // Callback
     MilpGurobiCallback cb = MilpGurobiCallback(instance, parameters, output, x);

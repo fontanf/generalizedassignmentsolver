@@ -59,13 +59,13 @@ int main(int argc, char *argv[])
 
     Info info = Info()
         .set_verbose(vm.count("verbose"))
-        .set_timelimit(time_limit)
-        .set_certfile(certificate_path)
-        .set_outputfile(output_path)
-        .set_onlywriteattheend(true)
-        .set_logfile(log_path)
+        .set_time_limit(time_limit)
+        .set_certificate_path(certificate_path)
+        .set_json_output_path(output_path)
+        .set_only_write_at_the_end(true)
+        .set_log_path(log_path)
         .set_log2stderr(vm.count("log2stderr"))
-        .set_loglevelmax(loglevelmax)
+        .set_maximum_log_level(loglevelmax)
         ;
 
     VER(info, "Agents:  " << instance.number_of_agents() << std::endl);

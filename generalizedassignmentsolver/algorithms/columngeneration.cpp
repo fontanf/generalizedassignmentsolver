@@ -223,7 +223,7 @@ ColumnGenerationOutput generalizedassignmentsolver::columngeneration(
 
     columngenerationsolver::Parameters p = get_parameters(instance);
     columngenerationsolver::ColumnGenerationOptionalParameters op;
-    op.info.set_timelimit(parameters.info.remaining_time());
+    op.info.set_time_limit(parameters.info.remaining_time());
     op.linear_programming_solver
         = columngenerationsolver::s2lps(parameters.linear_programming_solver);
     auto columngeneration_output = columngenerationsolver::columngeneration(p, op);
@@ -247,7 +247,7 @@ ColumnGenerationHeuristicGreedyOutput generalizedassignmentsolver::columngenerat
 
     columngenerationsolver::Parameters p = get_parameters(instance);
     columngenerationsolver::GreedyOptionalParameters op;
-    op.info.set_timelimit(parameters.info.remaining_time());
+    op.info.set_time_limit(parameters.info.remaining_time());
     op.columngeneration_parameters.linear_programming_solver
         = columngenerationsolver::s2lps(parameters.linear_programming_solver);
     auto output_greedy = columngenerationsolver::greedy(p, op);
@@ -293,7 +293,7 @@ ColumnGenerationHeuristicLimitedDiscrepancySearchOutput generalizedassignmentsol
                     ss,
                     parameters.info);
         };
-    op.info.set_timelimit(parameters.info.remaining_time());
+    op.info.set_time_limit(parameters.info.remaining_time());
 
     auto output_limiteddiscrepancysearch = columngenerationsolver::limiteddiscrepancysearch( p, op);
     return output.algorithm_end(parameters.info);

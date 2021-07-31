@@ -414,7 +414,7 @@ LocalSearchOutput generalizedassignmentsolver::localsearch(
     // Run A*.
     AStarLocalSearchOptionalParameters<LocalScheme> parameters_a_star;
     parameters_a_star.info.set_verbose(false);
-    parameters_a_star.info.set_timelimit(parameters.info.remaining_time());
+    parameters_a_star.info.set_time_limit(parameters.info.remaining_time());
     parameters_a_star.number_of_threads_1 = 1;
     parameters_a_star.number_of_threads_2 = parameters.number_of_threads;
     parameters_a_star.initial_solution_ids = std::vector<Counter>(

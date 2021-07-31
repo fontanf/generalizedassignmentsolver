@@ -328,8 +328,8 @@ void Output::print(Info& info, const std::stringstream& s) const
     VER(info, std::left << std::setw(10) << gap());
     VER(info, s.str() << std::endl);
 
-    if (!info.output->onlywriteattheend)
-        info.write_ini();
+    if (!info.output->only_write_at_the_end)
+        info.write_json_output();
 }
 
 void Output::update_solution(const Solution& solution_new, const std::stringstream& s, Info& info)
@@ -337,22 +337,22 @@ void Output::update_solution(const Solution& solution_new, const std::stringstre
     if (!compare(solution, solution_new))
         return;
 
-    info.output->mutex_sol.lock();
+    info.output->mutex_solutions.lock();
 
     if (compare(solution, solution_new)) {
         solution = solution_new;
         print(info, s);
 
-        info.output->sol_number++;
+        info.output->number_of_solutions++;
         double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
-        std::string sol_str = "Solution" + std::to_string(info.output->sol_number);
+        std::string sol_str = "Solution" + std::to_string(info.output->number_of_solutions);
         PUT(info, sol_str, "Value", solution.cost());
         PUT(info, sol_str, "Time", t);
-        if (!info.output->onlywriteattheend)
-            solution.write(info.output->certfile);
+        if (!info.output->only_write_at_the_end)
+            solution.write(info.output->certificate_path);
     }
 
-    info.output->mutex_sol.unlock();
+    info.output->mutex_solutions.unlock();
 }
 
 void Output::update_lower_bound(Cost lower_bound_new, const std::stringstream& s, Info& info)
@@ -360,22 +360,22 @@ void Output::update_lower_bound(Cost lower_bound_new, const std::stringstream& s
     if (lower_bound != -1 && lower_bound >= lower_bound_new)
         return;
 
-    info.output->mutex_sol.lock();
+    info.output->mutex_solutions.lock();
 
     if (lower_bound == -1 || lower_bound < lower_bound_new) {
         lower_bound = lower_bound_new;
         print(info, s);
 
-        info.output->bnd_number++;
+        info.output->number_of_bounds++;
         double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
-        std::string sol_str = "Bound" + std::to_string(info.output->bnd_number);
+        std::string sol_str = "Bound" + std::to_string(info.output->number_of_bounds);
         PUT(info, sol_str, "Value", lower_bound);
         PUT(info, sol_str, "Time", t);
-        if (!info.output->onlywriteattheend)
-            solution.write(info.output->certfile);
+        if (!info.output->only_write_at_the_end)
+            solution.write(info.output->certificate_path);
     }
 
-    info.output->mutex_sol.unlock();
+    info.output->mutex_solutions.unlock();
 }
 
 Output& Output::algorithm_end(Info& info)
@@ -393,8 +393,8 @@ Output& Output::algorithm_end(Info& info)
             << "Gap (%): " << gap() << std::endl
             << "Time (s): " << time << std::endl);
 
-    info.write_ini();
-    solution.write(info.output->certfile);
+    info.write_json_output();
+    solution.write(info.output->certificate_path);
     return *this;
 }
 
@@ -407,7 +407,7 @@ Cost generalizedassignmentsolver::algorithm_end(Cost lower_bound, Info& info)
             << "Bound: " << lower_bound << std::endl
             << "Time (s): " << t << std::endl);
 
-    info.write_ini();
+    info.write_json_output();
     return lower_bound;
 }
 

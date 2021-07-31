@@ -141,8 +141,8 @@ ConstraintProgrammingGecodeOutput generalizedassignmentsolver::constraintprogram
     Search::Options options;
 
     // Time limit
-    if (parameters.info.timelimit != std::numeric_limits<double>::infinity()) {
-        Search::Stop* stoptime = Search::Stop::time(parameters.info.timelimit * 1000);
+    if (parameters.info.time_limit != std::numeric_limits<double>::infinity()) {
+        Search::Stop* stoptime = Search::Stop::time(parameters.info.time_limit * 1000);
         options.stop = stoptime;
     }
 

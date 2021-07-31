@@ -131,7 +131,7 @@ MilpCplexOutput generalizedassignmentsolver::milp_cplex(
     cplex.setParam(IloCplex::Param::MIP::Strategy::File, 2); // Avoid running out of memory
 
     // Time limit
-    if (parameters.info.timelimit != std::numeric_limits<double>::infinity())
+    if (parameters.info.time_limit != std::numeric_limits<double>::infinity())
         cplex.setParam(IloCplex::TiLim, parameters.info.remaining_time());
 
     // Callback
