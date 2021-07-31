@@ -21,7 +21,7 @@ struct LagRelaxAssignmentLbfgsOutput: Output
     LagRelaxAssignmentLbfgsOutput& algorithm_end(Info& info);
 
     std::vector<std::vector<double>> x; // vector of size instance.alternative_number()
-    std::vector<double> multipliers; // vector of size instance.item_number()
+    std::vector<double> multipliers; // vector of size instance.number_of_items()
 };
 
 LagRelaxAssignmentLbfgsOutput lagrelax_assignment_lbfgs(const Instance& instance, LagRelaxAssignmentLbfgsOptionalParameters p = {});
@@ -34,7 +34,7 @@ struct LagRelaxKnapsackLbfgsOutput: Output
     LagRelaxKnapsackLbfgsOutput& algorithm_end(Info& info);
 
     std::vector<std::vector<double>> x; // vector of size instance.alternative_number()
-    std::vector<double> multipliers; // vector of size instance.agent_number()
+    std::vector<double> multipliers; // vector of size instance.number_of_agents()
 };
 
 LagRelaxKnapsackLbfgsOutput lagrelax_knapsack_lbfgs(const Instance& instance, Info info = Info());

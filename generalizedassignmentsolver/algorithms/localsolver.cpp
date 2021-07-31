@@ -38,7 +38,7 @@ public:
         LSExpression obj = ls.getModel().getObjective(0);
         if(!output_.solution.feasible() || output_.solution.cost() > obj.getValue() + 0.5) {
             Solution sol_curr(output_.solution.instance());
-            AgentIdx m = output_.solution.instance().agent_number();
+            AgentIdx m = output_.solution.instance().number_of_agents();
             for (AgentIdx i=0; i<m; ++i) {
                 LSCollection bin_collection = agents_[i].getCollectionValue();
                 for (ItemIdx j_pos=0; j_pos<bin_collection.count(); ++j_pos) {
@@ -61,8 +61,8 @@ private:
 LocalSolverOutput generalizedassignmentsolver::localsolver(const Instance& ins, LocalSolverOptionalParameters p)
 {
     VER(p.info, "*** localsolver ***" << std::endl);
-    ItemIdx n = ins.item_number();
-    AgentIdx m = ins.agent_number();
+    ItemIdx n = ins.number_of_items();
+    AgentIdx m = ins.number_of_agents();
 
     LocalSolverOutput output(ins, p.info);
 
@@ -99,8 +99,8 @@ LocalSolverOutput generalizedassignmentsolver::localsolver(const Instance& ins, 
     LSExpression total_cost; // Objective
 
     // Set decisions: bins[k] represents the items in bin k
-    for (AgentIdx i=0; i<ins.agent_number(); ++i)
-        agents[i] = model.setVar(ins.item_number());
+    for (AgentIdx i=0; i<ins.number_of_agents(); ++i)
+        agents[i] = model.setVar(ins.number_of_items());
 
     // Each item must be in one bin and one bin only
     model.constraint(model.partition(agents.begin(), agents.end()));

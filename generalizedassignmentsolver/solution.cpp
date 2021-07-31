@@ -7,14 +7,14 @@ using namespace generalizedassignmentsolver;
 
 Solution::Solution(const Instance& instance):
     instance_(instance),
-    x_(instance.item_number(), -1),
-    agents_(instance.agent_number())
+    x_(instance.number_of_items(), -1),
+    agents_(instance.number_of_agents())
 { }
 
 Solution::Solution(const Instance& instance, std::string filepath):
     instance_(instance),
-    x_(instance.item_number(), -1),
-    agents_(instance.agent_number())
+    x_(instance.number_of_items(), -1),
+    agents_(instance.number_of_agents())
 {
     if (filepath.empty())
         return;
@@ -25,7 +25,7 @@ Solution::Solution(const Instance& instance, std::string filepath):
     }
 
     AgentIdx i = -1;
-    for (ItemPos j = 0; j < instance.item_number(); ++j) {
+    for (ItemPos j = 0; j < instance.number_of_items(); ++j) {
         file >> i;
         set(j, i);
     }
@@ -33,8 +33,8 @@ Solution::Solution(const Instance& instance, std::string filepath):
 
 Solution::Solution(const Instance& instance, const std::vector<std::vector<ItemIdx>>& agents):
     instance_(instance),
-    x_(instance.item_number(), -1),
-    agents_(instance.agent_number())
+    x_(instance.number_of_items(), -1),
+    agents_(instance.number_of_agents())
 {
     for (AgentIdx i = 0; i < (AgentIdx)agents.size(); i++)
         for (ItemIdx j: agents[i])
@@ -67,7 +67,7 @@ Solution& Solution::operator=(const Solution& sol)
             comp_               = sol.comp_;
         } else {
             clear();
-            for (ItemIdx j = 0; j < instance().item_number(); ++j)
+            for (ItemIdx j = 0; j < instance().number_of_items(); ++j)
                 set(j, sol.agent(j));
         }
     }
@@ -78,7 +78,7 @@ bool Solution::operator==(const Solution& sol)
 {
     if (total_weight_ != sol.total_weight_ || total_cost_ != sol.total_cost_)
         return false;
-    for (ItemIdx j = 0; j < instance().item_number(); ++j)
+    for (ItemIdx j = 0; j < instance().number_of_items(); ++j)
         if (x_[j] != sol.x_[j])
             return false;
     return true;
@@ -86,8 +86,8 @@ bool Solution::operator==(const Solution& sol)
 
 void Solution::set(ItemIdx j, AgentIdx i)
 {
-    assert(i >= -1 || i < instance().agent_number());
-    assert(j >= 0 && j < instance().item_number());
+    assert(i >= -1 || i < instance().number_of_agents());
+    assert(j >= 0 && j < instance().number_of_items());
 
     AgentIdx i_old = agent(j);
     if (i_old == i)
@@ -147,7 +147,7 @@ void Solution::set(ItemIdx j, AgentIdx i)
 
 void Solution::update_penalties(bool inc, PCost delta_inc, PCost delta_dec)
 {
-    ItemIdx m = instance().agent_number();
+    ItemIdx m = instance().number_of_agents();
     if (inc) {
         double ratio_max = 0.0;
         for (AgentIdx i = 0; i < m; ++i) {
@@ -176,7 +176,7 @@ void Solution::update_penalties(bool inc, PCost delta_inc, PCost delta_dec)
 
 void Solution::update_penalties(PCost delta_inc)
 {
-    ItemIdx m = instance().agent_number();
+    ItemIdx m = instance().number_of_agents();
     total_pcost_ = 0;
     for (AgentIdx i = 0; i < m; ++i) {
         agents_[i].penalty *= (1 + delta_inc);
@@ -187,7 +187,7 @@ void Solution::update_penalties(PCost delta_inc)
 
 void Solution::update_penalties(const std::vector<PCost>& penalty)
 {
-    ItemIdx m = instance().agent_number();
+    ItemIdx m = instance().number_of_agents();
     total_pcost_ = 0;
     for (AgentIdx i = 0; i < m; ++i) {
         agents_[i].penalty = penalty[i];
@@ -210,7 +210,7 @@ void Solution::clear()
 std::string Solution::to_string(AgentIdx i)
 {
     std::string s = "agent " + std::to_string(i) + ":";
-    for (ItemIdx j = 0; j < instance().item_number(); ++j)
+    for (ItemIdx j = 0; j < instance().number_of_items(); ++j)
         if (agent(j) == i)
             s += " " + std::to_string(j);
     return s;
@@ -219,7 +219,7 @@ std::string Solution::to_string(AgentIdx i)
 ItemIdx generalizedassignmentsolver::distance(const Solution& sol1, const Solution& sol2)
 {
     ItemIdx dist = 0;
-    for (ItemIdx j = 0; j < sol1.instance().item_number(); ++j)
+    for (ItemIdx j = 0; j < sol1.instance().number_of_items(); ++j)
         if (sol1.agent(j) != sol2.agent(j))
             dist++;
     return dist;
@@ -242,16 +242,16 @@ void Solution::write(std::string filepath)
 
 std::ostream& generalizedassignmentsolver::operator<<(std::ostream& os, const Solution& solution)
 {
-    os <<  "n " << solution.item_number() << "/" << solution.instance().item_number()
+    os <<  "n " << solution.number_of_items() << "/" << solution.instance().number_of_items()
         << " cost " << solution.cost()
         << " overcapacity " << solution.overcapacity()
         << std::endl;
-    for (AgentIdx i = 0; i < solution.instance().agent_number(); ++i) {
+    for (AgentIdx i = 0; i < solution.instance().number_of_agents(); ++i) {
         os << "agent " << i << " (" << solution.remaining_capacity(i) << "/" << solution.instance().capacity(i) <<  "):";
-        for (ItemPos j = 0; j < solution.instance().item_number(); ++j)
+        for (ItemPos j = 0; j < solution.instance().number_of_items(); ++j)
             if (solution.agent(j) == i)
                 os << " " << j;
-        if (i != solution.instance().agent_number() - 1)
+        if (i != solution.instance().number_of_agents() - 1)
             os << std::endl;
     }
     return os;

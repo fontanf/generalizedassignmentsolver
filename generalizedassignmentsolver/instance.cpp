@@ -27,7 +27,7 @@ void Instance::clear()
 
 void Instance::add_item(const std::vector<std::pair<Weight, Cost>>& a)
 {
-    ItemIdx j = item_number();
+    ItemIdx j = number_of_items();
     add_item();
     for (AgentIdx i = 0; i < (AgentIdx)a.size(); ++i)
         set_alternative(j, i, a[i].first, a[i].second);
@@ -152,13 +152,13 @@ std::ostream& generalizedassignmentsolver::operator<<(std::ostream& os, const Al
 
 std::ostream& generalizedassignmentsolver::operator<<(std::ostream& os, const Instance& instance)
 {
-    os << "m " << instance.agent_number() << " n " << instance.item_number() << std::endl;
+    os << "m " << instance.number_of_agents() << " n " << instance.number_of_items() << std::endl;
     os << "c";
-    for (AgentIdx i = 0; i < instance.agent_number(); ++i)
+    for (AgentIdx i = 0; i < instance.number_of_agents(); ++i)
         os << " " << instance.capacity(i);
     os << std::endl;
 
-    for (ItemPos j = 0; j < instance.item_number(); ++j) {
+    for (ItemPos j = 0; j < instance.number_of_items(); ++j) {
         os << j << ": " << std::flush;
         os << std::endl;
     }
@@ -168,18 +168,18 @@ std::ostream& generalizedassignmentsolver::operator<<(std::ostream& os, const In
 void Instance::write(std::string filename)
 {
     std::ofstream file(filename);
-    file << agent_number() << " " << item_number() << std::endl;
-    for (AgentIdx i = 0; i < agent_number(); ++i) {
-        for (ItemIdx j = 0; j < item_number(); ++j)
+    file << number_of_agents() << " " << number_of_items() << std::endl;
+    for (AgentIdx i = 0; i < number_of_agents(); ++i) {
+        for (ItemIdx j = 0; j < number_of_items(); ++j)
             file << item(j).alternatives[i].c << " ";
         file << std::endl;
     }
-    for (AgentIdx i = 0; i < agent_number(); ++i) {
-        for (ItemIdx j = 0; j < item_number(); ++j)
+    for (AgentIdx i = 0; i < number_of_agents(); ++i) {
+        for (ItemIdx j = 0; j < number_of_items(); ++j)
             file << item(j).alternatives[i].w << " ";
         file << std::endl;
     }
-    for (AgentIdx i = 0; i < agent_number(); ++i)
+    for (AgentIdx i = 0; i < number_of_agents(); ++i)
         file << capacity(i) << " ";
     file << std::endl;
     file.close();

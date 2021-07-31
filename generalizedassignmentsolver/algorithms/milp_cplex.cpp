@@ -29,8 +29,8 @@ ILOMIPINFOCALLBACK4(loggingCallback,
         return;
 
     if (!output.solution.feasible() || output.solution.cost() > getIncumbentObjValue() + 0.5) {
-        AgentIdx m = instance.agent_number();
-        ItemIdx  n = instance.item_number();
+        AgentIdx m = instance.number_of_agents();
+        ItemIdx  n = instance.number_of_items();
         Solution solution(instance);
         for (ItemIdx j = 0; j < n; ++j) {
             IloNumArray val(x[j].getEnv());
@@ -51,8 +51,8 @@ MilpCplexOutput generalizedassignmentsolver::milp_cplex(
 
     MilpCplexOutput output(instance, parameters.info);
 
-    ItemIdx  n = instance.item_number();
-    AgentIdx m = instance.agent_number();
+    ItemIdx  n = instance.number_of_items();
+    AgentIdx m = instance.number_of_agents();
 
     if (n == 0)
         return output.algorithm_end(parameters.info);
@@ -119,7 +119,7 @@ MilpCplexOutput generalizedassignmentsolver::milp_cplex(
         Cost lb = std::ceil(cplex.getObjValue() - TOL);
         output.update_lower_bound(lb, std::stringstream("linearrelaxation"), parameters.info);
         for (ItemIdx j = 0; j < n; j++) {
-            output.x.push_back(std::vector<double>(instance.agent_number(), 0));
+            output.x.push_back(std::vector<double>(instance.number_of_agents(), 0));
             for (AgentIdx i = 0; i < m; i++)
                 if (cplex.getValue(x[j][i]) > 0.5)
                     output.x[j][i] = 1;

@@ -106,9 +106,9 @@ public:
     DesirabilityRcost1(const Instance& ins, const std::vector<double>& v):
         instance(ins), v_(v) { }
     DesirabilityRcost1(const Instance& ins, const double* v):
-        instance(ins), v_(ins.item_number())
+        instance(ins), v_(ins.number_of_items())
     {
-        for (ItemIdx j=0; j<ins.item_number(); ++j)
+        for (ItemIdx j=0; j<ins.number_of_items(); ++j)
             v_[j] = v[j];
     }
     double operator()(ItemIdx j, AgentIdx i) const
@@ -130,9 +130,9 @@ public:
     DesirabilityRcost2(const Instance& instance, const std::vector<double>& u):
         instance(instance), u_(u) { }
     DesirabilityRcost2(const Instance& instance, const double* u):
-        instance(instance), u_(instance.agent_number())
+        instance(instance), u_(instance.number_of_agents())
     {
-        for (AgentIdx i = 0; i < instance.agent_number(); ++i)
+        for (AgentIdx i = 0; i < instance.number_of_agents(); ++i)
             u_[i] = u[i];
     }
     double operator()(ItemIdx j, AgentIdx i) const

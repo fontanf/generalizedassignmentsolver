@@ -32,12 +32,12 @@ public:
     LagRelaxAssignmentLbfgsFunction(
             const Instance& instance,
             LagRelaxAssignmentLbfgsOptionalParameters& p,
-            ItemIdx unfixed_item_number,
+            ItemIdx number_of_unfixed_items,
             const std::vector<ItemIdx>& item_indices):
-        instance_(instance), p_(p), item_indices_(item_indices), grad_(unfixed_item_number)
+        instance_(instance), p_(p), item_indices_(item_indices), grad_(number_of_unfixed_items)
     {
-        ItemIdx n = instance_.item_number();
-        AgentIdx m = instance_.agent_number();
+        ItemIdx n = instance_.number_of_items();
+        AgentIdx m = instance_.number_of_agents();
 
         // Compute knapsack capacities
         kp_capacities_.resize(m);
@@ -78,8 +78,8 @@ private:
 
 double LagRelaxAssignmentLbfgsFunction::f(const column_vector& mu)
 {
-    ItemIdx n = instance_.item_number();
-    AgentIdx m = instance_.agent_number();
+    ItemIdx n = instance_.number_of_items();
+    AgentIdx m = instance_.number_of_agents();
 
     // Initialize bound and gradient;
     double l = 0;
@@ -132,10 +132,10 @@ LagRelaxAssignmentLbfgsOutput generalizedassignmentsolver::lagrelax_assignment_l
     VER(p.info, "*** lagrelax_assignment_lbfgs ***" << std::endl);
     LagRelaxAssignmentLbfgsOutput output(instance, p.info);
 
-    ItemIdx n = instance.item_number();
-    AgentIdx m = instance.agent_number();
+    ItemIdx n = instance.number_of_items();
+    AgentIdx m = instance.number_of_agents();
 
-    // Compute c0, item_indices and unfixed_item_number
+    // Compute c0, item_indices and number_of_unfixed_items
     ItemIdx item_idx = 0;
     Cost c0 = 0;
     std::vector<ItemIdx> item_indices(n, -2);
@@ -152,10 +152,10 @@ LagRelaxAssignmentLbfgsOutput generalizedassignmentsolver::lagrelax_assignment_l
             item_idx++;
         }
     }
-    ItemIdx unfixed_item_number = item_idx;
+    ItemIdx number_of_unfixed_items = item_idx;
 
     // Initialize multipliers
-    column_vector mu(unfixed_item_number);
+    column_vector mu(number_of_unfixed_items);
     if (p.initial_multipliers != NULL) {
         for (ItemIdx j = 0; j < n; ++j)
             if (item_indices[j] >= 0)
@@ -166,7 +166,7 @@ LagRelaxAssignmentLbfgsOutput generalizedassignmentsolver::lagrelax_assignment_l
     }
 
     // Solve
-    LagRelaxAssignmentLbfgsFunction func(instance, p, unfixed_item_number, item_indices);
+    LagRelaxAssignmentLbfgsFunction func(instance, p, number_of_unfixed_items, item_indices);
     auto f   = [&func](const column_vector& x) { return func.f(x); };
     auto def = [&func](const column_vector& x) { return func.der(x); };
     auto stop_strategy = objective_delta_stop_strategy(0.0001);
@@ -207,8 +207,8 @@ public:
 
     LagRelaxKnapsackLbfgsFunction(const Instance& instance):
         instance_(instance),
-        x_(instance.item_number()),
-        grad_(instance.agent_number())
+        x_(instance.number_of_items()),
+        grad_(instance.number_of_agents())
     {  }
     virtual ~LagRelaxKnapsackLbfgsFunction() { };
 
@@ -228,8 +228,8 @@ private:
 
 double LagRelaxKnapsackLbfgsFunction::f(const column_vector& mu)
 {
-    ItemIdx n = instance_.item_number();
-    AgentIdx m = instance_.agent_number();
+    ItemIdx n = instance_.number_of_items();
+    AgentIdx m = instance_.number_of_agents();
 
     // Initialize bound and gradient
     double l = 0;
@@ -272,8 +272,8 @@ LagRelaxKnapsackLbfgsOutput generalizedassignmentsolver::lagrelax_knapsack_lbfgs
     VER(info, "*** lagrelax_knapsack_lbfgs ***" << std::endl);
     LagRelaxKnapsackLbfgsOutput output(instance, info);
 
-    AgentIdx m = instance.agent_number();
-    ItemIdx  n = instance.item_number();
+    AgentIdx m = instance.number_of_agents();
+    ItemIdx  n = instance.number_of_items();
 
     // Initialize multipliers
     column_vector mu(m);
@@ -310,7 +310,7 @@ LagRelaxKnapsackLbfgsOutput generalizedassignmentsolver::lagrelax_knapsack_lbfgs
         output.multipliers[i] = mu(i);
     func.f(mu);
     for (ItemIdx j = 0; j < n; ++j) {
-        output.x.push_back(std::vector<double>(instance.agent_number(), 0));
+        output.x.push_back(std::vector<double>(instance.number_of_agents(), 0));
         output.x[j][func.agent(j)] = 1;
     }
 

@@ -117,8 +117,8 @@ CbcEventHandler::CbcAction SolHandler::event(CbcEvent whichEvent)
     if ((whichEvent != solution && whichEvent != heuristicSolution)) // no solution found
         return noAction;
 
-    ItemIdx  n = instance_.item_number();
-    AgentIdx m = instance_.agent_number();
+    ItemIdx  n = instance_.number_of_items();
+    AgentIdx m = instance_.number_of_agents();
 
     OsiSolverInterface *origSolver = model_->solver();
     const OsiSolverInterface *pps = model_->postProcessedSolver(1);
@@ -141,22 +141,22 @@ CbcEventHandler::CbcAction SolHandler::event(CbcEvent whichEvent)
 
 CoinLP::CoinLP(const Instance& instance)
 {
-    ItemIdx  n = instance.item_number();
-    AgentIdx m = instance.agent_number();
+    ItemIdx  n = instance.number_of_items();
+    AgentIdx m = instance.number_of_agents();
 
     // Variables
-    int col_number = m * n;
-    col_lower.resize(col_number, 0);
-    col_upper.resize(col_number, 1);
+    int number_of_columns = m * n;
+    col_lower.resize(number_of_columns, 0);
+    col_upper.resize(number_of_columns, 1);
 
     // Objective
-    objective = std::vector<double>(col_number);
+    objective = std::vector<double>(number_of_columns);
     for (AgentIdx i = 0; i < m; ++i)
         for (ItemIdx j = 0; j < n; ++j)
             objective[m * j + i] = instance.cost(j, i);
 
     // Constraints
-    int row_number = 0; // will be increased each time we add a constraint
+    int number_of_rows = 0; // will be increased each time we add a constraint
     std::vector<CoinBigIndex> row_starts;
     std::vector<int> number_of_elements_in_rows;
     std::vector<int> element_columns;
@@ -168,7 +168,7 @@ CoinLP::CoinLP(const Instance& instance)
         // Initialize new row
         row_starts.push_back(elements.size());
         number_of_elements_in_rows.push_back(0);
-        row_number++;
+        number_of_rows++;
         // Add elements
         for (AgentIdx i = 0; i < m; ++i) {
             elements.push_back(1);
@@ -186,7 +186,7 @@ CoinLP::CoinLP(const Instance& instance)
         // Initialize new row
         row_starts.push_back(elements.size());
         number_of_elements_in_rows.push_back(0);
-        row_number++;
+        number_of_rows++;
         // Add row elements
         for (ItemIdx j = 0; j < n; ++j) {
             elements.push_back(instance.weight(j, i));
@@ -201,7 +201,7 @@ CoinLP::CoinLP(const Instance& instance)
     // Create matrix
     row_starts.push_back(elements.size());
     matrix = CoinPackedMatrix(false,
-            col_number, row_number, elements.size(),
+            number_of_columns, number_of_rows, elements.size(),
             elements.data(), element_columns.data(),
             row_starts.data(), number_of_elements_in_rows.data());
 }
@@ -214,8 +214,8 @@ MilpCbcOutput generalizedassignmentsolver::milp_cbc(
 
     MilpCbcOutput output(instance, parameters.info);
 
-    ItemIdx n = instance.item_number();
-    AgentIdx m = instance.agent_number();
+    ItemIdx n = instance.number_of_items();
+    AgentIdx m = instance.number_of_agents();
     if (n == 0)
         return output.algorithm_end(parameters.info);
 

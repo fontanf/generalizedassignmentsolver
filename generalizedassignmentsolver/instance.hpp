@@ -100,8 +100,8 @@ public:
     inline Cost cost_max()   const { return c_max_; }
     inline Cost weight_max() const { return w_max_; }
 
-    ItemIdx item_number()       const { return items_.size(); }
-    AgentIdx agent_number()     const { return t_.size(); }
+    ItemIdx number_of_items()       const { return items_.size(); }
+    AgentIdx number_of_agents()     const { return t_.size(); }
     Weight capacity(AgentIdx i) const { return t_[i]; }
 
     inline Weight weight(ItemIdx j, AgentIdx i) const { return items_[j].alternatives[i].w; }
@@ -137,8 +137,8 @@ void Instance::add_item()
     ItemIdx j = items_.size();
     items_.push_back({});
     items_[j].j = j;
-    items_[j].alternatives.resize(agent_number());
-    for (AgentIdx i = 0; i < agent_number(); ++i) {
+    items_[j].alternatives.resize(number_of_agents());
+    for (AgentIdx i = 0; i < number_of_agents(); ++i) {
         items_[j].alternatives[i].j = j;
         items_[j].alternatives[i].i = i;
     }

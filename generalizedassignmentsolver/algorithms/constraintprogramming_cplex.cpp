@@ -21,8 +21,8 @@ ConstraintProgrammingCplexOutput generalizedassignmentsolver::constraintprogramm
     VER(parameters.info, "*** constraintprogramming_cplex ***" << std::endl);
     ConstraintProgrammingCplexOutput output(instance, parameters.info);
 
-    ItemIdx n = instance.item_number();
-    AgentIdx m = instance.agent_number();
+    ItemIdx n = instance.number_of_items();
+    AgentIdx m = instance.number_of_agents();
     IloEnv env;
     IloModel model(env);
 

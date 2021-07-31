@@ -74,8 +74,8 @@ public:
         //(void)heur_val;
         //return 0;
         Solution sol(instance_);
-        ItemIdx n = instance_.item_number();
-        AgentIdx m = instance_.agent_number();
+        ItemIdx n = instance_.number_of_items();
+        AgentIdx m = instance_.number_of_agents();
         for (ItemIdx j = 0; j < n; ++j) {
             bool fixed = false;
             AgentIdx i_best = -1;
@@ -109,8 +109,8 @@ private:
 int LagRelaxAssignmentHook::compute_rc(const VOL_dvector& u, VOL_dvector& rc)
 {
     const Instance& ins = instance_;
-    ItemIdx n = instance_.item_number();
-    AgentIdx m = instance_.agent_number();
+    ItemIdx n = instance_.number_of_items();
+    AgentIdx m = instance_.number_of_agents();
     for (ItemIdx j = 0; j < n; ++j)
         for (AgentIdx i = 0; i < m; ++i)
             rc[m * j + i] = ins.cost(j, i) - u[j];
@@ -121,8 +121,8 @@ int LagRelaxAssignmentHook::solve_subproblem(const VOL_dvector& dual, const VOL_
         double& lcost, VOL_dvector& x, VOL_dvector& v, double& pcost)
 {
     const Instance& ins = instance_;
-    ItemIdx n = instance_.item_number();
-    AgentIdx m = instance_.agent_number();
+    ItemIdx n = instance_.number_of_items();
+    AgentIdx m = instance_.number_of_agents();
 
     lcost = 0;
     pcost = 0;
@@ -143,12 +143,12 @@ int LagRelaxAssignmentHook::solve_subproblem(const VOL_dvector& dual, const VOL_
             knapsacksolver::Profit p = std::ceil(mult * dual[j] - mult * ins.cost(j, i));
             if (p > 0) {
                 instance_kp.add_item(ins.weight(j, i), p);
-                knapsacksolver::ItemIdx j_kp = instance_kp.item_number() - 1;
+                knapsacksolver::ItemIdx j_kp = instance_kp.number_of_items() - 1;
                 indices[j_kp] = j;
             }
         }
         auto output_kp = knapsacksolver::minknap(instance_kp);
-        for (knapsacksolver::ItemIdx j_kp = 0; j_kp < instance_kp.item_number(); ++j_kp) {
+        for (knapsacksolver::ItemIdx j_kp = 0; j_kp < instance_kp.number_of_items(); ++j_kp) {
             if (output_kp.solution.contains_idx(j_kp)) {
                 ItemIdx j = indices[j_kp];
                 x[m * j + i] = 1;
@@ -160,19 +160,19 @@ int LagRelaxAssignmentHook::solve_subproblem(const VOL_dvector& dual, const VOL_
     }
 
     //std::cout << "mult";
-    //for (ItemIdx j=0; j<ins.item_number(); ++j)
+    //for (ItemIdx j=0; j<ins.number_of_items(); ++j)
     //std::cout << " " << dual[j];
     //std::cout << std::endl;
     //std::cout << "pcost " << pcost << std::endl;
     //std::cout << "lcost " << lcost << std::endl;
     //std::cout << "v ";
-    //for (ItemIdx j=0; j<ins.item_number(); ++j)
+    //for (ItemIdx j=0; j<ins.number_of_items(); ++j)
     //std::cout << " " << v[j];
     //std::cout << std::endl;
 
-    //for (ItemIdx j=0; j<ins.item_number(); ++j) {
+    //for (ItemIdx j=0; j<ins.number_of_items(); ++j) {
     //std::cout << "j " << j;
-    //for (AgentIdx i=0; i<ins.agent_number(); ++i) {
+    //for (AgentIdx i=0; i<ins.number_of_agents(); ++i) {
     //AltIdx k = ins.alternative_index(j, i);
     //std::cout << " " << round(x[k] * 100) / 100;
     //}
@@ -187,8 +187,8 @@ LagRelaxAssignmentVolumeOutput generalizedassignmentsolver::lagrelax_assignment_
     VER(info, "*** lagrelax_assignment_volume ***" << std::endl);
     LagRelaxAssignmentVolumeOutput output(ins, info);
 
-    ItemIdx n = ins.item_number();
-    AgentIdx m = ins.agent_number();
+    ItemIdx n = ins.number_of_items();
+    AgentIdx m = ins.number_of_agents();
 
     VOL_problem volprob;
     volprob.parm.printflag = (info.output->verbose)? 1: 0;
@@ -293,8 +293,8 @@ private:
 int LagRelaxKnapsackHook::compute_rc(const VOL_dvector& u, VOL_dvector& rc)
 {
     const Instance& ins = instance_;
-    ItemIdx n = instance_.item_number();
-    AgentIdx m = instance_.agent_number();
+    ItemIdx n = instance_.number_of_items();
+    AgentIdx m = instance_.number_of_agents();
     for (ItemIdx j = 0; j < n; ++j)
         for (AgentIdx i = 0; i < m; ++i)
             rc[m * j + i] = ins.cost(j, i) - u[i] * ins.weight(j, i);
@@ -305,8 +305,8 @@ int LagRelaxKnapsackHook::solve_subproblem(const VOL_dvector& dual, const VOL_dv
         double& lcost, VOL_dvector& x, VOL_dvector& v, double& pcost)
 {
     const Instance& ins = instance_;
-    ItemIdx n = instance_.item_number();
-    AgentIdx m = instance_.agent_number();
+    ItemIdx n = instance_.number_of_items();
+    AgentIdx m = instance_.number_of_agents();
 
     lcost = 0;
     pcost = 0;
@@ -334,13 +334,13 @@ int LagRelaxKnapsackHook::solve_subproblem(const VOL_dvector& dual, const VOL_dv
     }
 
     //std::cout << "mult";
-    //for (AgentIdx i=0; i<ins.agent_number(); ++i)
+    //for (AgentIdx i=0; i<ins.number_of_agents(); ++i)
     //std::cout << " " << dual[i];
     //std::cout << std::endl;
     //std::cout << "pcost " << pcost << std::endl;
     //std::cout << "lcost " << lcost << std::endl;
     //std::cout << "v ";
-    //for (AgentIdx i=0; i<ins.agent_number(); ++i)
+    //for (AgentIdx i=0; i<ins.number_of_agents(); ++i)
     //std::cout << " " << v[i];
     //std::cout << std::endl;
 
@@ -352,8 +352,8 @@ LagRelaxKnapsackVolumeOutput generalizedassignmentsolver::lagrelax_knapsack_volu
     VER(info, "*** lagrelax_knapsack_volume ***" << std::endl);
     LagRelaxKnapsackVolumeOutput output(ins, info);
 
-    ItemIdx n = ins.item_number();
-    AgentIdx m = ins.agent_number();
+    ItemIdx n = ins.number_of_items();
+    AgentIdx m = ins.number_of_agents();
 
     VOL_problem volprob;
     volprob.parm.printflag = (info.output->verbose)? 1: 0;

@@ -79,11 +79,7 @@ bazel build \
 
 Solve:
 ```shell
-./bazel-bin/generalizedassignmentsolver/main -v \
-    -a 'mthg -f -pij/wij' \
-    -i "data/a05100" \
-    -o "a05100_output.json" \
-    -c "a05100_solution.txt"
+./bazel-bin/generalizedassignmentsolver/main -v -a 'mthg -f -pij/wij' -i "data/chu1997/a05100" -o "a05100_output.json" -c "a05100_solution.txt"
 ```
 
 Unit tests:

@@ -11,9 +11,9 @@ Solution generalizedassignmentsolver::random_infeasible(
         const Instance& instance,
         std::mt19937_64& generator)
 {
-    std::uniform_int_distribution<> dis(0, instance.agent_number() - 1);
+    std::uniform_int_distribution<> dis(0, instance.number_of_agents() - 1);
     Solution solution(instance);
-    for (ItemIdx j=0; j<instance.item_number(); ++j)
+    for (ItemIdx j=0; j<instance.number_of_items(); ++j)
         solution.set(j, dis(generator));
     return solution;
 }
@@ -27,8 +27,8 @@ Output generalizedassignmentsolver::random(
     Output output(instance, info);
 
     Solution solution = random_infeasible(instance, generator);
-    AgentIdx m = instance.agent_number();
-    ItemIdx  n = instance.item_number();
+    AgentIdx m = instance.number_of_agents();
+    ItemIdx  n = instance.number_of_items();
     std::uniform_int_distribution<Counter> dis_ss(1, n * m + (n * (n + 1)) / 2);
     std::uniform_int_distribution<ItemIdx> dis_j(0, n - 1);
     std::uniform_int_distribution<ItemIdx> dis_j2(0, n - 2);

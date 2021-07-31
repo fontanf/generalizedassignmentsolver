@@ -29,13 +29,13 @@ public:
     GapGecode(const Instance& instance, ConstraintProgrammingGecodeOptionalParameters& p):
         instance_(instance),
         p_(p),
-        xij0_(*this, instance.item_number() * instance.agent_number(), 0, 1),
-        xj_(*this, instance.item_number(), 0, instance.agent_number() - 1),
-        cj_(*this, instance.item_number()),
-        load_(*this, instance.agent_number())
+        xij0_(*this, instance.number_of_items() * instance.number_of_agents(), 0, 1),
+        xj_(*this, instance.number_of_items(), 0, instance.number_of_agents() - 1),
+        cj_(*this, instance.number_of_items()),
+        load_(*this, instance.number_of_agents())
     {
-        ItemIdx n = instance.item_number();
-        AgentIdx m = instance.agent_number();
+        ItemIdx n = instance.number_of_items();
+        AgentIdx m = instance.number_of_agents();
 
         // Channel xij == 1 <=> xj == i
         Matrix<BoolVarArgs> xij(xij0_, n, m);
@@ -132,7 +132,7 @@ ConstraintProgrammingGecodeOutput generalizedassignmentsolver::constraintprogram
     VER(parameters.info, "*** constraintprogramming_gecode ***" << std::endl);
     ConstraintProgrammingGecodeOutput output(instance, parameters.info);
 
-    if (instance.item_number() == 0)
+    if (instance.number_of_items() == 0)
         return output.algorithm_end(parameters.info);
 
     GapGecode model(instance, parameters);
@@ -151,7 +151,7 @@ ConstraintProgrammingGecodeOutput generalizedassignmentsolver::constraintprogram
     Solution sol_best(instance);
     while ((sol_ptr = engine.next())) {
         Solution sol_curr(instance);
-        for (ItemIdx j=0; j<instance.item_number(); j++)
+        for (ItemIdx j=0; j<instance.number_of_items(); j++)
             sol_curr.set(j, sol_ptr->agent(j));
         output.update_solution(sol_curr, std::stringstream(""), parameters.info);
         delete sol_ptr;

@@ -43,17 +43,17 @@ public:
 
     inline Cost cost()           const { return total_cost_; }
     inline Cost cost(AgentIdx i) const { return agents_[i].cost; }
-    inline Cost profit()         const { return item_number() * instance().cost_max() - total_cost_; }
+    inline Cost profit()         const { return number_of_items() * instance().cost_max() - total_cost_; }
 
     inline PCost pcost()           const { return total_pcost_; }
     inline PCost pcost(AgentIdx i) const { return agents_[i].pcost; }
 
     inline double comp() const { return comp_; }
 
-    inline bool full() const { return n_ == instance().item_number(); }
+    inline bool full() const { return n_ == instance().number_of_items(); }
     inline bool feasible() const { return full() && (overcapacity() == 0); }
 
-    inline ItemIdx item_number() const { return n_; }
+    inline ItemIdx number_of_items() const { return n_; }
     inline AgentIdx agent(ItemIdx j) const { return x_[j]; }
 
     /**

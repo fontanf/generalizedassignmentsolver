@@ -22,8 +22,8 @@ struct ColumnGenerationOutput: Output
 
     std::vector<double> solution;
     std::vector<std::vector<double>> x;
-    Counter iteration_number = 0;
-    Counter added_column_number = 0;
+    Counter number_of_iterations = 0;
+    Counter number_of_added_columns = 0;
 };
 
 ColumnGenerationOutput columngeneration(

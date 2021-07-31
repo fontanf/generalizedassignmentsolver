@@ -20,8 +20,8 @@ LinRelaxClpOutput generalizedassignmentsolver::linrelax_clp(const Instance& inst
 {
     VER(info, "*** linrelax_clp ***" << std::endl);
 
-    ItemIdx  n = instance.item_number();
-    AgentIdx m = instance.agent_number();
+    ItemIdx  n = instance.number_of_items();
+    AgentIdx m = instance.number_of_agents();
 
     LinRelaxClpOutput output(instance, info);
 

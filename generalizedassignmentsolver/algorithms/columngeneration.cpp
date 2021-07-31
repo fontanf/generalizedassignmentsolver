@@ -43,11 +43,11 @@ typedef columngenerationsolver::Column Column;
 
 ColumnGenerationOutput& ColumnGenerationOutput::algorithm_end(Info& info)
 {
-    PUT(info, "Algorithm", "Iterations", iteration_number);
-    PUT(info, "Algorithm", "AddedColumns", added_column_number);
+    PUT(info, "Algorithm", "Iterations", number_of_iterations);
+    PUT(info, "Algorithm", "AddedColumns", number_of_added_columns);
     Output::algorithm_end(info);
-    VER(info, "Iterations: " << iteration_number << std::endl);
-    VER(info, "Added columns: " << added_column_number << std::endl);
+    VER(info, "Iterations: " << number_of_iterations << std::endl);
+    VER(info, "Added columns: " << number_of_added_columns << std::endl);
     return *this;
 }
 
@@ -70,8 +70,8 @@ public:
 
     PricingSolver(const Instance& instance):
         instance_(instance),
-        fixed_items_(instance.item_number()),
-        fixed_agents_(instance.agent_number())
+        fixed_items_(instance.number_of_items()),
+        fixed_agents_(instance.number_of_agents())
     {  }
 
     virtual std::vector<ColIdx> initialize_pricing(
@@ -94,8 +94,8 @@ private:
 
 columngenerationsolver::Parameters get_parameters(const Instance& instance)
 {
-    AgentIdx m = instance.agent_number();
-    ItemIdx n = instance.item_number();
+    AgentIdx m = instance.number_of_agents();
+    ItemIdx n = instance.number_of_items();
     columngenerationsolver::Parameters p(m + n);
 
     p.objective_sense = columngenerationsolver::ObjectiveSense::Min;
@@ -123,7 +123,7 @@ Solution columns2solution(
         const Instance& instance,
         const std::vector<std::pair<Column, Value>>& columns)
 {
-    AgentIdx m = instance.agent_number();
+    AgentIdx m = instance.number_of_agents();
     Solution solution(instance);
     for (const auto& pair: columns) {
         const Column& column = pair.first;
@@ -157,10 +157,10 @@ std::vector<ColIdx> PricingSolver::initialize_pricing(
             Value row_coefficient = column.row_coefficients[row_pos];
             if (row_coefficient < 0.5)
                 continue;
-            if (row_index < instance_.agent_number()) {
+            if (row_index < instance_.number_of_agents()) {
                 fixed_agents_[row_index] = 1;
             } else {
-                fixed_items_[row_index - instance_.agent_number()] = 1;
+                fixed_items_[row_index - instance_.number_of_agents()] = 1;
             }
         }
     }
@@ -170,11 +170,11 @@ std::vector<ColIdx> PricingSolver::initialize_pricing(
 std::vector<Column> PricingSolver::solve_pricing(
             const std::vector<Value>& duals)
 {
-    AgentIdx m = instance_.agent_number();
-    ItemIdx n = instance_.item_number();
+    AgentIdx m = instance_.number_of_agents();
+    ItemIdx n = instance_.number_of_items();
     std::vector<Column> columns;
     knapsacksolver::Profit mult = 10000;
-    for (AgentIdx i = 0; i < instance_.agent_number(); ++i) {
+    for (AgentIdx i = 0; i < instance_.number_of_agents(); ++i) {
         if (fixed_agents_[i] == 1)
             continue;
         // Build subproblem instance.
@@ -199,7 +199,7 @@ std::vector<Column> PricingSolver::solve_pricing(
         Column column;
         column.row_indices.push_back(i);
         column.row_coefficients.push_back(1);
-        for (knapsacksolver::ItemIdx j = 0; j < instance_kp.item_number(); ++j) {
+        for (knapsacksolver::ItemIdx j = 0; j < instance_kp.number_of_items(); ++j) {
             if (output_kp.solution.contains_idx(j)) {
                 column.row_indices.push_back(m + kp2gap_[j]);
                 column.row_coefficients.push_back(1);
@@ -232,8 +232,8 @@ ColumnGenerationOutput generalizedassignmentsolver::columngeneration(
             std::ceil(columngeneration_output.solution_value - TOL),
             std::stringstream(""),
             parameters.info);
-    output.added_column_number = columngeneration_output.added_column_number;
-    output.iteration_number = columngeneration_output.iteration_number;
+    output.number_of_added_columns = columngeneration_output.number_of_added_columns;
+    output.number_of_iterations = columngeneration_output.number_of_iterations;
     return output.algorithm_end(parameters.info);
 }
 
@@ -280,7 +280,7 @@ ColumnGenerationHeuristicLimitedDiscrepancySearchOutput generalizedassignmentsol
                 const columngenerationsolver::LimitedDiscrepancySearchOutput& o)
         {
             std::stringstream ss;
-            ss << "node " << o.node_number;
+            ss << "node " << o.number_of_nodes;
             if (o.solution.size() > 0) {
                 ss << " discrepancy " << o.solution_discrepancy;
                 output.update_solution(

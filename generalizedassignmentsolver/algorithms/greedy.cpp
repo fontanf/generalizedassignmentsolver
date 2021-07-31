@@ -10,8 +10,8 @@ using namespace generalizedassignmentsolver;
 std::vector<std::pair<ItemIdx, AgentIdx>> generalizedassignmentsolver::greedy_init(const Solution& solution, const Desirability& f)
 {
     const Instance& instance = solution.instance();
-    ItemIdx  n = instance.item_number();
-    AgentIdx m = instance.agent_number();
+    ItemIdx  n = instance.number_of_items();
+    AgentIdx m = instance.number_of_agents();
     std::vector<std::pair<ItemIdx, AgentIdx>> alt;
     for (ItemIdx j = 0; j < n; ++j)
         for (AgentIdx i = 0; i < m; ++i)
@@ -54,8 +54,8 @@ Output generalizedassignmentsolver::greedy(const Instance& instance, const Desir
 
 std::vector<std::vector<AgentIdx>> generalizedassignmentsolver::greedyregret_init(const Instance& instance, const Desirability& f)
 {
-    ItemIdx n = instance.item_number();
-    AgentIdx m = instance.agent_number();
+    ItemIdx n = instance.number_of_items();
+    AgentIdx m = instance.number_of_agents();
 
     std::vector<std::vector<AgentIdx>> agents(n, std::vector<AgentIdx>(m));
     for (ItemIdx j = 0; j < n; ++j) {
@@ -73,8 +73,8 @@ void generalizedassignmentsolver::greedyregret(Solution& solution, const Desirab
         const std::vector<std::vector<int>>& fixed_alt)
 {
     const Instance& instance = solution.instance();
-    ItemIdx n = instance.item_number();
-    AgentIdx m = instance.agent_number();
+    ItemIdx n = instance.number_of_items();
+    AgentIdx m = instance.number_of_agents();
     std::vector<std::pair<AgentIdx, AgentIdx>> bests(n, {0, 1});
 
     while (!solution.full()) {
@@ -139,8 +139,8 @@ Output generalizedassignmentsolver::greedyregret(const Instance& instance, const
 void nshift(Solution& solution)
 {
     const Instance& instance = solution.instance();
-    ItemIdx n = instance.item_number();
-    AgentIdx m = instance.agent_number();
+    ItemIdx n = instance.number_of_items();
+    AgentIdx m = instance.number_of_agents();
     for (ItemIdx j = 0; j < n; ++j) {
         AgentIdx i_old = solution.agent(j);
         Cost c_best = 0;
