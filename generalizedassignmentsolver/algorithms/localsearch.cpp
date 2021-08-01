@@ -104,7 +104,6 @@ public:
 
     struct Parameters
     {
-        const generalizedassignmentsolver::Solution* initial_solution = NULL;
     };
 
     LocalScheme(
@@ -141,14 +140,6 @@ public:
             std::mt19937_64& generator) const
     {
         Solution solution = empty_solution();
-        if (parameters_.initial_solution != nullptr) {
-            for (ItemIdx j = 0; j < instance_.number_of_items(); ++j) {
-                AgentIdx i = parameters_.initial_solution->agent(j);
-                if (i != -1)
-                    add(solution, j, i);
-            }
-        }
-
         std::uniform_int_distribution<ItemIdx> d(0, instance_.number_of_agents() - 1);
         for (ItemIdx j = 0; j < instance_.number_of_items(); ++j) {
             if (solution.agents[j] != -1)
@@ -157,6 +148,17 @@ public:
             add(solution, j, i);
         }
         return solution;
+    }
+
+    inline Solution solution(
+            const generalizedassignmentsolver::Solution& solution) const
+    {
+        Solution solution_new = empty_solution();
+        for (ItemIdx j = 0; j < instance_.number_of_items(); ++j) {
+            AgentIdx i = solution.agent(j);
+            add(solution_new, j, i);
+        }
+        return solution_new;
     }
 
     /*
@@ -408,7 +410,6 @@ LocalSearchOutput generalizedassignmentsolver::localsearch(
 
     // Create LocalScheme.
     LocalScheme::Parameters parameters_local_scheme;
-    parameters_local_scheme.initial_solution = parameters.initial_solution;
     LocalScheme local_scheme(instance, parameters_local_scheme);
 
     // Run A*.
@@ -417,8 +418,13 @@ LocalSearchOutput generalizedassignmentsolver::localsearch(
     parameters_a_star.info.set_time_limit(parameters.info.remaining_time());
     parameters_a_star.number_of_threads_1 = 1;
     parameters_a_star.number_of_threads_2 = parameters.number_of_threads;
-    parameters_a_star.initial_solution_ids = std::vector<Counter>(
-            parameters_a_star.number_of_threads_2, 0);
+    if (parameters.initial_solution == nullptr) {
+        parameters_a_star.initial_solution_ids = std::vector<Counter>(
+                parameters_a_star.number_of_threads_2, 0);
+    } else {
+        LocalScheme::Solution solution = local_scheme.solution(*parameters.initial_solution);
+        parameters_a_star.initial_solutions = {solution};
+    }
     parameters_a_star.new_solution_callback
         = [&instance, &parameters, &output](
                 const LocalScheme::Solution& solution)
