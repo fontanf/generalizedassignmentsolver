@@ -11,18 +11,17 @@ Solution::Solution(const Instance& instance):
     agents_(instance.number_of_agents())
 { }
 
-Solution::Solution(const Instance& instance, std::string filepath):
+Solution::Solution(const Instance& instance, std::string certificate_path):
     instance_(instance),
     x_(instance.number_of_items(), -1),
     agents_(instance.number_of_agents())
 {
-    if (filepath.empty())
+    if (certificate_path.empty())
         return;
-    std::ifstream file(filepath);
-    if (!file.good()) {
-        std::cerr << "\033[31m" << "ERROR, unable to open file \"" << filepath << "\"" << "\033[0m" << std::endl;
-        return;
-    }
+    std::ifstream file(certificate_path);
+    if (!file.good())
+        throw std::runtime_error(
+                "Unable to open file \"" + certificate_path + "\".");
 
     AgentIdx i = -1;
     for (ItemPos j = 0; j < instance.number_of_items(); ++j) {
@@ -49,8 +48,7 @@ Solution::Solution(const Solution& sol):
     total_cost_(sol.total_cost_),
     total_weight_(sol.total_weight_),
     total_overcapacity_(sol.total_overcapacity_),
-    total_pcost_(sol.total_pcost_),
-    comp_(sol.comp_)
+    total_pcost_(sol.total_pcost_)
 { }
 
 Solution& Solution::operator=(const Solution& sol)
@@ -64,7 +62,6 @@ Solution& Solution::operator=(const Solution& sol)
             total_weight_       = sol.total_weight_;
             total_overcapacity_ = sol.total_overcapacity_;
             total_pcost_        = sol.total_pcost_;
-            comp_               = sol.comp_;
         } else {
             clear();
             for (ItemIdx j = 0; j < instance().number_of_items(); ++j)
@@ -225,19 +222,18 @@ ItemIdx generalizedassignmentsolver::distance(const Solution& sol1, const Soluti
     return dist;
 }
 
-void Solution::write(std::string filepath)
+void Solution::write(std::string certificate_path)
 {
-    if (filepath.empty())
+    if (certificate_path.empty())
         return;
-    std::ofstream cert(filepath);
-    if (!cert.good()) {
-        std::cerr << "\033[31m" << "ERROR, unable to open file \"" << filepath << "\"" << "\033[0m" << std::endl;
-        return;
-    }
+    std::ofstream file(certificate_path);
+    if (!file.good())
+        throw std::runtime_error(
+                "Unable to open file \"" + certificate_path + "\".");
 
-    std::copy(x_.begin(), x_.end(), std::ostream_iterator<AgentIdx>(cert, " "));
-    cert << std::endl;
-    cert.close();
+    std::copy(x_.begin(), x_.end(), std::ostream_iterator<AgentIdx>(file, " "));
+    file << std::endl;
+    file.close();
 }
 
 std::ostream& generalizedassignmentsolver::operator<<(std::ostream& os, const Solution& solution)

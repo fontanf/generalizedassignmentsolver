@@ -74,7 +74,7 @@ public:
     DesirabilityEfficiency(const Instance& ins): instance(ins) { }
     double operator()(ItemIdx j, AgentIdx i) const
     {
-        return (double)(instance.cost(j, i) - instance.item(j).c_max) / instance.weight(j, i);
+        return -(double)instance.profit(j, i) / instance.weight(j, i);
     }
     std::string to_string() const { return "-pij/wij"; }
 private:

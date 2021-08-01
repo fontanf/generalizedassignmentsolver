@@ -4,6 +4,14 @@ A solver for the Generalized Assignment Problem.
 
 This problem is interesting because many different optimization methods can and have been applied to solve it (Branch-and-cut, Branch-and-price, Branch-and-relax, Local search, Constraint programming, Column generation heuristics...). Thus, the main goal of this repository is for me to have reference implementations for classical algorithms and optimization solvers.
 
+The variant handled here is the variant:
+* with a minimization objective (items have costs)
+* where all items have to be assigned
+
+It is possible to solve the variant with a maximization objective (items have profits) by setting the cost of assigning item an `j` to agent an `i` to `maximum profit of item j - profit of assigning item j to agent i`.
+
+It is possible to solve the variant where not all items have to be assigned by adding an additional dummy agent `i` such that the weight of assigning an item `j` to this agent `i` is equal to `0` and the cost of assigning an item `j` to this agent `i` is equal to `maximum profit of item j`
+
 ## Implemented algorithms
 
 ### Lower bounds

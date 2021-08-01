@@ -19,50 +19,59 @@ class Solution
 
 public:
 
+    /** Create an empty solution. */
     Solution(const Instance& instance);
-    Solution(const Instance& instance, std::string filepath);
+    /** Create a solution from a file. */
+    Solution(const Instance& instance, std::string certificate_path);
     Solution(const Instance& instance, const std::vector<std::vector<ItemIdx>>& agents);
-    Solution(const Solution& sol);
-    Solution& operator=(const Solution& sol);
+    Solution(const Solution& solution);
+    Solution& operator=(const Solution& solution);
     ~Solution() { }
-    bool operator==(const Solution& sol);
+    bool operator==(const Solution& solution);
 
     /**
      * Getters
      */
 
+    /** Get the instance. */
     inline const Instance& instance() const { return instance_; }
 
+    /** Get the total weight of the solution. */
     inline Weight weight() const { return total_weight_; }
+    /** Get the weight of agent 'i'. */
     inline Weight weight(AgentIdx i) const { return agents_[i].weight; }
-
+    /** Get the remaining capacity of agent 'i'. */
     inline Weight remaining_capacity(AgentIdx i) const { return instance().capacity(i) - weight(i); }
-
-    inline Weight overcapacity()           const { return total_overcapacity_; };
+    /** Get the total overcapacity of the solution. */
+    inline Weight overcapacity() const { return total_overcapacity_; };
+    /** Get the overcapacity of agent 'i'. */
     inline Weight overcapacity(AgentIdx i) const { return agents_[i].overcapacity; };
-
-    inline Cost cost()           const { return total_cost_; }
+    /** Get the total cost of the solution. */
+    inline Cost cost() const { return total_cost_; }
+    /** Get the cost of agent 'i'. */
     inline Cost cost(AgentIdx i) const { return agents_[i].cost; }
-    inline Cost profit()         const { return number_of_items() * instance().cost_max() - total_cost_; }
 
     inline PCost pcost()           const { return total_pcost_; }
     inline PCost pcost(AgentIdx i) const { return agents_[i].pcost; }
 
-    inline double comp() const { return comp_; }
-
+    /** Return 'true' iff all items have been assigned. */
     inline bool full() const { return n_ == instance().number_of_items(); }
+    /** Return 'true' iff the solution is feasible. */
     inline bool feasible() const { return full() && (overcapacity() == 0); }
-
+    /** Get the number of items in the solution. */
     inline ItemIdx number_of_items() const { return n_; }
+    /**
+     * Get the agent to which item 'j' has been assigned.
+     *
+     * Return -1 if item 'j' has not been assigned to an agent.
+     */
     inline AgentIdx agent(ItemIdx j) const { return x_[j]; }
 
-    /**
+    /*
      * Setters
      */
 
     void set(ItemIdx j, AgentIdx i);
-
-    void comp(double c) { comp_ = c; }
 
     void update_penalties(bool inc, PCost delta_inc, PCost delta_dec);
     void update_penalties(const std::vector<PCost>& penalty);
@@ -84,7 +93,6 @@ private:
     Weight total_weight_ = 0;
     Weight total_overcapacity_ = 0;
     PCost total_pcost_ = 0;
-    double comp_ = 0;
 
 };
 
@@ -99,11 +107,6 @@ ItemIdx distance(const Solution& sol1, const Solution& sol2);
 bool compare(const Solution& sol_best, const Solution& sol_curr);
 
 std::ostream& operator<<(std::ostream& os, const Solution& solution);
-
-struct SolutionCompare
-{
-    bool operator()(const Solution& s1, const Solution& s2) { return s1.comp() < s2.comp(); }
-};
 
 /*********************************** Output ***********************************/
 

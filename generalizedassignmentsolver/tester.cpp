@@ -31,7 +31,7 @@ bool test(const Instance& instance, std::vector<Output (*)(Instance&)> fs, TestT
             }
         } else if (tt == UB) {
             if (feasible) {
-                EXPECT_GE(output.solution.profit(), opt);
+                EXPECT_GE(output.solution.cost(), opt);
             }
         }
     }

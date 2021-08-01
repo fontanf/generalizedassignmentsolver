@@ -33,10 +33,10 @@ struct Alternative
 {
     ItemIdx j;
     AgentIdx i;
-    Weight w;
-    Cost c;
+    Weight weight;
+    Cost cost;
 
-    double efficiency() const { return c * w; }
+    double efficiency() const { return cost * weight; }
 };
 
 struct Item
@@ -44,18 +44,18 @@ struct Item
     ItemIdx j;
     std::vector<Alternative> alternatives;
 
-    Weight w; // total weight
-    Cost c; // total cost
+    Weight total_weight;
+    Cost total_cost;
 
-    Cost c_min = -1; // minimum cost
-    Cost c_max = -1; // maximum cost
-    AgentIdx i_cmin = -1; // min cost agent
-    AgentIdx i_cmax = -1; // max cost agent
+    Cost minimum_cost = -1;
+    Cost maximum_cost = -1;
+    AgentIdx i_minimum_cost = -1;
+    AgentIdx i_maximum_cost = -1;
 
-    Weight w_min = -1; // minimum weight
-    Weight w_max = -1; // maximum weight
-    AgentIdx i_wmin = -1; // min weight agent
-    AgentIdx i_wmax = -1; // max weight agent
+    Weight minimum_weight = -1;
+    Weight maximum_weight = -1;
+    AgentIdx i_minimum_weight = -1;
+    AgentIdx i_maximum_weight = -1;
 };
 
 class Instance
@@ -63,24 +63,31 @@ class Instance
 
 public:
 
-    /**
+    /*
      * Constructors and destructor
      */
 
-    /** Create instance from file. */
+    /** Create an instance from a file. */
     Instance(std::string filename, std::string format = "orlibrary");
 
-    /** Manual constructor. */
+    /** Create an instance manually. */
     Instance(AgentIdx m);
+    /** Set the name of the instance. */
     void set_name(std::string name) { name_ = name; }
-    void set_capacity(AgentIdx i, Weight t) { t_[i] = t; }
-    inline void add_item();
-    inline void set_alternative(ItemIdx j, AgentIdx i, Weight w, Cost p);
+    /** Set the capacity of agent 'i' to 't'. */
+    void set_capacity(AgentIdx i, Weight t) { capacities_[i] = t; }
+    /** Add an item. */
+    void add_item();
+    /** Set the weight and the profit of assigning item 'j' to agent 'i'. */
+    void set_alternative(ItemIdx j, AgentIdx i, Weight weight, Cost cost);
+    /** Clear the instance. */
     void clear();
 
-    /** Constructor for test instances. */
+    /** Add an item with its weights and costs. */
     void add_item(const std::vector<std::pair<Weight, Cost>>& a);
+    /** Set the capacity of all agents. */
     void set_capacities(const std::vector<Weight>& t);
+    /** Set the optimal solution. */
     void set_optimal_solution(Solution& solution);
 
     /** Copy constructor. */
@@ -90,91 +97,71 @@ public:
     /** Destructor. */
     ~Instance();
 
-    /**
+    /*
      * Getters
      */
 
+    /** Get the name of the instance. */
     std::string name() const { return name_; }
+    /** Get item 'j'. */
     const Item& item(ItemPos j) const { return items_[j]; }
 
-    inline Cost cost_max()   const { return c_max_; }
-    inline Cost weight_max() const { return w_max_; }
+    /** Get the maximum cost of the instance. */
+    inline Cost maximum_cost() const { return maximum_cost_; }
+    /** Get the maximum weight of the instance. */
+    inline Cost maximum_weight() const { return maximum_weight_; }
 
-    ItemIdx number_of_items()       const { return items_.size(); }
-    AgentIdx number_of_agents()     const { return t_.size(); }
-    Weight capacity(AgentIdx i) const { return t_[i]; }
+    /** Get the number of items. */
+    ItemIdx number_of_items() const { return items_.size(); }
+    /** Get the number of agents. */
+    AgentIdx number_of_agents() const { return capacities_.size(); }
+    /** Get the capacity of agent 'i'. */
+    Weight capacity(AgentIdx i) const { return capacities_[i]; }
 
-    inline Weight weight(ItemIdx j, AgentIdx i) const { return items_[j].alternatives[i].w; }
-    inline Cost cost(ItemIdx j, AgentIdx i) const { return items_[j].alternatives[i].c; }
-    inline Cost profit(ItemIdx j, AgentIdx i) const { return items_[j].c_max - items_[j].alternatives[i].c; }
+    /** Get the weight of item 'j' when assigned to agent 'i'. */
+    inline Weight weight(ItemIdx j, AgentIdx i) const { return items_[j].alternatives[i].weight; }
+    /** Get the cost of item 'j' when assigned to agent 'i'. */
+    inline Cost cost(ItemIdx j, AgentIdx i) const { return items_[j].alternatives[i].cost; }
+    /** Get the profit of item 'j' when assigned to agent 'i'. */
+    inline Cost profit(ItemIdx j, AgentIdx i) const { return items_[j].maximum_cost - items_[j].alternatives[i].cost; }
 
-    const Solution* optimal_solution() const { return sol_opt_.get(); }
+    /** Get the optimal solution. */
+    const Solution* optimal_solution() const { return optimal_solution_.get(); }
+    /** Get the optimum value. */
     Cost optimum() const;
-    Cost bound() const { return c_tot_ + 1; }
-    Cost combinatorial_relaxation() const { return c_min_sum_; }
+    /** Get a trivial bound. */
+    Cost bound() const { return total_cost_ + 1; }
+    /** Get the bound of the combinatorial relaxation. */
+    Cost combinatorial_relaxation() const { return sum_of_minimum_costs_ + 1; }
 
-    void write(std::string filename);
+    /** Write the instance to a file. */
+    void write(std::string instance_path);
 
 private:
 
+    /** Read an instance in 'orlibrary' format. */
     void read_orlibrary(std::ifstream& file);
+    /** Read an instance in 'standard' format. */
     void read_standard(std::ifstream& file);
 
+    /** Name of the instance. */
     std::string name_;
+    /** Items. */
     std::vector<Item> items_;
-    std::vector<Weight> t_;
-    Cost c_max_ = -1;
-    Cost c_tot_ = 0;
-    Cost w_max_ = -1;
-    Cost c_min_sum_ = 0;
-
-    std::unique_ptr<Solution> sol_opt_;
+    /** Capacities. */
+    std::vector<Weight> capacities_;
+    /** Maximum cost of the instance. */
+    Cost maximum_cost_ = -1;
+    /** Total cost of all alternatives. */
+    Cost total_cost_ = 0;
+    /** Maximum weight of the instance. */
+    Cost maximum_weight_ = -1;
+    /** Sum of the minimum cost of each item. */
+    Cost sum_of_minimum_costs_ = 0;
+    /** Optimal solution. */
+    std::unique_ptr<Solution> optimal_solution_;
 
 };
-
-void Instance::add_item()
-{
-    ItemIdx j = items_.size();
-    items_.push_back({});
-    items_[j].j = j;
-    items_[j].alternatives.resize(number_of_agents());
-    for (AgentIdx i = 0; i < number_of_agents(); ++i) {
-        items_[j].alternatives[i].j = j;
-        items_[j].alternatives[i].i = i;
-    }
-}
-
-void Instance::set_alternative(ItemIdx j, AgentIdx i, Weight w, Cost v)
-{
-    items_[j].alternatives[i].w = w;
-    items_[j].alternatives[i].c = v;
-    items_[j].w += w;
-    items_[j].c += v;
-    if (items_[j].i_cmin != -1 && items_[j].c_min > v)
-        c_min_sum_ -= items_[j].c_min;
-    if (items_[j].i_cmin == -1 || items_[j].c_min > v) {
-        items_[j].i_cmin = i;
-        items_[j].c_min = v;
-        c_min_sum_ += v;
-    }
-    if (items_[j].i_wmin == -1 || items_[j].w_min > w) {
-        items_[j].i_wmin = i;
-        items_[j].w_min = w;
-    }
-    if (items_[j].c_max < v) {
-        items_[j].i_cmax = i;
-        items_[j].c_max = v;
-    }
-    if (items_[j].w_max < w) {
-        items_[j].i_wmax = i;
-        items_[j].w_max = w;
-    }
-    if (c_max_ < v)
-        c_max_ = v;
-    if (w_max_ < w)
-        w_max_ = w;
-    c_tot_ += v;
-}
 
 std::ostream& operator<<(std::ostream &os, const Alternative& alternative);
 std::ostream& operator<<(std::ostream &os, const Instance& instance);

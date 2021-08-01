@@ -51,7 +51,7 @@ Output generalizedassignmentsolver::repair(
     switch (parameters.initial_solution) {
     case RepairInitialSolution::CombinatorialRelaxation: {
         for (ItemIdx j = 0; j < n; ++j)
-            solution.set(j, instance.item(j).i_cmin);
+            solution.set(j, instance.item(j).i_minimum_cost);
         output.update_lower_bound(solution.cost(), std::stringstream("combinatorialrelaxation"), parameters.info);
         break;
     } case RepairInitialSolution::LagrangianRelaxationKnapsackLbfgs: {
