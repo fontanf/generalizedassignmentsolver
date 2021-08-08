@@ -63,6 +63,7 @@ cc_library(
                 ":random",
                 "//generalizedassignmentsolver:generalizedassignmentsolver",
                 "@localsearchsolver//localsearchsolver:localsearchsolver",
+                "@optimizationtools//optimizationtools:indexed_collections",
         ],
         visibility = ["//visibility:public"],
 )

@@ -4,6 +4,8 @@
 
 #include "localsearchsolver/a_star_local_search.hpp"
 
+#include "optimizationtools/indexed_set.hpp"
+
 #include <set>
 #include <random>
 #include <algorithm>
@@ -104,6 +106,7 @@ public:
 
     struct Parameters
     {
+        Counter number_of_perturbations = 10;
     };
 
     LocalScheme(
@@ -111,10 +114,8 @@ public:
             Parameters parameters):
         instance_(instance),
         parameters_(parameters),
-        items_(instance.number_of_items()),
         agents_(instance.number_of_agents())
     {
-        std::iota(items_.begin(), items_.end(), 0);
         std::iota(agents_.begin(), agents_.end(), 0);
     }
 
@@ -151,13 +152,26 @@ public:
     }
 
     inline Solution solution(
-            const generalizedassignmentsolver::Solution& solution) const
+            const generalizedassignmentsolver::Solution& solution,
+            std::mt19937_64& generator) const
     {
         Solution solution_new = empty_solution();
+
         for (ItemIdx j = 0; j < instance_.number_of_items(); ++j) {
             AgentIdx i = solution.agent(j);
+            if (i == -1)
+                continue;
             add(solution_new, j, i);
         }
+
+        std::uniform_int_distribution<ItemIdx> d(0, instance_.number_of_agents() - 1);
+        for (ItemIdx j = 0; j < instance_.number_of_items(); ++j) {
+            if (solution_new.agents[j] != -1)
+                continue;
+            AgentIdx i = d(generator);
+            add(solution_new, j, i);
+        }
+
         return solution_new;
     }
 
@@ -180,108 +194,197 @@ public:
 
     struct Move
     {
-        ItemIdx j;
-        AgentIdx i;
+        std::vector<std::tuple<ItemIdx, AgentIdx, AgentIdx>> moves;
         GlobalCost global_cost;
     };
 
-    static Move move_null() { return {-1, -1, global_cost_worst()}; }
+    static Move move_null() { return {{}, global_cost_worst()}; }
 
     struct MoveHasher
     {
-        std::hash<ItemIdx> hasher_1;
-        std::hash<AgentIdx> hasher_2;
-
-        inline bool hashable(const Move&) const { return true; }
-
-        inline bool operator()(
-                const Move& move_1,
-                const Move& move_2) const
-        {
-            return move_1.j == move_2.j
-                && move_1.i == move_2.i;
-        }
-
-        inline std::size_t operator()(
-                const Move& move) const
-        {
-            auto hash = hasher_1(move.j);
-            optimizationtools::hash_combine(hash, hasher_2(move.i));
-            return hash;
-        }
+        inline bool hashable(const Move&) const { return false; }
+        inline bool operator()(const Move&, const Move&) const { return false; }
+        inline std::size_t operator()(const Move&) const { return 0; }
     };
 
     inline MoveHasher move_hasher() const { return MoveHasher(); }
 
     inline std::vector<Move> perturbations(
             Solution& solution,
-            std::mt19937_64&) const
+            std::mt19937_64& generator)
     {
         std::vector<Move> moves;
-        for (ItemIdx j = 0; j < instance_.number_of_items(); ++j) {
-            AgentIdx i_old = solution.agents[j];
-            remove(solution, j);
-            for (AgentIdx i = 0; i < instance_.number_of_agents(); ++i) {
-                if (i == i_old)
-                    continue;
-                Move move;
-                move.j = j;
-                move.i = i;
-                move.global_cost = cost_add(solution, j, i);
-                moves.push_back(move);
+        std::uniform_int_distribution<AgentIdx> d(0, instance_.number_of_agents() - 2);
+        for (Counter perturbation = 0; perturbation < parameters_.number_of_perturbations; ++perturbation) {
+            std::vector<ItemIdx> items = optimizationtools::bob_floyd<ItemIdx>(
+                    (ItemIdx)8, instance_.number_of_items(), generator);
+            std::shuffle(items.begin(), items.end(), generator);
+            Move move;
+            for (ItemIdx j: items) {
+                AgentIdx i_old = solution.agents[j];
+                AgentIdx i_best = -1;
+                GlobalCost c_best = global_cost_worst();
+                remove(solution, j);
+                std::shuffle(agents_.begin(), agents_.end(), generator);
+                for (AgentIdx i: agents_) {
+                    if (i == i_old)
+                        continue;
+                    GlobalCost c = cost_add(solution, j, i);
+                    if (i_best == -1 || c < c_best) {
+                        i_best = i;
+                        c_best = c;
+                    }
+                }
+                add(solution, j, i_old);
+                move.moves.push_back({j, i_old, i_best});
             }
-            add(solution, j, i_old);
+            move.global_cost = global_cost(solution);
+            moves.push_back(move);
         }
         return moves;
     }
 
     inline void apply_move(Solution& solution, const Move& move) const
     {
-        remove(solution, move.j);
-        add(solution, move.j, move.i);
+        for (auto t: move.moves) {
+            ItemIdx j = std::get<0>(t);
+            AgentIdx i = std::get<2>(t);
+            remove(solution, j);
+            add(solution, j, i);
+        }
     }
+
+
+    struct MoveShift
+    {
+        ItemIdx j = -1;
+        AgentIdx i_old = -1;
+        AgentIdx i = -1;
+        GlobalCost cost_difference = global_cost_worst();
+    };
 
     inline void local_search(
             Solution& solution,
             std::mt19937_64& generator,
-            const Move& tabu = move_null())
+            const Move& perturbation = move_null())
     {
+        ItemIdx n = instance_.number_of_items();
+        AgentIdx m = instance_.number_of_agents();
+
+        // Strucutres for the shift neighborhood.
+        // Agents which have changed since the last shift neighborhood
+        // exploration.
+        optimizationtools::IndexedSet shift_changed_agents(m);
+        // Vector containing the improving moves of the shift neighborhood.
+        std::vector<MoveShift> shift_improving_moves;
+
+        // Initialize move structures.
+        // If we call the local_search on a solution which has not been
+        // perturbed, it is because it is not locally optimal. Therefore, all
+        // agents are considered 'changed'.
+        // Otherwise, only the agent modified by the perturbation are
+        // considered 'changed'.
+        if (perturbation.moves.empty()) {
+            for (AgentIdx i = 0; i < m; ++i)
+                shift_changed_agents.add(i);
+        } else {
+            for (auto t: perturbation.moves) {
+                AgentIdx i_old = std::get<1>(t);
+                AgentIdx i = std::get<2>(t);
+                shift_changed_agents.add(i);
+                shift_changed_agents.add(i_old);
+            }
+        }
+
         Counter it = 0;
         for (;; ++it) {
             //std::cout << "it " << it << " cost " << to_string(global_cost(solution)) << std::endl;
-            std::shuffle(items_.begin(), items_.end(), generator);
-            std::shuffle(agents_.begin(), agents_.end(), generator);
-            ItemIdx j_best = -1;
-            AgentIdx i_best = -1;
-            GlobalCost c_best = global_cost(solution);
-            for (auto& j: items_) {
+
+            // Shift neighborhood exploration.
+
+            // Remove obsolete moves.
+            for (auto it = shift_improving_moves.begin();
+                    it != shift_improving_moves.end();) {
+                if (shift_changed_agents.contains(it->i_old)
+                        || shift_changed_agents.contains(it->i)) {
+                    *it = *std::prev(shift_improving_moves.end());
+                    shift_improving_moves.pop_back();
+                } else {
+                    ++it;
+                }
+            }
+
+            // Evaluate new moves.
+            // For each item belonging to a changed agent, we add shift moves
+            // toward all agents.
+            // For each item belonging to an unchanged agent, we add shift
+            // moves toward all changed agents.
+            GlobalCost c_cur = global_cost(solution);
+            for (ItemIdx j = 0; j < n; ++j) {
                 AgentIdx i_old = solution.agents[j];
                 remove(solution, j);
-                for (AgentIdx i: agents_) {
-                    if (i == i_old)
-                        continue;
-                    if (j == tabu.j && i == tabu.i)
-                        continue;
-                    GlobalCost c = cost_add(solution, j, i);
-                    if (c >= c_best)
-                        continue;
-                    if (j_best != -1 && !dominates(c, c_best))
-                        continue;
-                    j_best = j;
-                    i_best = i;
-                    c_best = c;
+                if (shift_changed_agents.contains(i_old)) {
+                    for (AgentIdx i = 0; i < m; ++i) {
+                        if (i == i_old)
+                            continue;
+                        GlobalCost c = cost_add(solution, j, i);
+                        if (c >= c_cur)
+                            continue;
+                        MoveShift move;
+                        move.j = j;
+                        move.i_old = i_old;
+                        move.i = i;
+                        move.cost_difference = c - c_cur;
+                        shift_improving_moves.push_back(move);
+                    }
+                } else {
+                    for (AgentIdx i: shift_changed_agents) {
+                        if (i == i_old)
+                            continue;
+                        GlobalCost c = cost_add(solution, j, i);
+                        if (c >= c_cur)
+                            continue;
+                        MoveShift move;
+                        move.j = j;
+                        move.i_old = i_old;
+                        move.i = i;
+                        move.cost_difference = c - c_cur;
+                        shift_improving_moves.push_back(move);
+                    }
                 }
                 add(solution, j, i_old);
             }
-            if (j_best == -1)
+            shift_changed_agents.clear();
+
+            // If there is no improving move, then stop here.
+            if (shift_improving_moves.empty())
                 break;
-            remove(solution, j_best);
-            add(solution, j_best, i_best);
-            if (solution.cost != cost(c_best)) {
-                std::cout << to_string(c_best) << std::endl;
-                std::cout << to_string(global_cost(solution)) << std::endl;
+
+            // Otherwise, look for a pareto improving move.
+            //std::shuffle(shift_improving_moves.begin(), shift_improving_moves.end(), generator);
+            auto it_best = shift_improving_moves.begin();
+            for (auto it = shift_improving_moves.begin() + 1;
+                    it != shift_improving_moves.end(); ++it) {
+                if (it->cost_difference >= it_best->cost_difference
+                        || !dominates(it->cost_difference, it_best->cost_difference))
+                    continue;
+                it_best = it;
             }
-            assert(solution.cost == cost(c_best));
+
+            // Apply move.
+            remove(solution, it_best->j);
+            add(solution, it_best->j, it_best->i);
+            if (global_cost(solution) != c_cur + it_best->cost_difference) {
+                throw std::logic_error("Costs do not match:\n"
+                        "* Current cost: " + to_string(c_cur) + "\n"
+                        + "* Move cost difference: " + to_string(it_best->cost_difference) + "\n"
+                        + "* Expected new cost: " + to_string(c_cur + it_best->cost_difference) + "\n"
+                        + "* Actual new cost: " + to_string(global_cost(solution)) + "\n");
+            }
+
+            // Update move structures.
+            shift_changed_agents.add(it_best->i_old);
+            shift_changed_agents.add(it_best->i);
         }
     }
 
@@ -396,14 +499,13 @@ private:
     const Instance& instance_;
     Parameters parameters_;
 
-    std::vector<ItemIdx> items_;
     std::vector<AgentIdx> agents_;
 
 };
 
 LocalSearchOutput generalizedassignmentsolver::localsearch(
         const Instance& instance,
-        std::mt19937_64&,
+        std::mt19937_64& generator,
         LocalSearchOptionalParameters parameters)
 {
     LocalSearchOutput output(instance, parameters.info);
@@ -422,7 +524,8 @@ LocalSearchOutput generalizedassignmentsolver::localsearch(
         parameters_a_star.initial_solution_ids = std::vector<Counter>(
                 parameters_a_star.number_of_threads_2, 0);
     } else {
-        LocalScheme::Solution solution = local_scheme.solution(*parameters.initial_solution);
+        LocalScheme::Solution solution = local_scheme.solution(*parameters.initial_solution, generator);
+        parameters_a_star.initial_solution_ids = {};
         parameters_a_star.initial_solutions = {solution};
     }
     parameters_a_star.new_solution_callback

@@ -7,26 +7,31 @@
 
 using namespace generalizedassignmentsolver;
 
-std::vector<std::pair<ItemIdx, AgentIdx>> generalizedassignmentsolver::greedy_init(const Solution& solution, const Desirability& f)
+std::vector<std::pair<ItemIdx, AgentIdx>> generalizedassignmentsolver::greedy_init(
+        const Instance& instance,
+        const Desirability& f)
 {
-    const Instance& instance = solution.instance();
     ItemIdx  n = instance.number_of_items();
     AgentIdx m = instance.number_of_agents();
-    std::vector<std::pair<ItemIdx, AgentIdx>> alt;
+    std::vector<std::pair<ItemIdx, AgentIdx>> alternatives;
     for (ItemIdx j = 0; j < n; ++j)
         for (AgentIdx i = 0; i < m; ++i)
-            alt.push_back({j, i});
-    sort(alt.begin(), alt.end(), [&f](
+            alternatives.push_back({j, i});
+    sort(alternatives.begin(), alternatives.end(), [&f](
                 const std::pair<ItemIdx, AgentIdx>& a,
-                const std::pair<ItemIdx, AgentIdx>& b) -> bool {
-            return f(a.first, a.second) < f(b.first, b.second); });
-    return alt;
+                const std::pair<ItemIdx, AgentIdx>& b) -> bool
+            {
+                return f(a.first, a.second) < f(b.first, b.second);
+            });
+    return alternatives;
 }
 
-void generalizedassignmentsolver::greedy(Solution& solution, const std::vector<std::pair<ItemIdx, AgentIdx>>& alt)
+void generalizedassignmentsolver::greedy(
+        Solution& solution,
+        const std::vector<std::pair<ItemIdx, AgentIdx>>& alternatives)
 {
     const Instance& instance = solution.instance();
-    for (auto p: alt) {
+    for (auto p: alternatives) {
         ItemIdx j = p.first;
         if (solution.agent(j) != -1)
             continue;
@@ -39,20 +44,24 @@ void generalizedassignmentsolver::greedy(Solution& solution, const std::vector<s
     }
 }
 
-Output generalizedassignmentsolver::greedy(const Instance& instance, const Desirability& f, Info info)
+Output generalizedassignmentsolver::greedy(
+        const Instance& instance,
+        const Desirability& f, Info info)
 {
     VER(info, "*** greedy " << f.to_string() << " ***" << std::endl);
     Output output(instance, info);
     Solution solution(instance);
-    auto alt = greedy_init(solution, f);
-    greedy(solution, alt);
+    auto alternatives = greedy_init(instance, f);
+    greedy(solution, alternatives);
     output.update_solution(solution, std::stringstream(""), info);
     return output.algorithm_end(info);
 }
 
 /******************************************************************************/
 
-std::vector<std::vector<AgentIdx>> generalizedassignmentsolver::greedyregret_init(const Instance& instance, const Desirability& f)
+std::vector<std::vector<AgentIdx>> generalizedassignmentsolver::greedyregret_init(
+        const Instance& instance,
+        const Desirability& f)
 {
     ItemIdx n = instance.number_of_items();
     AgentIdx m = instance.number_of_agents();
@@ -60,17 +69,21 @@ std::vector<std::vector<AgentIdx>> generalizedassignmentsolver::greedyregret_ini
     std::vector<std::vector<AgentIdx>> agents(n, std::vector<AgentIdx>(m));
     for (ItemIdx j = 0; j < n; ++j) {
         std::iota(agents[j].begin(), agents[j].end(), 0);
-        sort(agents[j].begin(), agents[j].end(), [&f, &j](
-                    AgentIdx i1, AgentIdx i2) -> bool {
-                return f(j, i1) < f(j, i2); });
+        sort(agents[j].begin(), agents[j].end(),
+                [&f, &j](AgentIdx i1, AgentIdx i2) -> bool
+                {
+                    return f(j, i1) < f(j, i2);
+                });
     }
 
     return agents;
 }
 
-void generalizedassignmentsolver::greedyregret(Solution& solution, const Desirability& f,
+void generalizedassignmentsolver::greedyregret(
+        Solution& solution,
+        const Desirability& f,
         const std::vector<std::vector<AgentIdx>>& agents,
-        const std::vector<std::vector<int>>& fixed_alt)
+        const std::vector<std::vector<int>>& fixed_alternatives)
 {
     const Instance& instance = solution.instance();
     ItemIdx n = instance.number_of_items();
@@ -89,8 +102,9 @@ void generalizedassignmentsolver::greedyregret(Solution& solution, const Desirab
 
             while (i_first < m) {
                 AgentIdx i = agents[j][i_first];
-                if (instance.weight(j, i) > solution.remaining_capacity(i) ||
-                        (!fixed_alt.empty() && fixed_alt[j][i] != -1)) {
+                if (instance.weight(j, i) > solution.remaining_capacity(i)
+                        || (!fixed_alternatives.empty()
+                            && fixed_alternatives[j][i] != -1)) {
                     i_first++;
                     if (i_first == i_second)
                         i_second++;
@@ -103,8 +117,9 @@ void generalizedassignmentsolver::greedyregret(Solution& solution, const Desirab
 
             while (i_second < m) {
                 AgentIdx i = agents[j][i_second];
-                if (instance.weight(j, i) > solution.remaining_capacity(i) ||
-                        (!fixed_alt.empty() && fixed_alt[j][i] != -1)) {
+                if (instance.weight(j, i) > solution.remaining_capacity(i)
+                        || (!fixed_alternatives.empty()
+                            && fixed_alternatives[j][i] != -1)) {
                     i_second++;
                 } else {
                     break;
@@ -123,7 +138,10 @@ void generalizedassignmentsolver::greedyregret(Solution& solution, const Desirab
     }
 }
 
-Output generalizedassignmentsolver::greedyregret(const Instance& instance, const Desirability& f, Info info)
+Output generalizedassignmentsolver::greedyregret(
+        const Instance& instance,
+        const Desirability& f,
+        Info info)
 {
     VER(info, "*** greedyregret " << f.to_string() << " ***" << std::endl);
     Output output(instance, info);
@@ -159,34 +177,44 @@ void nshift(Solution& solution)
     }
 }
 
-void generalizedassignmentsolver::mthg(Solution& solution, const std::vector<std::pair<ItemIdx, AgentIdx>>& alt)
+void generalizedassignmentsolver::mthg(
+        Solution& solution,
+        const std::vector<std::pair<ItemIdx, AgentIdx>>& alternatives)
 {
-    greedy(solution, alt);
+    greedy(solution, alternatives);
     if (solution.feasible())
         nshift(solution);
 }
 
-Output generalizedassignmentsolver::mthg(const Instance& instance, const Desirability& f, Info info)
+Output generalizedassignmentsolver::mthg(
+        const Instance& instance,
+        const Desirability& f,
+        Info info)
 {
     VER(info, "*** mthg " << f.to_string() << " ***" << std::endl);
     Output output(instance, info);
     Solution solution(instance);
-    auto alt = greedy_init(solution, f);
+    auto alt = greedy_init(instance, f);
     mthg(solution, alt);
     output.update_solution(solution, std::stringstream(""), info);
     return output.algorithm_end(info);
 }
 
-void generalizedassignmentsolver::mthgregret(Solution& solution, const Desirability& f,
+void generalizedassignmentsolver::mthgregret(
+        Solution& solution,
+        const Desirability& f,
         const std::vector<std::vector<AgentIdx>>& agents,
-        const std::vector<std::vector<int>>& fixed_alt)
+        const std::vector<std::vector<int>>& fixed_alternatives)
 {
-    greedyregret(solution, f, agents, fixed_alt);
+    greedyregret(solution, f, agents, fixed_alternatives);
     if (solution.feasible())
         nshift(solution);
 }
 
-Output generalizedassignmentsolver::mthgregret(const Instance& instance, const Desirability& f, Info info)
+Output generalizedassignmentsolver::mthgregret(
+        const Instance& instance,
+        const Desirability& f,
+        Info info)
 {
     VER(info, "*** mthgregret " << f.to_string() << " ***" << std::endl);
     Output output(instance, info);
