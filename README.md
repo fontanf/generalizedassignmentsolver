@@ -17,48 +17,48 @@ It is possible to solve the variant where not all items have to be assigned by a
 ### Lower bounds
 
 - Linear relaxation
-  - solved with CLP `-a linrelax_clp` :heavy_check_mark:
-  - solved with Gurobi `-a "milp_gurobi --only-linear-relaxation"` :heavy_check_mark:
-  - solved with Cplex `-a "milp_cplex --only-linear-relaxation"` :heavy_check_mark:
+  - solved with CLP `-a linrelax_clp`
+  - solved with Gurobi `-a "milp_gurobi --only-linear-relaxation"`
+  - solved with Cplex `-a "milp_cplex --only-linear-relaxation"`
 
 - Lagrangian relaxation of knapsack constraints. The value of this relaxation is the same as the value of the linear relaxation. However, it might be cheaper to compute, especially on large instances.
-  - solved with volume method `-a lagrelax_knapsack_volume` :heavy_check_mark:
-  - solved with L-BFGS method `-a lagrelax_knapsack_lbfgs` :heavy_check_mark:
+  - solved with volume method `-a lagrelax_knapsack_volume`
+  - solved with L-BFGS method `-a lagrelax_knapsack_lbfgs`
 
 - Lagrangian relaxation of assignment constraints
-  - solved with volume method `-a lagrelax_assignment_volume` :heavy_check_mark:
-  - solved with L-BFGS method `-a lagrelax_assignment_lbfgs` :heavy_check_mark:
+  - solved with volume method `-a lagrelax_assignment_volume`
+  - solved with L-BFGS method `-a lagrelax_assignment_lbfgs`
 
-- Column generation `-a "columngeneration --linear-programming-solver clp"` :heavy_check_mark: `-a "columngeneration --linear-programming-solver cplex"` :heavy_check_mark:
+- Column generation `-a "columngeneration --linear-programming-solver clp"` `-a "columngeneration --linear-programming-solver cplex"`
 
 ### Upper bounds
 
-Polynomial algorithms from "Generalized Assignment Problems" (Martello et al., 1992), options `-f cij` `-f wij` `-f cij*wij` `-f -pij/wij` `-f wij/ti`:
-- Basic greedy `-a "greedy -f wij"` :heavy_check_mark:
-- Greedy with regret measure `-a "greedyregret -f wij"` :heavy_check_mark:
-- MTHG, basic greedy (+ n shifts) `-a "mthg -f wij"` :heavy_check_mark:
-- MTHG, greedy with regret measure (+ n shifts) `-a "mthgregret -f wij"` :heavy_check_mark:
+- Polynomial algorithms from "Generalized Assignment Problems" (Martello et al., 1992), options `-f cij` `-f wij` `-f cij*wij` `-f -pij/wij` `-f wij/ti`:
+  - Basic greedy `-a "greedy -f wij"`
+  - Greedy with regret measure `-a "greedyregret -f wij"`
+  - MTHG, basic greedy (+ n shifts) `-a "mthg -f wij"`
+  - MTHG, greedy with regret measure (+ n shifts) `-a "mthgregret -f wij"`
 
-Local search algorithm implemented with [fontanf/localsearchsolver](https://github.com/fontanf/localsearchsolver) `-a "localsearch --threads 3"` :heavy_check_mark:
+- Local search algorithm implemented with [fontanf/localsearchsolver](https://github.com/fontanf/localsearchsolver) `-a "localsearch --threads 3"`
 
-Tree search algorithms based on the Dantzig-Wolfe reformulation branching scheme (i.e. column generation heuristics) implemented with [fontanf/columngenerationsolver](https://github.com/fontanf/columngenerationsolver):
-- Greedy `-a "columngenerationheuristic_greedy --linear-programming-solver cplex"` :heavy_check_mark:
-- Limited discrepency search `-a "columngenerationheuristic_limiteddiscrepancysearch --linear-programming-solver cplex"` :heavy_check_mark:
+- Tree search algorithms based on the Dantzig-Wolfe reformulation branching scheme (i.e. column generation heuristics) implemented with [fontanf/columngenerationsolver](https://github.com/fontanf/columngenerationsolver):
+  - Greedy `-a "columngenerationheuristic_greedy --linear-programming-solver cplex"`
+  - Limited discrepency search `-a "columngenerationheuristic_limiteddiscrepancysearch --linear-programming-solver cplex"`
 
-Others heuristics:
-- Random feasible solution found with a Local search `-a random` :heavy_check_mark:
-- Local search with LocalSolver `-a localsolver` :heavy_check_mark:
+- Others heuristics:
+  - Random feasible solution found with a Local search `-a random`
+  - Local search with LocalSolver `-a localsolver`
 
 ### Exact algorithms
 
 - Mixed-Integer Linear Programs
-  - with CBC `-a milp_cbc` :heavy_check_mark:
-  - with CPLEX `-a milp_cplex` :heavy_check_mark:
-  - with Gurobi `-a milp_gurobi` :heavy_check_mark:
+  - with CBC `-a milp_cbc`
+  - with CPLEX `-a milp_cplex`
+  - with Gurobi `-a milp_gurobi`
 
 - Constraint programming
-  - with Gecode `-a constraintprogramming_gecode` :heavy_check_mark:
-  - with CPLEX `-a constraintprogramming_cplex` :heavy_check_mark:
+  - with Gecode `-a constraintprogramming_gecode`
+  - with CPLEX `-a constraintprogramming_cplex`
 
 ## Usage (command line)
 

@@ -173,7 +173,7 @@ Output generalizedassignmentsolver::run(
         parameters.info = info;
         return lagrelax_assignment_lbfgs(instance, parameters);
     } else if (algorithm_args[0] == "columngeneration") {
-        ColumnGenerationOptionalParameters parameters = read_columngeneration_args(algorithm_argv);
+        auto parameters = read_columngeneration_args(algorithm_argv);
         parameters.info = info;
         return columngeneration(instance, parameters);
 
@@ -233,11 +233,11 @@ Output generalizedassignmentsolver::run(
         std::unique_ptr<Desirability> f = desirability(desirability_string, instance);
         return mthgregret(instance, *f, info);
     } else if (algorithm_args[0] == "repair") {
-        RepairOptionalParameters parameters = read_repair_args(algorithm_argv);
+        auto parameters = read_repair_args(algorithm_argv);
         parameters.info = info;
         return repair(instance, generator, parameters);
     } else if (algorithm_args[0] == "localsearch") {
-        LocalSearchOptionalParameters parameters = read_localsearch_args(algorithm_argv);
+        auto parameters = read_localsearch_args(algorithm_argv);
         parameters.info = info;
         parameters.initial_solution = &initial_solution;
         return localsearch(instance, generator, parameters);
@@ -248,11 +248,11 @@ Output generalizedassignmentsolver::run(
         return localsolver(instance, parameters);
 #endif
     } else if (algorithm_args[0] == "columngenerationheuristic_greedy") {
-        ColumnGenerationOptionalParameters parameters = read_columngeneration_args(algorithm_argv);
+        auto parameters = read_columngeneration_args(algorithm_argv);
         parameters.info = info;
         return columngenerationheuristic_greedy(instance, parameters);
     } else if (algorithm_args[0] == "columngenerationheuristic_limiteddiscrepancysearch") {
-        ColumnGenerationOptionalParameters parameters = read_columngeneration_args(algorithm_argv);
+        auto parameters = read_columngeneration_args(algorithm_argv);
         parameters.info = info;
         return columngenerationheuristic_limiteddiscrepancysearch(instance, parameters);
 

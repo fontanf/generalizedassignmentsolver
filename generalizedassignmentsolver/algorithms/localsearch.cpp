@@ -214,7 +214,6 @@ public:
             std::mt19937_64& generator)
     {
         std::vector<Move> moves;
-        std::uniform_int_distribution<AgentIdx> d(0, instance_.number_of_agents() - 2);
         for (Counter perturbation = 0; perturbation < parameters_.number_of_perturbations; ++perturbation) {
             std::vector<ItemIdx> items = optimizationtools::bob_floyd<ItemIdx>(
                     (ItemIdx)8, instance_.number_of_items(), generator);
@@ -265,7 +264,7 @@ public:
 
     inline void local_search(
             Solution& solution,
-            std::mt19937_64& generator,
+            std::mt19937_64&,
             const Move& perturbation = move_null())
     {
         ItemIdx n = instance_.number_of_items();
