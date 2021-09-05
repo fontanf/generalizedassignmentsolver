@@ -38,7 +38,7 @@ Output generalizedassignmentsolver::random(
     Counter it_max = 2 * (n * m + (n * (n + 1)) / 2);
     Counter it_without_change = 0;
 
-    while (it_without_change < it_max && info.check_time()) {
+    while (it_without_change < it_max && !info.needs_to_end()) {
         Counter p = dis_ss(generator);
         if (p <= m * n) { // shift
             ItemIdx j = dis_j(generator);

@@ -157,7 +157,7 @@ ConstraintProgrammingGecodeOutput generalizedassignmentsolver::constraintprogram
         delete sol_ptr;
     }
 
-    if (parameters.info.check_time()) {
+    if (!parameters.info.needs_to_end()) {
         Cost lb = (output.solution.feasible())? output.solution.cost(): instance.bound();
         output.update_lower_bound(lb, std::stringstream(""), parameters.info);
     }

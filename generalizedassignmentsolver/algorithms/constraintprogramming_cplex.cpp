@@ -84,7 +84,7 @@ ConstraintProgrammingCplexOutput generalizedassignmentsolver::constraintprogramm
         output.update_solution(sol_curr, std::stringstream(""), parameters.info);
     }
 
-    if (parameters.info.check_time()) {
+    if (!parameters.info.needs_to_end()) {
         Cost lb = (output.solution.feasible())? output.solution.cost(): instance.bound();
         output.update_lower_bound(lb, std::stringstream(""), parameters.info);
     }

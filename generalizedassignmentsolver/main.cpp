@@ -66,6 +66,7 @@ int main(int argc, char *argv[])
         .set_log_path(log_path)
         .set_log2stderr(vm.count("log2stderr"))
         .set_maximum_log_level(loglevelmax)
+        .set_sigint_handler()
         ;
 
     VER(info, "Agents:  " << instance.number_of_agents() << std::endl);

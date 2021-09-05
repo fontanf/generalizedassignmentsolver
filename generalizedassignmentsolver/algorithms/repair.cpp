@@ -109,7 +109,7 @@ Output generalizedassignmentsolver::repair(
     }
 
     if (parameters.l == -1) {
-        while (solution.overcapacity() > 0 && parameters.info.check_time()) {
+        while (solution.overcapacity() > 0 && !parameters.info.needs_to_end()) {
             //std::cout << "cost " << solution.cost() << " oc " << solution.overcapacity() << std::endl;
             ItemIdx j1_best = -1;
             ItemIdx j2_best = -1;
@@ -180,7 +180,7 @@ Output generalizedassignmentsolver::repair(
         ItemIdx i2_best = -1;
         Cost v_best = -1;
         Counter it = 0;
-        while (solution.overcapacity() > 0 && parameters.info.check_time()) {
+        while (solution.overcapacity() > 0 && !parameters.info.needs_to_end()) {
             Counter x = dis_ss(generator);
             if (x <= m * n) { // shift
                 ItemIdx j = dis_j(generator);
