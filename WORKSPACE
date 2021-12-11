@@ -46,8 +46,8 @@ local_repository(
 git_repository(
     name = "localsearchsolver",
     remote = "https://github.com/fontanf/localsearchsolver.git",
-    commit = "4387e502f49d9e2f40c0f9248502a9a6d6319501",
-    shallow_since = "1630823452 +0200",
+    commit = "c8417a9fde8ea32ea25e648062140eb9026fa093",
+    shallow_since = "1639209412 +0100",
 )
 
 local_repository(
@@ -70,8 +70,8 @@ local_repository(
 git_repository(
     name = "knapsacksolver",
     remote = "https://github.com/fontanf/knapsacksolver.git",
-    commit = "c5b67dc444cc04782ca6dabed940388216e873c6",
-    shallow_since = "1627737095 +0200",
+    commit = "817d1f9102317f38dd1b21a0aa9908c6c2666761",
+    shallow_since = "1639211385 +0100",
 )
 
 http_archive(

@@ -2,7 +2,7 @@
 #include "generalizedassignmentsolver/algorithms/random.hpp"
 #include "generalizedassignmentsolver/algorithms/greedy.hpp"
 
-#include "localsearchsolver/a_star_local_search.hpp"
+#include "localsearchsolver/best_first_local_search.hpp"
 
 #include "optimizationtools/indexed_set.hpp"
 
@@ -36,15 +36,6 @@ public:
     inline ItemIdx  number_of_items(const GlobalCost& global_cost) const { return std::get<0>(global_cost); }
     inline Weight    overweight(const GlobalCost& global_cost) const { return std::get<1>(global_cost); }
     inline Cost            cost(const GlobalCost& global_cost) const { return std::get<2>(global_cost); }
-
-    static GlobalCost global_cost_worst()
-    {
-        return {
-            std::numeric_limits<ItemIdx>::max(),
-            std::numeric_limits<Weight>::max(),
-            std::numeric_limits<Cost>::max(),
-        };
-    }
 
     /*
      * Solutions.
@@ -198,8 +189,6 @@ public:
         GlobalCost global_cost;
     };
 
-    static Move move_null() { return {{}, global_cost_worst()}; }
-
     struct MoveHasher
     {
         inline bool hashable(const Move&) const { return false; }
@@ -222,7 +211,7 @@ public:
             for (ItemIdx j: items) {
                 AgentIdx i_old = solution.agents[j];
                 AgentIdx i_best = -1;
-                GlobalCost c_best = global_cost_worst();
+                GlobalCost c_best = worst<GlobalCost>();
                 remove(solution, j);
                 std::shuffle(agents_.begin(), agents_.end(), generator);
                 for (AgentIdx i: agents_) {
@@ -259,13 +248,13 @@ public:
         ItemIdx j = -1;
         AgentIdx i_old = -1;
         AgentIdx i = -1;
-        GlobalCost cost_difference = global_cost_worst();
+        GlobalCost cost_difference = worst<GlobalCost>();
     };
 
     inline void local_search(
             Solution& solution,
             std::mt19937_64&,
-            const Move& perturbation = move_null())
+            const Move& perturbation = Move())
     {
         ItemIdx n = instance_.number_of_items();
         AgentIdx m = instance_.number_of_agents();
@@ -514,20 +503,20 @@ LocalSearchOutput generalizedassignmentsolver::localsearch(
     LocalScheme local_scheme(instance, parameters_local_scheme);
 
     // Run A*.
-    AStarLocalSearchOptionalParameters<LocalScheme> parameters_a_star;
-    parameters_a_star.info.set_verbose(false);
-    parameters_a_star.info.set_time_limit(parameters.info.remaining_time());
-    parameters_a_star.number_of_threads_1 = 1;
-    parameters_a_star.number_of_threads_2 = parameters.number_of_threads;
+    BestFirstLocalSearchOptionalParameters<LocalScheme> parameters_bfls;
+    parameters_bfls.info.set_verbose(false);
+    parameters_bfls.info.set_time_limit(parameters.info.remaining_time());
+    parameters_bfls.number_of_threads_1 = 1;
+    parameters_bfls.number_of_threads_2 = parameters.number_of_threads;
     if (parameters.initial_solution == nullptr) {
-        parameters_a_star.initial_solution_ids = std::vector<Counter>(
-                parameters_a_star.number_of_threads_2, 0);
+        parameters_bfls.initial_solution_ids = std::vector<Counter>(
+                parameters_bfls.number_of_threads_2, 0);
     } else {
         LocalScheme::Solution solution = local_scheme.solution(*parameters.initial_solution, generator);
-        parameters_a_star.initial_solution_ids = {};
-        parameters_a_star.initial_solutions = {solution};
+        parameters_bfls.initial_solution_ids = {};
+        parameters_bfls.initial_solutions = {solution};
     }
-    parameters_a_star.new_solution_callback
+    parameters_bfls.new_solution_callback
         = [&instance, &parameters, &output](
                 const LocalScheme::Solution& solution)
         {
@@ -539,7 +528,7 @@ LocalSearchOutput generalizedassignmentsolver::localsearch(
             std::stringstream ss;
             output.update_solution(sol, ss, parameters.info);
         };
-    a_star_local_search(local_scheme, parameters_a_star);
+    best_first_local_search(local_scheme, parameters_bfls);
 
     return output.algorithm_end(parameters.info);
 }
