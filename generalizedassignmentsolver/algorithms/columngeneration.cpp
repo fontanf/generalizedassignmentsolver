@@ -226,14 +226,14 @@ ColumnGenerationOutput generalizedassignmentsolver::columngeneration(
     op.info.set_time_limit(parameters.info.remaining_time());
     op.linear_programming_solver
         = columngenerationsolver::s2lps(parameters.linear_programming_solver);
-    auto columngeneration_output = columngenerationsolver::columngeneration(p, op);
+    auto column_generation_output = columngenerationsolver::column_generation(p, op);
 
     output.update_lower_bound(
-            std::ceil(columngeneration_output.solution_value - TOL),
+            std::ceil(column_generation_output.solution_value - TOL),
             std::stringstream(""),
             parameters.info);
-    output.number_of_added_columns = columngeneration_output.number_of_added_columns;
-    output.number_of_iterations = columngeneration_output.number_of_iterations;
+    output.number_of_added_columns = column_generation_output.number_of_added_columns;
+    output.number_of_iterations = column_generation_output.number_of_iterations;
     return output.algorithm_end(parameters.info);
 }
 
@@ -248,7 +248,7 @@ ColumnGenerationHeuristicGreedyOutput generalizedassignmentsolver::columngenerat
     columngenerationsolver::Parameters p = get_parameters(instance);
     columngenerationsolver::GreedyOptionalParameters op;
     op.info.set_time_limit(parameters.info.remaining_time());
-    op.columngeneration_parameters.linear_programming_solver
+    op.column_generation_parameters.linear_programming_solver
         = columngenerationsolver::s2lps(parameters.linear_programming_solver);
     auto output_greedy = columngenerationsolver::greedy(p, op);
 
@@ -274,7 +274,7 @@ ColumnGenerationHeuristicLimitedDiscrepancySearchOutput generalizedassignmentsol
 
     columngenerationsolver::Parameters p = get_parameters(instance);
     columngenerationsolver::LimitedDiscrepancySearchOptionalParameters op;
-    op.columngeneration_parameters.linear_programming_solver
+    op.column_generation_parameters.linear_programming_solver
         = columngenerationsolver::s2lps(parameters.linear_programming_solver);
     op.new_bound_callback = [&instance, &parameters, &output](
                 const columngenerationsolver::LimitedDiscrepancySearchOutput& o)
@@ -295,6 +295,6 @@ ColumnGenerationHeuristicLimitedDiscrepancySearchOutput generalizedassignmentsol
         };
     op.info.set_time_limit(parameters.info.remaining_time());
 
-    auto output_limiteddiscrepancysearch = columngenerationsolver::limiteddiscrepancysearch( p, op);
+    auto output_limited_discrepancy_search = columngenerationsolver::limited_discrepancy_search( p, op);
     return output.algorithm_end(parameters.info);
 }
