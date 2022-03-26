@@ -129,7 +129,13 @@ ConstraintProgrammingGecodeOutput generalizedassignmentsolver::constraintprogram
         const Instance& instance,
         ConstraintProgrammingGecodeOptionalParameters parameters)
 {
-    VER(parameters.info, "*** constraintprogramming_gecode ***" << std::endl);
+    init_display(instance, parameters.info);
+    VER(parameters.info,
+               "Algorithm" << std::endl
+            << "---------" << std::endl
+            << "Constraint Programming (Gecode)" << std::endl
+            << std::endl);
+
     ConstraintProgrammingGecodeOutput output(instance, parameters.info);
 
     if (instance.number_of_items() == 0)

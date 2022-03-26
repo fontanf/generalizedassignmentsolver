@@ -11,7 +11,7 @@ std::vector<std::pair<ItemIdx, AgentIdx>> generalizedassignmentsolver::greedy_in
         const Instance& instance,
         const Desirability& f)
 {
-    ItemIdx  n = instance.number_of_items();
+    ItemIdx n = instance.number_of_items();
     AgentIdx m = instance.number_of_agents();
     std::vector<std::pair<ItemIdx, AgentIdx>> alternatives;
     for (ItemIdx j = 0; j < n; ++j)
@@ -48,7 +48,17 @@ Output generalizedassignmentsolver::greedy(
         const Instance& instance,
         const Desirability& f, Info info)
 {
-    VER(info, "*** greedy " << f.to_string() << " ***" << std::endl);
+    init_display(instance, info);
+    VER(info,
+               "Algorithm" << std::endl
+            << "---------" << std::endl
+            << "Greedy" << std::endl
+            << std::endl
+            << "Parameters" << std::endl
+            << "----------" << std::endl
+            << "Desirability:  " << f.to_string() << std::endl
+            << std::endl);
+
     Output output(instance, info);
     Solution solution(instance);
     auto alternatives = greedy_init(instance, f);
@@ -143,7 +153,17 @@ Output generalizedassignmentsolver::greedyregret(
         const Desirability& f,
         Info info)
 {
-    VER(info, "*** greedyregret " << f.to_string() << " ***" << std::endl);
+    init_display(instance, info);
+    VER(info,
+               "Algorithm" << std::endl
+            << "---------" << std::endl
+            << "Regret greedy" << std::endl
+            << std::endl
+            << "Parameters" << std::endl
+            << "----------" << std::endl
+            << "Desirability:  " << f.to_string() << std::endl
+            << std::endl);
+
     Output output(instance, info);
     Solution solution(instance);
     auto agents = greedyregret_init(instance, f);
@@ -191,7 +211,17 @@ Output generalizedassignmentsolver::mthg(
         const Desirability& f,
         Info info)
 {
-    VER(info, "*** mthg " << f.to_string() << " ***" << std::endl);
+    init_display(instance, info);
+    VER(info,
+               "Algorithm" << std::endl
+            << "---------" << std::endl
+            << "MTHG" << std::endl
+            << std::endl
+            << "Parameters" << std::endl
+            << "----------" << std::endl
+            << "Desirability:  " << f.to_string() << std::endl
+            << std::endl);
+
     Output output(instance, info);
     Solution solution(instance);
     auto alt = greedy_init(instance, f);
@@ -216,7 +246,17 @@ Output generalizedassignmentsolver::mthgregret(
         const Desirability& f,
         Info info)
 {
-    VER(info, "*** mthgregret " << f.to_string() << " ***" << std::endl);
+    init_display(instance, info);
+    VER(info,
+               "Algorithm" << std::endl
+            << "---------" << std::endl
+            << "Regret MTHG" << std::endl
+            << std::endl
+            << "Parameters" << std::endl
+            << "----------" << std::endl
+            << "Desirability:  " << f.to_string() << std::endl
+            << std::endl);
+
     Output output(instance, info);
     Solution solution(instance);
     auto agents = greedyregret_init(instance, f);

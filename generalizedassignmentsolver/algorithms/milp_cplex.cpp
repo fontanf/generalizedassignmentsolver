@@ -30,7 +30,7 @@ ILOMIPINFOCALLBACK4(loggingCallback,
 
     if (!output.solution.feasible() || output.solution.cost() > getIncumbentObjValue() + 0.5) {
         AgentIdx m = instance.number_of_agents();
-        ItemIdx  n = instance.number_of_items();
+        ItemIdx n = instance.number_of_items();
         Solution solution(instance);
         for (ItemIdx j = 0; j < n; ++j) {
             IloNumArray val(x[j].getEnv());
@@ -47,11 +47,16 @@ MilpCplexOutput generalizedassignmentsolver::milp_cplex(
         const Instance& instance,
         MilpCplexOptionalParameters parameters)
 {
-    VER(parameters.info, "*** milp_cplex ***" << std::endl);
+    init_display(instance, parameters.info);
+    VER(parameters.info,
+               "Algorithm" << std::endl
+            << "---------" << std::endl
+            << "MILP (CPLEX)" << std::endl
+            << std::endl);
 
     MilpCplexOutput output(instance, parameters.info);
 
-    ItemIdx  n = instance.number_of_items();
+    ItemIdx n = instance.number_of_items();
     AgentIdx m = instance.number_of_agents();
 
     if (n == 0)

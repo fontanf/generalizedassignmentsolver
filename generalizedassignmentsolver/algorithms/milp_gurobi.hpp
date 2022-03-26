@@ -17,14 +17,19 @@ struct MilpGurobiOptionalParameters
 
 struct MilpGurobiOutput: Output
 {
-    MilpGurobiOutput(const Instance& instance, Info& info): Output(instance, info) { }
+    MilpGurobiOutput(
+            const Instance& instance,
+            Info& info):
+        Output(instance, info) { }
+
     MilpGurobiOutput& algorithm_end(Info& info);
 
     std::vector<std::vector<double>> x;
 };
 
 MilpGurobiOutput milp_gurobi(
-        const Instance& instance, MilpGurobiOptionalParameters parameters = {});
+        const Instance& instance,
+        MilpGurobiOptionalParameters parameters = {});
 
 }
 

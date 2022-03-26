@@ -23,12 +23,18 @@ Output generalizedassignmentsolver::random(
         std::mt19937_64& generator,
         Info info)
 {
-    VER(info, "*** random ***" << std::endl);
+    init_display(instance, info);
+    VER(info,
+               "Algorithm" << std::endl
+            << "---------" << std::endl
+            << "Random" << std::endl
+            << std::endl);
+
     Output output(instance, info);
 
     Solution solution = random_infeasible(instance, generator);
     AgentIdx m = instance.number_of_agents();
-    ItemIdx  n = instance.number_of_items();
+    ItemIdx n = instance.number_of_items();
     std::uniform_int_distribution<Counter> dis_ss(1, n * m + (n * (n + 1)) / 2);
     std::uniform_int_distribution<ItemIdx> dis_j(0, n - 1);
     std::uniform_int_distribution<ItemIdx> dis_j2(0, n - 2);

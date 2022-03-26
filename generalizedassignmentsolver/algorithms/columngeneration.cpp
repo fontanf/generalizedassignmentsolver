@@ -46,8 +46,8 @@ ColumnGenerationOutput& ColumnGenerationOutput::algorithm_end(Info& info)
     PUT(info, "Algorithm", "Iterations", number_of_iterations);
     PUT(info, "Algorithm", "AddedColumns", number_of_added_columns);
     Output::algorithm_end(info);
-    VER(info, "Iterations: " << number_of_iterations << std::endl);
-    VER(info, "Added columns: " << number_of_added_columns << std::endl);
+    VER(info, "Iterations:               " << number_of_iterations << std::endl);
+    VER(info, "Number of columns added:  " << number_of_added_columns << std::endl);
     return *this;
 }
 
@@ -211,14 +211,25 @@ std::vector<Column> PricingSolver::solve_pricing(
     return columns;
 }
 
-/******************************************************************************/
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 ColumnGenerationOutput generalizedassignmentsolver::columngeneration(
-        const Instance& instance, ColumnGenerationOptionalParameters parameters)
+        const Instance& instance,
+        ColumnGenerationOptionalParameters parameters)
 {
-    VER(parameters.info, "*** columngeneration"
-            << " --linear-programming-solver " << parameters.linear_programming_solver
-            << " ***" << std::endl);
+    init_display(instance, parameters.info);
+    VER(parameters.info,
+               "Algorithm" << std::endl
+            << "---------" << std::endl
+            << "Column Generation" << std::endl
+            << std::endl
+            << "Parameters" << std::endl
+            << "----------" << std::endl
+            << "Linear programming solver:  " << parameters.linear_programming_solver << std::endl
+            << std::endl);
+
     ColumnGenerationOutput output(instance, parameters.info);
 
     columngenerationsolver::Parameters p = get_parameters(instance);
@@ -238,11 +249,20 @@ ColumnGenerationOutput generalizedassignmentsolver::columngeneration(
 }
 
 ColumnGenerationHeuristicGreedyOutput generalizedassignmentsolver::columngenerationheuristic_greedy(
-        const Instance& instance, ColumnGenerationOptionalParameters parameters)
+        const Instance& instance,
+        ColumnGenerationOptionalParameters parameters)
 {
-    VER(parameters.info, "*** columngenerationheuristic_greedy"
-            << " --linear-programming-solver " << parameters.linear_programming_solver
-            << " ***" << std::endl);
+    init_display(instance, parameters.info);
+    VER(parameters.info,
+               "Algorithm" << std::endl
+            << "---------" << std::endl
+            << "Column Generation Heuristic - Greedy" << std::endl
+            << std::endl
+            << "Parameters" << std::endl
+            << "----------" << std::endl
+            << "Linear programming solver:  " << parameters.linear_programming_solver << std::endl
+            << std::endl);
+
     ColumnGenerationHeuristicGreedyOutput output(instance, parameters.info);
 
     columngenerationsolver::Parameters p = get_parameters(instance);
@@ -265,11 +285,20 @@ ColumnGenerationHeuristicGreedyOutput generalizedassignmentsolver::columngenerat
 }
 
 ColumnGenerationHeuristicLimitedDiscrepancySearchOutput generalizedassignmentsolver::columngenerationheuristic_limiteddiscrepancysearch(
-        const Instance& instance, ColumnGenerationOptionalParameters parameters)
+        const Instance& instance,
+        ColumnGenerationOptionalParameters parameters)
 {
-    VER(parameters.info, "*** columngenerationheuristic_limiteddiscrepancysearch"
-            << " --linear-programming-solver " << parameters.linear_programming_solver
-            << " ***" << std::endl);
+    init_display(instance, parameters.info);
+    VER(parameters.info,
+               "Algorithm" << std::endl
+            << "---------" << std::endl
+            << "Column Generation Heuristic - Limited Discrepancy Search" << std::endl
+            << std::endl
+            << "Parameters" << std::endl
+            << "----------" << std::endl
+            << "Linear programming solver:  " << parameters.linear_programming_solver << std::endl
+            << std::endl);
+
     ColumnGenerationHeuristicLimitedDiscrepancySearchOutput output(instance, parameters.info);
 
     columngenerationsolver::Parameters p = get_parameters(instance);

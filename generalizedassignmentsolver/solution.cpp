@@ -268,13 +268,21 @@ Output::Output(const Instance& instance, Info& info):
     solution(instance),
     lower_bound(instance.combinatorial_relaxation())
 {
-    VER(info, std::left << std::setw(10) << "T (s)");
-    VER(info, std::left << std::setw(14) << "UB");
-    VER(info, std::left << std::setw(14) << "LB");
-    VER(info, std::left << std::setw(14) << "GAP");
-    VER(info, std::left << std::setw(10) << "GAP (%)");
-    VER(info, "");
-    VER(info, std::endl);
+    VER(info,
+               std::setw(10) << "T (s)"
+            << std::setw(14) << "UB"
+            << std::setw(14) << "LB"
+            << std::setw(14) << "GAP"
+            << std::setw(10) << "GAP (%)"
+            << std::setw(24) << "Comment"
+            << std::endl
+            << std::setw(10) << "-----"
+            << std::setw(14) << "--"
+            << std::setw(14) << "--"
+            << std::setw(14) << "---"
+            << std::setw(10) << "-------"
+            << std::setw(24) << "-------"
+            << std::endl);
     print(info, std::stringstream(""));
     info.reset_time();
 }
@@ -317,12 +325,13 @@ void Output::print(Info& info, const std::stringstream& s) const
 {
     double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
 
-    VER(info, std::left << std::setw(10) << t);
-    VER(info, std::left << std::setw(14) << upper_bound_string());
-    VER(info, std::left << std::setw(14) << lower_bound_string());
-    VER(info, std::left << std::setw(14) << gap_string());
-    VER(info, std::left << std::setw(10) << gap());
-    VER(info, s.str() << std::endl);
+    VER(info,
+               std::setw(10) << t
+            << std::setw(14) << upper_bound_string()
+            << std::setw(14) << lower_bound_string()
+            << std::setw(14) << gap_string()
+            << std::setw(10) << gap()
+            << std::setw(24) << s.str() << std::endl);
 
     if (!info.output->only_write_at_the_end)
         info.write_json_output();
@@ -382,12 +391,15 @@ Output& Output::algorithm_end(Info& info)
     PUT(info, "Bound", "Value", lower_bound_string());
     PUT(info, "Solution", "Time", time);
     PUT(info, "Bound", "Time", time);
-    VER(info, "---" << std::endl
-            << "Solution: " << upper_bound_string() << std::endl
-            << "Bound: " << lower_bound_string() << std::endl
-            << "Gap: " << gap_string() << std::endl
-            << "Gap (%): " << gap() << std::endl
-            << "Time (s): " << time << std::endl);
+    VER(info,
+            std::endl
+            << "Final statistics" << std::endl
+            << "----------------" << std::endl
+            << "Value:                    " << upper_bound_string() << std::endl
+            << "Bound:                    " << lower_bound_string() << std::endl
+            << "Gap:                      " << gap_string() << std::endl
+            << "Gap (%):                  " << gap() << std::endl
+            << "Time (s):                 " << time << std::endl);
 
     info.write_json_output();
     solution.write(info.output->certificate_path);
@@ -399,9 +411,12 @@ Cost generalizedassignmentsolver::algorithm_end(Cost lower_bound, Info& info)
     double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
     PUT(info, "Bound", "Value", lower_bound);
     PUT(info, "Bound", "Time", t);
-    VER(info, "---" << std::endl
-            << "Bound: " << lower_bound << std::endl
-            << "Time (s): " << t << std::endl);
+    VER(info,
+            std::endl
+            << "Final statistics" << std::endl
+            << "----------------" << std::endl
+            << "Bound:                    " << lower_bound << std::endl
+            << "Time (s):                 " << t << std::endl);
 
     info.write_json_output();
     return lower_bound;

@@ -94,6 +94,7 @@ RepairOptionalParameters read_repair_args(const std::vector<char*>& argv)
     return parameters;
 }
 
+#if CPLEX_FOUND
 MilpCplexOptionalParameters read_milp_cplex_args(const std::vector<char*>& argv)
 {
     MilpCplexOptionalParameters parameters;
@@ -113,6 +114,7 @@ MilpCplexOptionalParameters read_milp_cplex_args(const std::vector<char*>& argv)
         parameters.only_linear_relaxation = true;
     return parameters;
 }
+#endif
 
 #if GUROBI_FOUND
 MilpGurobiOptionalParameters read_milp_gurobi_args(const std::vector<char*>& argv)

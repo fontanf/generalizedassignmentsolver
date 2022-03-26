@@ -45,7 +45,7 @@ Output generalizedassignmentsolver::repair(
     Output output(instance, parameters.info);
 
     AgentIdx m = instance.number_of_agents();
-    ItemIdx  n = instance.number_of_items();
+    ItemIdx n = instance.number_of_items();
 
     Solution solution(instance);
     switch (parameters.initial_solution) {

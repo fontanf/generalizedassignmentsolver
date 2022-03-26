@@ -28,7 +28,11 @@ struct RepairOptionalParameters
 
 struct RepairOutput: Output
 {
-    RepairOutput(const Instance& instance, Info& info): Output(instance, info) { }
+    RepairOutput(
+            const Instance& instance,
+            Info& info):
+        Output(instance, info) { }
+
     RepairOutput& algorithm_end(Info& info);
 
     Counter iterations = 0;

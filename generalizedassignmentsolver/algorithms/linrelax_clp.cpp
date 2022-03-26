@@ -16,11 +16,18 @@ LinRelaxClpOutput& LinRelaxClpOutput::algorithm_end(Info& info)
     return *this;
 }
 
-LinRelaxClpOutput generalizedassignmentsolver::linrelax_clp(const Instance& instance, Info info)
+LinRelaxClpOutput generalizedassignmentsolver::linrelax_clp(
+        const Instance& instance,
+        Info info)
 {
-    VER(info, "*** linrelax_clp ***" << std::endl);
+    init_display(instance, info);
+    VER(info,
+               "Algorithm" << std::endl
+            << "---------" << std::endl
+            << "Linear Relaxation (CLP)" << std::endl
+            << std::endl);
 
-    ItemIdx  n = instance.number_of_items();
+    ItemIdx n = instance.number_of_items();
     AgentIdx m = instance.number_of_agents();
 
     LinRelaxClpOutput output(instance, info);

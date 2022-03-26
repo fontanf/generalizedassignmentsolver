@@ -31,11 +31,11 @@ public:
     using GlobalCost = std::tuple<ItemIdx, Weight, Cost>;
 
     inline ItemIdx&       number_of_items(GlobalCost& global_cost) const { return std::get<0>(global_cost); }
-    inline Weight&         overweight(GlobalCost& global_cost) const { return std::get<1>(global_cost); }
-    inline Cost&                 cost(GlobalCost& global_cost) const { return std::get<2>(global_cost); }
+    inline Weight&             overweight(GlobalCost& global_cost) const { return std::get<1>(global_cost); }
+    inline Cost&                     cost(GlobalCost& global_cost) const { return std::get<2>(global_cost); }
     inline ItemIdx  number_of_items(const GlobalCost& global_cost) const { return std::get<0>(global_cost); }
-    inline Weight    overweight(const GlobalCost& global_cost) const { return std::get<1>(global_cost); }
-    inline Cost            cost(const GlobalCost& global_cost) const { return std::get<2>(global_cost); }
+    inline Weight        overweight(const GlobalCost& global_cost) const { return std::get<1>(global_cost); }
+    inline Cost                cost(const GlobalCost& global_cost) const { return std::get<2>(global_cost); }
 
     /*
      * Solutions.
@@ -496,6 +496,13 @@ LocalSearchOutput generalizedassignmentsolver::localsearch(
         std::mt19937_64& generator,
         LocalSearchOptionalParameters parameters)
 {
+    init_display(instance, parameters.info);
+    VER(parameters.info,
+               "Algorithm" << std::endl
+            << "---------" << std::endl
+            << "Local Search" << std::endl
+            << std::endl);
+
     LocalSearchOutput output(instance, parameters.info);
 
     // Create LocalScheme.

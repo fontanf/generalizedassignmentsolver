@@ -41,7 +41,7 @@ protected:
         if (!output_.solution.feasible() || output_.solution.cost() > getDoubleInfo(GRB_CB_MIPSOL_OBJ) + 0.5) {
             Solution solution(instance_);
             AgentIdx m = instance_.number_of_agents();
-            ItemIdx  n = instance_.number_of_items();
+            ItemIdx n = instance_.number_of_items();
             for (ItemIdx j = 0; j < n; ++j)
                 for (AgentIdx i = 0; i < m; ++i)
                     if (getSolution(x_[j][i]) > 0.5)
@@ -64,11 +64,16 @@ MilpGurobiOutput generalizedassignmentsolver::milp_gurobi(
         const Instance& instance, MilpGurobiOptionalParameters parameters)
 {
     GRBEnv env;
-    VER(parameters.info, "*** milp_gurobi ***" << std::endl);
+    init_display(instance, parameters.info);
+    VER(parameters.info,
+               "Algorithm" << std::endl
+            << "---------" << std::endl
+            << "MILP (Gurobi)" << std::endl
+            << std::endl);
 
     MilpGurobiOutput output(instance, parameters.info);
 
-    ItemIdx  n = instance.number_of_items();
+    ItemIdx n = instance.number_of_items();
     AgentIdx m = instance.number_of_agents();
 
     if (n == 0)

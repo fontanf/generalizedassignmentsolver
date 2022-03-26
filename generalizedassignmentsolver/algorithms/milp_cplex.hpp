@@ -17,13 +17,18 @@ struct MilpCplexOptionalParameters
 
 struct MilpCplexOutput: Output
 {
-    MilpCplexOutput(const Instance& instance, Info& info): Output(instance, info) { }
+    MilpCplexOutput(
+            const Instance& instance,
+            Info& info):
+        Output(instance, info) { }
+
     MilpCplexOutput& algorithm_end(Info& info);
 
     std::vector<std::vector<double>> x;
 };
 
-MilpCplexOutput milp_cplex(const Instance& instance,
+MilpCplexOutput milp_cplex(
+        const Instance& instance,
         MilpCplexOptionalParameters parameters = {});
 
 }

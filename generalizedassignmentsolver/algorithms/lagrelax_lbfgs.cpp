@@ -14,7 +14,9 @@ using namespace dlib;
 
 typedef matrix<double,0,1> column_vector;
 
-/************************** lagrelax_assignment_lbfgs *************************/
+////////////////////////////////////////////////////////////////////////////////
+/////////////////////////// lagrelax_assignment_lbfgs //////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 LagRelaxAssignmentLbfgsOutput& LagRelaxAssignmentLbfgsOutput::algorithm_end(Info& info)
 {
@@ -127,10 +129,18 @@ double LagRelaxAssignmentLbfgsFunction::f(const column_vector& mu)
     return l;
 }
 
-LagRelaxAssignmentLbfgsOutput generalizedassignmentsolver::lagrelax_assignment_lbfgs(const Instance& instance, LagRelaxAssignmentLbfgsOptionalParameters p)
+LagRelaxAssignmentLbfgsOutput generalizedassignmentsolver::lagrelax_assignment_lbfgs(
+        const Instance& instance,
+        LagRelaxAssignmentLbfgsOptionalParameters parameters)
 {
-    VER(p.info, "*** lagrelax_assignment_lbfgs ***" << std::endl);
-    LagRelaxAssignmentLbfgsOutput output(instance, p.info);
+    init_display(instance, parameters.info);
+    VER(parameters.info,
+               "Algorithm" << std::endl
+            << "---------" << std::endl
+            << "Lagrangian Relaxation - Assignment Constraints (LBFGS)" << std::endl
+            << std::endl);
+
+    LagRelaxAssignmentLbfgsOutput output(instance, parameters.info);
 
     ItemIdx n = instance.number_of_items();
     AgentIdx m = instance.number_of_agents();
@@ -141,7 +151,7 @@ LagRelaxAssignmentLbfgsOutput generalizedassignmentsolver::lagrelax_assignment_l
     std::vector<ItemIdx> item_indices(n, -2);
     for (ItemIdx j = 0; j < n; ++j) {
         for (AgentIdx i = 0; i < m; ++i) {
-            if (p.fixed_alt != NULL && (*p.fixed_alt)[j][i] == 1) {
+            if (parameters.fixed_alt != NULL && (*parameters.fixed_alt)[j][i] == 1) {
                 c0 += instance.cost(j, i);
                 item_indices[j] = -1;
                 break;
@@ -156,17 +166,17 @@ LagRelaxAssignmentLbfgsOutput generalizedassignmentsolver::lagrelax_assignment_l
 
     // Initialize multipliers
     column_vector mu(number_of_unfixed_items);
-    if (p.initial_multipliers != NULL) {
+    if (parameters.initial_multipliers != NULL) {
         for (ItemIdx j = 0; j < n; ++j)
             if (item_indices[j] >= 0)
-                mu(item_indices[j]) = (*p.initial_multipliers)[j];
+                mu(item_indices[j]) = (*parameters.initial_multipliers)[j];
     } else {
         for (ItemIdx j = 0; j < n; ++j)
             mu(j) = 0;
     }
 
     // Solve
-    LagRelaxAssignmentLbfgsFunction func(instance, p, number_of_unfixed_items, item_indices);
+    LagRelaxAssignmentLbfgsFunction func(instance, parameters, number_of_unfixed_items, item_indices);
     auto f   = [&func](const column_vector& x) { return func.f(x); };
     auto def = [&func](const column_vector& x) { return func.der(x); };
     auto stop_strategy = objective_delta_stop_strategy(0.0001);
@@ -181,16 +191,18 @@ LagRelaxAssignmentLbfgsOutput generalizedassignmentsolver::lagrelax_assignment_l
 
     // Compute output parameters
     Cost lb = c0 + std::ceil(res - TOL);
-    output.update_lower_bound(lb, std::stringstream(""), p.info);
+    output.update_lower_bound(lb, std::stringstream(""), parameters.info);
     output.multipliers.resize(n);
     for (ItemIdx j = 0; j < n; ++j)
         if (item_indices[j] >= 0)
             output.multipliers[j] = mu(item_indices[j]);
 
-    return output.algorithm_end(p.info);
+    return output.algorithm_end(parameters.info);
 }
 
-/*************************** lagrelax_knapsack_lbfgs **************************/
+////////////////////////////////////////////////////////////////////////////////
+//////////////////////////// lagrelax_knapsack_lbfgs ///////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 LagRelaxKnapsackLbfgsOutput& LagRelaxKnapsackLbfgsOutput::algorithm_end(Info& info)
 {
@@ -267,13 +279,21 @@ double LagRelaxKnapsackLbfgsFunction::f(const column_vector& mu)
     return l;
 }
 
-LagRelaxKnapsackLbfgsOutput generalizedassignmentsolver::lagrelax_knapsack_lbfgs(const Instance& instance, Info info)
+LagRelaxKnapsackLbfgsOutput generalizedassignmentsolver::lagrelax_knapsack_lbfgs(
+        const Instance& instance,
+        Info info)
 {
-    VER(info, "*** lagrelax_knapsack_lbfgs ***" << std::endl);
+    init_display(instance, info);
+    VER(info,
+               "Algorithm" << std::endl
+            << "---------" << std::endl
+            << "Lagrangian Relaxation - Knapsack Constraints (LBFGS)" << std::endl
+            << std::endl);
+
     LagRelaxKnapsackLbfgsOutput output(instance, info);
 
     AgentIdx m = instance.number_of_agents();
-    ItemIdx  n = instance.number_of_items();
+    ItemIdx n = instance.number_of_items();
 
     // Initialize multipliers
     column_vector mu(m);

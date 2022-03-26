@@ -69,9 +69,6 @@ int main(int argc, char *argv[])
         .set_sigint_handler()
         ;
 
-    VER(info, "Agents:  " << instance.number_of_agents() << std::endl);
-    VER(info, "Items:   " << instance.number_of_items() << std::endl);
-
     run(algorithm, instance, initial_solution, gen, info);
 
     return 0;

@@ -49,7 +49,9 @@ MilpCbcOutput& MilpCbcOutput::algorithm_end(Info& info)
     return *this;
 }
 
-/********************************** Callback **********************************/
+////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////// Callback ///////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 class SolHandler: public CbcEventHandler
 {
@@ -117,7 +119,7 @@ CbcEventHandler::CbcAction SolHandler::event(CbcEvent whichEvent)
     if ((whichEvent != solution && whichEvent != heuristicSolution)) // no solution found
         return noAction;
 
-    ItemIdx  n = instance_.number_of_items();
+    ItemIdx n = instance_.number_of_items();
     AgentIdx m = instance_.number_of_agents();
 
     OsiSolverInterface *origSolver = model_->solver();
@@ -137,11 +139,13 @@ CbcEventHandler::CbcAction SolHandler::event(CbcEvent whichEvent)
     return noAction;
 }
 
-/******************************************************************************/
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 CoinLP::CoinLP(const Instance& instance)
 {
-    ItemIdx  n = instance.number_of_items();
+    ItemIdx n = instance.number_of_items();
     AgentIdx m = instance.number_of_agents();
 
     // Variables
@@ -210,7 +214,12 @@ MilpCbcOutput generalizedassignmentsolver::milp_cbc(
         const Instance& instance,
         MilpCbcOptionalParameters parameters)
 {
-    VER(parameters.info, "*** milp_cbc ***" << std::endl);
+    init_display(instance, parameters.info);
+    VER(parameters.info,
+               "Algorithm" << std::endl
+            << "---------" << std::endl
+            << "MILP (CBC)" << std::endl
+            << std::endl);
 
     MilpCbcOutput output(instance, parameters.info);
 
@@ -228,8 +237,13 @@ MilpCbcOutput generalizedassignmentsolver::milp_cbc(
     solver1.messageHandler()->setLogLevel(0);
 
     // Load problem
-    solver1.loadProblem(mat.matrix, mat.col_lower.data(), mat.col_upper.data(),
-              mat.objective.data(), mat.row_lower.data(), mat.row_upper.data());
+    solver1.loadProblem(
+            mat.matrix,
+            mat.col_lower.data(),
+            mat.col_upper.data(),
+            mat.objective.data(),
+            mat.row_lower.data(),
+            mat.row_upper.data());
 
     // Mark integer
     for (ItemIdx j = 0; j < n; ++j)
@@ -318,12 +332,16 @@ MilpCbcOutput generalizedassignmentsolver::milp_cbc(
 
     // Add initial solution
     std::vector<double> sol_init(m * n, 0);
-    if (parameters.initial_solution != NULL && parameters.initial_solution->feasible()) {
+    if (parameters.initial_solution != NULL
+            && parameters.initial_solution->feasible()) {
         for (ItemIdx j = 0; j < n; ++j)
             for (AgentIdx i = 0; i < m; ++i)
                 if (parameters.initial_solution->agent(j) == i)
                     sol_init[m * j + i] = 1;
-        model.setBestSolution(sol_init.data(), m * n, parameters.initial_solution->cost());
+        model.setBestSolution(
+                sol_init.data(),
+                m * n,
+                parameters.initial_solution->cost());
     }
 
     // Stop af first improvment
@@ -334,7 +352,10 @@ MilpCbcOutput generalizedassignmentsolver::milp_cbc(
     model.branchAndBound();
 
     if (model.isProvenInfeasible()) {
-        output.update_lower_bound(instance.bound(), std::stringstream(""), parameters.info);
+        output.update_lower_bound(
+                instance.bound(),
+                std::stringstream(""),
+                parameters.info);
     } else if (model.isProvenOptimal()) {
         if (!output.solution.feasible() || output.solution.cost() > model.getObjValue() + 0.5) {
             const double *solution_cbc = model.solver()->getColSolution();
@@ -343,18 +364,25 @@ MilpCbcOutput generalizedassignmentsolver::milp_cbc(
                 for (AgentIdx i = 0; i < m; ++i)
                     if (solution_cbc[m * j + i] > 0.5)
                         solution.set(j, i);
-            output.update_solution(solution, std::stringstream(""), parameters.info);
+            output.update_solution(
+                    solution,
+                    std::stringstream(""),
+                    parameters.info);
         }
         output.update_lower_bound(output.solution.cost(), std::stringstream(""), parameters.info);
     } else if (model.bestSolution() != NULL) {
-        if (!output.solution.feasible() || output.solution.cost() > model.getObjValue() + 0.5) {
+        if (!output.solution.feasible()
+                || output.solution.cost() > model.getObjValue() + 0.5) {
             const double *solution_cbc = model.solver()->getColSolution();
             Solution solution(instance);
             for (ItemIdx j = 0; j < n; ++j)
                 for (AgentIdx i = 0; i < m; ++i)
                     if (solution_cbc[m * j + i] > 0.5)
                         solution.set(j, i);
-            output.update_solution(solution, std::stringstream(""), parameters.info);
+            output.update_solution(
+                    solution,
+                    std::stringstream(""),
+                    parameters.info);
         }
         Cost lb = std::ceil(model.getBestPossibleObjValue() - TOL);
         output.update_lower_bound(lb, std::stringstream(""), parameters.info);

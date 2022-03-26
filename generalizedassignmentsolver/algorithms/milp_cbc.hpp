@@ -35,11 +35,16 @@ struct MilpCbcOptionalParameters
 
 struct MilpCbcOutput: Output
 {
-    MilpCbcOutput(const Instance& instance, Info& info): Output(instance, info) { }
+    MilpCbcOutput(
+            const Instance& instance,
+            Info& info):
+        Output(instance, info) { }
+
     MilpCbcOutput& algorithm_end(Info& info);
 };
 
-MilpCbcOutput milp_cbc(const Instance& instance,
+MilpCbcOutput milp_cbc(
+        const Instance& instance,
         MilpCbcOptionalParameters parameters = {});
 
 }

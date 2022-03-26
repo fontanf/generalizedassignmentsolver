@@ -253,3 +253,18 @@ void Instance::write(std::string filename)
     file.close();
 }
 
+void generalizedassignmentsolver::init_display(
+        const Instance& instance,
+        optimizationtools::Info& info)
+{
+    VER(info,
+               "=====================================" << std::endl
+            << "    Generalized Assignment Solver    " << std::endl
+            << "=====================================" << std::endl
+            << std::endl
+            << "Instance" << std::endl
+            << "--------" << std::endl
+            << "Number of items:    " << instance.number_of_items() << std::endl
+            << "Number of agents:   " << instance.number_of_agents() << std::endl
+            << std::endl);
+}

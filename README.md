@@ -89,6 +89,37 @@ Solve:
 ```shell
 ./bazel-bin/generalizedassignmentsolver/main -v -a 'mthg -f -pij/wij' -i "data/chu1997/a05100" -o "a05100_output.json" -c "a05100_solution.txt"
 ```
+```
+=====================================
+    Generalized Assignment Solver    
+=====================================
+
+Instance
+--------
+Number of items:    100
+Number of agents:   5
+
+Algorithm
+---------
+MTHG
+
+Parameters
+----------
+Desirability:  -pij/wij
+
+     T (s)            UB            LB           GAP   GAP (%)                 Comment
+     -----            --            --           ---   -------                 -------
+         0           inf          1694           inf       inf                        
+    0.0001          1713          1694            19      1.12                        
+
+Final statistics
+----------------
+Value:                    1713
+Bound:                    1694
+Gap:                      19
+Gap (%):                  1.12
+Time (s):                 0.0001
+```
 
 Unit tests:
 ```shell

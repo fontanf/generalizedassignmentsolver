@@ -20,7 +20,9 @@ using namespace generalizedassignmentsolver;
  * https://www.coin-or.org/Doxygen/Osi/structVOL__parms.html
  */
 
-/************************* lagrelax_assignment_volume *************************/
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////// lagrelax_assignment_volume //////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 LagRelaxAssignmentVolumeOutput& LagRelaxAssignmentVolumeOutput::algorithm_end(Info& info)
 {
@@ -35,7 +37,9 @@ class LagRelaxAssignmentHook: public VOL_user_hooks
 
 public:
 
-    LagRelaxAssignmentHook(const Instance& ins): instance_(ins) {  }
+    LagRelaxAssignmentHook(const Instance& instance):
+        instance_(instance) {  }
+
     virtual ~LagRelaxAssignmentHook() { }
 
     // for all hooks: return value of -1 means that volume should quit
@@ -182,13 +186,21 @@ int LagRelaxAssignmentHook::solve_subproblem(const VOL_dvector& dual, const VOL_
     return 0;
 }
 
-LagRelaxAssignmentVolumeOutput generalizedassignmentsolver::lagrelax_assignment_volume(const Instance& ins, Info info)
+LagRelaxAssignmentVolumeOutput generalizedassignmentsolver::lagrelax_assignment_volume(
+        const Instance& instance,
+        Info info)
 {
-    VER(info, "*** lagrelax_assignment_volume ***" << std::endl);
-    LagRelaxAssignmentVolumeOutput output(ins, info);
+    init_display(instance, info);
+    VER(info,
+               "Algorithm" << std::endl
+            << "---------" << std::endl
+            << "Lagrangian Relaxation - Assignment Constraints (Volume)" << std::endl
+            << std::endl);
 
-    ItemIdx n = ins.number_of_items();
-    AgentIdx m = ins.number_of_agents();
+    LagRelaxAssignmentVolumeOutput output(instance, info);
+
+    ItemIdx n = instance.number_of_items();
+    AgentIdx m = instance.number_of_agents();
 
     VOL_problem volprob;
     volprob.parm.printflag = (info.output->verbose)? 1: 0;
@@ -209,7 +221,7 @@ LagRelaxAssignmentVolumeOutput generalizedassignmentsolver::lagrelax_assignment_
         volprob.dual_ub[j] =  1.0e31;
     }
 
-    LagRelaxAssignmentHook hook(ins);
+    LagRelaxAssignmentHook hook(instance);
     volprob.solve(hook, false /* no warmstart */);
 
     // Extract solution
@@ -229,7 +241,9 @@ LagRelaxAssignmentVolumeOutput generalizedassignmentsolver::lagrelax_assignment_
     return output.algorithm_end(info);
 }
 
-/************************** lagrelax_knapsack_volume **************************/
+////////////////////////////////////////////////////////////////////////////////
+/////////////////////////// lagrelax_knapsack_volume ///////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 LagRelaxKnapsackVolumeOutput& LagRelaxKnapsackVolumeOutput::algorithm_end(Info& info)
 {
@@ -244,7 +258,9 @@ class LagRelaxKnapsackHook: public VOL_user_hooks
 
 public:
 
-    LagRelaxKnapsackHook(const Instance& ins): instance_(ins) {  }
+    LagRelaxKnapsackHook(const Instance& instance):
+        instance_(instance) {  }
+
     virtual ~LagRelaxKnapsackHook() { }
 
     // for all hooks: return value of -1 means that volume should quit
@@ -347,13 +363,21 @@ int LagRelaxKnapsackHook::solve_subproblem(const VOL_dvector& dual, const VOL_dv
     return 0;
 }
 
-LagRelaxKnapsackVolumeOutput generalizedassignmentsolver::lagrelax_knapsack_volume(const Instance& ins, Info info)
+LagRelaxKnapsackVolumeOutput generalizedassignmentsolver::lagrelax_knapsack_volume(
+        const Instance& instance,
+        Info info)
 {
-    VER(info, "*** lagrelax_knapsack_volume ***" << std::endl);
-    LagRelaxKnapsackVolumeOutput output(ins, info);
+    init_display(instance, info);
+    VER(info,
+               "Algorithm" << std::endl
+            << "---------" << std::endl
+            << "Lagrangian Relaxation - Knapsack Constraints (Volume)" << std::endl
+            << std::endl);
 
-    ItemIdx n = ins.number_of_items();
-    AgentIdx m = ins.number_of_agents();
+    LagRelaxKnapsackVolumeOutput output(instance, info);
+
+    ItemIdx n = instance.number_of_items();
+    AgentIdx m = instance.number_of_agents();
 
     VOL_problem volprob;
     volprob.parm.printflag = (info.output->verbose)? 1: 0;
@@ -368,7 +392,7 @@ LagRelaxKnapsackVolumeOutput generalizedassignmentsolver::lagrelax_knapsack_volu
         volprob.dual_lb[i] = -1.0e31;
     }
 
-    LagRelaxKnapsackHook hook(ins);
+    LagRelaxKnapsackHook hook(instance);
     volprob.solve(hook, false /* no warmstart */);
 
     // Extract solution

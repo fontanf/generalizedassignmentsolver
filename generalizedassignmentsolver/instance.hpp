@@ -166,5 +166,9 @@ private:
 std::ostream& operator<<(std::ostream &os, const Alternative& alternative);
 std::ostream& operator<<(std::ostream &os, const Instance& instance);
 
+void init_display(
+        const Instance& instance,
+        optimizationtools::Info& info);
+
 }
 

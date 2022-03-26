@@ -18,7 +18,13 @@ ConstraintProgrammingCplexOutput generalizedassignmentsolver::constraintprogramm
         const Instance& instance,
         ConstraintProgrammingCplexOptionalParameters parameters)
 {
-    VER(parameters.info, "*** constraintprogramming_cplex ***" << std::endl);
+    init_display(instance, parameters.info);
+    VER(parameters.info,
+               "Algorithm" << std::endl
+            << "---------" << std::endl
+            << "Constraint Programming (CPLEX)" << std::endl
+            << std::endl);
+
     ConstraintProgrammingCplexOutput output(instance, parameters.info);
 
     ItemIdx n = instance.number_of_items();

@@ -1,7 +1,9 @@
 build --compilation_mode=opt
 build --cxxopt=-Wall --cxxopt=-Wextra
 
+################################################################################
 ############################ Optional dependencies #############################
+################################################################################
 
 #build --define coinor=true
 #build --define cplex=true

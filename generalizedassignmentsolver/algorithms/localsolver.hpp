@@ -14,11 +14,16 @@ struct LocalSolverOptionalParameters
 
 struct LocalSolverOutput: Output
 {
-    LocalSolverOutput(const Instance& ins, Info& info): Output(ins, info) { }
+    LocalSolverOutput(
+            const Instance& instance,
+            Info& info): Output(instance, info) { }
+
     LocalSolverOutput& algorithm_end(Info& info);
 };
 
-LocalSolverOutput localsolver(const Instance& ins, LocalSolverOptionalParameters p = {});
+LocalSolverOutput localsolver(
+        const Instance& instance,
+        LocalSolverOptionalParameters p = {});
 
 }
 
