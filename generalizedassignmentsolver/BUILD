@@ -19,7 +19,7 @@ cc_library(
                 "desirability.cpp",
         ],
         copts = STDCPP,
-        deps = ["@optimizationtools//optimizationtools:info"],
+        deps = ["@optimizationtools//optimizationtools/utils:info"],
         visibility = ["//visibility:public"],
 )
 

@@ -24,7 +24,7 @@ Output generalizedassignmentsolver::random(
         Info info)
 {
     init_display(instance, info);
-    VER(info,
+    FFOT_VER(info,
                "Algorithm" << std::endl
             << "---------" << std::endl
             << "Random" << std::endl

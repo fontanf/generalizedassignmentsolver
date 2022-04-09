@@ -19,7 +19,7 @@ ConstraintProgrammingCplexOutput generalizedassignmentsolver::constraintprogramm
         ConstraintProgrammingCplexOptionalParameters parameters)
 {
     init_display(instance, parameters.info);
-    VER(parameters.info,
+    FFOT_VER(parameters.info,
                "Algorithm" << std::endl
             << "---------" << std::endl
             << "Constraint Programming (CPLEX)" << std::endl

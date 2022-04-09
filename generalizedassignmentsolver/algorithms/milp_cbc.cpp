@@ -43,9 +43,9 @@ using namespace generalizedassignmentsolver;
 
 MilpCbcOutput& MilpCbcOutput::algorithm_end(Info& info)
 {
-    //PUT(info, "Algorithm", "Iterations", it);
+    //FFOT_PUT(info, "Algorithm", "Iterations", it);
     Output::algorithm_end(info);
-    //VER(info, "Iterations: " << it << std::endl);
+    //FFOT_VER(info, "Iterations: " << it << std::endl);
     return *this;
 }
 
@@ -113,7 +113,7 @@ CbcEventHandler::CbcAction SolHandler::event(CbcEvent whichEvent)
     if ((model_->specialOptions() & 2048) != 0) // not in subtree
         return noAction;
 
-    Cost lb = std::ceil(model_->getBestPossibleObjValue() - TOL);
+    Cost lb = std::ceil(model_->getBestPossibleObjValue() - FFOT_TOL);
     output_.update_lower_bound(lb, std::stringstream(""), parameters_.info);
 
     if ((whichEvent != solution && whichEvent != heuristicSolution)) // no solution found
@@ -215,7 +215,7 @@ MilpCbcOutput generalizedassignmentsolver::milp_cbc(
         MilpCbcOptionalParameters parameters)
 {
     init_display(instance, parameters.info);
-    VER(parameters.info,
+    FFOT_VER(parameters.info,
                "Algorithm" << std::endl
             << "---------" << std::endl
             << "MILP (CBC)" << std::endl
@@ -384,10 +384,10 @@ MilpCbcOutput generalizedassignmentsolver::milp_cbc(
                     std::stringstream(""),
                     parameters.info);
         }
-        Cost lb = std::ceil(model.getBestPossibleObjValue() - TOL);
+        Cost lb = std::ceil(model.getBestPossibleObjValue() - FFOT_TOL);
         output.update_lower_bound(lb, std::stringstream(""), parameters.info);
     } else {
-        Cost lb = std::ceil(model.getBestPossibleObjValue() - TOL);
+        Cost lb = std::ceil(model.getBestPossibleObjValue() - FFOT_TOL);
         output.update_lower_bound(lb, std::stringstream(""), parameters.info);
     }
 

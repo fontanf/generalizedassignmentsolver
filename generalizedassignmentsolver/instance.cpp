@@ -257,7 +257,7 @@ void generalizedassignmentsolver::init_display(
         const Instance& instance,
         optimizationtools::Info& info)
 {
-    VER(info,
+    FFOT_VER(info,
                "=====================================" << std::endl
             << "    Generalized Assignment Solver    " << std::endl
             << "=====================================" << std::endl

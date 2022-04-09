@@ -35,7 +35,7 @@ protected:
         if (where != GRB_CB_MIPSOL)
             return;
 
-        Cost lb = std::ceil(getDoubleInfo(GRB_CB_MIPSOL_OBJBND) - TOL);
+        Cost lb = std::ceil(getDoubleInfo(GRB_CB_MIPSOL_OBJBND) - FFOT_TOL);
         output_.update_lower_bound(lb, std::stringstream(""), parameters_.info);
 
         if (!output_.solution.feasible() || output_.solution.cost() > getDoubleInfo(GRB_CB_MIPSOL_OBJ) + 0.5) {
@@ -65,7 +65,7 @@ MilpGurobiOutput generalizedassignmentsolver::milp_gurobi(
 {
     GRBEnv env;
     init_display(instance, parameters.info);
-    VER(parameters.info,
+    FFOT_VER(parameters.info,
                "Algorithm" << std::endl
             << "---------" << std::endl
             << "MILP (Gurobi)" << std::endl
@@ -117,7 +117,7 @@ MilpGurobiOutput generalizedassignmentsolver::milp_gurobi(
             for (AgentIdx i = 0; i < m; i++)
                 x[j][i].set(GRB_CharAttr_VType, GRB_CONTINUOUS);
         model.optimize();
-        Cost lb = std::ceil(model.get(GRB_DoubleAttr_ObjVal) - TOL);
+        Cost lb = std::ceil(model.get(GRB_DoubleAttr_ObjVal) - FFOT_TOL);
         output.update_lower_bound(lb, std::stringstream("linearrelaxation"), parameters.info);
         for (ItemIdx j = 0; j < n; j++) {
             output.x.push_back(std::vector<double>(m));
@@ -169,10 +169,10 @@ MilpGurobiOutput generalizedassignmentsolver::milp_gurobi(
                         solution.set(j, i);
             output.update_solution(solution, std::stringstream(""), parameters.info);
         }
-        Cost lb = std::ceil(model.get(GRB_DoubleAttr_ObjBound) - TOL);
+        Cost lb = std::ceil(model.get(GRB_DoubleAttr_ObjBound) - FFOT_TOL);
         output.update_lower_bound(lb, std::stringstream(""), parameters.info);
     } else {
-        Cost lb = std::ceil(model.get(GRB_DoubleAttr_ObjBound) - TOL);
+        Cost lb = std::ceil(model.get(GRB_DoubleAttr_ObjBound) - FFOT_TOL);
         output.update_lower_bound(lb, std::stringstream(""), parameters.info);
     }
 

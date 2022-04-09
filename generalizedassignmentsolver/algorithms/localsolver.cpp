@@ -15,9 +15,9 @@ using namespace localsolver;
 
 LocalSolverOutput& LocalSolverOutput::algorithm_end(Info& info)
 {
-    //PUT(info, "Algorithm", "Iterations", it);
+    //FFOT_PUT(info, "Algorithm", "Iterations", it);
     Output::algorithm_end(info);
-    //VER(info, "Iterations: " << it << std::endl);
+    //FFOT_VER(info, "Iterations: " << it << std::endl);
     return *this;
 }
 
@@ -66,7 +66,7 @@ LocalSolverOutput generalizedassignmentsolver::localsolver(
         LocalSolverOptionalParameters parameters)
 {
     init_display(instance, parameters.info);
-    VER(parameters.info,
+    FFOT_VER(parameters.info,
                "Algorithm" << std::endl
             << "---------" << std::endl
             << "Local Solver" << std::endl

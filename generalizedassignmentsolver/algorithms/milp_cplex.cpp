@@ -10,9 +10,9 @@ ILOSTLBEGIN
 
 MilpCplexOutput& MilpCplexOutput::algorithm_end(Info& info)
 {
-    //PUT(info, "Algorithm", "Iterations", it);
+    //FFOT_PUT(info, "Algorithm", "Iterations", it);
     Output::algorithm_end(info);
-    //VER(info, "Iterations: " << it << std::endl);
+    //FFOT_VER(info, "Iterations: " << it << std::endl);
     return *this;
 }
 
@@ -22,7 +22,7 @@ ILOMIPINFOCALLBACK4(loggingCallback,
                     MilpCplexOutput&, output,
                     std::vector<IloNumVarArray>&, x)
 {
-    Cost lb = std::ceil(getBestObjValue() - TOL);
+    Cost lb = std::ceil(getBestObjValue() - FFOT_TOL);
     output.update_lower_bound(lb, std::stringstream(""), parameters.info);
 
     if (!hasIncumbent())
@@ -48,7 +48,7 @@ MilpCplexOutput generalizedassignmentsolver::milp_cplex(
         MilpCplexOptionalParameters parameters)
 {
     init_display(instance, parameters.info);
-    VER(parameters.info,
+    FFOT_VER(parameters.info,
                "Algorithm" << std::endl
             << "---------" << std::endl
             << "MILP (CPLEX)" << std::endl
@@ -121,7 +121,7 @@ MilpCplexOutput generalizedassignmentsolver::milp_cplex(
             for (AgentIdx i = 0; i < m; i++)
                 model.add(IloConversion(env, x[j][i], ILOFLOAT));
         cplex.solve();
-        Cost lb = std::ceil(cplex.getObjValue() - TOL);
+        Cost lb = std::ceil(cplex.getObjValue() - FFOT_TOL);
         output.update_lower_bound(lb, std::stringstream("linearrelaxation"), parameters.info);
         for (ItemIdx j = 0; j < n; j++) {
             output.x.push_back(std::vector<double>(instance.number_of_agents(), 0));
@@ -166,10 +166,10 @@ MilpCplexOutput generalizedassignmentsolver::milp_cplex(
                         solution.set(j, i);
             output.update_solution(solution, std::stringstream(""), parameters.info);
         }
-        Cost lb = std::ceil(cplex.getBestObjValue() - TOL);
+        Cost lb = std::ceil(cplex.getBestObjValue() - FFOT_TOL);
         output.update_lower_bound(lb, std::stringstream(""), parameters.info);
     } else {
-        Cost lb = std::ceil(cplex.getBestObjValue() - TOL);
+        Cost lb = std::ceil(cplex.getBestObjValue() - FFOT_TOL);
         output.update_lower_bound(lb, std::stringstream(""), parameters.info);
     }
 

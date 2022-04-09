@@ -243,7 +243,7 @@ Output generalizedassignmentsolver::run(
         parameters.info = info;
         parameters.initial_solution = &initial_solution;
         return localsearch(instance, generator, parameters);
-#if LOCALocalSearchOLVER_FOUND
+#if LOCALSOLVER_FOUND
     } else if (algorithm_args[0] == "localsolver") {
         LocalSolverOptionalParameters parameters;
         parameters.info = info;

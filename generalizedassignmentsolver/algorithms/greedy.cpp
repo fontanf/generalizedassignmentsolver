@@ -49,7 +49,7 @@ Output generalizedassignmentsolver::greedy(
         const Desirability& f, Info info)
 {
     init_display(instance, info);
-    VER(info,
+    FFOT_VER(info,
                "Algorithm" << std::endl
             << "---------" << std::endl
             << "Greedy" << std::endl
@@ -154,7 +154,7 @@ Output generalizedassignmentsolver::greedyregret(
         Info info)
 {
     init_display(instance, info);
-    VER(info,
+    FFOT_VER(info,
                "Algorithm" << std::endl
             << "---------" << std::endl
             << "Regret greedy" << std::endl
@@ -212,7 +212,7 @@ Output generalizedassignmentsolver::mthg(
         Info info)
 {
     init_display(instance, info);
-    VER(info,
+    FFOT_VER(info,
                "Algorithm" << std::endl
             << "---------" << std::endl
             << "MTHG" << std::endl
@@ -247,7 +247,7 @@ Output generalizedassignmentsolver::mthgregret(
         Info info)
 {
     init_display(instance, info);
-    VER(info,
+    FFOT_VER(info,
                "Algorithm" << std::endl
             << "---------" << std::endl
             << "Regret MTHG" << std::endl

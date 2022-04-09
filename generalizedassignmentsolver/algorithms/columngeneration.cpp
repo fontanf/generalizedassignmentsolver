@@ -43,11 +43,11 @@ typedef columngenerationsolver::Column Column;
 
 ColumnGenerationOutput& ColumnGenerationOutput::algorithm_end(Info& info)
 {
-    PUT(info, "Algorithm", "Iterations", number_of_iterations);
-    PUT(info, "Algorithm", "AddedColumns", number_of_added_columns);
+    FFOT_PUT(info, "Algorithm", "Iterations", number_of_iterations);
+    FFOT_PUT(info, "Algorithm", "AddedColumns", number_of_added_columns);
     Output::algorithm_end(info);
-    VER(info, "Iterations:               " << number_of_iterations << std::endl);
-    VER(info, "Number of columns added:  " << number_of_added_columns << std::endl);
+    FFOT_VER(info, "Iterations:               " << number_of_iterations << std::endl);
+    FFOT_VER(info, "Number of columns added:  " << number_of_added_columns << std::endl);
     return *this;
 }
 
@@ -220,7 +220,7 @@ ColumnGenerationOutput generalizedassignmentsolver::columngeneration(
         ColumnGenerationOptionalParameters parameters)
 {
     init_display(instance, parameters.info);
-    VER(parameters.info,
+    FFOT_VER(parameters.info,
                "Algorithm" << std::endl
             << "---------" << std::endl
             << "Column Generation" << std::endl
@@ -240,7 +240,7 @@ ColumnGenerationOutput generalizedassignmentsolver::columngeneration(
     auto column_generation_output = columngenerationsolver::column_generation(p, op);
 
     output.update_lower_bound(
-            std::ceil(column_generation_output.solution_value - TOL),
+            std::ceil(column_generation_output.solution_value - FFOT_TOL),
             std::stringstream(""),
             parameters.info);
     output.number_of_added_columns = column_generation_output.number_of_added_columns;
@@ -253,7 +253,7 @@ ColumnGenerationHeuristicGreedyOutput generalizedassignmentsolver::columngenerat
         ColumnGenerationOptionalParameters parameters)
 {
     init_display(instance, parameters.info);
-    VER(parameters.info,
+    FFOT_VER(parameters.info,
                "Algorithm" << std::endl
             << "---------" << std::endl
             << "Column Generation Heuristic - Greedy" << std::endl
@@ -273,7 +273,7 @@ ColumnGenerationHeuristicGreedyOutput generalizedassignmentsolver::columngenerat
     auto output_greedy = columngenerationsolver::greedy(p, op);
 
     output.update_lower_bound(
-            std::ceil(output_greedy.bound - TOL),
+            std::ceil(output_greedy.bound - FFOT_TOL),
             std::stringstream(""),
             parameters.info);
     if (output_greedy.solution.size() > 0)
@@ -289,7 +289,7 @@ ColumnGenerationHeuristicLimitedDiscrepancySearchOutput generalizedassignmentsol
         ColumnGenerationOptionalParameters parameters)
 {
     init_display(instance, parameters.info);
-    VER(parameters.info,
+    FFOT_VER(parameters.info,
                "Algorithm" << std::endl
             << "---------" << std::endl
             << "Column Generation Heuristic - Limited Discrepancy Search" << std::endl
@@ -318,7 +318,7 @@ ColumnGenerationHeuristicLimitedDiscrepancySearchOutput generalizedassignmentsol
                         parameters.info);
             }
             output.update_lower_bound(
-                    std::ceil(o.bound - TOL),
+                    std::ceil(o.bound - FFOT_TOL),
                     ss,
                     parameters.info);
         };

@@ -130,7 +130,7 @@ ConstraintProgrammingGecodeOutput generalizedassignmentsolver::constraintprogram
         ConstraintProgrammingGecodeOptionalParameters parameters)
 {
     init_display(instance, parameters.info);
-    VER(parameters.info,
+    FFOT_VER(parameters.info,
                "Algorithm" << std::endl
             << "---------" << std::endl
             << "Constraint Programming (Gecode)" << std::endl

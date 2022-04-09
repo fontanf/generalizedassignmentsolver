@@ -4,7 +4,7 @@
 
 #include "localsearchsolver/best_first_local_search.hpp"
 
-#include "optimizationtools/indexed_set.hpp"
+#include "optimizationtools/containers/indexed_set.hpp"
 
 #include <set>
 #include <random>
@@ -16,9 +16,9 @@ using namespace localsearchsolver;
 
 LocalSearchOutput& LocalSearchOutput::algorithm_end(Info& info)
 {
-    //PUT(info, "Algorithm", "Iterations", iterations);
+    //FFOT_PUT(info, "Algorithm", "Iterations", iterations);
     Output::algorithm_end(info);
-    //VER(info, "Iterations: " << iterations << std::endl);
+    //FFOT_VER(info, "Iterations: " << iterations << std::endl);
     return *this;
 }
 
@@ -497,7 +497,7 @@ LocalSearchOutput generalizedassignmentsolver::localsearch(
         LocalSearchOptionalParameters parameters)
 {
     init_display(instance, parameters.info);
-    VER(parameters.info,
+    FFOT_VER(parameters.info,
                "Algorithm" << std::endl
             << "---------" << std::endl
             << "Local Search" << std::endl

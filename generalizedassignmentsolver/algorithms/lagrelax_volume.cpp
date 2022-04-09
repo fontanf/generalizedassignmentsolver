@@ -26,9 +26,9 @@ using namespace generalizedassignmentsolver;
 
 LagRelaxAssignmentVolumeOutput& LagRelaxAssignmentVolumeOutput::algorithm_end(Info& info)
 {
-    //PUT(info, "Algorithm", "Iterations", it);
+    //FFOT_PUT(info, "Algorithm", "Iterations", it);
     Output::algorithm_end(info);
-    //VER(info, "Iterations: " << it << std::endl);
+    //FFOT_VER(info, "Iterations: " << it << std::endl);
     return *this;
 }
 
@@ -191,7 +191,7 @@ LagRelaxAssignmentVolumeOutput generalizedassignmentsolver::lagrelax_assignment_
         Info info)
 {
     init_display(instance, info);
-    VER(info,
+    FFOT_VER(info,
                "Algorithm" << std::endl
             << "---------" << std::endl
             << "Lagrangian Relaxation - Assignment Constraints (Volume)" << std::endl
@@ -226,7 +226,7 @@ LagRelaxAssignmentVolumeOutput generalizedassignmentsolver::lagrelax_assignment_
 
     // Extract solution
 
-    Cost lb = std::ceil(volprob.value - TOL); // bound
+    Cost lb = std::ceil(volprob.value - FFOT_TOL); // bound
     output.update_lower_bound(lb, std::stringstream(""), info);
 
     output.multipliers.resize(n); // multipliers
@@ -247,9 +247,9 @@ LagRelaxAssignmentVolumeOutput generalizedassignmentsolver::lagrelax_assignment_
 
 LagRelaxKnapsackVolumeOutput& LagRelaxKnapsackVolumeOutput::algorithm_end(Info& info)
 {
-    //PUT(info, "Algorithm", "Iterations", it);
+    //FFOT_PUT(info, "Algorithm", "Iterations", it);
     Output::algorithm_end(info);
-    //VER(info, "Iterations: " << it << std::endl);
+    //FFOT_VER(info, "Iterations: " << it << std::endl);
     return *this;
 }
 
@@ -368,7 +368,7 @@ LagRelaxKnapsackVolumeOutput generalizedassignmentsolver::lagrelax_knapsack_volu
         Info info)
 {
     init_display(instance, info);
-    VER(info,
+    FFOT_VER(info,
                "Algorithm" << std::endl
             << "---------" << std::endl
             << "Lagrangian Relaxation - Knapsack Constraints (Volume)" << std::endl
@@ -397,7 +397,7 @@ LagRelaxKnapsackVolumeOutput generalizedassignmentsolver::lagrelax_knapsack_volu
 
     // Extract solution
 
-    Cost lb = std::ceil(volprob.value - TOL); // bound
+    Cost lb = std::ceil(volprob.value - FFOT_TOL); // bound
     output.update_lower_bound(lb, std::stringstream(""), info);
 
     output.multipliers.resize(m); // multipliers

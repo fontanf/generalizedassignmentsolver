@@ -268,7 +268,7 @@ Output::Output(const Instance& instance, Info& info):
     solution(instance),
     lower_bound(instance.combinatorial_relaxation())
 {
-    VER(info,
+    FFOT_VER(info,
                std::setw(10) << "T (s)"
             << std::setw(14) << "UB"
             << std::setw(14) << "LB"
@@ -325,7 +325,7 @@ void Output::print(Info& info, const std::stringstream& s) const
 {
     double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
 
-    VER(info,
+    FFOT_VER(info,
                std::setw(10) << t
             << std::setw(14) << upper_bound_string()
             << std::setw(14) << lower_bound_string()
@@ -351,8 +351,8 @@ void Output::update_solution(const Solution& solution_new, const std::stringstre
         info.output->number_of_solutions++;
         double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
         std::string sol_str = "Solution" + std::to_string(info.output->number_of_solutions);
-        PUT(info, sol_str, "Value", solution.cost());
-        PUT(info, sol_str, "Time", t);
+        FFOT_PUT(info, sol_str, "Value", solution.cost());
+        FFOT_PUT(info, sol_str, "Time", t);
         if (!info.output->only_write_at_the_end)
             solution.write(info.output->certificate_path);
     }
@@ -374,8 +374,8 @@ void Output::update_lower_bound(Cost lower_bound_new, const std::stringstream& s
         info.output->number_of_bounds++;
         double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
         std::string sol_str = "Bound" + std::to_string(info.output->number_of_bounds);
-        PUT(info, sol_str, "Value", lower_bound);
-        PUT(info, sol_str, "Time", t);
+        FFOT_PUT(info, sol_str, "Value", lower_bound);
+        FFOT_PUT(info, sol_str, "Time", t);
         if (!info.output->only_write_at_the_end)
             solution.write(info.output->certificate_path);
     }
@@ -387,11 +387,11 @@ Output& Output::algorithm_end(Info& info)
 {
     time = (double)std::round(info.elapsed_time() * 10000) / 10000;
 
-    PUT(info, "Solution", "Value", upper_bound_string());
-    PUT(info, "Bound", "Value", lower_bound_string());
-    PUT(info, "Solution", "Time", time);
-    PUT(info, "Bound", "Time", time);
-    VER(info,
+    FFOT_PUT(info, "Solution", "Value", upper_bound_string());
+    FFOT_PUT(info, "Bound", "Value", lower_bound_string());
+    FFOT_PUT(info, "Solution", "Time", time);
+    FFOT_PUT(info, "Bound", "Time", time);
+    FFOT_VER(info,
             std::endl
             << "Final statistics" << std::endl
             << "----------------" << std::endl
@@ -409,9 +409,9 @@ Output& Output::algorithm_end(Info& info)
 Cost generalizedassignmentsolver::algorithm_end(Cost lower_bound, Info& info)
 {
     double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
-    PUT(info, "Bound", "Value", lower_bound);
-    PUT(info, "Bound", "Time", t);
-    VER(info,
+    FFOT_PUT(info, "Bound", "Value", lower_bound);
+    FFOT_PUT(info, "Bound", "Time", t);
+    FFOT_VER(info,
             std::endl
             << "Final statistics" << std::endl
             << "----------------" << std::endl

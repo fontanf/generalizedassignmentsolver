@@ -20,9 +20,9 @@ typedef matrix<double,0,1> column_vector;
 
 LagRelaxAssignmentLbfgsOutput& LagRelaxAssignmentLbfgsOutput::algorithm_end(Info& info)
 {
-    //PUT(info, "Algorithm", "Iterations", it);
+    //FFOT_PUT(info, "Algorithm", "Iterations", it);
     Output::algorithm_end(info);
-    //VER(info, "Iterations: " << it << std::endl);
+    //FFOT_VER(info, "Iterations: " << it << std::endl);
     return *this;
 }
 
@@ -134,7 +134,7 @@ LagRelaxAssignmentLbfgsOutput generalizedassignmentsolver::lagrelax_assignment_l
         LagRelaxAssignmentLbfgsOptionalParameters parameters)
 {
     init_display(instance, parameters.info);
-    VER(parameters.info,
+    FFOT_VER(parameters.info,
                "Algorithm" << std::endl
             << "---------" << std::endl
             << "Lagrangian Relaxation - Assignment Constraints (LBFGS)" << std::endl
@@ -190,7 +190,7 @@ LagRelaxAssignmentLbfgsOutput generalizedassignmentsolver::lagrelax_assignment_l
             std::numeric_limits<double>::max());
 
     // Compute output parameters
-    Cost lb = c0 + std::ceil(res - TOL);
+    Cost lb = c0 + std::ceil(res - FFOT_TOL);
     output.update_lower_bound(lb, std::stringstream(""), parameters.info);
     output.multipliers.resize(n);
     for (ItemIdx j = 0; j < n; ++j)
@@ -206,9 +206,9 @@ LagRelaxAssignmentLbfgsOutput generalizedassignmentsolver::lagrelax_assignment_l
 
 LagRelaxKnapsackLbfgsOutput& LagRelaxKnapsackLbfgsOutput::algorithm_end(Info& info)
 {
-    //PUT(info, "Algorithm", "Iterations", it);
+    //FFOT_PUT(info, "Algorithm", "Iterations", it);
     Output::algorithm_end(info);
-    //VER(info, "Iterations: " << it << std::endl);
+    //FFOT_VER(info, "Iterations: " << it << std::endl);
     return *this;
 }
 
@@ -284,7 +284,7 @@ LagRelaxKnapsackLbfgsOutput generalizedassignmentsolver::lagrelax_knapsack_lbfgs
         Info info)
 {
     init_display(instance, info);
-    VER(info,
+    FFOT_VER(info,
                "Algorithm" << std::endl
             << "---------" << std::endl
             << "Lagrangian Relaxation - Knapsack Constraints (LBFGS)" << std::endl
@@ -323,7 +323,7 @@ LagRelaxKnapsackLbfgsOutput generalizedassignmentsolver::lagrelax_knapsack_lbfgs
             mu_upper);
 
     // Compute output parameters
-    Cost lb = std::ceil(res - TOL);
+    Cost lb = std::ceil(res - FFOT_TOL);
     output.update_lower_bound(lb, std::stringstream(""), info);
     output.multipliers.resize(m);
     for (AgentIdx i = 0; i < m; ++i)

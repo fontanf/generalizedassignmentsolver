@@ -10,9 +10,9 @@ using namespace generalizedassignmentsolver;
 
 LinRelaxClpOutput& LinRelaxClpOutput::algorithm_end(Info& info)
 {
-    //PUT(info, "Algorithm", "Iterations", it);
+    //FFOT_PUT(info, "Algorithm", "Iterations", it);
     Output::algorithm_end(info);
-    //VER(info, "Iterations: " << it << std::endl);
+    //FFOT_VER(info, "Iterations: " << it << std::endl);
     return *this;
 }
 
@@ -21,7 +21,7 @@ LinRelaxClpOutput generalizedassignmentsolver::linrelax_clp(
         Info info)
 {
     init_display(instance, info);
-    VER(info,
+    FFOT_VER(info,
                "Algorithm" << std::endl
             << "---------" << std::endl
             << "Linear Relaxation (CLP)" << std::endl
@@ -47,7 +47,7 @@ LinRelaxClpOutput generalizedassignmentsolver::linrelax_clp(
     model.initialSolve();
 
     // Get solution
-    Cost lb = std::ceil(model.getObjValue() - TOL);
+    Cost lb = std::ceil(model.getObjValue() - FFOT_TOL);
     output.update_lower_bound(lb, std::stringstream(""), info);
     output.x.resize(n, std::vector<double>(m));
     const double *solution = model.getColSolution();
