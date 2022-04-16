@@ -16,12 +16,12 @@ struct CoinLP
 {
     CoinLP(const Instance& instance);
 
-    std::vector<double> col_lower;
-    std::vector<double> col_upper;
+    std::vector<double> column_lower_bounds;
+    std::vector<double> column_upper_bounds;
     std::vector<double> objective;
 
-    std::vector<double> row_lower;
-    std::vector<double> row_upper;
+    std::vector<double> row_lower_bounds;
+    std::vector<double> row_upper_bounds;
     CoinPackedMatrix matrix;
 };
 

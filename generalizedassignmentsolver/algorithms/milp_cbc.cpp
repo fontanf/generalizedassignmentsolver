@@ -53,14 +53,14 @@ MilpCbcOutput& MilpCbcOutput::algorithm_end(Info& info)
 /////////////////////////////////// Callback ///////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-class SolHandler: public CbcEventHandler
+class EventHandler: public CbcEventHandler
 {
 
 public:
 
-    virtual CbcAction event(CbcEvent whichEvent);
+    virtual CbcAction event(CbcEvent which_event);
 
-    SolHandler(
+    EventHandler(
             const Instance& instance,
             MilpCbcOptionalParameters& parameters,
             MilpCbcOutput& output):
@@ -69,8 +69,8 @@ public:
         parameters_(parameters),
         output_(output) { }
 
-    SolHandler(
-            CbcModel *model,
+    EventHandler(
+            CbcModel* model,
             const Instance& instance,
             MilpCbcOptionalParameters& parameters,
             MilpCbcOutput& output):
@@ -79,26 +79,26 @@ public:
         parameters_(parameters),
         output_(output) { }
 
-    virtual ~SolHandler() { }
+    virtual ~EventHandler() { }
 
-    SolHandler(const SolHandler &rhs):
+    EventHandler(const EventHandler &rhs):
         CbcEventHandler(rhs),
         instance_(rhs.instance_),
         parameters_(rhs.parameters_),
         output_(rhs.output_) { }
 
-    SolHandler &operator=(const SolHandler &rhs)
+    EventHandler &operator=(const EventHandler &rhs)
     {
         if (this != &rhs) {
             CbcEventHandler::operator=(rhs);
-            //this->instance_   = rhs.instance_;
+            //this->instance_  = rhs.instance_;
             this->parameters_ = rhs.parameters_;
-            this->output_     = rhs.output_;
+            this->output_ = rhs.output_;
         }
         return *this;
     }
 
-    virtual CbcEventHandler *clone() const { return new SolHandler(*this); }
+    virtual CbcEventHandler* clone() const { return new EventHandler(*this); }
 
 private:
 
@@ -108,7 +108,7 @@ private:
 
 };
 
-CbcEventHandler::CbcAction SolHandler::event(CbcEvent whichEvent)
+CbcEventHandler::CbcAction EventHandler::event(CbcEvent which_event)
 {
     if ((model_->specialOptions() & 2048) != 0) // not in subtree
         return noAction;
@@ -116,18 +116,18 @@ CbcEventHandler::CbcAction SolHandler::event(CbcEvent whichEvent)
     Cost lb = std::ceil(model_->getBestPossibleObjValue() - FFOT_TOL);
     output_.update_lower_bound(lb, std::stringstream(""), parameters_.info);
 
-    if ((whichEvent != solution && whichEvent != heuristicSolution)) // no solution found
+    if ((which_event != solution && which_event != heuristicSolution)) // no solution found
         return noAction;
 
     ItemIdx n = instance_.number_of_items();
     AgentIdx m = instance_.number_of_agents();
 
-    OsiSolverInterface *origSolver = model_->solver();
-    const OsiSolverInterface *pps = model_->postProcessedSolver(1);
-    const OsiSolverInterface *solver = pps? pps: origSolver;
+    OsiSolverInterface* origSolver = model_->solver();
+    const OsiSolverInterface* pps = model_->postProcessedSolver(1);
+    const OsiSolverInterface* solver = pps? pps: origSolver;
 
     if (!output_.solution.feasible() || output_.solution.cost() > solver->getObjValue() + 0.5) {
-        const double *solution_cbc = solver->getColSolution();
+        const double* solution_cbc = solver->getColSolution();
         Solution solution(instance_);
         for (ItemIdx j = 0; j < n; ++j)
             for (AgentIdx i = 0; i < m; ++i)
@@ -150,8 +150,8 @@ CoinLP::CoinLP(const Instance& instance)
 
     // Variables
     int number_of_columns = m * n;
-    col_lower.resize(number_of_columns, 0);
-    col_upper.resize(number_of_columns, 1);
+    column_lower_bounds.resize(number_of_columns, 0);
+    column_upper_bounds.resize(number_of_columns, 1);
 
     // Objective
     objective = std::vector<double>(number_of_columns);
@@ -180,8 +180,8 @@ CoinLP::CoinLP(const Instance& instance)
             number_of_elements_in_rows.back()++;
         }
         // Add row bounds
-        row_lower.push_back(1);
-        row_upper.push_back(1);
+        row_lower_bounds.push_back(1);
+        row_upper_bounds.push_back(1);
     }
 
     // Capacity constraint
@@ -198,8 +198,8 @@ CoinLP::CoinLP(const Instance& instance)
             number_of_elements_in_rows.back()++;
         }
         // Add row bounds
-        row_lower.push_back(0);
-        row_upper.push_back(instance.capacity(i));
+        row_lower_bounds.push_back(0);
+        row_upper_bounds.push_back(instance.capacity(i));
     }
 
     // Create matrix
@@ -228,40 +228,40 @@ MilpCbcOutput generalizedassignmentsolver::milp_cbc(
     if (n == 0)
         return output.algorithm_end(parameters.info);
 
-    CoinLP mat(instance);
+    CoinLP problem(instance);
 
     OsiCbcSolverInterface solver1;
 
-    // Reduce printout
+    // Reduce printout.
     solver1.getModelPtr()->setLogLevel(0);
     solver1.messageHandler()->setLogLevel(0);
 
-    // Load problem
+    // Load problem.
     solver1.loadProblem(
-            mat.matrix,
-            mat.col_lower.data(),
-            mat.col_upper.data(),
-            mat.objective.data(),
-            mat.row_lower.data(),
-            mat.row_upper.data());
+            problem.matrix,
+            problem.column_lower_bounds.data(),
+            problem.column_upper_bounds.data(),
+            problem.objective.data(),
+            problem.row_lower_bounds.data(),
+            problem.row_upper_bounds.data());
 
-    // Mark integer
+    // Mark integer.
     for (ItemIdx j = 0; j < n; ++j)
         for (AgentIdx i = 0; i < m; ++i)
             solver1.setInteger(m * j + i);
 
-    // Pass data and solver to CbcModel
+    // Pass data and solver to CbcModel.
     CbcModel model(solver1);
 
-    // Callback
-    SolHandler sh(instance, parameters, output);
-    model.passInEventHandler(&sh);
+    // Callback.
+    EventHandler event_handler(instance, parameters, output);
+    model.passInEventHandler(&event_handler);
 
-    // Reduce printout
+    // Reduce printout.
     model.setLogLevel(0);
     model.solver()->setHintParam(OsiDoReducePrint, true, OsiHintTry);
 
-    // Heuristics
+    // Heuristics.
     //CbcHeuristicDiveCoefficient heuristic_divecoefficient(model);
     //model.addHeuristic(&heuristic_divecoefficient);
     //CbcHeuristicDiveFractional heuristic_divefractional(model);
@@ -291,7 +291,7 @@ MilpCbcOutput generalizedassignmentsolver::milp_cbc(
     //CbcSerendipity heuristic_serendipity(model);
     //model.addHeuristic(&heuristic_serendipity);
 
-    // Cuts
+    // Cuts.
     //CglClique cutgen_clique;
     //model.addCutGenerator(&cutgen_clique);
     //CglAllDifferent cutgen_alldifferent;
@@ -327,10 +327,10 @@ MilpCbcOutput generalizedassignmentsolver::milp_cbc(
     //CglTwomir cutgen_twomir;
     //model.addCutGenerator(&cutgen_twomir);
 
-    // Set time limit
+    // Set time limit.
     model.setMaximumSeconds(parameters.info.remaining_time());
 
-    // Add initial solution
+    // Add initial solution.
     std::vector<double> sol_init(m * n, 0);
     if (parameters.initial_solution != NULL
             && parameters.initial_solution->feasible()) {
@@ -344,36 +344,24 @@ MilpCbcOutput generalizedassignmentsolver::milp_cbc(
                 parameters.initial_solution->cost());
     }
 
-    // Stop af first improvment
+    // Stop af first improvment.
     if (parameters.stop_at_first_improvment)
         model.setMaximumSolutions(1);
 
-    // Do complete search
+    // Do complete search.
     model.branchAndBound();
 
-    if (model.isProvenInfeasible()) {
+    if (model.isProvenInfeasible()) {  // Infeasible.
+        // Update dual bound.
         output.update_lower_bound(
                 instance.bound(),
                 std::stringstream(""),
                 parameters.info);
-    } else if (model.isProvenOptimal()) {
-        if (!output.solution.feasible() || output.solution.cost() > model.getObjValue() + 0.5) {
-            const double *solution_cbc = model.solver()->getColSolution();
-            Solution solution(instance);
-            for (ItemIdx j = 0; j < n; ++j)
-                for (AgentIdx i = 0; i < m; ++i)
-                    if (solution_cbc[m * j + i] > 0.5)
-                        solution.set(j, i);
-            output.update_solution(
-                    solution,
-                    std::stringstream(""),
-                    parameters.info);
-        }
-        output.update_lower_bound(output.solution.cost(), std::stringstream(""), parameters.info);
-    } else if (model.bestSolution() != NULL) {
+    } else if (model.isProvenOptimal()) {  // Optimal
+        // Update primal solution.
         if (!output.solution.feasible()
                 || output.solution.cost() > model.getObjValue() + 0.5) {
-            const double *solution_cbc = model.solver()->getColSolution();
+            const double* solution_cbc = model.solver()->getColSolution();
             Solution solution(instance);
             for (ItemIdx j = 0; j < n; ++j)
                 for (AgentIdx i = 0; i < m; ++i)
@@ -384,9 +372,31 @@ MilpCbcOutput generalizedassignmentsolver::milp_cbc(
                     std::stringstream(""),
                     parameters.info);
         }
+        // Update dual bound.
+        output.update_lower_bound(
+                output.solution.cost(),
+                std::stringstream(""),
+                parameters.info);
+    } else if (model.bestSolution() != NULL) {  // Feasible solution found.
+        // Update primal solution.
+        if (!output.solution.feasible()
+                || output.solution.cost() > model.getObjValue() + 0.5) {
+            const double* solution_cbc = model.solver()->getColSolution();
+            Solution solution(instance);
+            for (ItemIdx j = 0; j < n; ++j)
+                for (AgentIdx i = 0; i < m; ++i)
+                    if (solution_cbc[m * j + i] > 0.5)
+                        solution.set(j, i);
+            output.update_solution(
+                    solution,
+                    std::stringstream(""),
+                    parameters.info);
+        }
+        // Update dual bound.
         Cost lb = std::ceil(model.getBestPossibleObjValue() - FFOT_TOL);
         output.update_lower_bound(lb, std::stringstream(""), parameters.info);
-    } else {
+    } else {   // No feasible solution found.
+        // Update dual bound.
         Cost lb = std::ceil(model.getBestPossibleObjValue() - FFOT_TOL);
         output.update_lower_bound(lb, std::stringstream(""), parameters.info);
     }

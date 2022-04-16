@@ -32,7 +32,7 @@ LinRelaxClpOutput generalizedassignmentsolver::linrelax_clp(
 
     LinRelaxClpOutput output(instance, info);
 
-    CoinLP mat(instance);
+    CoinLP problem(instance);
 
     ClpSimplex model;
 
@@ -40,8 +40,13 @@ LinRelaxClpOutput generalizedassignmentsolver::linrelax_clp(
     model.messageHandler()->setLogLevel(0);
 
     // Load problem
-    model.loadProblem(mat.matrix, mat.col_lower.data(), mat.col_upper.data(),
-              mat.objective.data(), mat.row_lower.data(), mat.row_upper.data());
+    model.loadProblem(
+            problem.matrix,
+            problem.column_lower_bounds.data(),
+            problem.column_upper_bounds.data(),
+            problem.objective.data(),
+            problem.row_lower_bounds.data(),
+            problem.row_upper_bounds.data());
 
     // Solve
     model.initialSolve();
@@ -50,7 +55,7 @@ LinRelaxClpOutput generalizedassignmentsolver::linrelax_clp(
     Cost lb = std::ceil(model.getObjValue() - FFOT_TOL);
     output.update_lower_bound(lb, std::stringstream(""), info);
     output.x.resize(n, std::vector<double>(m));
-    const double *solution = model.getColSolution();
+    const double* solution = model.getColSolution();
     for (ItemIdx j = 0; j < n; ++j)
         for (AgentIdx i = 0; i < m; ++i)
             output.x[i][j] = solution[m * j + i];
