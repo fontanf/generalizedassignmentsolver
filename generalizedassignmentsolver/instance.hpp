@@ -16,55 +16,74 @@ namespace generalizedassignmentsolver
 
 using optimizationtools::Info;
 
-typedef int64_t Cost;
-typedef double  PCost;
-typedef int64_t Weight;
-typedef int64_t ItemIdx;
-typedef int64_t ItemPos;
-typedef int64_t AgentIdx;
-typedef int64_t AgentPos;
-typedef int64_t StateIdx;
-typedef int64_t Counter;
-typedef int64_t Seed;
+using Cost = int64_t;
+using PCost = double;
+using Weight = int64_t;
+using ItemIdx = int64_t;
+using ItemPos = int64_t;
+using AgentIdx = int64_t;
+using AgentPos = int64_t;
+using Counter = int64_t;
+using Seed = int64_t;
 
 class Solution;
 
 struct Alternative
 {
+    /** Id of the item. */
     ItemIdx j;
+    /** Id of the agent. */
     AgentIdx i;
+    /** Weight. */
     Weight weight;
+    /** Cost. */
     Cost cost;
 
+    /** Get the efficiency of the alternative. */
     double efficiency() const { return cost * weight; }
 };
 
 struct Item
 {
+    /** Unique id of the item. */
     ItemIdx j;
+    /** Alternatives of the item. */
     std::vector<Alternative> alternatives;
 
+    /** Total weight of the item. */
     Weight total_weight;
+    /** Total cost of the item. */
     Cost total_cost;
 
+    /** Minimum cost of the item. */
     Cost minimum_cost = -1;
+    /** Maximum cost of the item. */
     Cost maximum_cost = -1;
+    /** Id of an agent of minimum cost of the item. */
     AgentIdx i_minimum_cost = -1;
+    /** Id of an agent of maximum cost of the item. */
     AgentIdx i_maximum_cost = -1;
 
+    /** Minimum weight of the item. */
     Weight minimum_weight = -1;
+    /** Maximum weight of the item. */
     Weight maximum_weight = -1;
+    /** Id of an agent of minimum weight of the item. */
     AgentIdx i_minimum_weight = -1;
+    /** Id of an agent of maximum weight of hte item. */
     AgentIdx i_maximum_weight = -1;
 };
 
+/**
+ * Instance class for a Generalized Assignment Problem.
+ */
 class Instance
 {
 
 public:
 
     /*
-     * Constructors and destructor
+     * Constructors and destructor.
      */
 
     /** Create an instance from a file. */
@@ -139,10 +158,18 @@ public:
 
 private:
 
+    /*
+     * Private methods.
+     */
+
     /** Read an instance in 'orlibrary' format. */
     void read_orlibrary(std::ifstream& file);
     /** Read an instance in 'standard' format. */
     void read_standard(std::ifstream& file);
+
+    /*
+     * Private attributes.
+     */
 
     /** Name of the instance. */
     std::string name_;
@@ -158,12 +185,18 @@ private:
     Cost maximum_weight_ = -1;
     /** Sum of the minimum cost of each item. */
     Cost sum_of_minimum_costs_ = 0;
-    /** Optimal solution. */
+    /**
+     * Optimal solution.
+     *
+     * 'nullptr' if not set.
+     */
     std::unique_ptr<Solution> optimal_solution_;
 
 };
 
+/** Stream insertion operator. */
 std::ostream& operator<<(std::ostream &os, const Alternative& alternative);
+/** Stream insertion operator. */
 std::ostream& operator<<(std::ostream &os, const Instance& instance);
 
 void init_display(

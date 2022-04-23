@@ -19,9 +19,10 @@ Solution::Solution(const Instance& instance, std::string certificate_path):
     if (certificate_path.empty())
         return;
     std::ifstream file(certificate_path);
-    if (!file.good())
+    if (!file.good()) {
         throw std::runtime_error(
                 "Unable to open file \"" + certificate_path + "\".");
+    }
 
     AgentIdx i = -1;
     for (ItemPos j = 0; j < instance.number_of_items(); ++j) {
@@ -213,11 +214,13 @@ std::string Solution::to_string(AgentIdx i)
     return s;
 }
 
-ItemIdx generalizedassignmentsolver::distance(const Solution& sol1, const Solution& sol2)
+ItemIdx generalizedassignmentsolver::distance(
+        const Solution& solution_1,
+        const Solution& solution_2)
 {
     ItemIdx dist = 0;
-    for (ItemIdx j = 0; j < sol1.instance().number_of_items(); ++j)
-        if (sol1.agent(j) != sol2.agent(j))
+    for (ItemIdx j = 0; j < solution_1.instance().number_of_items(); ++j)
+        if (solution_1.agent(j) != solution_2.agent(j))
             dist++;
     return dist;
 }
@@ -227,16 +230,19 @@ void Solution::write(std::string certificate_path)
     if (certificate_path.empty())
         return;
     std::ofstream file(certificate_path);
-    if (!file.good())
+    if (!file.good()) {
         throw std::runtime_error(
                 "Unable to open file \"" + certificate_path + "\".");
+    }
 
     std::copy(x_.begin(), x_.end(), std::ostream_iterator<AgentIdx>(file, " "));
     file << std::endl;
     file.close();
 }
 
-std::ostream& generalizedassignmentsolver::operator<<(std::ostream& os, const Solution& solution)
+std::ostream& generalizedassignmentsolver::operator<<(
+        std::ostream& os,
+        const Solution& solution)
 {
     os <<  "n " << solution.number_of_items() << "/" << solution.instance().number_of_items()
         << " cost " << solution.cost()
@@ -253,16 +259,20 @@ std::ostream& generalizedassignmentsolver::operator<<(std::ostream& os, const So
     return os;
 }
 
-bool generalizedassignmentsolver::compare(const Solution& sol_best, const Solution& sol_curr)
+bool generalizedassignmentsolver::compare(
+        const Solution& best_solution,
+        const Solution& current_solution)
 {
-    if (!sol_curr.feasible())
+    if (!current_solution.feasible())
         return false;
-    if (!sol_best.feasible())
+    if (!best_solution.feasible())
         return true;
-    return sol_best.cost() > sol_curr.cost();
+    return best_solution.cost() > current_solution.cost();
 }
 
-/*********************************** Output ***********************************/
+////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////// Output ////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 Output::Output(const Instance& instance, Info& info):
     solution(instance),
@@ -318,19 +328,20 @@ double Output::gap() const
         return 0;
     if (lower_bound == 0 || !solution.feasible())
         return std::numeric_limits<double>::infinity();
-    return (double)(10000 * (solution.cost() - lower_bound) / lower_bound) / 100;
+    return (double)(solution.cost() - lower_bound) / lower_bound * 100;
 }
 
 void Output::print(Info& info, const std::stringstream& s) const
 {
-    double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
+    double t = info.elapsed_time();
+    std::streamsize precision = std::cout.precision();
 
     FFOT_VER(info,
-               std::setw(10) << t
+               std::setw(10) << std::fixed << std::setprecision(3) << t << std::defaultfloat << std::setprecision(precision)
             << std::setw(14) << upper_bound_string()
             << std::setw(14) << lower_bound_string()
             << std::setw(14) << gap_string()
-            << std::setw(10) << gap()
+            << std::setw(10) << std::fixed << std::setprecision(2) << gap() << std::defaultfloat << std::setprecision(precision)
             << std::setw(24) << s.str() << std::endl);
 
     if (!info.output->only_write_at_the_end)
