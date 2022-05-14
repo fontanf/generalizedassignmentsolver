@@ -3,7 +3,8 @@ load("//generalizedassignmentsolver:variables.bzl", "STDCPP",
          "CPLEX_COPTS", "CPLEX_DEP", "CPOPTIMIZER_DEP",
          "GUROBI_COPTS", "GUROBI_DEP",
          "GECODE_COPTS", "GECODE_DEP",
-         "LOCALSOLVER_COPTS", "LOCALSOLVER_DEP")
+         "LOCALSOLVER_COPTS", "LOCALSOLVER_DEP",
+         "KNITRO_COPTS", "KNITRO_DEP")
 
 cc_library(
         name = "greedy",
@@ -55,6 +56,17 @@ cc_library(
 )
 
 cc_library(
+        name = "milp_knitro",
+        hdrs = ["milp_knitro.hpp"],
+        srcs = ["milp_knitro.cpp"],
+        deps = [
+                "//generalizedassignmentsolver:generalizedassignmentsolver",
+        ] + KNITRO_DEP,
+        copts = KNITRO_COPTS,
+        visibility = ["//visibility:public"],
+)
+
+cc_library(
         name = "localsearch",
         hdrs = ["localsearch.hpp"],
         srcs = ["localsearch.cpp"],
@@ -96,6 +108,7 @@ cc_library(
                 ":milp_cbc",
                 ":milp_cplex",
                 ":milp_gurobi",
+                ":milp_knitro",
                 ":localsearch",
                 "//generalizedassignmentsolver:generalizedassignmentsolver",
                 "@columngenerationsolver//columngenerationsolver:columngenerationsolver",
@@ -103,8 +116,8 @@ cc_library(
                 "@knapsacksolver//knapsacksolver/algorithms:bellman",
                 "@dlib//:dlib",
                 "@boost//:program_options",
-        ] + COINOR_DEP + CPLEX_DEP + GUROBI_DEP + CPOPTIMIZER_DEP + GECODE_DEP + LOCALSOLVER_DEP,
-        copts = COINOR_COPTS + CPLEX_COPTS + GUROBI_COPTS + GECODE_COPTS + LOCALSOLVER_COPTS,
+        ] + COINOR_DEP + CPLEX_DEP + GUROBI_DEP + CPOPTIMIZER_DEP + GECODE_DEP + LOCALSOLVER_DEP + KNITRO_DEP,
+        copts = COINOR_COPTS + CPLEX_COPTS + GUROBI_COPTS + GECODE_COPTS + LOCALSOLVER_COPTS + KNITRO_COPTS,
         visibility = ["//visibility:public"],
 )
 
@@ -119,6 +132,7 @@ cc_test(
                 "milp_cbc_test.cpp",
                 "milp_cplex_test.cpp",
                 "milp_gurobi_test.cpp",
+                "milp_knitro_test.cpp",
                 "constraintprogramming_cplex_test.cpp",
                 "constraintprogramming_gecode_test.cpp",
         ],
@@ -126,7 +140,7 @@ cc_test(
                 "//generalizedassignmentsolver:tester",
                 ":algorithms",
         ],
-        copts = COINOR_COPTS + CPLEX_COPTS + GUROBI_COPTS + GECODE_COPTS + LOCALSOLVER_COPTS,
+        copts = COINOR_COPTS + CPLEX_COPTS + GUROBI_COPTS + GECODE_COPTS + LOCALSOLVER_COPTS + KNITRO_COPTS,
         tags = ["requires-network"],
         timeout = "moderate",
 )

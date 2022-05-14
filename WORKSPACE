@@ -56,14 +56,14 @@ local_repository(
 )
 
 git_repository(
-    name = "columngenerationsolver",
+    name = "columngenerationsolver_",
     remote = "https://github.com/fontanf/columngenerationsolver.git",
     commit = "e1f129fb7f912996d98bcefe1ba42d84ad5a62c9",
     shallow_since = "1649493214 +0200",
 )
 
 local_repository(
-    name = "columngenerationsolver_",
+    name = "columngenerationsolver",
     path = "../columngenerationsolver/",
 )
 
@@ -201,3 +201,29 @@ cc_library(
 """,
 )
 
+new_local_repository(
+    name = "knitro",
+    path = "/home/florian/Programmes/knitro-13.0.1-Linux-64//",
+    build_file_content = """
+cc_library(
+    name = "knitro",
+    hdrs = [
+            "include/knitro.h",
+    ],
+    strip_include_prefix = "include/",
+    srcs = [
+            "lib/libknitro.so",
+            "lib/libiomp5.so",
+    ],
+    copts = [
+            "-fopenmp",
+    ],
+    linkopts = [
+            "-fopenmp",
+            "-ldl",
+            "-liomp5",
+    ],
+    visibility = ["//visibility:public"],
+)
+""",
+)

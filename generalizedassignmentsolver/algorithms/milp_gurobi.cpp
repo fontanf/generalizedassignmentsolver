@@ -61,7 +61,8 @@ private:
 };
 
 MilpGurobiOutput generalizedassignmentsolver::milp_gurobi(
-        const Instance& instance, MilpGurobiOptionalParameters parameters)
+        const Instance& instance,
+        MilpGurobiOptionalParameters parameters)
 {
     GRBEnv env;
     init_display(instance, parameters.info);

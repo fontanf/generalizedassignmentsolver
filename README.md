@@ -55,6 +55,7 @@ It is possible to solve the variant where not all items have to be assigned by a
   - with CBC `-a milp_cbc`
   - with CPLEX `-a milp_cplex`
   - with Gurobi `-a milp_gurobi`
+  - with Knitro `-a milp_knitro`
 
 - Constraint programming
   - with Gecode `-a constraintprogramming_gecode`
@@ -82,6 +83,7 @@ bazel build \
     --define gecode=true \
     --define dlib=true \
     --define localsolver=true \
+    --define knitro=true \
     -- //...
 ```
 

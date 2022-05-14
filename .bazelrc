@@ -10,4 +10,5 @@ build --cxxopt=-Wall --cxxopt=-Wextra
 #build --define gurobi=true
 #build --define gecode=true
 #build --define localsolver=true
+#build --define knitro=true
 

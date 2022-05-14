@@ -20,6 +20,9 @@ GECODE_COPTS = select({
 LOCALSOLVER_COPTS = select({
             "//generalizedassignmentsolver:localsolver_build": ["-DLOCALSOLVER_FOUND"],
             "//conditions:default": []})
+KNITRO_COPTS = select({
+            "//generalizedassignmentsolver:knitro_build": ["-DKNITRO_FOUND"],
+            "//conditions:default": []})
 
 COINOR_DEP = select({
             "//generalizedassignmentsolver:coinor_build": ["@coinor//:coinor"],
@@ -38,5 +41,8 @@ GECODE_DEP = select({
             "//conditions:default": []})
 LOCALSOLVER_DEP = select({
             "//generalizedassignmentsolver:localsolver_build": ["@localsolver//:localsolver"],
+            "//conditions:default": []})
+KNITRO_DEP = select({
+            "//generalizedassignmentsolver:knitro_build": ["@knitro//:knitro"],
             "//conditions:default": []})
 

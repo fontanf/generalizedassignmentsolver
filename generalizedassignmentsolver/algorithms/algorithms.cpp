@@ -1,19 +1,36 @@
 #include "generalizedassignmentsolver/algorithms/algorithms.hpp"
 
+#if COINOR_FOUND
 #include "generalizedassignmentsolver/algorithms/linrelax_clp.hpp"
 #include "generalizedassignmentsolver/algorithms/lagrelax_volume.hpp"
+#endif
 #include "generalizedassignmentsolver/algorithms/lagrelax_lbfgs.hpp"
 #include "generalizedassignmentsolver/algorithms/columngeneration.hpp"
+#if COINOR_FOUND
 #include "generalizedassignmentsolver/algorithms/milp_cbc.hpp"
+#endif
+#if CPLEX_FOUND
 #include "generalizedassignmentsolver/algorithms/milp_cplex.hpp"
+#endif
+#if GUROBI_FOUND
 #include "generalizedassignmentsolver/algorithms/milp_gurobi.hpp"
+#endif
+#if KNITRO_FOUND
+#include "generalizedassignmentsolver/algorithms/milp_knitro.hpp"
+#endif
+#if GECODE_FOUND
 #include "generalizedassignmentsolver/algorithms/constraintprogramming_gecode.hpp"
+#endif
+#if CPLEX_FOUND
 #include "generalizedassignmentsolver/algorithms/constraintprogramming_cplex.hpp"
+#endif
 #include "generalizedassignmentsolver/algorithms/random.hpp"
 #include "generalizedassignmentsolver/algorithms/greedy.hpp"
 #include "generalizedassignmentsolver/algorithms/repair.hpp"
 #include "generalizedassignmentsolver/algorithms/localsearch.hpp"
+#if LOCALSOLVER_FOUND
 #include "generalizedassignmentsolver/algorithms/localsolver.hpp"
+#endif
 
 #include <boost/program_options.hpp>
 
@@ -138,6 +155,28 @@ MilpGurobiOptionalParameters read_milp_gurobi_args(const std::vector<char*>& arg
 }
 #endif
 
+#if KNITRO_FOUND
+MilpKnitroOptionalParameters read_milp_knitro_args(const std::vector<char*>& argv)
+{
+    MilpKnitroOptionalParameters parameters;
+    po::options_description desc("Allowed options");
+    desc.add_options()
+        ("only-linear-relaxation", "")
+        ;
+    po::variables_map vm;
+    po::store(po::parse_command_line((Counter)argv.size(), argv.data(), desc), vm);
+    try {
+        po::notify(vm);
+    } catch (const po::required_option& e) {
+        std::cout << desc << std::endl;;
+        throw "";
+    }
+    if (vm.count("only-linear-relaxation"))
+        parameters.only_linear_relaxation = true;
+    return parameters;
+}
+#endif
+
 Output generalizedassignmentsolver::run(
         std::string algorithm,
         const Instance& instance,
@@ -199,6 +238,12 @@ Output generalizedassignmentsolver::run(
         auto parameters = read_milp_gurobi_args(algorithm_argv);
         parameters.info = info;
         return milp_gurobi(instance, parameters);
+#endif
+#if KNITRO_FOUND
+    } else if (algorithm_args[0] == "milp_knitro") {
+        auto parameters = read_milp_knitro_args(algorithm_argv);
+        parameters.info = info;
+        return milp_knitro(instance, parameters);
 #endif
 #if GECODE_FOUND
     } else if (algorithm_args[0] == "constraintprogramming_gecode") {
