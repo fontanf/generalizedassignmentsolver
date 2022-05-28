@@ -15,7 +15,7 @@ def Settings(**kwargs):
                 '-I', '/opt/ibm/ILOG/CPLEX_Studio129/cplex/include/',
                 '-I', '/opt/ibm/ILOG/CPLEX_Studio129/cpoptimizer/include/',
                 '-I', '/home/florian/Programmes/gurobi811/linux64/include/',
-                '-I', '/home/florian/Programmes/knitro-13.0.1-Linux-64/include/',
+                '-I', '/home/florian/Programmes/knitro-13.1.0-z-Linux-Intel17-64/include/',
                 '-I', '/home/florian/Programmes/gecode-release-6.2.0/',
                 '-I', './bazel-generalizedassignmentsolver/external/json/single_include/',
                 '-I', './bazel-generalizedassignmentsolver/external/googletest/googletest/include/',

@@ -41,8 +41,8 @@ int milp_knitro_callback(
             user_params->parameters.info);
 
     double obj;
-    int has_incumbent = KN_get_mip_incumbent_obj(kc, &obj);
-    if (has_incumbent == 1) {
+    int return_code = KN_get_mip_incumbent_obj(kc, &obj);
+    if (return_code == 0) {
         if (!user_params->output.solution.feasible()
                 || user_params->output.solution.cost() > obj + 0.5) {
             Solution solution(user_params->instance);
@@ -50,10 +50,12 @@ int milp_knitro_callback(
             ItemIdx n = user_params->instance.number_of_items();
             std::vector<double> values(n * m);
             KN_get_mip_incumbent_x(kc, values.data());
-            for (ItemIdx j = 0; j < n; ++j)
-                for (AgentIdx i = 0; i < m; ++i)
+            for (ItemIdx j = 0; j < n; ++j) {
+                for (AgentIdx i = 0; i < m; ++i) {
                     if (values[user_params->x[j][i]] > 0.5)
                         solution.set(j, i);
+                }
+            }
             std::stringstream ss;
             user_params->output.update_solution(
                     solution,
@@ -143,16 +145,16 @@ MilpKnitroOutput generalizedassignmentsolver::milp_knitro(
     }
 
     // Initial solution.
-    //if (parameters.initial_solution != NULL && parameters.initial_solution->feasible()) {
-    //    for (ItemIdx j = 0; j < n; ++j) {
-    //        for (AgentIdx i = 0; i < m; ++i) {
-    //            KN_set_mip_var_primal_init_value(
-    //                    kc,
-    //                    x[j][i],
-    //                    (parameters.initial_solution->agent(j) == i)? 1: 0);
-    //        }
-    //    }
-    //}
+    if (parameters.initial_solution != NULL && parameters.initial_solution->feasible()) {
+        for (ItemIdx j = 0; j < n; ++j) {
+            for (AgentIdx i = 0; i < m; ++i) {
+                KN_set_mip_var_primal_init_value(
+                        kc,
+                        x[j][i],
+                        (parameters.initial_solution->agent(j) == i)? 1: 0);
+            }
+        }
+    }
 
     KN_set_double_param(kc, KN_PARAM_MIP_OPTGAPREL, 0); // Fix precision issue
     KN_set_double_param(kc, KN_PARAM_MIP_OPTGAPABS, 0); // Fix precision issue
@@ -172,7 +174,7 @@ MilpKnitroOutput generalizedassignmentsolver::milp_knitro(
     double obj;
     double bound;
     double value;
-    int has_incumbent = KN_get_mip_incumbent_obj(kc, &obj);
+    int return_code = KN_get_mip_incumbent_obj(kc, &obj);
     if (status == KN_RC_MIP_EXH_INFEAS) {
         output.update_lower_bound(instance.bound(), std::stringstream(""), parameters.info);
     } else if (status == KN_RC_OPTIMAL_OR_SATISFACTORY) {
@@ -188,7 +190,7 @@ MilpKnitroOutput generalizedassignmentsolver::milp_knitro(
             output.update_solution(solution, std::stringstream(""), parameters.info);
         }
         output.update_lower_bound(output.solution.cost(), std::stringstream(""), parameters.info);
-    } else if (has_incumbent == 1) {
+    } else if (return_code == 0) {
         if (!output.solution.feasible() || output.solution.cost() > obj + 0.5) {
             Solution solution(instance);
             for (ItemIdx j = 0; j < n; ++j) {

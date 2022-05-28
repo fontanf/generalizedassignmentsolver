@@ -242,6 +242,7 @@ Output generalizedassignmentsolver::run(
 #if KNITRO_FOUND
     } else if (algorithm_args[0] == "milp_knitro") {
         auto parameters = read_milp_knitro_args(algorithm_argv);
+        parameters.initial_solution = &initial_solution;
         parameters.info = info;
         return milp_knitro(instance, parameters);
 #endif

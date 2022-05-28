@@ -203,7 +203,7 @@ cc_library(
 
 new_local_repository(
     name = "knitro",
-    path = "/home/florian/Programmes/knitro-13.0.1-Linux-64//",
+    path = "/home/florian/Programmes/knitro-13.1.0-z-Linux-Intel17-64/",
     build_file_content = """
 cc_library(
     name = "knitro",
