@@ -10,7 +10,7 @@ ILOSTLBEGIN
 
 MilpCplexOutput& MilpCplexOutput::algorithm_end(Info& info)
 {
-    //FFOT_PUT(info, "Algorithm", "Iterations", it);
+    //info.add_to_json("Algorithm", "Iterations", it);
     Output::algorithm_end(info);
     //FFOT_VER(info, "Iterations: " << it << std::endl);
     return *this;
@@ -48,11 +48,11 @@ MilpCplexOutput generalizedassignmentsolver::milp_cplex(
         MilpCplexOptionalParameters parameters)
 {
     init_display(instance, parameters.info);
-    FFOT_VER(parameters.info,
-               "Algorithm" << std::endl
+    parameters.info.os()
+            << "Algorithm" << std::endl
             << "---------" << std::endl
             << "MILP (CPLEX)" << std::endl
-            << std::endl);
+            << std::endl;
 
     MilpCplexOutput output(instance, parameters.info);
 

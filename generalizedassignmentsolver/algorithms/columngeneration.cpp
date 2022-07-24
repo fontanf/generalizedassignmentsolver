@@ -43,11 +43,11 @@ typedef columngenerationsolver::Column Column;
 
 ColumnGenerationOutput& ColumnGenerationOutput::algorithm_end(Info& info)
 {
-    FFOT_PUT(info, "Algorithm", "Iterations", number_of_iterations);
-    FFOT_PUT(info, "Algorithm", "AddedColumns", number_of_added_columns);
+    info.add_to_json("Algorithm", "Iterations", number_of_iterations);
+    info.add_to_json("Algorithm", "AddedColumns", number_of_added_columns);
     Output::algorithm_end(info);
-    FFOT_VER(info, "Iterations:               " << number_of_iterations << std::endl);
-    FFOT_VER(info, "Number of columns added:  " << number_of_added_columns << std::endl);
+    info.os() << "Iterations:               " << number_of_iterations << std::endl;
+    info.os() << "Number of columns added:  " << number_of_added_columns << std::endl;
     return *this;
 }
 
@@ -220,15 +220,15 @@ ColumnGenerationOutput generalizedassignmentsolver::columngeneration(
         ColumnGenerationOptionalParameters parameters)
 {
     init_display(instance, parameters.info);
-    FFOT_VER(parameters.info,
-               "Algorithm" << std::endl
+    parameters.info.os()
+            << "Algorithm" << std::endl
             << "---------" << std::endl
             << "Column Generation" << std::endl
             << std::endl
             << "Parameters" << std::endl
             << "----------" << std::endl
             << "Linear programming solver:  " << parameters.linear_programming_solver << std::endl
-            << std::endl);
+            << std::endl;
 
     ColumnGenerationOutput output(instance, parameters.info);
 
@@ -253,15 +253,15 @@ ColumnGenerationHeuristicGreedyOutput generalizedassignmentsolver::columngenerat
         ColumnGenerationOptionalParameters parameters)
 {
     init_display(instance, parameters.info);
-    FFOT_VER(parameters.info,
-               "Algorithm" << std::endl
+    parameters.info.os()
+            << "Algorithm" << std::endl
             << "---------" << std::endl
             << "Column Generation Heuristic - Greedy" << std::endl
             << std::endl
             << "Parameters" << std::endl
             << "----------" << std::endl
             << "Linear programming solver:  " << parameters.linear_programming_solver << std::endl
-            << std::endl);
+            << std::endl;
 
     ColumnGenerationHeuristicGreedyOutput output(instance, parameters.info);
 
@@ -289,15 +289,15 @@ ColumnGenerationHeuristicLimitedDiscrepancySearchOutput generalizedassignmentsol
         ColumnGenerationOptionalParameters parameters)
 {
     init_display(instance, parameters.info);
-    FFOT_VER(parameters.info,
-               "Algorithm" << std::endl
+    parameters.info.os()
+            << "Algorithm" << std::endl
             << "---------" << std::endl
             << "Column Generation Heuristic - Limited Discrepancy Search" << std::endl
             << std::endl
             << "Parameters" << std::endl
             << "----------" << std::endl
             << "Linear programming solver:  " << parameters.linear_programming_solver << std::endl
-            << std::endl);
+            << std::endl;
 
     ColumnGenerationHeuristicLimitedDiscrepancySearchOutput output(instance, parameters.info);
 

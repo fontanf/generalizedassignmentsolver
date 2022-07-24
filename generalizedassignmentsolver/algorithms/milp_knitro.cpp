@@ -72,11 +72,11 @@ MilpKnitroOutput generalizedassignmentsolver::milp_knitro(
         MilpKnitroOptionalParameters parameters)
 {
     init_display(instance, parameters.info);
-    FFOT_VER(parameters.info,
-               "Algorithm" << std::endl
+    parameters.info.os()
+            << "Algorithm" << std::endl
             << "---------" << std::endl
             << "MILP (Knitro)" << std::endl
-            << std::endl);
+            << std::endl;
 
     MilpKnitroOutput output(instance, parameters.info);
 

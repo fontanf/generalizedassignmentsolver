@@ -43,7 +43,7 @@ using namespace generalizedassignmentsolver;
 
 MilpCbcOutput& MilpCbcOutput::algorithm_end(Info& info)
 {
-    //FFOT_PUT(info, "Algorithm", "Iterations", it);
+    //info.add_to_json("Algorithm", "Iterations", it);
     Output::algorithm_end(info);
     //FFOT_VER(info, "Iterations: " << it << std::endl);
     return *this;
@@ -215,11 +215,11 @@ MilpCbcOutput generalizedassignmentsolver::milp_cbc(
         MilpCbcOptionalParameters parameters)
 {
     init_display(instance, parameters.info);
-    FFOT_VER(parameters.info,
-               "Algorithm" << std::endl
+    parameters.info.os()
+            << "Algorithm" << std::endl
             << "---------" << std::endl
             << "MILP (CBC)" << std::endl
-            << std::endl);
+            << std::endl;
 
     MilpCbcOutput output(instance, parameters.info);
 

@@ -16,7 +16,7 @@ using namespace localsearchsolver;
 
 LocalSearchOutput& LocalSearchOutput::algorithm_end(Info& info)
 {
-    //FFOT_PUT(info, "Algorithm", "Iterations", iterations);
+    //info.add_to_json("Algorithm", "Iterations", iterations);
     Output::algorithm_end(info);
     //FFOT_VER(info, "Iterations: " << iterations << std::endl);
     return *this;
@@ -109,11 +109,6 @@ public:
     {
         std::iota(agents_.begin(), agents_.end(), 0);
     }
-
-    LocalScheme(const LocalScheme& local_scheme):
-        LocalScheme(local_scheme.instance_, local_scheme.parameters_) { }
-
-    virtual ~LocalScheme() { }
 
     /*
      * Initial solutions.
@@ -232,7 +227,10 @@ public:
         return moves;
     }
 
-    inline void apply_move(Solution& solution, const Move& move) const
+    inline void apply_move(
+            Solution& solution,
+            const Move& move,
+            std::mt19937_64&) const
     {
         for (auto t: move.moves) {
             ItemIdx j = std::get<0>(t);
@@ -497,11 +495,11 @@ LocalSearchOutput generalizedassignmentsolver::localsearch(
         LocalSearchOptionalParameters parameters)
 {
     init_display(instance, parameters.info);
-    FFOT_VER(parameters.info,
-               "Algorithm" << std::endl
+    parameters.info.os()
+            << "Algorithm" << std::endl
             << "---------" << std::endl
             << "Local Search" << std::endl
-            << std::endl);
+            << std::endl;
 
     LocalSearchOutput output(instance, parameters.info);
 
@@ -511,7 +509,7 @@ LocalSearchOutput generalizedassignmentsolver::localsearch(
 
     // Run A*.
     BestFirstLocalSearchOptionalParameters<LocalScheme> parameters_bfls;
-    parameters_bfls.info.set_verbose(false);
+    parameters_bfls.info.set_verbosity_level(0);
     parameters_bfls.info.set_time_limit(parameters.info.remaining_time());
     parameters_bfls.number_of_threads_1 = 1;
     parameters_bfls.number_of_threads_2 = parameters.number_of_threads;

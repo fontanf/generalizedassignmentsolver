@@ -66,11 +66,11 @@ MilpGurobiOutput generalizedassignmentsolver::milp_gurobi(
 {
     GRBEnv env;
     init_display(instance, parameters.info);
-    FFOT_VER(parameters.info,
-               "Algorithm" << std::endl
+    parameters.info.os()
+            << "Algorithm" << std::endl
             << "---------" << std::endl
             << "MILP (Gurobi)" << std::endl
-            << std::endl);
+            << std::endl;
 
     MilpGurobiOutput output(instance, parameters.info);
 

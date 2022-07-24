@@ -49,15 +49,15 @@ Output generalizedassignmentsolver::greedy(
         const Desirability& f, Info info)
 {
     init_display(instance, info);
-    FFOT_VER(info,
-               "Algorithm" << std::endl
+    info.os()
+            << "Algorithm" << std::endl
             << "---------" << std::endl
             << "Greedy" << std::endl
             << std::endl
             << "Parameters" << std::endl
             << "----------" << std::endl
             << "Desirability:  " << f.to_string() << std::endl
-            << std::endl);
+            << std::endl;
 
     Output output(instance, info);
     Solution solution(instance);
@@ -154,15 +154,15 @@ Output generalizedassignmentsolver::greedyregret(
         Info info)
 {
     init_display(instance, info);
-    FFOT_VER(info,
-               "Algorithm" << std::endl
+    info.os()
+            << "Algorithm" << std::endl
             << "---------" << std::endl
             << "Regret greedy" << std::endl
             << std::endl
             << "Parameters" << std::endl
             << "----------" << std::endl
             << "Desirability:  " << f.to_string() << std::endl
-            << std::endl);
+            << std::endl;
 
     Output output(instance, info);
     Solution solution(instance);
@@ -212,15 +212,15 @@ Output generalizedassignmentsolver::mthg(
         Info info)
 {
     init_display(instance, info);
-    FFOT_VER(info,
-               "Algorithm" << std::endl
+    info.os()
+            << "Algorithm" << std::endl
             << "---------" << std::endl
             << "MTHG" << std::endl
             << std::endl
             << "Parameters" << std::endl
             << "----------" << std::endl
             << "Desirability:  " << f.to_string() << std::endl
-            << std::endl);
+            << std::endl;
 
     Output output(instance, info);
     Solution solution(instance);
@@ -247,15 +247,15 @@ Output generalizedassignmentsolver::mthgregret(
         Info info)
 {
     init_display(instance, info);
-    FFOT_VER(info,
-               "Algorithm" << std::endl
+    info.os()
+            << "Algorithm" << std::endl
             << "---------" << std::endl
             << "Regret MTHG" << std::endl
             << std::endl
             << "Parameters" << std::endl
             << "----------" << std::endl
             << "Desirability:  " << f.to_string() << std::endl
-            << std::endl);
+            << std::endl;
 
     Output output(instance, info);
     Solution solution(instance);

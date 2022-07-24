@@ -26,7 +26,7 @@ using namespace generalizedassignmentsolver;
 
 LagRelaxAssignmentVolumeOutput& LagRelaxAssignmentVolumeOutput::algorithm_end(Info& info)
 {
-    //FFOT_PUT(info, "Algorithm", "Iterations", it);
+    //info.add_to_json("Algorithm", "Iterations", it);
     Output::algorithm_end(info);
     //FFOT_VER(info, "Iterations: " << it << std::endl);
     return *this;
@@ -191,11 +191,11 @@ LagRelaxAssignmentVolumeOutput generalizedassignmentsolver::lagrelax_assignment_
         Info info)
 {
     init_display(instance, info);
-    FFOT_VER(info,
-               "Algorithm" << std::endl
+    info.os()
+            << "Algorithm" << std::endl
             << "---------" << std::endl
             << "Lagrangian Relaxation - Assignment Constraints (Volume)" << std::endl
-            << std::endl);
+            << std::endl;
 
     LagRelaxAssignmentVolumeOutput output(instance, info);
 
@@ -247,7 +247,7 @@ LagRelaxAssignmentVolumeOutput generalizedassignmentsolver::lagrelax_assignment_
 
 LagRelaxKnapsackVolumeOutput& LagRelaxKnapsackVolumeOutput::algorithm_end(Info& info)
 {
-    //FFOT_PUT(info, "Algorithm", "Iterations", it);
+    //info.add_to_json("Algorithm", "Iterations", it);
     Output::algorithm_end(info);
     //FFOT_VER(info, "Iterations: " << it << std::endl);
     return *this;
@@ -368,11 +368,11 @@ LagRelaxKnapsackVolumeOutput generalizedassignmentsolver::lagrelax_knapsack_volu
         Info info)
 {
     init_display(instance, info);
-    FFOT_VER(info,
-               "Algorithm" << std::endl
+    info.os()
+            << "Algorithm" << std::endl
             << "---------" << std::endl
             << "Lagrangian Relaxation - Knapsack Constraints (Volume)" << std::endl
-            << std::endl);
+            << std::endl;
 
     LagRelaxKnapsackVolumeOutput output(instance, info);
 

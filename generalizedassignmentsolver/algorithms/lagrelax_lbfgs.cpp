@@ -20,7 +20,7 @@ typedef matrix<double,0,1> column_vector;
 
 LagRelaxAssignmentLbfgsOutput& LagRelaxAssignmentLbfgsOutput::algorithm_end(Info& info)
 {
-    //FFOT_PUT(info, "Algorithm", "Iterations", it);
+    //info.add_to_json("Algorithm", "Iterations", it);
     Output::algorithm_end(info);
     //FFOT_VER(info, "Iterations: " << it << std::endl);
     return *this;
@@ -134,11 +134,11 @@ LagRelaxAssignmentLbfgsOutput generalizedassignmentsolver::lagrelax_assignment_l
         LagRelaxAssignmentLbfgsOptionalParameters parameters)
 {
     init_display(instance, parameters.info);
-    FFOT_VER(parameters.info,
-               "Algorithm" << std::endl
+    parameters.info.os()
+            << "Algorithm" << std::endl
             << "---------" << std::endl
             << "Lagrangian Relaxation - Assignment Constraints (LBFGS)" << std::endl
-            << std::endl);
+            << std::endl;
 
     LagRelaxAssignmentLbfgsOutput output(instance, parameters.info);
 
@@ -206,7 +206,7 @@ LagRelaxAssignmentLbfgsOutput generalizedassignmentsolver::lagrelax_assignment_l
 
 LagRelaxKnapsackLbfgsOutput& LagRelaxKnapsackLbfgsOutput::algorithm_end(Info& info)
 {
-    //FFOT_PUT(info, "Algorithm", "Iterations", it);
+    //info.add_to_json("Algorithm", "Iterations", it);
     Output::algorithm_end(info);
     //FFOT_VER(info, "Iterations: " << it << std::endl);
     return *this;
@@ -284,11 +284,11 @@ LagRelaxKnapsackLbfgsOutput generalizedassignmentsolver::lagrelax_knapsack_lbfgs
         Info info)
 {
     init_display(instance, info);
-    FFOT_VER(info,
-               "Algorithm" << std::endl
+    info.os()
+            << "Algorithm" << std::endl
             << "---------" << std::endl
             << "Lagrangian Relaxation - Knapsack Constraints (LBFGS)" << std::endl
-            << std::endl);
+            << std::endl;
 
     LagRelaxKnapsackLbfgsOutput output(instance, info);
 

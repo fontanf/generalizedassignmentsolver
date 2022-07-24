@@ -19,6 +19,7 @@ int main(int argc, char *argv[])
     std::string log_path = "";
     int loglevelmax = 999;
     int seed = 0;
+    int verbosity_level = 1;
     double time_limit = std::numeric_limits<double>::infinity();
 
     po::options_description desc("Allowed options");
@@ -30,9 +31,9 @@ int main(int argc, char *argv[])
         ("initial-solution", po::value<std::string>(&initial_solution_path), "set initial solution file")
         ("output,o", po::value<std::string>(&output_path), "set output file")
         ("certificate,c", po::value<std::string>(&certificate_path), "set certificate file")
-        ("time-limit,t", po::value<double>(&time_limit), "Time limit in seconds\n  ex: 3600")
-        ("seed,s", po::value<int>(&seed), "seed")
-        ("verbose,v", "")
+        ("time-limit,t", po::value<double>(&time_limit), "set time limit in seconds\n  ex: 3600")
+        ("seed,s", po::value<int>(&seed), "set seed")
+        ("verbosity-level,v", po::value<int>(&verbosity_level), "set verbosity level")
         ("log,l", po::value<std::string>(&log_path), "set log file")
         ("loglevelmax", po::value<int>(&loglevelmax), "set log max level")
         ("log2stderr", "write log in stderr")
@@ -58,7 +59,7 @@ int main(int argc, char *argv[])
     Solution initial_solution(instance, initial_solution_path);
 
     Info info = Info()
-        .set_verbose(vm.count("verbose"))
+        .set_verbosity_level(verbosity_level)
         .set_time_limit(time_limit)
         .set_certificate_path(certificate_path)
         .set_json_output_path(output_path)

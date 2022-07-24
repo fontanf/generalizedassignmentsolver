@@ -109,13 +109,6 @@ public:
     /** Set the optimal solution. */
     void set_optimal_solution(Solution& solution);
 
-    /** Copy constructor. */
-    Instance(const Instance& instance);
-    /** Copy assignment operator. */
-    Instance& operator=(const Instance& instance);
-    /** Destructor. */
-    ~Instance();
-
     /*
      * Getters
      */
@@ -190,7 +183,7 @@ private:
      *
      * 'nullptr' if not set.
      */
-    std::unique_ptr<Solution> optimal_solution_;
+    std::shared_ptr<Solution> optimal_solution_;
 
 };
 

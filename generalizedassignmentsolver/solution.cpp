@@ -278,8 +278,8 @@ Output::Output(const Instance& instance, Info& info):
     solution(instance),
     lower_bound(instance.combinatorial_relaxation())
 {
-    FFOT_VER(info,
-               std::setw(10) << "T (s)"
+    info.os()
+            << std::setw(10) << "T (s)"
             << std::setw(14) << "UB"
             << std::setw(14) << "LB"
             << std::setw(14) << "GAP"
@@ -292,7 +292,7 @@ Output::Output(const Instance& instance, Info& info):
             << std::setw(14) << "---"
             << std::setw(10) << "-------"
             << std::setw(24) << "-------"
-            << std::endl);
+            << std::endl;
     print(info, std::stringstream(""));
     info.reset_time();
 }
@@ -336,13 +336,13 @@ void Output::print(Info& info, const std::stringstream& s) const
     double t = info.elapsed_time();
     std::streamsize precision = std::cout.precision();
 
-    FFOT_VER(info,
-               std::setw(10) << std::fixed << std::setprecision(3) << t << std::defaultfloat << std::setprecision(precision)
+    info.os()
+            << std::setw(10) << std::fixed << std::setprecision(3) << t << std::defaultfloat << std::setprecision(precision)
             << std::setw(14) << upper_bound_string()
             << std::setw(14) << lower_bound_string()
             << std::setw(14) << gap_string()
             << std::setw(10) << std::fixed << std::setprecision(2) << gap() << std::defaultfloat << std::setprecision(precision)
-            << std::setw(24) << s.str() << std::endl);
+            << std::setw(24) << s.str() << std::endl;
 
     if (!info.output->only_write_at_the_end)
         info.write_json_output();
@@ -353,7 +353,7 @@ void Output::update_solution(const Solution& solution_new, const std::stringstre
     if (!compare(solution, solution_new))
         return;
 
-    info.output->mutex_solutions.lock();
+    info.lock();
 
     if (compare(solution, solution_new)) {
         solution = solution_new;
@@ -362,13 +362,13 @@ void Output::update_solution(const Solution& solution_new, const std::stringstre
         info.output->number_of_solutions++;
         double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
         std::string sol_str = "Solution" + std::to_string(info.output->number_of_solutions);
-        FFOT_PUT(info, sol_str, "Value", solution.cost());
-        FFOT_PUT(info, sol_str, "Time", t);
+        info.add_to_json(sol_str, "Value", solution.cost());
+        info.add_to_json(sol_str, "Time", t);
         if (!info.output->only_write_at_the_end)
             solution.write(info.output->certificate_path);
     }
 
-    info.output->mutex_solutions.unlock();
+    info.unlock();
 }
 
 void Output::update_lower_bound(Cost lower_bound_new, const std::stringstream& s, Info& info)
@@ -376,7 +376,7 @@ void Output::update_lower_bound(Cost lower_bound_new, const std::stringstream& s
     if (lower_bound != -1 && lower_bound >= lower_bound_new)
         return;
 
-    info.output->mutex_solutions.lock();
+    info.lock();
 
     if (lower_bound == -1 || lower_bound < lower_bound_new) {
         lower_bound = lower_bound_new;
@@ -385,32 +385,32 @@ void Output::update_lower_bound(Cost lower_bound_new, const std::stringstream& s
         info.output->number_of_bounds++;
         double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
         std::string sol_str = "Bound" + std::to_string(info.output->number_of_bounds);
-        FFOT_PUT(info, sol_str, "Value", lower_bound);
-        FFOT_PUT(info, sol_str, "Time", t);
+        info.add_to_json(sol_str, "Value", lower_bound);
+        info.add_to_json(sol_str, "Time", t);
         if (!info.output->only_write_at_the_end)
             solution.write(info.output->certificate_path);
     }
 
-    info.output->mutex_solutions.unlock();
+    info.unlock();
 }
 
 Output& Output::algorithm_end(Info& info)
 {
     time = (double)std::round(info.elapsed_time() * 10000) / 10000;
 
-    FFOT_PUT(info, "Solution", "Value", upper_bound_string());
-    FFOT_PUT(info, "Bound", "Value", lower_bound_string());
-    FFOT_PUT(info, "Solution", "Time", time);
-    FFOT_PUT(info, "Bound", "Time", time);
-    FFOT_VER(info,
-            std::endl
+    info.add_to_json("Solution", "Value", upper_bound_string());
+    info.add_to_json("Bound", "Value", lower_bound_string());
+    info.add_to_json("Solution", "Time", time);
+    info.add_to_json("Bound", "Time", time);
+    info.os()
+            << std::endl
             << "Final statistics" << std::endl
             << "----------------" << std::endl
             << "Value:                    " << upper_bound_string() << std::endl
             << "Bound:                    " << lower_bound_string() << std::endl
             << "Gap:                      " << gap_string() << std::endl
             << "Gap (%):                  " << gap() << std::endl
-            << "Time (s):                 " << time << std::endl);
+            << "Time (s):                 " << time << std::endl;
 
     info.write_json_output();
     solution.write(info.output->certificate_path);
@@ -420,14 +420,14 @@ Output& Output::algorithm_end(Info& info)
 Cost generalizedassignmentsolver::algorithm_end(Cost lower_bound, Info& info)
 {
     double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
-    FFOT_PUT(info, "Bound", "Value", lower_bound);
-    FFOT_PUT(info, "Bound", "Time", t);
-    FFOT_VER(info,
-            std::endl
+    info.add_to_json("Bound", "Value", lower_bound);
+    info.add_to_json("Bound", "Time", t);
+    info.os()
+            << std::endl
             << "Final statistics" << std::endl
             << "----------------" << std::endl
             << "Bound:                    " << lower_bound << std::endl
-            << "Time (s):                 " << t << std::endl);
+            << "Time (s):                 " << t << std::endl;
 
     info.write_json_output();
     return lower_bound;

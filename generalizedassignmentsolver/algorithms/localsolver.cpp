@@ -15,7 +15,7 @@ using namespace localsolver;
 
 LocalSolverOutput& LocalSolverOutput::algorithm_end(Info& info)
 {
-    //FFOT_PUT(info, "Algorithm", "Iterations", it);
+    //info.add_to_json("Algorithm", "Iterations", it);
     Output::algorithm_end(info);
     //FFOT_VER(info, "Iterations: " << it << std::endl);
     return *this;
@@ -66,11 +66,11 @@ LocalSolverOutput generalizedassignmentsolver::localsolver(
         LocalSolverOptionalParameters parameters)
 {
     init_display(instance, parameters.info);
-    FFOT_VER(parameters.info,
-               "Algorithm" << std::endl
+    parameters.info.os()
+            << "Algorithm" << std::endl
             << "---------" << std::endl
             << "Local Solver" << std::endl
-            << std::endl);
+            << std::endl;
 
     ItemIdx n = instance.number_of_items();
     AgentIdx m = instance.number_of_agents();

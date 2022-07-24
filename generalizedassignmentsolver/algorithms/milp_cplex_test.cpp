@@ -8,7 +8,7 @@ using namespace generalizedassignmentsolver;
 Output milp_cplex_test(Instance& instance)
 {
     Info info = Info()
-        .set_verbose(true)
+        .set_verbosity_level(1)
         ;
     MilpCplexOptionalParameters parameters;
     parameters.info = info;

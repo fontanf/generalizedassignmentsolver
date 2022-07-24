@@ -24,11 +24,11 @@ Output generalizedassignmentsolver::random(
         Info info)
 {
     init_display(instance, info);
-    FFOT_VER(info,
-               "Algorithm" << std::endl
+    info.os()
+            << "Algorithm" << std::endl
             << "---------" << std::endl
             << "Random" << std::endl
-            << std::endl);
+            << std::endl;
 
     Output output(instance, info);
 

@@ -81,7 +81,7 @@ void Instance::set_alternative(ItemIdx j, AgentIdx i, Weight weight, Cost cost)
 
 void Instance::set_optimal_solution(Solution& solution)
 {
-    optimal_solution_ = std::make_unique<Solution>(solution);
+    optimal_solution_ = std::make_shared<Solution>(solution);
 }
 
 void Instance::clear()
@@ -168,42 +168,6 @@ void Instance::read_standard(std::ifstream& file)
     }
 }
 
-Instance::~Instance() {  }
-
-Instance::Instance(const Instance& instance):
-    name_(instance.name_),
-    items_(instance.items_),
-    capacities_(instance.capacities_),
-    maximum_cost_(instance.maximum_cost_),
-    total_cost_(instance.total_cost_),
-    maximum_weight_(instance.maximum_weight_),
-    sum_of_minimum_costs_(instance.sum_of_minimum_costs_)
-{
-    if (instance.optimal_solution_ != NULL) {
-        optimal_solution_ = std::make_unique<Solution>(*this);
-        *optimal_solution_ = *instance.optimal_solution_;
-    }
-}
-
-Instance& Instance::operator=(const Instance& instance)
-{
-    if (this != &instance) {
-        name_                 = instance.name_;
-        items_                = instance.items_;
-        capacities_           = instance.capacities_;
-        maximum_cost_         = instance.maximum_cost_;
-        total_cost_           = instance.total_cost_;
-        maximum_weight_       = instance.maximum_weight_;
-        sum_of_minimum_costs_ = instance.sum_of_minimum_costs_;
-
-        if (instance.optimal_solution_ != NULL) {
-            optimal_solution_ = std::make_unique<Solution>(*this);
-            *optimal_solution_ = *instance.optimal_solution_;
-        }
-    }
-    return *this;
-}
-
 Cost Instance::optimum() const
 {
     return optimal_solution()->cost();
@@ -258,8 +222,8 @@ void generalizedassignmentsolver::init_display(
         const Instance& instance,
         optimizationtools::Info& info)
 {
-    FFOT_VER(info,
-               "=====================================" << std::endl
+    info.os()
+            << "=====================================" << std::endl
             << "    Generalized Assignment Solver    " << std::endl
             << "=====================================" << std::endl
             << std::endl
@@ -267,5 +231,5 @@ void generalizedassignmentsolver::init_display(
             << "--------" << std::endl
             << "Number of items:    " << instance.number_of_items() << std::endl
             << "Number of agents:   " << instance.number_of_agents() << std::endl
-            << std::endl);
+            << std::endl;
 }

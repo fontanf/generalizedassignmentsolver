@@ -10,7 +10,7 @@ using namespace generalizedassignmentsolver;
 
 LinRelaxClpOutput& LinRelaxClpOutput::algorithm_end(Info& info)
 {
-    //FFOT_PUT(info, "Algorithm", "Iterations", it);
+    //info.add_to_json("Algorithm", "Iterations", it);
     Output::algorithm_end(info);
     //FFOT_VER(info, "Iterations: " << it << std::endl);
     return *this;
@@ -21,11 +21,11 @@ LinRelaxClpOutput generalizedassignmentsolver::linrelax_clp(
         Info info)
 {
     init_display(instance, info);
-    FFOT_VER(info,
-               "Algorithm" << std::endl
+    info.os()
+            << "Algorithm" << std::endl
             << "---------" << std::endl
             << "Linear Relaxation (CLP)" << std::endl
-            << std::endl);
+            << std::endl;
 
     ItemIdx n = instance.number_of_items();
     AgentIdx m = instance.number_of_agents();
