@@ -9,7 +9,7 @@ namespace generalizedassignmentsolver
 
 struct ConstraintProgrammingGecodeOptionalParameters
 {
-    Info info = Info();
+    optimizationtools::Info info = optimizationtools::Info();
 
     std::string bound = "none"; // "none", "lagrelax", "colgen"
     std::string search_strategy = "dfs"; // "dfs", "lds"
@@ -38,8 +38,13 @@ struct ConstraintProgrammingGecodeOptionalParameters
 
 struct ConstraintProgrammingGecodeOutput: Output
 {
-    ConstraintProgrammingGecodeOutput(const Instance& instance, Info& info): Output(instance, info) { }
-    ConstraintProgrammingGecodeOutput& algorithm_end(Info& info);
+    ConstraintProgrammingGecodeOutput(
+            const Instance& instance,
+            optimizationtools::Info& info):
+        Output(instance, info) { }
+
+    ConstraintProgrammingGecodeOutput& algorithm_end(
+            optimizationtools::Info& info);
 };
 
 ConstraintProgrammingGecodeOutput constraintprogramming_gecode(

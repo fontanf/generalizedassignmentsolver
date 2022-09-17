@@ -10,15 +10,20 @@ namespace generalizedassignmentsolver
 
 struct ColumnGenerationOptionalParameters
 {
-    Info info = Info();
+    optimizationtools::Info info = optimizationtools::Info();
 
     std::string linear_programming_solver = "CLP";
 };
 
 struct ColumnGenerationOutput: Output
 {
-    ColumnGenerationOutput(const Instance& instance, Info& info): Output(instance, info) { }
-    ColumnGenerationOutput& algorithm_end(Info& info);
+    ColumnGenerationOutput(
+            const Instance& instance,
+            optimizationtools::Info& info):
+        Output(instance, info) { }
+
+    ColumnGenerationOutput& algorithm_end(
+            optimizationtools::Info& info);
 
     std::vector<double> solution;
     std::vector<std::vector<double>> x;
@@ -34,8 +39,13 @@ ColumnGenerationOutput columngeneration(
 
 struct ColumnGenerationHeuristicGreedyOutput: Output
 {
-    ColumnGenerationHeuristicGreedyOutput(const Instance& instance, Info& info): Output(instance, info) { }
-    ColumnGenerationHeuristicGreedyOutput& algorithm_end(Info& info);
+    ColumnGenerationHeuristicGreedyOutput(
+            const Instance& instance,
+            optimizationtools::Info& info):
+        Output(instance, info) { }
+
+    ColumnGenerationHeuristicGreedyOutput& algorithm_end(
+            optimizationtools::Info& info);
 
     std::vector<double> solution;
     std::vector<std::vector<double>> x;
@@ -49,8 +59,13 @@ ColumnGenerationHeuristicGreedyOutput columngenerationheuristic_greedy(
 
 struct ColumnGenerationHeuristicLimitedDiscrepancySearchOutput: Output
 {
-    ColumnGenerationHeuristicLimitedDiscrepancySearchOutput(const Instance& instance, Info& info): Output(instance, info) { }
-    ColumnGenerationHeuristicLimitedDiscrepancySearchOutput& algorithm_end(Info& info);
+    ColumnGenerationHeuristicLimitedDiscrepancySearchOutput(
+            const Instance& instance,
+            optimizationtools::Info& info):
+        Output(instance, info) { }
+
+    ColumnGenerationHeuristicLimitedDiscrepancySearchOutput& algorithm_end(
+            optimizationtools::Info& info);
 
     std::vector<double> solution;
     std::vector<std::vector<double>> x;

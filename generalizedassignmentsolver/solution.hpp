@@ -159,7 +159,9 @@ std::ostream& operator<<(std::ostream& os, const Solution& solution);
 
 struct Output
 {
-    Output(const Instance& instance, Info& info);
+    Output(
+            const Instance& instance,
+            optimizationtools::Info& info);
 
     Solution solution;
     Cost lower_bound = 0;
@@ -172,15 +174,28 @@ struct Output
     std::string lower_bound_string() const;
     std::string gap_string() const;
     double gap() const;
-    void print(Info& info, const std::stringstream& s) const;
 
-    void update_solution(const Solution& solution_new, const std::stringstream& s, Info& info);
-    void update_lower_bound(Cost lower_bound_new, const std::stringstream& s, Info& info);
+    void print(
+            optimizationtools::Info& info,
+            const std::stringstream& s) const;
 
-    Output& algorithm_end(Info& info);
+    void update_solution(
+            const Solution& solution_new,
+            const std::stringstream& s,
+            optimizationtools::Info& info);
+
+    void update_lower_bound(
+            Cost lower_bound_new,
+            const std::stringstream& s,
+            optimizationtools::Info& info);
+
+    Output& algorithm_end(
+            optimizationtools::Info& info);
 };
 
-Cost algorithm_end(Cost lower_bound, Info& info);
+Cost algorithm_end(
+        Cost lower_bound,
+        optimizationtools::Info& info);
 
 }
 

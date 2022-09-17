@@ -8,7 +8,8 @@ using namespace generalizedassignmentsolver;
 
 ILOSTLBEGIN
 
-MilpCplexOutput& MilpCplexOutput::algorithm_end(Info& info)
+MilpCplexOutput& MilpCplexOutput::algorithm_end(
+        optimizationtools::Info& info)
 {
     //info.add_to_json("Algorithm", "Iterations", it);
     Output::algorithm_end(info);

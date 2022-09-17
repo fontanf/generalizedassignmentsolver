@@ -10,7 +10,7 @@ Output run(
         const Instance& instance,
         const Solution& initial_solution,
         std::mt19937_64& generator,
-        Info info);
+        optimizationtools::Info info);
 
 }
 

@@ -46,7 +46,8 @@ void generalizedassignmentsolver::greedy(
 
 Output generalizedassignmentsolver::greedy(
         const Instance& instance,
-        const Desirability& f, Info info)
+        const Desirability& f,
+        optimizationtools::Info info)
 {
     init_display(instance, info);
     info.os()
@@ -151,7 +152,7 @@ void generalizedassignmentsolver::greedyregret(
 Output generalizedassignmentsolver::greedyregret(
         const Instance& instance,
         const Desirability& f,
-        Info info)
+        optimizationtools::Info info)
 {
     init_display(instance, info);
     info.os()
@@ -209,7 +210,7 @@ void generalizedassignmentsolver::mthg(
 Output generalizedassignmentsolver::mthg(
         const Instance& instance,
         const Desirability& f,
-        Info info)
+        optimizationtools::Info info)
 {
     init_display(instance, info);
     info.os()
@@ -244,7 +245,7 @@ void generalizedassignmentsolver::mthgregret(
 Output generalizedassignmentsolver::mthgregret(
         const Instance& instance,
         const Desirability& f,
-        Info info)
+        optimizationtools::Info info)
 {
     init_display(instance, info);
     info.os()

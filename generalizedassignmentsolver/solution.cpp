@@ -274,7 +274,9 @@ bool generalizedassignmentsolver::compare(
 //////////////////////////////////// Output ////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-Output::Output(const Instance& instance, Info& info):
+Output::Output(
+        const Instance& instance,
+        optimizationtools::Info& info):
     solution(instance),
     lower_bound(instance.combinatorial_relaxation())
 {
@@ -331,7 +333,9 @@ double Output::gap() const
     return (double)(solution.cost() - lower_bound) / lower_bound * 100;
 }
 
-void Output::print(Info& info, const std::stringstream& s) const
+void Output::print(
+        optimizationtools::Info& info,
+        const std::stringstream& s) const
 {
     double t = info.elapsed_time();
     std::streamsize precision = std::cout.precision();
@@ -348,7 +352,10 @@ void Output::print(Info& info, const std::stringstream& s) const
         info.write_json_output();
 }
 
-void Output::update_solution(const Solution& solution_new, const std::stringstream& s, Info& info)
+void Output::update_solution(
+        const Solution& solution_new,
+        const std::stringstream& s,
+        optimizationtools::Info& info)
 {
     if (!compare(solution, solution_new))
         return;
@@ -371,7 +378,10 @@ void Output::update_solution(const Solution& solution_new, const std::stringstre
     info.unlock();
 }
 
-void Output::update_lower_bound(Cost lower_bound_new, const std::stringstream& s, Info& info)
+void Output::update_lower_bound(
+        Cost lower_bound_new,
+        const std::stringstream& s,
+        optimizationtools::Info& info)
 {
     if (lower_bound != -1 && lower_bound >= lower_bound_new)
         return;
@@ -394,7 +404,7 @@ void Output::update_lower_bound(Cost lower_bound_new, const std::stringstream& s
     info.unlock();
 }
 
-Output& Output::algorithm_end(Info& info)
+Output& Output::algorithm_end(optimizationtools::Info& info)
 {
     time = (double)std::round(info.elapsed_time() * 10000) / 10000;
 
@@ -417,7 +427,9 @@ Output& Output::algorithm_end(Info& info)
     return *this;
 }
 
-Cost generalizedassignmentsolver::algorithm_end(Cost lower_bound, Info& info)
+Cost generalizedassignmentsolver::algorithm_end(
+        Cost lower_bound,
+        optimizationtools::Info& info)
 {
     double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
     info.add_to_json("Bound", "Value", lower_bound);

@@ -9,7 +9,7 @@ namespace generalizedassignmentsolver
 
 struct MilpKnitroOptionalParameters
 {
-    Info info = Info();
+    optimizationtools::Info info = optimizationtools::Info();
 
     const Solution* initial_solution = NULL;
     bool only_linear_relaxation = false;
@@ -19,10 +19,11 @@ struct MilpKnitroOutput: Output
 {
     MilpKnitroOutput(
             const Instance& instance,
-            Info& info):
+            optimizationtools::Info& info):
         Output(instance, info) { }
 
-    MilpKnitroOutput& algorithm_end(Info& info);
+    MilpKnitroOutput& algorithm_end(
+            optimizationtools::Info& info);
 
     std::vector<std::vector<double>> x;
 };

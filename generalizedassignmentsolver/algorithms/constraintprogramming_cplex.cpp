@@ -8,7 +8,8 @@ using namespace generalizedassignmentsolver;
 
 ILOSTLBEGIN
 
-ConstraintProgrammingCplexOutput& ConstraintProgrammingCplexOutput::algorithm_end(Info& info)
+ConstraintProgrammingCplexOutput& ConstraintProgrammingCplexOutput::algorithm_end(
+        optimizationtools::Info& info)
 {
     Output::algorithm_end(info);
     return *this;

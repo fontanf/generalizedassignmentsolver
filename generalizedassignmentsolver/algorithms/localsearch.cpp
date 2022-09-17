@@ -14,7 +14,8 @@
 using namespace generalizedassignmentsolver;
 using namespace localsearchsolver;
 
-LocalSearchOutput& LocalSearchOutput::algorithm_end(Info& info)
+LocalSearchOutput& LocalSearchOutput::algorithm_end(
+        optimizationtools::Info& info)
 {
     //info.add_to_json("Algorithm", "Iterations", iterations);
     Output::algorithm_end(info);

@@ -15,7 +15,8 @@ using namespace Gecode;
  * https://www.gecode.org/doc-latest/MPG.pdf
  */
 
-ConstraintProgrammingGecodeOutput& ConstraintProgrammingGecodeOutput::algorithm_end(Info& info)
+ConstraintProgrammingGecodeOutput& ConstraintProgrammingGecodeOutput::algorithm_end(
+        optimizationtools::Info& info)
 {
     Output::algorithm_end(info);
     return *this;

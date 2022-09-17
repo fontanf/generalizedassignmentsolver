@@ -20,7 +20,7 @@ std::istream& operator>>(std::istream& in, RepairInitialSolution& initial_soluti
 
 struct RepairOptionalParameters
 {
-    Info info = Info();
+    optimizationtools::Info info = optimizationtools::Info();
 
     RepairInitialSolution initial_solution;
     Counter l = -1;
@@ -30,10 +30,11 @@ struct RepairOutput: Output
 {
     RepairOutput(
             const Instance& instance,
-            Info& info):
+            optimizationtools::Info& info):
         Output(instance, info) { }
 
-    RepairOutput& algorithm_end(Info& info);
+    RepairOutput& algorithm_end(
+            optimizationtools::Info& info);
 
     Counter iterations = 0;
 };

@@ -41,7 +41,8 @@ typedef columngenerationsolver::ColIdx ColIdx;
 typedef columngenerationsolver::Value Value;
 typedef columngenerationsolver::Column Column;
 
-ColumnGenerationOutput& ColumnGenerationOutput::algorithm_end(Info& info)
+ColumnGenerationOutput& ColumnGenerationOutput::algorithm_end(
+        optimizationtools::Info& info)
 {
     info.add_to_json("Algorithm", "Iterations", number_of_iterations);
     info.add_to_json("Algorithm", "AddedColumns", number_of_added_columns);
@@ -51,13 +52,15 @@ ColumnGenerationOutput& ColumnGenerationOutput::algorithm_end(Info& info)
     return *this;
 }
 
-ColumnGenerationHeuristicGreedyOutput& ColumnGenerationHeuristicGreedyOutput::algorithm_end(Info& info)
+ColumnGenerationHeuristicGreedyOutput& ColumnGenerationHeuristicGreedyOutput::algorithm_end(
+        optimizationtools::Info& info)
 {
     Output::algorithm_end(info);
     return *this;
 }
 
-ColumnGenerationHeuristicLimitedDiscrepancySearchOutput& ColumnGenerationHeuristicLimitedDiscrepancySearchOutput::algorithm_end(Info& info)
+ColumnGenerationHeuristicLimitedDiscrepancySearchOutput& ColumnGenerationHeuristicLimitedDiscrepancySearchOutput::algorithm_end(
+        optimizationtools::Info& info)
 {
     Output::algorithm_end(info);
     return *this;

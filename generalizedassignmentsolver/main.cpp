@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
     Instance instance(instance_path, format);
     Solution initial_solution(instance, initial_solution_path);
 
-    Info info = Info()
+    optimizationtools::Info info = optimizationtools::Info()
         .set_verbosity_level(verbosity_level)
         .set_time_limit(time_limit)
         .set_certificate_path(certificate_path)

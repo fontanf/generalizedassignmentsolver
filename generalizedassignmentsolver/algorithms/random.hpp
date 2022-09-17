@@ -12,7 +12,7 @@ Solution random_infeasible(
 Output random(
         const Instance& instance,
         std::mt19937_64& generator,
-        Info info = Info());
+        optimizationtools::Info info = optimizationtools::Info());
 
 }
 

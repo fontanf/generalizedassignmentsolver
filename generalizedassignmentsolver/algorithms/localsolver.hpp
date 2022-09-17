@@ -9,16 +9,18 @@ namespace generalizedassignmentsolver
 
 struct LocalSolverOptionalParameters
 {
-    Info info = Info();
+    optimizationtools::Info info = optimizationtools::Info();
 };
 
 struct LocalSolverOutput: Output
 {
     LocalSolverOutput(
             const Instance& instance,
-            Info& info): Output(instance, info) { }
+            optimizationtools::Info& info):
+        Output(instance, info) { }
 
-    LocalSolverOutput& algorithm_end(Info& info);
+    LocalSolverOutput& algorithm_end(
+            optimizationtools::Info& info);
 };
 
 LocalSolverOutput localsolver(

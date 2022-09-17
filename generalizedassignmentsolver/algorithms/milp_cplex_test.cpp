@@ -7,7 +7,7 @@ using namespace generalizedassignmentsolver;
 
 Output milp_cplex_test(Instance& instance)
 {
-    Info info = Info()
+    optimizationtools::Info info = optimizationtools::Info()
         .set_verbosity_level(1)
         ;
     MilpCplexOptionalParameters parameters;

@@ -41,7 +41,8 @@
 
 using namespace generalizedassignmentsolver;
 
-MilpCbcOutput& MilpCbcOutput::algorithm_end(Info& info)
+MilpCbcOutput& MilpCbcOutput::algorithm_end(
+        optimizationtools::Info& info)
 {
     //info.add_to_json("Algorithm", "Iterations", it);
     Output::algorithm_end(info);

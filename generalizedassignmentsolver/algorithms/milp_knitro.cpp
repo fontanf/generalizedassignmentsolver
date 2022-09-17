@@ -10,7 +10,8 @@
 
 using namespace generalizedassignmentsolver;
 
-MilpKnitroOutput& MilpKnitroOutput::algorithm_end(Info& info)
+MilpKnitroOutput& MilpKnitroOutput::algorithm_end(
+        optimizationtools::Info& info)
 {
     Output::algorithm_end(info);
     return *this;

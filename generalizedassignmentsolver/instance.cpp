@@ -96,7 +96,8 @@ void Instance::clear()
     optimal_solution_ = NULL;
 }
 
-Instance::Instance(std::string instance_path, std::string format): name_(instance_path)
+Instance::Instance(std::string instance_path, std::string format):
+    name_(instance_path)
 {
     std::ifstream file(instance_path);
     if (!file.good()) {
@@ -198,9 +199,14 @@ std::ostream& generalizedassignmentsolver::operator<<(std::ostream& os, const In
     return os;
 }
 
-void Instance::write(std::string filename)
+void Instance::write(std::string instance_path)
 {
-    std::ofstream file(filename);
+    std::ofstream file(instance_path);
+    if (!file.good()) {
+        throw std::runtime_error(
+                "Unable to open file \"" + instance_path + "\".");
+    }
+
     file << number_of_agents() << " " << number_of_items() << std::endl;
     for (AgentIdx i = 0; i < number_of_agents(); ++i) {
         for (ItemIdx j = 0; j < number_of_items(); ++j)

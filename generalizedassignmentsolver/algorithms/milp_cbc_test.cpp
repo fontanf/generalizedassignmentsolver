@@ -7,7 +7,7 @@ using namespace generalizedassignmentsolver;
 
 Output milp_cbc_test(Instance& instance)
 {
-    Info info = Info()
+    optimizationtools::Info info = optimizationtools::Info()
         .set_verbosity_level(1)
         ;
     MilpCbcOptionalParameters parameters;

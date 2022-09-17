@@ -18,7 +18,8 @@ typedef matrix<double,0,1> column_vector;
 /////////////////////////// lagrelax_assignment_lbfgs //////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-LagRelaxAssignmentLbfgsOutput& LagRelaxAssignmentLbfgsOutput::algorithm_end(Info& info)
+LagRelaxAssignmentLbfgsOutput& LagRelaxAssignmentLbfgsOutput::algorithm_end(
+        optimizationtools::Info& info)
 {
     //info.add_to_json("Algorithm", "Iterations", it);
     Output::algorithm_end(info);
@@ -204,7 +205,8 @@ LagRelaxAssignmentLbfgsOutput generalizedassignmentsolver::lagrelax_assignment_l
 //////////////////////////// lagrelax_knapsack_lbfgs ///////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-LagRelaxKnapsackLbfgsOutput& LagRelaxKnapsackLbfgsOutput::algorithm_end(Info& info)
+LagRelaxKnapsackLbfgsOutput& LagRelaxKnapsackLbfgsOutput::algorithm_end(
+        optimizationtools::Info& info)
 {
     //info.add_to_json("Algorithm", "Iterations", it);
     Output::algorithm_end(info);
@@ -281,7 +283,7 @@ double LagRelaxKnapsackLbfgsFunction::f(const column_vector& mu)
 
 LagRelaxKnapsackLbfgsOutput generalizedassignmentsolver::lagrelax_knapsack_lbfgs(
         const Instance& instance,
-        Info info)
+        optimizationtools::Info info)
 {
     init_display(instance, info);
     info.os()

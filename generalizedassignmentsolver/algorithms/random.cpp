@@ -21,7 +21,7 @@ Solution generalizedassignmentsolver::random_infeasible(
 Output generalizedassignmentsolver::random(
         const Instance& instance,
         std::mt19937_64& generator,
-        Info info)
+        optimizationtools::Info info)
 {
     init_display(instance, info);
     info.os()

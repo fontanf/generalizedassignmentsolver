@@ -10,7 +10,8 @@
 
 using namespace generalizedassignmentsolver;
 
-MilpGurobiOutput& MilpGurobiOutput::algorithm_end(Info& info)
+MilpGurobiOutput& MilpGurobiOutput::algorithm_end(
+        optimizationtools::Info& info)
 {
     Output::algorithm_end(info);
     return *this;

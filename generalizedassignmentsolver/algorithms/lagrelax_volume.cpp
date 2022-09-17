@@ -24,7 +24,8 @@ using namespace generalizedassignmentsolver;
 ////////////////////////// lagrelax_assignment_volume //////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-LagRelaxAssignmentVolumeOutput& LagRelaxAssignmentVolumeOutput::algorithm_end(Info& info)
+LagRelaxAssignmentVolumeOutput& LagRelaxAssignmentVolumeOutput::algorithm_end(
+        optimizationtools::Info& info)
 {
     //info.add_to_json("Algorithm", "Iterations", it);
     Output::algorithm_end(info);
@@ -188,7 +189,7 @@ int LagRelaxAssignmentHook::solve_subproblem(const VOL_dvector& dual, const VOL_
 
 LagRelaxAssignmentVolumeOutput generalizedassignmentsolver::lagrelax_assignment_volume(
         const Instance& instance,
-        Info info)
+        optimizationtools::Info info)
 {
     init_display(instance, info);
     info.os()
@@ -245,7 +246,7 @@ LagRelaxAssignmentVolumeOutput generalizedassignmentsolver::lagrelax_assignment_
 /////////////////////////// lagrelax_knapsack_volume ///////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-LagRelaxKnapsackVolumeOutput& LagRelaxKnapsackVolumeOutput::algorithm_end(Info& info)
+LagRelaxKnapsackVolumeOutput& LagRelaxKnapsackVolumeOutput::algorithm_end(optimizationtools::Info& info)
 {
     //info.add_to_json("Algorithm", "Iterations", it);
     Output::algorithm_end(info);
@@ -365,7 +366,7 @@ int LagRelaxKnapsackHook::solve_subproblem(const VOL_dvector& dual, const VOL_dv
 
 LagRelaxKnapsackVolumeOutput generalizedassignmentsolver::lagrelax_knapsack_volume(
         const Instance& instance,
-        Info info)
+        optimizationtools::Info info)
 {
     init_display(instance, info);
     info.os()

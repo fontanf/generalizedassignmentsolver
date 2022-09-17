@@ -27,7 +27,7 @@ struct CoinLP
 
 struct MilpCbcOptionalParameters
 {
-    Info info = Info();
+    optimizationtools::Info info = optimizationtools::Info();
 
     const Solution* initial_solution = NULL;
     bool stop_at_first_improvment = false;
@@ -37,10 +37,11 @@ struct MilpCbcOutput: Output
 {
     MilpCbcOutput(
             const Instance& instance,
-            Info& info):
+            optimizationtools::Info& info):
         Output(instance, info) { }
 
-    MilpCbcOutput& algorithm_end(Info& info);
+    MilpCbcOutput& algorithm_end(
+            optimizationtools::Info& info);
 };
 
 MilpCbcOutput milp_cbc(

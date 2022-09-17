@@ -14,8 +14,6 @@
 namespace generalizedassignmentsolver
 {
 
-using optimizationtools::Info;
-
 using Cost = int64_t;
 using PCost = double;
 using Weight = int64_t;
@@ -87,7 +85,7 @@ public:
      */
 
     /** Create an instance from a file. */
-    Instance(std::string filename, std::string format = "orlibrary");
+    Instance(std::string instance_path, std::string format = "orlibrary");
 
     /** Create an instance manually. */
     Instance(AgentIdx m);

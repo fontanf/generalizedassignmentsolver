@@ -11,22 +11,22 @@ namespace generalizedassignmentsolver
 Output greedy(
         const Instance& instance,
         const Desirability& f,
-        Info info = Info());
+        optimizationtools::Info info = optimizationtools::Info());
 
 Output greedyregret(
         const Instance& instance,
         const Desirability& f,
-        Info info = Info());
+        optimizationtools::Info info = optimizationtools::Info());
 
 Output mthg(
         const Instance& instance,
         const Desirability& f,
-        Info info = Info());
+        optimizationtools::Info info = optimizationtools::Info());
 
 Output mthgregret(
         const Instance& instance,
         const Desirability& f,
-        Info info = Info());
+        optimizationtools::Info info = optimizationtools::Info());
 
 // These additional functions can be used to fill a partial solutions.
 //

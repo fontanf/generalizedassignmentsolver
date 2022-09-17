@@ -13,7 +13,8 @@
 using namespace generalizedassignmentsolver;
 using namespace localsolver;
 
-LocalSolverOutput& LocalSolverOutput::algorithm_end(Info& info)
+LocalSolverOutput& LocalSolverOutput::algorithm_end(
+        optimizationtools::Info& info)
 {
     //info.add_to_json("Algorithm", "Iterations", it);
     Output::algorithm_end(info);

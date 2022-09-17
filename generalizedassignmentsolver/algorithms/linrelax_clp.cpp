@@ -8,7 +8,8 @@
 
 using namespace generalizedassignmentsolver;
 
-LinRelaxClpOutput& LinRelaxClpOutput::algorithm_end(Info& info)
+LinRelaxClpOutput& LinRelaxClpOutput::algorithm_end(
+        optimizationtools::Info& info)
 {
     //info.add_to_json("Algorithm", "Iterations", it);
     Output::algorithm_end(info);
@@ -18,7 +19,7 @@ LinRelaxClpOutput& LinRelaxClpOutput::algorithm_end(Info& info)
 
 LinRelaxClpOutput generalizedassignmentsolver::linrelax_clp(
         const Instance& instance,
-        Info info)
+        optimizationtools::Info info)
 {
     init_display(instance, info);
     info.os()
