@@ -144,6 +144,15 @@ public:
     /** Get the bound of the combinatorial relaxation. */
     Cost combinatorial_relaxation() const { return sum_of_minimum_costs_ + 1; }
 
+    /*
+     * Export.
+     */
+
+    /** Print the instance into a stream. */
+    std::ostream& print(
+            std::ostream& os,
+            int verbose = 1) const;
+
     /** Write the instance to a file. */
     void write(std::string instance_path);
 
@@ -184,11 +193,6 @@ private:
     std::shared_ptr<Solution> optimal_solution_;
 
 };
-
-/** Stream insertion operator. */
-std::ostream& operator<<(std::ostream &os, const Alternative& alternative);
-/** Stream insertion operator. */
-std::ostream& operator<<(std::ostream &os, const Instance& instance);
 
 void init_display(
         const Instance& instance,

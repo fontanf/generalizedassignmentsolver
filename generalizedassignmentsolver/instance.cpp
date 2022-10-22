@@ -174,28 +174,57 @@ Cost Instance::optimum() const
     return optimal_solution()->cost();
 }
 
-std::ostream& generalizedassignmentsolver::operator<<(std::ostream& os, const Alternative& alternative)
+std::ostream& Instance::print(
+        std::ostream& os,
+        int verbose) const
 {
-    os << "(" << alternative.i
-        << " " << alternative.cost
-        << " " << alternative.weight
-        << " " << alternative.efficiency()
-        << ")";
-    return os;
-}
-
-std::ostream& generalizedassignmentsolver::operator<<(std::ostream& os, const Instance& instance)
-{
-    os << "m " << instance.number_of_agents() << " n " << instance.number_of_items() << std::endl;
-    os << "c";
-    for (AgentIdx i = 0; i < instance.number_of_agents(); ++i)
-        os << " " << instance.capacity(i);
-    os << std::endl;
-
-    for (ItemPos j = 0; j < instance.number_of_items(); ++j) {
-        os << j << ": " << std::flush;
-        os << std::endl;
+    if (verbose >= 1) {
+        os
+            << "Number of agents:         " << number_of_agents() << std::endl
+            << "Number of items:          " << number_of_items() << std::endl
+            ;
     }
+
+    if (verbose >= 2) {
+        os
+            << std::endl
+            << std::setw(12) << "Agent"
+            << std::setw(12) << "Capacity"
+            << std::endl
+            << std::setw(12) << "-----"
+            << std::setw(12) << "--------"
+            << std::endl;
+        for (AgentIdx i = 0; i < number_of_agents(); ++i) {
+            os
+                << std::setw(12) << i
+                << std::setw(12) << capacity(i)
+                << std::endl;
+        }
+
+        os
+            << std::endl
+            << std::setw(12) << "Item"
+            << std::setw(12) << "Agent"
+            << std::setw(12) << "Weight"
+            << std::setw(12) << "Cost"
+            << std::endl
+            << std::setw(12) << "----"
+            << std::setw(12) << "-----"
+            << std::setw(12) << "------"
+            << std::setw(12) << "----"
+            << std::endl;
+        for (ItemIdx j = 0; j < number_of_items(); ++j) {
+            for (AgentIdx i = 0; i < number_of_agents(); ++i) {
+                os
+                    << std::setw(12) << j
+                    << std::setw(12) << i
+                    << std::setw(12) << weight(j, i)
+                    << std::setw(12) << cost(j, i)
+                    << std::endl;
+            }
+        }
+    }
+
     return os;
 }
 
@@ -234,8 +263,7 @@ void generalizedassignmentsolver::init_display(
             << "=====================================" << std::endl
             << std::endl
             << "Instance" << std::endl
-            << "--------" << std::endl
-            << "Number of items:    " << instance.number_of_items() << std::endl
-            << "Number of agents:   " << instance.number_of_agents() << std::endl
-            << std::endl;
+            << "--------" << std::endl;
+    instance.print(info.os(), info.verbosity_level());
+    info.os() << std::endl;
 }
