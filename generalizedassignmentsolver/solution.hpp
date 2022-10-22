@@ -35,14 +35,8 @@ public:
     /** Create a solution from a file. */
     Solution(const Instance& instance, std::string certificate_path);
     Solution(const Instance& instance, const std::vector<std::vector<ItemIdx>>& agents);
-    /** Copy constructor. */
-    Solution(const Solution& solution);
     /** Copy assignment operator. */
     Solution& operator=(const Solution& solution);
-    /** Destructor. */
-    ~Solution() { }
-    /** Equality operator. */
-    bool operator==(const Solution& solution);
 
     /*
      * Getters.

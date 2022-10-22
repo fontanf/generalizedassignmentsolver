@@ -41,45 +41,24 @@ Solution::Solution(const Instance& instance, const std::vector<std::vector<ItemI
             set(j, i);
 }
 
-Solution::Solution(const Solution& sol):
-    instance_(sol.instance_),
-    x_(sol.x_),
-    agents_(sol.agents_),
-    n_(sol.n_),
-    total_cost_(sol.total_cost_),
-    total_weight_(sol.total_weight_),
-    total_overcapacity_(sol.total_overcapacity_),
-    total_pcost_(sol.total_pcost_)
-{ }
-
-Solution& Solution::operator=(const Solution& sol)
+Solution& Solution::operator=(const Solution& solution)
 {
-    if (this != &sol) {
-        if (&sol.instance() == &instance()) {
-            x_                  = sol.x_;
-            agents_             = sol.agents_;
-            n_                  = sol.n_;
-            total_cost_         = sol.total_cost_;
-            total_weight_       = sol.total_weight_;
-            total_overcapacity_ = sol.total_overcapacity_;
-            total_pcost_        = sol.total_pcost_;
+    if (this != &solution) {
+        if (&solution.instance() == &instance()) {
+            x_                  = solution.x_;
+            agents_             = solution.agents_;
+            n_                  = solution.n_;
+            total_cost_         = solution.total_cost_;
+            total_weight_       = solution.total_weight_;
+            total_overcapacity_ = solution.total_overcapacity_;
+            total_pcost_        = solution.total_pcost_;
         } else {
             clear();
             for (ItemIdx j = 0; j < instance().number_of_items(); ++j)
-                set(j, sol.agent(j));
+                set(j, solution.agent(j));
         }
     }
     return *this;
-}
-
-bool Solution::operator==(const Solution& sol)
-{
-    if (total_weight_ != sol.total_weight_ || total_cost_ != sol.total_cost_)
-        return false;
-    for (ItemIdx j = 0; j < instance().number_of_items(); ++j)
-        if (x_[j] != sol.x_[j])
-            return false;
-    return true;
 }
 
 void Solution::set(ItemIdx j, AgentIdx i)
