@@ -6,15 +6,13 @@
 using namespace generalizedassignmentsolver;
 
 Solution::Solution(const Instance& instance):
-    instance_(instance),
+    instance_(&instance),
     x_(instance.number_of_items(), -1),
     agents_(instance.number_of_agents())
 { }
 
 Solution::Solution(const Instance& instance, std::string certificate_path):
-    instance_(instance),
-    x_(instance.number_of_items(), -1),
-    agents_(instance.number_of_agents())
+    Solution(instance)
 {
     if (certificate_path.empty())
         return;
@@ -32,33 +30,11 @@ Solution::Solution(const Instance& instance, std::string certificate_path):
 }
 
 Solution::Solution(const Instance& instance, const std::vector<std::vector<ItemIdx>>& agents):
-    instance_(instance),
-    x_(instance.number_of_items(), -1),
-    agents_(instance.number_of_agents())
+    Solution(instance)
 {
     for (AgentIdx i = 0; i < (AgentIdx)agents.size(); i++)
         for (ItemIdx j: agents[i])
             set(j, i);
-}
-
-Solution& Solution::operator=(const Solution& solution)
-{
-    if (this != &solution) {
-        if (&solution.instance() == &instance()) {
-            x_                  = solution.x_;
-            agents_             = solution.agents_;
-            n_                  = solution.n_;
-            total_cost_         = solution.total_cost_;
-            total_weight_       = solution.total_weight_;
-            total_overcapacity_ = solution.total_overcapacity_;
-            total_pcost_        = solution.total_pcost_;
-        } else {
-            clear();
-            for (ItemIdx j = 0; j < instance().number_of_items(); ++j)
-                set(j, solution.agent(j));
-        }
-    }
-    return *this;
 }
 
 void Solution::set(ItemIdx j, AgentIdx i)
