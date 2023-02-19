@@ -46,8 +46,8 @@ local_repository(
 git_repository(
     name = "localsearchsolver",
     remote = "https://github.com/fontanf/localsearchsolver.git",
-    commit = "027d29031632949403460aa9cd6ffaec094aaa45",
-    shallow_since = "1658648929 +0200",
+    commit = "87f1be46915ed89664ca9bc011134522f2d1a311",
+    shallow_since = "1676834417 +0100",
 )
 
 local_repository(

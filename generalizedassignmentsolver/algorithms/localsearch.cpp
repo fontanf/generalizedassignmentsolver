@@ -28,70 +28,6 @@ class LocalScheme
 
 public:
 
-    /** Global cost: <Item number, Overweight, Cost>; */
-    using GlobalCost = std::tuple<ItemIdx, Weight, Cost>;
-
-    inline ItemIdx&       number_of_items(GlobalCost& global_cost) const { return std::get<0>(global_cost); }
-    inline Weight&             overweight(GlobalCost& global_cost) const { return std::get<1>(global_cost); }
-    inline Cost&                     cost(GlobalCost& global_cost) const { return std::get<2>(global_cost); }
-    inline ItemIdx  number_of_items(const GlobalCost& global_cost) const { return std::get<0>(global_cost); }
-    inline Weight        overweight(const GlobalCost& global_cost) const { return std::get<1>(global_cost); }
-    inline Cost                cost(const GlobalCost& global_cost) const { return std::get<2>(global_cost); }
-
-    /*
-     * Solutions.
-     */
-
-    using CompactSolution = std::vector<AgentIdx>;
-
-    struct CompactSolutionHasher
-    {
-        std::hash<AgentIdx> hasher;
-
-        inline bool operator()(
-                const std::shared_ptr<CompactSolution>& compact_solution_1,
-                const std::shared_ptr<CompactSolution>& compact_solution_2) const
-        {
-            return *compact_solution_1 == *compact_solution_2;
-        }
-
-        inline std::size_t operator()(
-                const std::shared_ptr<CompactSolution>& compact_solution) const
-        {
-            size_t hash = 0;
-            for (ItemIdx j: *compact_solution)
-                optimizationtools::hash_combine(hash, hasher(j));
-            return hash;
-        }
-    };
-
-    inline CompactSolutionHasher compact_solution_hasher() const { return CompactSolutionHasher(); }
-
-    struct Solution
-    {
-        std::vector<AgentIdx> agents;
-        std::vector<Weight> weights;
-        ItemIdx number_of_items = 0;
-        Weight overweight = 0;
-        Cost cost = 0;
-    };
-
-    CompactSolution solution2compact(const Solution& solution)
-    {
-        return solution.agents;
-    }
-
-    Solution compact2solution(const CompactSolution& compact_solution)
-    {
-        Solution solution = empty_solution();
-        for (ItemIdx j = 0; j < instance_.number_of_items(); ++j) {
-            AgentIdx i = compact_solution[j];
-            if (i != -1)
-                add(solution, j, i);
-        }
-        return solution;
-    }
-
     /*
      * Constructors and destructor.
      */
@@ -112,8 +48,31 @@ public:
     }
 
     /*
-     * Initial solutions.
+     * Global cost.
      */
+
+    /** Global cost: <Item number, Overweight, Cost>; */
+    using GlobalCost = std::tuple<ItemIdx, Weight, Cost>;
+
+    inline ItemIdx&       number_of_items(GlobalCost& global_cost) const { return std::get<0>(global_cost); }
+    inline Weight&             overweight(GlobalCost& global_cost) const { return std::get<1>(global_cost); }
+    inline Cost&                     cost(GlobalCost& global_cost) const { return std::get<2>(global_cost); }
+    inline ItemIdx  number_of_items(const GlobalCost& global_cost) const { return std::get<0>(global_cost); }
+    inline Weight        overweight(const GlobalCost& global_cost) const { return std::get<1>(global_cost); }
+    inline Cost                cost(const GlobalCost& global_cost) const { return std::get<2>(global_cost); }
+
+    /*
+     * Solutions.
+     */
+
+    struct Solution
+    {
+        std::vector<AgentIdx> agents;
+        std::vector<Weight> weights;
+        ItemIdx number_of_items = 0;
+        Weight overweight = 0;
+        Cost cost = 0;
+    };
 
     inline Solution empty_solution() const
     {
@@ -162,10 +121,6 @@ public:
         return solution_new;
     }
 
-    /*
-     * Solution properties.
-     */
-
     inline GlobalCost global_cost(const Solution& solution) const
     {
         return {
@@ -179,69 +134,6 @@ public:
      * Local search.
      */
 
-    struct Move
-    {
-        std::vector<std::tuple<ItemIdx, AgentIdx, AgentIdx>> moves;
-        GlobalCost global_cost;
-    };
-
-    struct MoveHasher
-    {
-        inline bool hashable(const Move&) const { return false; }
-        inline bool operator()(const Move&, const Move&) const { return false; }
-        inline std::size_t operator()(const Move&) const { return 0; }
-    };
-
-    inline MoveHasher move_hasher() const { return MoveHasher(); }
-
-    inline std::vector<Move> perturbations(
-            Solution& solution,
-            std::mt19937_64& generator)
-    {
-        std::vector<Move> moves;
-        for (Counter perturbation = 0; perturbation < parameters_.number_of_perturbations; ++perturbation) {
-            std::vector<ItemIdx> items = optimizationtools::bob_floyd<ItemIdx>(
-                    (ItemIdx)8, instance_.number_of_items(), generator);
-            std::shuffle(items.begin(), items.end(), generator);
-            Move move;
-            for (ItemIdx j: items) {
-                AgentIdx i_old = solution.agents[j];
-                AgentIdx i_best = -1;
-                GlobalCost c_best = worst<GlobalCost>();
-                remove(solution, j);
-                std::shuffle(agents_.begin(), agents_.end(), generator);
-                for (AgentIdx i: agents_) {
-                    if (i == i_old)
-                        continue;
-                    GlobalCost c = cost_add(solution, j, i);
-                    if (i_best == -1 || c < c_best) {
-                        i_best = i;
-                        c_best = c;
-                    }
-                }
-                add(solution, j, i_old);
-                move.moves.push_back({j, i_old, i_best});
-            }
-            move.global_cost = global_cost(solution);
-            moves.push_back(move);
-        }
-        return moves;
-    }
-
-    inline void apply_move(
-            Solution& solution,
-            const Move& move,
-            std::mt19937_64&) const
-    {
-        for (auto t: move.moves) {
-            ItemIdx j = std::get<0>(t);
-            AgentIdx i = std::get<2>(t);
-            remove(solution, j);
-            add(solution, j, i);
-        }
-    }
-
-
     struct MoveShift
     {
         ItemIdx j = -1;
@@ -250,10 +142,12 @@ public:
         GlobalCost cost_difference = worst<GlobalCost>();
     };
 
+    struct Perturbation;
+
     inline void local_search(
             Solution& solution,
             std::mt19937_64&,
-            const Move& perturbation = Move())
+            const Perturbation& perturbation = Perturbation())
     {
         ItemIdx n = instance_.number_of_items();
         AgentIdx m = instance_.number_of_agents();
@@ -284,6 +178,7 @@ public:
         }
 
         Counter it = 0;
+        (void)it;
         for (;; ++it) {
             //std::cout << "it " << it << " cost " << to_string(global_cost(solution)) << std::endl;
 
@@ -374,6 +269,117 @@ public:
             shift_changed_agents.add(it_best->i);
         }
     }
+
+    /*
+     * Iterated local search.
+     */
+
+    struct Perturbation
+    {
+        std::vector<std::tuple<ItemIdx, AgentIdx, AgentIdx>> moves;
+        GlobalCost global_cost;
+    };
+
+    inline std::vector<Perturbation> perturbations(
+            Solution& solution,
+            std::mt19937_64& generator)
+    {
+        std::vector<Perturbation> perturbations;
+        for (Counter perturbation_id = 0; perturbation_id < parameters_.number_of_perturbations; ++perturbation_id) {
+            std::vector<ItemIdx> items = optimizationtools::bob_floyd<ItemIdx>(
+                    (ItemIdx)8, instance_.number_of_items(), generator);
+            std::shuffle(items.begin(), items.end(), generator);
+            Perturbation perturbation;
+            for (ItemIdx j: items) {
+                AgentIdx i_old = solution.agents[j];
+                AgentIdx i_best = -1;
+                GlobalCost c_best = worst<GlobalCost>();
+                remove(solution, j);
+                std::shuffle(agents_.begin(), agents_.end(), generator);
+                for (AgentIdx i: agents_) {
+                    if (i == i_old)
+                        continue;
+                    GlobalCost c = cost_add(solution, j, i);
+                    if (i_best == -1 || c < c_best) {
+                        i_best = i;
+                        c_best = c;
+                    }
+                }
+                add(solution, j, i_old);
+                perturbation.moves.push_back({j, i_old, i_best});
+            }
+            perturbation.global_cost = global_cost(solution);
+            perturbations.push_back(perturbation);
+        }
+        return perturbations;
+    }
+
+    inline void apply_perturbation(
+            Solution& solution,
+            const Perturbation& perturbation,
+            std::mt19937_64&) const
+    {
+        for (auto t: perturbation.moves) {
+            ItemIdx j = std::get<0>(t);
+            AgentIdx i = std::get<2>(t);
+            remove(solution, j);
+            add(solution, j, i);
+        }
+    }
+
+    /*
+     * Best first local search.
+     */
+
+    using CompactSolution = std::vector<AgentIdx>;
+
+    struct CompactSolutionHasher
+    {
+        std::hash<AgentIdx> hasher;
+
+        inline bool operator()(
+                const std::shared_ptr<CompactSolution>& compact_solution_1,
+                const std::shared_ptr<CompactSolution>& compact_solution_2) const
+        {
+            return *compact_solution_1 == *compact_solution_2;
+        }
+
+        inline std::size_t operator()(
+                const std::shared_ptr<CompactSolution>& compact_solution) const
+        {
+            size_t hash = 0;
+            for (ItemIdx j: *compact_solution)
+                optimizationtools::hash_combine(hash, hasher(j));
+            return hash;
+        }
+    };
+
+    inline CompactSolutionHasher compact_solution_hasher() const { return CompactSolutionHasher(); }
+
+    CompactSolution solution2compact(const Solution& solution)
+    {
+        return solution.agents;
+    }
+
+    Solution compact2solution(const CompactSolution& compact_solution)
+    {
+        Solution solution = empty_solution();
+        for (ItemIdx j = 0; j < instance_.number_of_items(); ++j) {
+            AgentIdx i = compact_solution[j];
+            if (i != -1)
+                add(solution, j, i);
+        }
+        return solution;
+    }
+
+    struct PerturbationHasher
+    {
+        inline bool hashable(const Perturbation&) const { return false; }
+        inline bool operator()(const Perturbation&, const Perturbation&) const { return false; }
+        inline std::size_t operator()(const Perturbation&) const { return 0; }
+    };
+
+    inline PerturbationHasher perturbation_hasher() const { return PerturbationHasher(); }
 
     /*
      * Outputs.
