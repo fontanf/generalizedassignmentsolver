@@ -51,15 +51,13 @@ public:
      * Global cost.
      */
 
-    /** Global cost: <Item number, Overweight, Cost>; */
-    using GlobalCost = std::tuple<ItemIdx, Weight, Cost>;
+    /** Global cost: <Overweight, Cost>; */
+    using GlobalCost = std::tuple<Weight, Cost>;
 
-    inline ItemIdx&       number_of_items(GlobalCost& global_cost) const { return std::get<0>(global_cost); }
-    inline Weight&             overweight(GlobalCost& global_cost) const { return std::get<1>(global_cost); }
-    inline Cost&                     cost(GlobalCost& global_cost) const { return std::get<2>(global_cost); }
-    inline ItemIdx  number_of_items(const GlobalCost& global_cost) const { return std::get<0>(global_cost); }
-    inline Weight        overweight(const GlobalCost& global_cost) const { return std::get<1>(global_cost); }
-    inline Cost                cost(const GlobalCost& global_cost) const { return std::get<2>(global_cost); }
+    inline Weight&       overweight(GlobalCost& global_cost) const { return std::get<0>(global_cost); }
+    inline Cost&               cost(GlobalCost& global_cost) const { return std::get<1>(global_cost); }
+    inline Weight  overweight(const GlobalCost& global_cost) const { return std::get<0>(global_cost); }
+    inline Cost          cost(const GlobalCost& global_cost) const { return std::get<1>(global_cost); }
 
     /*
      * Solutions.
@@ -69,7 +67,6 @@ public:
     {
         std::vector<AgentIdx> agents;
         std::vector<Weight> weights;
-        ItemIdx number_of_items = 0;
         Weight overweight = 0;
         Cost cost = 0;
     };
@@ -124,7 +121,6 @@ public:
     inline GlobalCost global_cost(const Solution& solution) const
     {
         return {
-            -solution.number_of_items,
             solution.overweight,
             solution.cost,
         };
@@ -389,7 +385,6 @@ public:
             std::ostream &os,
             const Solution& solution) const
     {
-        os << "item number: " << solution.number_of_items << std::endl;
         os << "agents:";
         for (AgentIdx i: solution.agents)
             os << " " << i;
@@ -418,8 +413,6 @@ private:
         assert(i >= 0);
         assert(i < instance_.number_of_agents());
         assert(solution.agents[j] == -1);
-        // Update number_of_items.
-        solution.number_of_items++;
         // Update weights.
         Weight w_max = instance_.capacity(i);
         Weight w = instance_.weight(j, i);
@@ -440,8 +433,6 @@ private:
     {
         AgentIdx i = solution.agents[j];
         assert(i != -1);
-        // Update number_of_items.
-        solution.number_of_items--;
         // Update weights.
         Weight w_max = instance_.capacity(i);
         Weight w = instance_.weight(j, i);
@@ -469,8 +460,6 @@ private:
     {
         GlobalCost gc = global_cost(solution);
         assert(solution.agents[j] == -1);
-        // Update number_of_items.
-        number_of_items(gc)--;
         // Update overweigt.
         Weight w_max = instance_.capacity(i);
         Weight w = instance_.weight(j, i);
@@ -489,7 +478,10 @@ private:
      * Private attributes.
      */
 
+    /** Instance. */
     const Instance& instance_;
+
+    /** Parameters. */
     Parameters parameters_;
 
     std::vector<AgentIdx> agents_;
@@ -514,7 +506,7 @@ LocalSearchOutput generalizedassignmentsolver::localsearch(
     LocalScheme::Parameters parameters_local_scheme;
     LocalScheme local_scheme(instance, parameters_local_scheme);
 
-    // Run A*.
+    // Run best first local search.
     BestFirstLocalSearchOptionalParameters<LocalScheme> parameters_bfls;
     parameters_bfls.info.set_verbosity_level(0);
     parameters_bfls.info.set_time_limit(parameters.info.remaining_time());
