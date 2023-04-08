@@ -1,8 +1,3 @@
-#include "generalizedassignmentsolver/algorithms/columngeneration.hpp"
-
-#include "columngenerationsolver/algorithms/greedy.hpp"
-#include "columngenerationsolver/algorithms/limited_discrepancy_search.hpp"
-
 /**
  * The linear programming formulation of the problem based on Dantzig–Wolfe
  * decomposition is written as follows:
@@ -33,6 +28,14 @@
  * m Knapsack Problems with items with profit (vⱼ - cᵢⱼ).
  *
  */
+
+#include "generalizedassignmentsolver/algorithms/columngeneration.hpp"
+
+#include "columngenerationsolver/algorithms/greedy.hpp"
+#include "columngenerationsolver/algorithms/limited_discrepancy_search.hpp"
+
+#include "knapsacksolver/algorithms/dynamic_programming_primal_dual.hpp"
+#include "knapsacksolver/algorithms/dynamic_programming_bellman.hpp"
 
 using namespace generalizedassignmentsolver;
 
@@ -196,7 +199,7 @@ std::vector<Column> PricingSolver::solve_pricing(
         }
 
         // Solve subproblem instance.
-        auto output_kp = knapsacksolver::minknap(instance_kp);
+        auto output_kp = knapsacksolver::dynamic_programming_primal_dual(instance_kp);
 
         // Retrieve column.
         Column column;

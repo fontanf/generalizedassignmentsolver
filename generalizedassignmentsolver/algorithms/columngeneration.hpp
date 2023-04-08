@@ -2,9 +2,6 @@
 
 #include "generalizedassignmentsolver/solution.hpp"
 
-#include "knapsacksolver/algorithms/minknap.hpp"
-#include "knapsacksolver/algorithms/bellman.hpp"
-
 namespace generalizedassignmentsolver
 {
 

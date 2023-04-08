@@ -1,7 +1,7 @@
 #include "generalizedassignmentsolver/algorithms/lagrelax_lbfgs.hpp"
 
-#include "knapsacksolver/algorithms/minknap.hpp"
-#include "knapsacksolver/algorithms/bellman.hpp"
+#include "knapsacksolver/algorithms/dynamic_programming_primal_dual.hpp"
+#include "knapsacksolver/algorithms/dynamic_programming_bellman.hpp"
 
 #include <dlib/optimization.h>
 
@@ -114,8 +114,8 @@ double LagRelaxAssignmentLbfgsFunction::f(const column_vector& mu)
         }
 
         // Solve knapsack instance
-        //auto kp_output = knapsacksolver::bellman_array_all(kp_instance, Info().set_verbose(false));
-        auto kp_output = knapsacksolver::minknap(kp_instance);
+        //auto kp_output = knapsacksolver::dynamic_programming_bellman_array_all(kp_instance, Info().set_verbose(false));
+        auto kp_output = knapsacksolver::dynamic_programming_primal_dual(kp_instance);
         //std::cout << "i " << i << " opt " << kp_output.solution.profit() << std::endl;
 
         // Update bound and gradient
