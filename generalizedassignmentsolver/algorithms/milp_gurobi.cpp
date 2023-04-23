@@ -37,18 +37,29 @@ protected:
             return;
 
         Cost lb = std::ceil(getDoubleInfo(GRB_CB_MIPSOL_OBJBND) - FFOT_TOL);
-        output_.update_lower_bound(lb, std::stringstream(""), parameters_.info);
+        output_.update_lower_bound(
+                lb,
+                std::stringstream(""),
+                parameters_.info);
 
-        if (!output_.solution.feasible() || output_.solution.cost() > getDoubleInfo(GRB_CB_MIPSOL_OBJ) + 0.5) {
+        if (!output_.solution.feasible()
+                || output_.solution.cost() > getDoubleInfo(GRB_CB_MIPSOL_OBJ) + 0.5) {
             Solution solution(instance_);
-            AgentIdx m = instance_.number_of_agents();
-            ItemIdx n = instance_.number_of_items();
-            for (ItemIdx j = 0; j < n; ++j)
-                for (AgentIdx i = 0; i < m; ++i)
-                    if (getSolution(x_[j][i]) > 0.5)
-                        solution.set(j, i);
+            for (ItemIdx item_id = 0;
+                    item_id < instance_.number_of_items();
+                    ++item_id) {
+                for (AgentIdx agent_id = 0;
+                        agent_id < instance_.number_of_agents();
+                        ++agent_id) {
+                    if (getSolution(x_[item_id][agent_id]) > 0.5)
+                        solution.set(item_id, agent_id);
+                }
+            }
             std::stringstream ss;
-            output_.update_solution(solution, std::stringstream(""), parameters_.info);
+            output_.update_solution(
+                    solution,
+                    std::stringstream(""),
+                    parameters_.info);
         }
     }
 
@@ -75,38 +86,54 @@ MilpGurobiOutput generalizedassignmentsolver::milp_gurobi(
 
     MilpGurobiOutput output(instance, parameters.info);
 
-    ItemIdx n = instance.number_of_items();
-    AgentIdx m = instance.number_of_agents();
-
-    if (n == 0)
+    if (instance.number_of_items() == 0)
         return output.algorithm_end(parameters.info);
 
     GRBModel model(env);
 
     // Variables
     std::vector<GRBVar*> x;
-    for (ItemIdx j = 0; j < n; j++)
-        x.push_back(model.addVars(m, GRB_BINARY));
+    for (ItemIdx item_id = 0;
+            item_id < instance.number_of_items();
+            ++item_id) {
+        x.push_back(model.addVars(instance.number_of_agents(), GRB_BINARY));
+    }
 
     // Objective
-    for (ItemIdx j = 0; j < n; j++)
-        for (AgentIdx i = 0; i < m; i++)
-            x[j][i].set(GRB_DoubleAttr_Obj, instance.cost(j, i));
+    for (ItemIdx item_id = 0;
+            item_id < instance.number_of_items();
+            ++item_id) {
+        for (AgentIdx agent_id = 0;
+                agent_id < instance.number_of_agents();
+                ++agent_id) {
+            x[item_id][agent_id].set(
+                    GRB_DoubleAttr_Obj,
+                    instance.cost(item_id, agent_id));
+        }
+    }
     model.set(GRB_IntAttr_ModelSense, GRB_MINIMIZE);
 
     // Capacity constraints
-    for (AgentIdx i = 0; i < m; i++) {
+    for (AgentIdx agent_id = 0;
+            agent_id < instance.number_of_agents();
+            ++agent_id) {
         GRBLinExpr expr;
-        for (ItemIdx j = 0; j < n; j++)
-            expr += instance.weight(j, i) * x[j][i];
-        model.addConstr(expr <= instance.capacity(i));
+        for (ItemIdx item_id = 0;
+                item_id < instance.number_of_items();
+                ++item_id)
+            expr += instance.weight(item_id, agent_id) * x[item_id][agent_id];
+        model.addConstr(expr <= instance.capacity(agent_id));
     }
 
     // One alternative per item constraint
-    for (ItemIdx j = 0; j < n; j++) {
+    for (ItemIdx item_id = 0;
+            item_id < instance.number_of_items();
+            ++item_id) {
         GRBLinExpr expr;
-        for (AgentIdx i = 0; i < m; i++)
-            expr += x[j][i];
+        for (AgentIdx agent_id = 0;
+                agent_id < instance.number_of_agents();
+                ++agent_id)
+            expr += x[item_id][agent_id];
         model.addConstr(expr == 1);
     }
 
@@ -115,25 +142,52 @@ MilpGurobiOutput generalizedassignmentsolver::milp_gurobi(
     model.set(GRB_IntParam_LogToConsole, 0);
 
     if (parameters.only_linear_relaxation) {
-        for (ItemIdx j = 0; j < n; j++)
-            for (AgentIdx i = 0; i < m; i++)
-                x[j][i].set(GRB_CharAttr_VType, GRB_CONTINUOUS);
+        for (ItemIdx item_id = 0;
+                item_id < instance.number_of_items();
+                ++item_id) {
+            for (AgentIdx agent_id = 0;
+                    agent_id < instance.number_of_agents();
+                    ++agent_id) {
+                x[item_id][agent_id].set(
+                        GRB_CharAttr_VType,
+                        GRB_CONTINUOUS);
+            }
+        }
         model.optimize();
         Cost lb = std::ceil(model.get(GRB_DoubleAttr_ObjVal) - FFOT_TOL);
-        output.update_lower_bound(lb, std::stringstream("linearrelaxation"), parameters.info);
-        for (ItemIdx j = 0; j < n; j++) {
-            output.x.push_back(std::vector<double>(m));
-            for (AgentIdx i = 0; i < m; i++)
-                output.x[j][i] = x[j][i].get(GRB_DoubleAttr_X);
+        output.update_lower_bound(
+                lb,
+                std::stringstream("linearrelaxation"),
+                parameters.info);
+
+        for (ItemIdx item_id = 0;
+                item_id < instance.number_of_items();
+                ++item_id) {
+            output.x.push_back(std::vector<double>(instance.number_of_agents()));
+            for (AgentIdx agent_id = 0;
+                    agent_id < instance.number_of_agents();
+                    ++agent_id)
+                output.x[item_id][agent_id] = x[item_id][agent_id].get(GRB_DoubleAttr_X);
         }
+
         return output.algorithm_end(parameters.info);
     }
 
     // Initial solution
-    if (parameters.initial_solution != NULL && parameters.initial_solution->feasible())
-        for (ItemIdx j = 0; j < n; ++j)
-            for (AgentIdx i = 0; i < m; ++i)
-                x[j][i].set(GRB_DoubleAttr_Start, (parameters.initial_solution->agent(j) == i)? 1: 0);
+    if (parameters.initial_solution != NULL
+            && parameters.initial_solution->feasible()) {
+        for (ItemIdx item_id = 0;
+                item_id < instance.number_of_items();
+                ++item_id) {
+            for (AgentIdx agent_id = 0;
+                    agent_id < instance.number_of_agents();
+                    ++agent_id) {
+                x[item_id][agent_id].set(
+                        GRB_DoubleAttr_Start,
+                        (parameters.initial_solution->agent(item_id) == agent_id)? 1: 0);
+            }
+        }
+    }
 
     model.set(GRB_DoubleParam_MIPGap, 0); // Fix precision issue
     model.set(GRB_DoubleParam_NodefileStart, 0.5); // Avoid running out of memory
@@ -151,31 +205,61 @@ MilpGurobiOutput generalizedassignmentsolver::milp_gurobi(
 
     int optimstatus = model.get(GRB_IntAttr_Status);
     if (optimstatus == GRB_INFEASIBLE) {
-        output.update_lower_bound(instance.bound(), std::stringstream(""), parameters.info);
+        output.update_lower_bound(
+                instance.bound(),
+                std::stringstream(""),
+                parameters.info);
     } else if (optimstatus == GRB_OPTIMAL) {
-        if (!output.solution.feasible() || output.solution.cost() > model.get(GRB_DoubleAttr_ObjVal) + 0.5) {
+        if (!output.solution.feasible()
+                || output.solution.cost() > model.get(GRB_DoubleAttr_ObjVal) + 0.5) {
             Solution solution(instance);
-            for (ItemIdx j = 0; j < n; ++j)
-                for (AgentIdx i = 0; i < m; ++i)
-                    if (x[j][i].get(GRB_DoubleAttr_X) > 0.5)
-                        solution.set(j, i);
-            output.update_solution(solution, std::stringstream(""), parameters.info);
+            for (ItemIdx item_id = 0;
+                    item_id < instance.number_of_items();
+                    ++item_id) {
+                for (AgentIdx agent_id = 0;
+                        agent_id < instance.number_of_agents();
+                        ++agent_id) {
+                    if (x[item_id][agent_id].get(GRB_DoubleAttr_X) > 0.5)
+                        solution.set(item_id, agent_id);
+                }
+            }
+            output.update_solution(
+                    solution,
+                    std::stringstream(""),
+                    parameters.info);
         }
-        output.update_lower_bound(output.solution.cost(), std::stringstream(""), parameters.info);
+        output.update_lower_bound(
+                output.solution.cost(),
+                std::stringstream(""),
+                parameters.info);
     } else if (model.get(GRB_IntAttr_SolCount) > 0) {
-        if (!output.solution.feasible() || output.solution.cost() > model.get(GRB_DoubleAttr_ObjVal) + 0.5) {
+        if (!output.solution.feasible()
+                || output.solution.cost() > model.get(GRB_DoubleAttr_ObjVal) + 0.5) {
             Solution solution(instance);
-            for (ItemIdx j = 0; j < n; ++j)
-                for (AgentIdx i = 0; i < m; ++i)
-                    if (x[j][i].get(GRB_DoubleAttr_X) > 0.5)
-                        solution.set(j, i);
-            output.update_solution(solution, std::stringstream(""), parameters.info);
+            for (ItemIdx item_id = 0;
+                    item_id < instance.number_of_items();
+                    ++item_id)
+                for (AgentIdx agent_id = 0;
+                        agent_id < instance.number_of_agents();
+                        ++agent_id)
+                    if (x[item_id][agent_id].get(GRB_DoubleAttr_X) > 0.5)
+                        solution.set(item_id, agent_id);
+            output.update_solution(
+                    solution,
+                    std::stringstream(""),
+                    parameters.info);
         }
         Cost lb = std::ceil(model.get(GRB_DoubleAttr_ObjBound) - FFOT_TOL);
-        output.update_lower_bound(lb, std::stringstream(""), parameters.info);
+        output.update_lower_bound(
+                lb,
+                std::stringstream(""),
+                parameters.info);
     } else {
         Cost lb = std::ceil(model.get(GRB_DoubleAttr_ObjBound) - FFOT_TOL);
-        output.update_lower_bound(lb, std::stringstream(""), parameters.info);
+        output.update_lower_bound(
+                lb,
+                std::stringstream(""),
+                parameters.info);
     }
 
     return output.algorithm_end(parameters.info);

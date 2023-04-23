@@ -30,15 +30,18 @@ ILOMIPINFOCALLBACK4(loggingCallback,
         return;
 
     if (!output.solution.feasible() || output.solution.cost() > getIncumbentObjValue() + 0.5) {
-        AgentIdx m = instance.number_of_agents();
-        ItemIdx n = instance.number_of_items();
         Solution solution(instance);
-        for (ItemIdx j = 0; j < n; ++j) {
-            IloNumArray val(x[j].getEnv());
-            getIncumbentValues(val, x[j]);
-            for (AgentIdx i = 0; i < m; ++i)
-                if (val[i] > 0.5)
-                    solution.set(j, i);
+        for (ItemIdx item_id = 0;
+                item_id < instance.number_of_items();
+                ++item_id) {
+            IloNumArray val(x[item_id].getEnv());
+            getIncumbentValues(val, x[item_id]);
+            for (AgentIdx agent_id = 0;
+                    agent_id < instance.number_of_agents();
+                    ++agent_id) {
+                if (val[agent_id] > 0.5)
+                    solution.set(item_id, agent_id);
+            }
         }
         output.update_solution(solution, std::stringstream(""), parameters.info);
     }
@@ -57,10 +60,9 @@ MilpCplexOutput generalizedassignmentsolver::milp_cplex(
 
     MilpCplexOutput output(instance, parameters.info);
 
-    ItemIdx n = instance.number_of_items();
     AgentIdx m = instance.number_of_agents();
 
-    if (n == 0)
+    if (instance.number_of_items() == 0)
         return output.algorithm_end(parameters.info);
 
     IloEnv env;
@@ -68,30 +70,30 @@ MilpCplexOutput generalizedassignmentsolver::milp_cplex(
 
     // Variables
     std::vector<IloNumVarArray> x;
-    for (ItemIdx j = 0; j < n; j++)
+    for (ItemIdx item_id = 0; item_id < instance.number_of_items(); item_id++)
         x.push_back(IloNumVarArray(env, m, 0, 1, ILOBOOL));
 
     // Objective
     IloExpr expr(env);
-    for (ItemIdx j = 0; j < n; j++)
-        for (AgentIdx i = 0; i < m; i++)
-            expr += instance.cost(j, i) * x[j][i];
+    for (ItemIdx item_id = 0; item_id < instance.number_of_items(); item_id++)
+        for (AgentIdx agent_id = 0; agent_id < m; agent_id++)
+            expr += instance.cost(item_id, agent_id) * x[item_id][agent_id];
     IloObjective obj = IloMinimize(env, expr);
     model.add(obj);
 
     // Capacity constraints
-    for (AgentIdx i = 0; i < m; i++) {
+    for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id) {
         IloExpr expr(env);
-        for (ItemIdx j = 0; j < n; j++)
-            expr += instance.weight(j, i) * x[j][i];
-        model.add(0 <= expr <= instance.capacity(i));
+        for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id)
+            expr += instance.weight(item_id, agent_id) * x[item_id][agent_id];
+        model.add(0 <= expr <= instance.capacity(agent_id));
     }
 
     // One alternative per item constraint
-    for (ItemIdx j = 0; j < n; j++) {
+    for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id) {
         IloExpr expr(env);
-        for (AgentIdx i = 0; i < m; i++)
-            expr += x[j][i];
+        for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id)
+            expr += x[item_id][agent_id];
         model.add(expr == 1);
     }
 
@@ -101,11 +103,11 @@ MilpCplexOutput generalizedassignmentsolver::milp_cplex(
     if (parameters.initial_solution != NULL && parameters.initial_solution->feasible()) {
         IloNumVarArray startVar(env);
         IloNumArray startVal(env);
-        for (ItemIdx j = 0; j < n; ++j) {
-            AgentIdx i_curr = parameters.initial_solution->agent(j);
-            for (AgentIdx i = 0; i < m; ++i) {
-                startVar.add(x[j][i]);
-                startVal.add(((i == i_curr)? 1: 0));
+        for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id) {
+            AgentIdx agent_id_curr = parameters.initial_solution->agent(item_id);
+            for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id) {
+                startVar.add(x[item_id][agent_id]);
+                startVal.add(((agent_id == agent_id_curr)? 1: 0));
             }
         }
         cplex.addMIPStart(startVar, startVal);
@@ -118,17 +120,17 @@ MilpCplexOutput generalizedassignmentsolver::milp_cplex(
     cplex.setOut(logfile);
 
     if (parameters.only_linear_relaxation) {
-        for (ItemIdx j = 0; j < n; j++)
-            for (AgentIdx i = 0; i < m; i++)
-                model.add(IloConversion(env, x[j][i], ILOFLOAT));
+        for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id)
+            for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id)
+                model.add(IloConversion(env, x[item_id][agent_id], ILOFLOAT));
         cplex.solve();
         Cost lb = std::ceil(cplex.getObjValue() - FFOT_TOL);
         output.update_lower_bound(lb, std::stringstream("linearrelaxation"), parameters.info);
-        for (ItemIdx j = 0; j < n; j++) {
+        for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id) {
             output.x.push_back(std::vector<double>(instance.number_of_agents(), 0));
-            for (AgentIdx i = 0; i < m; i++)
-                if (cplex.getValue(x[j][i]) > 0.5)
-                    output.x[j][i] = 1;
+            for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id)
+                if (cplex.getValue(x[item_id][agent_id]) > 0.5)
+                    output.x[item_id][agent_id] = 1;
         }
         return output.algorithm_end(parameters.info);
     }
@@ -151,20 +153,20 @@ MilpCplexOutput generalizedassignmentsolver::milp_cplex(
     } else if (cplex.getStatus() == IloAlgorithm::Optimal) {
         if (!output.solution.feasible() || output.solution.cost() > cplex.getObjValue() + 0.5) {
             Solution solution(instance);
-            for (ItemIdx j = 0; j < n; j++)
-                for (AgentIdx i = 0; i < m; i++)
-                    if (cplex.getValue(x[j][i]) > 0.5)
-                        solution.set(j, i);
+            for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id)
+                for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id)
+                    if (cplex.getValue(x[item_id][agent_id]) > 0.5)
+                        solution.set(item_id, agent_id);
             output.update_solution(solution, std::stringstream(""), parameters.info);
         }
         output.update_lower_bound(output.solution.cost(), std::stringstream(""), parameters.info);
     } else if (cplex.isPrimalFeasible()) {
         if (!output.solution.feasible() || output.solution.cost() > cplex.getObjValue() + 0.5) {
             Solution solution(instance);
-            for (ItemIdx j = 0; j < n; j++)
-                for (AgentIdx i = 0; i < m; i++)
-                    if (cplex.getValue(x[j][i]) > 0.5)
-                        solution.set(j, i);
+            for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id)
+                for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id)
+                    if (cplex.getValue(x[item_id][agent_id]) > 0.5)
+                        solution.set(item_id, agent_id);
             output.update_solution(solution, std::stringstream(""), parameters.info);
         }
         Cost lb = std::ceil(cplex.getBestObjValue() - FFOT_TOL);

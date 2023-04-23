@@ -120,9 +120,6 @@ CbcEventHandler::CbcAction EventHandler::event(CbcEvent which_event)
     if ((which_event != solution && which_event != heuristicSolution)) // no solution found
         return noAction;
 
-    ItemIdx n = instance_.number_of_items();
-    AgentIdx m = instance_.number_of_agents();
-
     OsiSolverInterface* origSolver = model_->solver();
     const OsiSolverInterface* pps = model_->postProcessedSolver(1);
     const OsiSolverInterface* solver = pps? pps: origSolver;
@@ -130,10 +127,16 @@ CbcEventHandler::CbcAction EventHandler::event(CbcEvent which_event)
     if (!output_.solution.feasible() || output_.solution.cost() > solver->getObjValue() + 0.5) {
         const double* solution_cbc = solver->getColSolution();
         Solution solution(instance_);
-        for (ItemIdx j = 0; j < n; ++j)
-            for (AgentIdx i = 0; i < m; ++i)
-                if (solution_cbc[m * j + i] > 0.5)
-                    solution.set(j, i);
+        for (ItemIdx item_id = 0;
+                item_id < instance_.number_of_items();
+                ++item_id) {
+            for (AgentIdx agent_id = 0;
+                    agent_id < instance_.number_of_agents();
+                    ++agent_id) {
+                if (solution_cbc[instance_.number_of_agents() * item_id + agent_id] > 0.5)
+                    solution.set(item_id, agent_id);
+            }
+        }
         output_.update_solution(solution, std::stringstream(""), parameters_.info);
     }
 
@@ -146,19 +149,16 @@ CbcEventHandler::CbcAction EventHandler::event(CbcEvent which_event)
 
 CoinLP::CoinLP(const Instance& instance)
 {
-    ItemIdx n = instance.number_of_items();
-    AgentIdx m = instance.number_of_agents();
-
     // Variables
-    int number_of_columns = m * n;
+    int number_of_columns = instance.number_of_agents() * instance.number_of_items();
     column_lower_bounds.resize(number_of_columns, 0);
     column_upper_bounds.resize(number_of_columns, 1);
 
     // Objective
     objective = std::vector<double>(number_of_columns);
-    for (AgentIdx i = 0; i < m; ++i)
-        for (ItemIdx j = 0; j < n; ++j)
-            objective[m * j + i] = instance.cost(j, i);
+    for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id)
+        for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id)
+            objective[instance.number_of_agents() * item_id + agent_id] = instance.cost(item_id, agent_id);
 
     // Constraints
     int number_of_rows = 0; // will be increased each time we add a constraint
@@ -169,15 +169,15 @@ CoinLP::CoinLP(const Instance& instance)
 
     // Every item needs to be assigned
     // sum_i xij = 1 for all j
-    for (ItemIdx j = 0; j < n; ++j) {
+    for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id) {
         // Initialize new row
         row_starts.push_back(elements.size());
         number_of_elements_in_rows.push_back(0);
         number_of_rows++;
         // Add elements
-        for (AgentIdx i = 0; i < m; ++i) {
+        for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id) {
             elements.push_back(1);
-            element_columns.push_back(m * j + i);
+            element_columns.push_back(instance.number_of_agents() * item_id + agent_id);
             number_of_elements_in_rows.back()++;
         }
         // Add row bounds
@@ -187,28 +187,33 @@ CoinLP::CoinLP(const Instance& instance)
 
     // Capacity constraint
     // sum_j wj xij <= ci
-    for (AgentIdx i = 0; i < m; ++i) {
+    for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id) {
         // Initialize new row
         row_starts.push_back(elements.size());
         number_of_elements_in_rows.push_back(0);
         number_of_rows++;
         // Add row elements
-        for (ItemIdx j = 0; j < n; ++j) {
-            elements.push_back(instance.weight(j, i));
-            element_columns.push_back(m * j + i);
+        for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id) {
+            elements.push_back(instance.weight(item_id, agent_id));
+            element_columns.push_back(instance.number_of_agents() * item_id + agent_id);
             number_of_elements_in_rows.back()++;
         }
         // Add row bounds
         row_lower_bounds.push_back(0);
-        row_upper_bounds.push_back(instance.capacity(i));
+        row_upper_bounds.push_back(instance.capacity(agent_id));
     }
 
     // Create matrix
     row_starts.push_back(elements.size());
-    matrix = CoinPackedMatrix(false,
-            number_of_columns, number_of_rows, elements.size(),
-            elements.data(), element_columns.data(),
-            row_starts.data(), number_of_elements_in_rows.data());
+    matrix = CoinPackedMatrix(
+            false,
+            number_of_columns,
+            number_of_rows,
+            elements.size(),
+            elements.data(),
+            element_columns.data(),
+            row_starts.data(),
+            number_of_elements_in_rows.data());
 }
 
 MilpCbcOutput generalizedassignmentsolver::milp_cbc(
@@ -224,9 +229,7 @@ MilpCbcOutput generalizedassignmentsolver::milp_cbc(
 
     MilpCbcOutput output(instance, parameters.info);
 
-    ItemIdx n = instance.number_of_items();
-    AgentIdx m = instance.number_of_agents();
-    if (n == 0)
+    if (instance.number_of_items() == 0)
         return output.algorithm_end(parameters.info);
 
     CoinLP problem(instance);
@@ -247,9 +250,9 @@ MilpCbcOutput generalizedassignmentsolver::milp_cbc(
             problem.row_upper_bounds.data());
 
     // Mark integer.
-    for (ItemIdx j = 0; j < n; ++j)
-        for (AgentIdx i = 0; i < m; ++i)
-            solver1.setInteger(m * j + i);
+    for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id)
+        for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id)
+            solver1.setInteger(instance.number_of_agents() * item_id + agent_id);
 
     // Pass data and solver to CbcModel.
     CbcModel model(solver1);
@@ -332,16 +335,16 @@ MilpCbcOutput generalizedassignmentsolver::milp_cbc(
     model.setMaximumSeconds(parameters.info.remaining_time());
 
     // Add initial solution.
-    std::vector<double> sol_init(m * n, 0);
+    std::vector<double> sol_init(instance.number_of_agents() * instance.number_of_items(), 0);
     if (parameters.initial_solution != NULL
             && parameters.initial_solution->feasible()) {
-        for (ItemIdx j = 0; j < n; ++j)
-            for (AgentIdx i = 0; i < m; ++i)
-                if (parameters.initial_solution->agent(j) == i)
-                    sol_init[m * j + i] = 1;
+        for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id)
+            for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id)
+                if (parameters.initial_solution->agent(item_id) == agent_id)
+                    sol_init[instance.number_of_agents() * item_id + agent_id] = 1;
         model.setBestSolution(
                 sol_init.data(),
-                m * n,
+                instance.number_of_agents() * instance.number_of_items(),
                 parameters.initial_solution->cost());
     }
 
@@ -364,10 +367,10 @@ MilpCbcOutput generalizedassignmentsolver::milp_cbc(
                 || output.solution.cost() > model.getObjValue() + 0.5) {
             const double* solution_cbc = model.solver()->getColSolution();
             Solution solution(instance);
-            for (ItemIdx j = 0; j < n; ++j)
-                for (AgentIdx i = 0; i < m; ++i)
-                    if (solution_cbc[m * j + i] > 0.5)
-                        solution.set(j, i);
+            for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id)
+                for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id)
+                    if (solution_cbc[instance.number_of_agents() * item_id + agent_id] > 0.5)
+                        solution.set(item_id, agent_id);
             output.update_solution(
                     solution,
                     std::stringstream(""),
@@ -384,10 +387,10 @@ MilpCbcOutput generalizedassignmentsolver::milp_cbc(
                 || output.solution.cost() > model.getObjValue() + 0.5) {
             const double* solution_cbc = model.solver()->getColSolution();
             Solution solution(instance);
-            for (ItemIdx j = 0; j < n; ++j)
-                for (AgentIdx i = 0; i < m; ++i)
-                    if (solution_cbc[m * j + i] > 0.5)
-                        solution.set(j, i);
+            for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id)
+                for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id)
+                    if (solution_cbc[instance.number_of_agents() * item_id + agent_id] > 0.5)
+                        solution.set(item_id, agent_id);
             output.update_solution(
                     solution,
                     std::stringstream(""),

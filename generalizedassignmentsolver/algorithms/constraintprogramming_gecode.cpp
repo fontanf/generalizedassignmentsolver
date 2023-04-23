@@ -40,50 +40,53 @@ public:
 
         // Channel xij == 1 <=> xj == i
         Matrix<BoolVarArgs> xij(xij0_, n, m);
-        for (ItemIdx j=0; j<n; j++)
-            channel(*this, xij.col(j), xj_[j]);
-        for (ItemIdx j=0; j<n; j++)
-            rel(*this, sum(xij.col(j)) == 1);
+        for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id)
+            channel(*this, xij.col(item_id), xj_[item_id]);
+        for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id)
+            rel(*this, sum(xij.col(item_id)) == 1);
 
         // Weights
         weights_ = std::vector<IntArgs>(m, IntArgs(n));
-        for (AgentIdx i=0; i<m; ++i)
-            for (ItemIdx j=0; j<n; ++j)
-                weights_[i][j] = instance.weight(j, i);
+        for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id)
+            for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id)
+                weights_[agent_id][item_id] = instance.weight(item_id, agent_id);
 
         // Costs
         costs_ = std::vector<IntArgs>(n, IntArgs(m));
-        for (ItemIdx j=0; j<n; ++j)
-            for (AgentIdx i=0; i<m; ++i)
-                costs_[j][i] = instance.cost(j, i);
+        for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id)
+            for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id)
+                costs_[item_id][agent_id] = instance.cost(item_id, agent_id);
 
         // Cost variables
-        for (ItemIdx j=0; j<n; j++) {
-            cj_[j] = IntVar(*this, instance.item(j).c_min, instance.item(j).c_max);
-            element(*this, costs_[j], xj_[j], cj_[j]);
+        for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id) {
+            cj_[item_id] = IntVar(
+                    *this,
+                    instance.item(item_id).minimum_cost,
+                    instance.item(item_id).maximum_cost);
+            element(*this, costs_[item_id], xj_[item_id], cj_[item_id]);
         }
         c_ = expr(*this, sum(cj_));
 
         // Load variables (and capacity constraints)
-        for (AgentIdx i=0; i<m; ++i) {
-            load_[i] = IntVar(*this, 0, instance.capacity(i));
-            linear(*this, weights_[i], xij.row(i), IRT_EQ, load_[i]);
+        for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id) {
+            load_[agent_id] = IntVar(*this, 0, instance.capacity(agent_id));
+            linear(*this, weights_[agent_id], xij.row(agent_id), IRT_EQ, load_[agent_id]);
         }
 
         // Branch on the most efficient agent
         auto v = [](const Space& home, IntVar x, int j)
         {
             const Instance& instance = static_cast<const GapGecode&>(home).instance();
-            AgentIdx i_best = -1;
+            AgentIdx agent_id_best = -1;
             double c_best = -1;
             for (IntVarValues i(x); i(); ++i) {
                 double c = instance.profit(j, i.val()) / instance.weight(j, i.val());
-                if (i_best == -1 || c_best < c) {
-                    i_best = i.val();
+                if (agent_id_best == -1 || c_best < c) {
+                    agent_id_best = i.val();
                     c_best = c;
                 }
             }
-            return i_best;
+            return agent_id_best;
         };
         branch(*this, xj_, INT_VAR_NONE(), INT_VAL(v));
     }
@@ -109,7 +112,7 @@ public:
         std::cout << "Cost " << c_ << std::endl;
     }
 
-    AgentIdx agent(ItemIdx j) const { return xj_[j].val(); }
+    AgentIdx agent(ItemIdx item_id) const { return xj_[item_id].val(); }
     const Instance& instance() const { return instance_; }
 
 private:
@@ -158,8 +161,11 @@ ConstraintProgrammingGecodeOutput generalizedassignmentsolver::constraintprogram
     Solution sol_best(instance);
     while ((sol_ptr = engine.next())) {
         Solution sol_curr(instance);
-        for (ItemIdx j=0; j<instance.number_of_items(); j++)
-            sol_curr.set(j, sol_ptr->agent(j));
+        for (ItemIdx item_id = 0;
+                item_id < instance.number_of_items();
+                item_id++) {
+            sol_curr.set(item_id, sol_ptr->agent(item_id));
+        }
         output.update_solution(sol_curr, std::stringstream(""), parameters.info);
         delete sol_ptr;
     }

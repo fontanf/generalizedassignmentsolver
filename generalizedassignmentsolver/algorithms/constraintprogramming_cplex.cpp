@@ -28,49 +28,47 @@ ConstraintProgrammingCplexOutput generalizedassignmentsolver::constraintprogramm
 
     ConstraintProgrammingCplexOutput output(instance, parameters.info);
 
-    ItemIdx n = instance.number_of_items();
-    AgentIdx m = instance.number_of_agents();
     IloEnv env;
     IloModel model(env);
 
     // Variables
-    IloIntVarArray xj(env, n, 0, m - 1);
-    IloArray<IloBoolVarArray> xij(env, n);
-    for (ItemIdx j = 0; j < n; j++)
-        xij[j] = IloBoolVarArray(env, m);
+    IloIntVarArray xj(env, instance.number_of_items(), 0, instance.number_of_agents() - 1);
+    IloArray<IloBoolVarArray> xij(env, instance.number_of_items());
+    for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id)
+        xij[item_id] = IloBoolVarArray(env, instance.number_of_agents());
 
     // Channel xij == 1 <=> xj == i
-    for (AgentIdx i = 0; i < m; i++)
-        for (ItemIdx j = 0; j < n; j++)
-            model.add((xij[j][i] == 1) == (xj[j] == i));
+    for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id)
+        for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id)
+            model.add((xij[item_id][agent_id] == 1) == (xj[item_id] == agent_id));
 
     // Costs
     IloArray<IloIntArray> cost(env);
-    for (ItemIdx j = 0; j < n; j++) {
-        cost.add(IloIntArray(env, m));
-        for (AgentIdx i = 0; i < m; i++)
-            cost[j][i] = instance.cost(j, i);
+    for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id) {
+        cost.add(IloIntArray(env, instance.number_of_agents()));
+        for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id)
+            cost[item_id][agent_id] = instance.cost(item_id, agent_id);
     }
 
     // Cost variables
-    IloIntExprArray cj(env, n);
-    for (ItemIdx j = 0; j < n; j++)
-        cj[j] = IloElement(cost[j], xj[j]);
+    IloIntExprArray cj(env, instance.number_of_items());
+    for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id)
+        cj[item_id] = IloElement(cost[item_id], xj[item_id]);
 
     // Objective
     IloIntExpr c(env);
-    for (ItemIdx j = 0; j < n; j++)
-        c += cj[j];
+    for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id)
+        c += cj[item_id];
     model.add(IloMinimize(env, c));
 
     // Load variables (and capacity constraint)
-    IloIntVarArray load(env, m);
-    for (AgentIdx i = 0; i < m; i++) {
-        load[i] = IloIntVar(env, 0, instance.capacity(i));
+    IloIntVarArray load(env, instance.number_of_agents());
+    for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id) {
+        load[agent_id] = IloIntVar(env, 0, instance.capacity(agent_id));
         IloExpr sum(env);
-        for (ItemIdx j = 0; j < n; ++j)
-            sum += instance.weight(j, i) * xij[j][i];
-        model.add(load[i] == sum);
+        for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id)
+            sum += instance.weight(item_id, agent_id) * xij[item_id][agent_id];
+        model.add(load[agent_id] == sum);
     }
 
     IloCP cp(model);
@@ -86,8 +84,8 @@ ConstraintProgrammingCplexOutput generalizedassignmentsolver::constraintprogramm
     cp.startNewSearch();
     while (cp.next()) {
         Solution sol_curr(instance);
-        for (ItemIdx j = 0; j < n; ++j)
-            sol_curr.set(j, cp.getValue(xj[j]));
+        for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id)
+            sol_curr.set(item_id, cp.getValue(xj[item_id]));
         output.update_solution(sol_curr, std::stringstream(""), parameters.info);
     }
 

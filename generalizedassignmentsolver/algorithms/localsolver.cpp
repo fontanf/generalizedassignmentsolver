@@ -39,18 +39,25 @@ public:
         if (s == SS_Infeasible)
             return;
 
+        const Instance& instance = output_.solution.instance();
         LSExpression obj = ls.getModel().getObjective(0);
         if(!output_.solution.feasible() || output_.solution.cost() > obj.getValue() + 0.5) {
             Solution sol_curr(output_.solution.instance());
-            AgentIdx m = output_.solution.instance().number_of_agents();
-            for (AgentIdx i=0; i<m; ++i) {
-                LSCollection bin_collection = agents_[i].getCollectionValue();
-                for (ItemIdx j_pos=0; j_pos<bin_collection.count(); ++j_pos) {
-                    sol_curr.set(bin_collection[j_pos], i);
+            for (AgentIdx agent_id = 0;
+                    agent_id < instance.number_of_agents();
+                    ++agent_id) {
+                LSCollection bin_collection = agents_[agent_id].getCollectionValue();
+                for (ItemIdx item_id_pos = 0;
+                        item_id_pos < bin_collection.count();
+                        ++item_id_pos) {
+                    sol_curr.set(bin_collection[item_id_pos], agent_id);
                 }
             }
             std::stringstream ss;
-            output_.update_solution(sol_curr, std::stringstream(""), parameters_.info);
+            output_.update_solution(
+                    sol_curr,
+                    std::stringstream(""),
+                    parameters_.info);
         }
     }
 
@@ -73,12 +80,9 @@ LocalSolverOutput generalizedassignmentsolver::localsolver(
             << "Local Solver" << std::endl
             << std::endl;
 
-    ItemIdx n = instance.number_of_items();
-    AgentIdx m = instance.number_of_agents();
-
     LocalSolverOutput output(instance, parameters.info);
 
-    if (n == 0)
+    if (instance.number_of_items() == 0)
         return output.algorithm_end(parameters.info);
 
     LocalSolver localsolver;
@@ -92,10 +96,10 @@ LocalSolverOutput generalizedassignmentsolver::localsolver(
     // Weight of each item
     std::vector<std::vector<lsint>> item_weights(n, std::vector<lsint>(n));
     std::vector<std::vector<lsint>> item_costs(n, std::vector<lsint>(n));
-    for (AgentIdx i = 0; i < m; ++i) {
-        for (ItemIdx j = 0; j < n; ++j) {
-            item_weights[i][j] = instance.alternative(j, i).w;
-            item_costs[i][j] = instance.alternative(j, i).c;
+    for (AgentIdx agent_id = 0; agent_id < number_of_agents; ++agent_id) {
+        for (ItemIdx item_id = 0; item_id < number_of_items; ++item_id) {
+            item_weights[agent_id][item_id] = instance.alternative(item_id, agent_id).weight;
+            item_costs[agent_id][item_id] = instance.alternative(item_id, agent_id).cost;
         }
     }
 
@@ -111,31 +115,46 @@ LocalSolverOutput generalizedassignmentsolver::localsolver(
     LSExpression total_cost; // Objective
 
     // Set decisions: bins[k] represents the items in bin k
-    for (AgentIdx i = 0; i < instance.number_of_agents(); ++i)
-        agents[i] = model.setVar(instance.number_of_items());
+    for (AgentIdx agent_id = 0;
+            agent_id < instance.number_of_agents();
+            ++agent_id) {
+        agents[agent_id] = model.setVar(instance.number_of_items());
+    }
 
     // Each item must be in one bin and one bin only
     model.constraint(model.partition(agents.begin(), agents.end()));
 
     // Create an array and a function to retrieve the item's weight
-    std::vector<LSExpression> weight_array(m);
-    std::vector<LSExpression> cost_array(m);
-    std::vector<LSExpression> weight_selector(m);
-    std::vector<LSExpression> cost_selector(m);
-    for (AgentIdx i=0; i<m; ++i) {
-        weight_array[i] = model.array(item_weights[i].begin(), item_weights[i].end());
-        weight_selector[i] = model.createFunction([&](LSExpression j) {
-                return weight_array[i][j]; });
-        cost_array[i] = model.array(item_costs[i].begin(), item_costs[i].end());
-        cost_selector[i] = model.createFunction([&](LSExpression j) {
-                return cost_array[i][j]; });
+    std::vector<LSExpression> weight_array(instance.number_of_agents());
+    std::vector<LSExpression> cost_array(instance.number_of_agents());
+    std::vector<LSExpression> weight_selector(instance.number_of_agents());
+    std::vector<LSExpression> cost_selector(instance.number_of_agents());
+    for (AgentIdx agent_id = 0;
+            agent_id < instance.number_of_agents();
+            ++agent_id) {
+        weight_array[agent_id] = model.array(
+                item_weights[agent_id].begin(),
+                item_weights[agent_id].end());
+        weight_selector[agent_id] = model.createFunction([&](LSExpression item_id) {
+                return weight_array[agent_id][item_id]; });
+
+        cost_array[agent_id] = model.array(
+                item_costs[agent_id].begin(),
+                item_costs[agent_id].end());
+        cost_selector[agent_id] = model.createFunction([&](LSExpression item_id) {
+                return cost_array[agent_id][item_id]; });
     }
 
-    for (AgentIdx i = 0; i < m; ++i) {
+    for (AgentIdx agent_id = 0; agent_id < number_of_agents; ++agent_id) {
         // Weight constraint for each bin
-        agents_weight[i] = model.sum(agents[i], weight_selector[i]);
-        model.constraint(agents_weight[i] <= (lsint)instance.capacity(i));
-        agents_cost[i] = model.sum(agents[i], cost_selector[i]);
+        agents_weight[agent_id] = model.sum(
+                agents[agent_id],
+                weight_selector[agent_id]);
+        model.constraint(agents_weight[agent_id] <= (lsint)instance.capacity(i));
+
+        agents_cost[agent_id] = model.sum(
+                agents[agent_id],
+                cost_selector[agent_id]);
     }
 
     // Count the used bins
@@ -159,10 +178,13 @@ LocalSolverOutput generalizedassignmentsolver::localsolver(
 
     // Retrieve solution
     Solution sol_curr(instance);
-    for (AgentIdx i = 0; i < m; ++i) {
-        LSCollection bin_collection = agents[i].getCollectionValue();
-        for (ItemIdx j_pos = 0; j_pos < bin_collection.count(); ++j_pos)
-            sol_curr.set(bin_collection[j_pos], i);
+    for (AgentIdx agent_id = 0; agent_id < number_of_agents; ++agent_id) {
+        LSCollection bin_collection = agents[agent_id].getCollectionValue();
+        for (ItemIdx item_id_pos = 0;
+                item_id_pos < bin_collection.count();
+                ++item_id_pos) {
+            sol_curr.set(bin_collection[item_id_pos], agent_id);
+        }
     }
     output.update_solution(sol_curr, std::stringstream(""), parameters.info);
 

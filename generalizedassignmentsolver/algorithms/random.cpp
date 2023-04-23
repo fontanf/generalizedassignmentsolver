@@ -13,8 +13,8 @@ Solution generalizedassignmentsolver::random_infeasible(
 {
     std::uniform_int_distribution<> dis(0, instance.number_of_agents() - 1);
     Solution solution(instance);
-    for (ItemIdx j=0; j<instance.number_of_items(); ++j)
-        solution.set(j, dis(generator));
+    for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id)
+        solution.set(item_id, dis(generator));
     return solution;
 }
 
@@ -33,47 +33,45 @@ Output generalizedassignmentsolver::random(
     Output output(instance, info);
 
     Solution solution = random_infeasible(instance, generator);
-    AgentIdx m = instance.number_of_agents();
-    ItemIdx n = instance.number_of_items();
-    std::uniform_int_distribution<Counter> dis_ss(1, n * m + (n * (n + 1)) / 2);
-    std::uniform_int_distribution<ItemIdx> dis_j(0, n - 1);
-    std::uniform_int_distribution<ItemIdx> dis_j2(0, n - 2);
-    std::uniform_int_distribution<AgentIdx> dis_i(0, m - 2);
+    std::uniform_int_distribution<Counter> dis_ss(1, instance.number_of_items() * instance.number_of_agents() + (instance.number_of_items() * (instance.number_of_items() + 1)) / 2);
+    std::uniform_int_distribution<ItemIdx> dis_j(0, instance.number_of_items() - 1);
+    std::uniform_int_distribution<ItemIdx> dis_item_id_2(0, instance.number_of_items() - 2);
+    std::uniform_int_distribution<AgentIdx> dis_i(0, instance.number_of_agents() - 2);
     std::uniform_real_distribution<double> dis(0, 1);
 
-    Counter it_max = 2 * (n * m + (n * (n + 1)) / 2);
+    Counter it_max = 2 * (instance.number_of_items() * instance.number_of_agents() + (instance.number_of_items() * (instance.number_of_items() + 1)) / 2);
     Counter it_without_change = 0;
 
     while (it_without_change < it_max && !info.needs_to_end()) {
         Counter p = dis_ss(generator);
-        if (p <= m * n) { // shift
-            ItemIdx j = dis_j(generator);
-            AgentIdx i = dis_i(generator);
-            AgentIdx i_old = solution.agent(j);
-            if (i >= i_old)
-                i++;
-            if (std::max((Weight)0, solution.weight(i_old) - instance.weight(j, i_old) - instance.capacity(i_old))
-                    + std::max((Weight)0, solution.weight(i) + instance.weight(j, i) - instance.capacity(i))
-                    <= solution.overcapacity(i_old) + solution.overcapacity(i)) {
-                solution.set(j, i);
+        if (p <= instance.number_of_agents() * instance.number_of_items()) { // shift
+            ItemIdx item_id = dis_j(generator);
+            AgentIdx agent_id = dis_i(generator);
+            AgentIdx agent_id_old = solution.agent(item_id);
+            if (agent_id >= agent_id_old)
+                agent_id++;
+            if (std::max((Weight)0, solution.weight(agent_id_old) - instance.weight(item_id, agent_id_old) - instance.capacity(agent_id_old))
+                    + std::max((Weight)0, solution.weight(agent_id) + instance.weight(item_id, agent_id) - instance.capacity(agent_id))
+                    <= solution.overcapacity(agent_id_old) + solution.overcapacity(agent_id)) {
+                solution.set(item_id, agent_id);
                 it_without_change = 0;
             } else {
                 it_without_change++;
             }
         } else { // swap
-            ItemIdx j1 = dis_j(generator);
-            ItemIdx j2 = dis_j2(generator);
-            if (j2 >= j1)
-                j2++;
-            AgentIdx i1 = solution.agent(j1);
-            AgentIdx i2 = solution.agent(j2);
-            if (i1 == i2)
+            ItemIdx item_id_1 = dis_j(generator);
+            ItemIdx item_id_2 = dis_item_id_2(generator);
+            if (item_id_2 >= item_id_1)
+                item_id_2++;
+            AgentIdx agent_id_1 = solution.agent(item_id_1);
+            AgentIdx agent_id_2 = solution.agent(item_id_2);
+            if (agent_id_1 == agent_id_2)
                 continue;
-            if (std::max((Weight)0, solution.weight(i1) - instance.weight(j1, i1) + instance.weight(j2, i1) - instance.capacity(i1))
-                    + std::max((Weight)0, solution.weight(i2) - instance.weight(j2, i2) + instance.weight(j1, i2) - instance.capacity(i2))
-                    <= solution.overcapacity(i1) + solution.overcapacity(i2)) {
-                solution.set(j1, i2);
-                solution.set(j2, i1);
+            if (std::max((Weight)0, solution.weight(agent_id_1) - instance.weight(item_id_1, agent_id_1) + instance.weight(item_id_2, agent_id_1) - instance.capacity(agent_id_1))
+                    + std::max((Weight)0, solution.weight(agent_id_2) - instance.weight(item_id_2, agent_id_2) + instance.weight(item_id_1, agent_id_2) - instance.capacity(agent_id_2))
+                    <= solution.overcapacity(agent_id_1) + solution.overcapacity(agent_id_2)) {
+                solution.set(item_id_1, agent_id_2);
+                solution.set(item_id_2, agent_id_1);
                 it_without_change = 0;
             } else {
                 it_without_change++;

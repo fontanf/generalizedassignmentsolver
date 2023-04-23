@@ -85,11 +85,13 @@ public:
     {
         Solution solution = empty_solution();
         std::uniform_int_distribution<ItemIdx> d(0, instance_.number_of_agents() - 1);
-        for (ItemIdx j = 0; j < instance_.number_of_items(); ++j) {
-            if (solution.agents[j] != -1)
+        for (ItemIdx item_id = 0;
+                item_id < instance_.number_of_items();
+                ++item_id) {
+            if (solution.agents[item_id] != -1)
                 continue;
-            AgentIdx i = d(generator);
-            add(solution, j, i);
+            AgentIdx agent_id = d(generator);
+            add(solution, item_id, agent_id);
         }
         return solution;
     }
@@ -100,19 +102,23 @@ public:
     {
         Solution solution_new = empty_solution();
 
-        for (ItemIdx j = 0; j < instance_.number_of_items(); ++j) {
-            AgentIdx i = solution.agent(j);
-            if (i == -1)
+        for (ItemIdx item_id = 0;
+                item_id < instance_.number_of_items();
+                ++item_id) {
+            AgentIdx agent_id = solution.agent(item_id);
+            if (agent_id == -1)
                 continue;
-            add(solution_new, j, i);
+            add(solution_new, item_id, agent_id);
         }
 
         std::uniform_int_distribution<ItemIdx> d(0, instance_.number_of_agents() - 1);
-        for (ItemIdx j = 0; j < instance_.number_of_items(); ++j) {
-            if (solution_new.agents[j] != -1)
+        for (ItemIdx item_id = 0;
+                item_id < instance_.number_of_items();
+                ++item_id) {
+            if (solution_new.agents[item_id] != -1)
                 continue;
-            AgentIdx i = d(generator);
-            add(solution_new, j, i);
+            AgentIdx agent_id = d(generator);
+            add(solution_new, item_id, agent_id);
         }
 
         return solution_new;
@@ -132,9 +138,9 @@ public:
 
     struct MoveShift
     {
-        ItemIdx j = -1;
-        AgentIdx i_old = -1;
-        AgentIdx i = -1;
+        ItemIdx item_id = -1;
+        AgentIdx agent_id_old = -1;
+        AgentIdx agent_id = -1;
         GlobalCost cost_difference = worst<GlobalCost>();
     };
 
@@ -145,13 +151,10 @@ public:
             std::mt19937_64&,
             const Perturbation& perturbation = Perturbation())
     {
-        ItemIdx n = instance_.number_of_items();
-        AgentIdx m = instance_.number_of_agents();
-
         // Strucutres for the shift neighborhood.
         // Agents which have changed since the last shift neighborhood
         // exploration.
-        optimizationtools::IndexedSet shift_changed_agents(m);
+        optimizationtools::IndexedSet shift_changed_agents(instance_.number_of_agents());
         // Vector containing the improving moves of the shift neighborhood.
         std::vector<MoveShift> shift_improving_moves;
 
@@ -162,14 +165,17 @@ public:
         // Otherwise, only the agent modified by the perturbation are
         // considered 'changed'.
         if (perturbation.moves.empty()) {
-            for (AgentIdx i = 0; i < m; ++i)
-                shift_changed_agents.add(i);
+            for (AgentIdx agent_id = 0;
+                    agent_id < instance_.number_of_agents();
+                    ++agent_id) {
+                shift_changed_agents.add(agent_id);
+            }
         } else {
             for (auto t: perturbation.moves) {
-                AgentIdx i_old = std::get<1>(t);
-                AgentIdx i = std::get<2>(t);
-                shift_changed_agents.add(i);
-                shift_changed_agents.add(i_old);
+                AgentIdx agent_id_old = std::get<1>(t);
+                AgentIdx agent_id = std::get<2>(t);
+                shift_changed_agents.add(agent_id);
+                shift_changed_agents.add(agent_id_old);
             }
         }
 
@@ -183,8 +189,8 @@ public:
             // Remove obsolete moves.
             for (auto it = shift_improving_moves.begin();
                     it != shift_improving_moves.end();) {
-                if (shift_changed_agents.contains(it->i_old)
-                        || shift_changed_agents.contains(it->i)) {
+                if (shift_changed_agents.contains(it->agent_id_old)
+                        || shift_changed_agents.contains(it->agent_id)) {
                     *it = *std::prev(shift_improving_moves.end());
                     shift_improving_moves.pop_back();
                 } else {
@@ -198,39 +204,41 @@ public:
             // For each item belonging to an unchanged agent, we add shift
             // moves toward all changed agents.
             GlobalCost c_cur = global_cost(solution);
-            for (ItemIdx j = 0; j < n; ++j) {
-                AgentIdx i_old = solution.agents[j];
-                remove(solution, j);
-                if (shift_changed_agents.contains(i_old)) {
-                    for (AgentIdx i = 0; i < m; ++i) {
-                        if (i == i_old)
+            for (ItemIdx item_id = 0;
+                    item_id < instance_.number_of_items();
+                    ++item_id) {
+                AgentIdx agent_id_old = solution.agents[item_id];
+                remove(solution, item_id);
+                if (shift_changed_agents.contains(agent_id_old)) {
+                    for (AgentIdx agent_id = 0; agent_id < instance_.number_of_agents(); ++agent_id) {
+                        if (agent_id == agent_id_old)
                             continue;
-                        GlobalCost c = cost_add(solution, j, i);
+                        GlobalCost c = cost_add(solution, item_id, agent_id);
                         if (c >= c_cur)
                             continue;
                         MoveShift move;
-                        move.j = j;
-                        move.i_old = i_old;
-                        move.i = i;
+                        move.item_id = item_id;
+                        move.agent_id_old = agent_id_old;
+                        move.agent_id = agent_id;
                         move.cost_difference = c - c_cur;
                         shift_improving_moves.push_back(move);
                     }
                 } else {
-                    for (AgentIdx i: shift_changed_agents) {
-                        if (i == i_old)
+                    for (AgentIdx agent_id: shift_changed_agents) {
+                        if (agent_id == agent_id_old)
                             continue;
-                        GlobalCost c = cost_add(solution, j, i);
+                        GlobalCost c = cost_add(solution, item_id, agent_id);
                         if (c >= c_cur)
                             continue;
                         MoveShift move;
-                        move.j = j;
-                        move.i_old = i_old;
-                        move.i = i;
+                        move.item_id = item_id;
+                        move.agent_id_old = agent_id_old;
+                        move.agent_id = agent_id;
                         move.cost_difference = c - c_cur;
                         shift_improving_moves.push_back(move);
                     }
                 }
-                add(solution, j, i_old);
+                add(solution, item_id, agent_id_old);
             }
             shift_changed_agents.clear();
 
@@ -250,8 +258,8 @@ public:
             }
 
             // Apply move.
-            remove(solution, it_best->j);
-            add(solution, it_best->j, it_best->i);
+            remove(solution, it_best->item_id);
+            add(solution, it_best->item_id, it_best->agent_id);
             if (global_cost(solution) != c_cur + it_best->cost_difference) {
                 throw std::logic_error("Costs do not match:\n"
                         "* Current cost: " + to_string(c_cur) + "\n"
@@ -261,8 +269,8 @@ public:
             }
 
             // Update move structures.
-            shift_changed_agents.add(it_best->i_old);
-            shift_changed_agents.add(it_best->i);
+            shift_changed_agents.add(it_best->agent_id_old);
+            shift_changed_agents.add(it_best->agent_id);
         }
     }
 
@@ -286,23 +294,23 @@ public:
                     (ItemIdx)8, instance_.number_of_items(), generator);
             std::shuffle(items.begin(), items.end(), generator);
             Perturbation perturbation;
-            for (ItemIdx j: items) {
-                AgentIdx i_old = solution.agents[j];
-                AgentIdx i_best = -1;
+            for (ItemIdx item_id: items) {
+                AgentIdx agent_id_old = solution.agents[item_id];
+                AgentIdx agent_id_best = -1;
                 GlobalCost c_best = worst<GlobalCost>();
-                remove(solution, j);
+                remove(solution, item_id);
                 std::shuffle(agents_.begin(), agents_.end(), generator);
-                for (AgentIdx i: agents_) {
-                    if (i == i_old)
+                for (AgentIdx agent_id: agents_) {
+                    if (agent_id == agent_id_old)
                         continue;
-                    GlobalCost c = cost_add(solution, j, i);
-                    if (i_best == -1 || c < c_best) {
-                        i_best = i;
+                    GlobalCost c = cost_add(solution, item_id, agent_id);
+                    if (agent_id_best == -1 || c < c_best) {
+                        agent_id_best = agent_id;
                         c_best = c;
                     }
                 }
-                add(solution, j, i_old);
-                perturbation.moves.push_back({j, i_old, i_best});
+                add(solution, item_id, agent_id_old);
+                perturbation.moves.push_back({item_id, agent_id_old, agent_id_best});
             }
             perturbation.global_cost = global_cost(solution);
             perturbations.push_back(perturbation);
@@ -316,10 +324,10 @@ public:
             std::mt19937_64&) const
     {
         for (auto t: perturbation.moves) {
-            ItemIdx j = std::get<0>(t);
-            AgentIdx i = std::get<2>(t);
-            remove(solution, j);
-            add(solution, j, i);
+            ItemIdx item_id = std::get<0>(t);
+            AgentIdx agent_id = std::get<2>(t);
+            remove(solution, item_id);
+            add(solution, item_id, agent_id);
         }
     }
 
@@ -344,8 +352,8 @@ public:
                 const std::shared_ptr<CompactSolution>& compact_solution) const
         {
             size_t hash = 0;
-            for (ItemIdx j: *compact_solution)
-                optimizationtools::hash_combine(hash, hasher(j));
+            for (ItemIdx item_id: *compact_solution)
+                optimizationtools::hash_combine(hash, hasher(item_id));
             return hash;
         }
     };
@@ -360,10 +368,12 @@ public:
     Solution compact2solution(const CompactSolution& compact_solution)
     {
         Solution solution = empty_solution();
-        for (ItemIdx j = 0; j < instance_.number_of_items(); ++j) {
-            AgentIdx i = compact_solution[j];
-            if (i != -1)
-                add(solution, j, i);
+        for (ItemIdx item_id = 0;
+                item_id < instance_.number_of_items();
+                ++item_id) {
+            AgentIdx agent_id = compact_solution[item_id];
+            if (agent_id != -1)
+                add(solution, item_id, agent_id);
         }
         return solution;
     }
@@ -386,12 +396,12 @@ public:
             const Solution& solution) const
     {
         os << "agents:";
-        for (AgentIdx i: solution.agents)
-            os << " " << i;
+        for (AgentIdx agent_id: solution.agents)
+            os << " " << agent_id;
         os << std::endl;
         os << "weights:";
-        for (Weight w: solution.weights)
-            os << " " << w;
+        for (Weight weight: solution.weights)
+            os << " " << weight;
         os << std::endl;
         os << "overweight: " << solution.overweight << std::endl;
         os << "cost: " << solution.cost << std::endl;
@@ -406,47 +416,52 @@ private:
      * Manipulate solutions.
      */
 
-    inline void add(Solution& solution, ItemIdx j, AgentIdx i) const
+    inline void add(
+            Solution& solution,
+            ItemIdx item_id,
+            AgentIdx agent_id) const
     {
-        assert(j >= 0);
-        assert(j < instance_.number_of_items());
-        assert(i >= 0);
-        assert(i < instance_.number_of_agents());
-        assert(solution.agents[j] == -1);
+        assert(item_id >= 0);
+        assert(item_id < instance_.number_of_items());
+        assert(agent_id >= 0);
+        assert(agent_id < instance_.number_of_agents());
+        assert(solution.agents[item_id] == -1);
         // Update weights.
-        Weight w_max = instance_.capacity(i);
-        Weight w = instance_.weight(j, i);
-        if (solution.weights[i] >= w_max) {
+        Weight w_max = instance_.capacity(agent_id);
+        Weight w = instance_.weight(item_id, agent_id);
+        if (solution.weights[agent_id] >= w_max) {
             solution.overweight += w;
-        } else if (solution.weights[i] + w <= w_max) {
+        } else if (solution.weights[agent_id] + w <= w_max) {
         } else {
-            solution.overweight += (solution.weights[i] + w - w_max);
+            solution.overweight += (solution.weights[agent_id] + w - w_max);
         }
-        solution.weights[i] += w;
+        solution.weights[agent_id] += w;
         // Update cost.
-        solution.cost += instance_.cost(j, i);
+        solution.cost += instance_.cost(item_id, agent_id);
         // Update items.
-        solution.agents[j] = i;
+        solution.agents[item_id] = agent_id;
     }
 
-    inline void remove(Solution& solution, ItemIdx j) const
+    inline void remove(
+            Solution& solution,
+            ItemIdx item_id) const
     {
-        AgentIdx i = solution.agents[j];
-        assert(i != -1);
+        AgentIdx agent_id = solution.agents[item_id];
+        assert(agent_id != -1);
         // Update weights.
-        Weight w_max = instance_.capacity(i);
-        Weight w = instance_.weight(j, i);
-        if (solution.weights[i] - w >= w_max) {
+        Weight w_max = instance_.capacity(agent_id);
+        Weight w = instance_.weight(item_id, agent_id);
+        if (solution.weights[agent_id] - w >= w_max) {
             solution.overweight -= w;
-        } else if (solution.weights[i] <= w_max) {
+        } else if (solution.weights[agent_id] <= w_max) {
         } else {
-            solution.overweight -= (solution.weights[i] - w_max);
+            solution.overweight -= (solution.weights[agent_id] - w_max);
         }
-        solution.weights[i] -= w;
+        solution.weights[agent_id] -= w;
         // Update cost.
-        solution.cost -= instance_.cost(j, i);
+        solution.cost -= instance_.cost(item_id, agent_id);
         // Update items.
-        solution.agents[j] = -1;
+        solution.agents[item_id] = -1;
     }
 
     /*
@@ -455,22 +470,22 @@ private:
 
     inline GlobalCost cost_add(
             const Solution& solution,
-            ItemIdx j,
-            AgentIdx i) const
+            ItemIdx item_id,
+            AgentIdx agent_id) const
     {
         GlobalCost gc = global_cost(solution);
-        assert(solution.agents[j] == -1);
+        assert(solution.agents[item_id] == -1);
         // Update overweigt.
-        Weight w_max = instance_.capacity(i);
-        Weight w = instance_.weight(j, i);
-        if (solution.weights[i] >= w_max) {
+        Weight w_max = instance_.capacity(agent_id);
+        Weight w = instance_.weight(item_id, agent_id);
+        if (solution.weights[agent_id] >= w_max) {
             overweight(gc) += w;
-        } else if (solution.weights[i] + w <= w_max) {
+        } else if (solution.weights[agent_id] + w <= w_max) {
         } else {
-            overweight(gc) += (solution.weights[i] + w - w_max);
+            overweight(gc) += (solution.weights[agent_id] + w - w_max);
         }
         // Update cost.
-        cost(gc) += instance_.cost(j, i);
+        cost(gc) += instance_.cost(item_id, agent_id);
         return gc;
     }
 
@@ -525,9 +540,11 @@ LocalSearchOutput generalizedassignmentsolver::localsearch(
                 const LocalScheme::Solution& solution)
         {
             Solution sol(instance);
-            for (ItemIdx j = 0; j < instance.number_of_items(); ++j) {
-                AgentIdx i = solution.agents[j];
-                sol.set(j, i);
+            for (ItemIdx item_id = 0;
+                    item_id < instance.number_of_items();
+                    ++item_id) {
+                AgentIdx agent_id = solution.agents[item_id];
+                sol.set(item_id, agent_id);
             }
             std::stringstream ss;
             output.update_solution(sol, ss, parameters.info);

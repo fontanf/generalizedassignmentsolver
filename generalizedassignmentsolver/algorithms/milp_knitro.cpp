@@ -32,6 +32,7 @@ int milp_knitro_callback(
         void* const user_params_void)
 {
     MilpKnitroCallbackUserParams* user_params = (MilpKnitroCallbackUserParams*)user_params_void;
+    const Instance& instance = user_params->instance;
 
     double bound;
     KN_get_mip_relaxation_bnd(kc, &bound);
@@ -47,14 +48,16 @@ int milp_knitro_callback(
         if (!user_params->output.solution.feasible()
                 || user_params->output.solution.cost() > obj + 0.5) {
             Solution solution(user_params->instance);
-            AgentIdx m = user_params->instance.number_of_agents();
-            ItemIdx n = user_params->instance.number_of_items();
-            std::vector<double> values(n * m);
+            std::vector<double> values(instance.number_of_items() * instance.number_of_agents());
             KN_get_mip_incumbent_x(kc, values.data());
-            for (ItemIdx j = 0; j < n; ++j) {
-                for (AgentIdx i = 0; i < m; ++i) {
-                    if (values[user_params->x[j][i]] > 0.5)
-                        solution.set(j, i);
+            for (ItemIdx item_id = 0;
+                    item_id < instance.number_of_items();
+                    ++item_id) {
+                for (AgentIdx agent_id = 0;
+                        agent_id < instance.number_of_agents();
+                        ++agent_id) {
+                    if (values[user_params->x[item_id][agent_id]] > 0.5)
+                        solution.set(item_id, agent_id);
                 }
             }
             std::stringstream ss;
@@ -81,10 +84,7 @@ MilpKnitroOutput generalizedassignmentsolver::milp_knitro(
 
     MilpKnitroOutput output(instance, parameters.info);
 
-    ItemIdx n = instance.number_of_items();
-    AgentIdx m = instance.number_of_agents();
-
-    if (n == 0)
+    if (instance.number_of_items() == 0)
         return output.algorithm_end(parameters.info);
 
     KN_context* kc;
@@ -96,33 +96,74 @@ MilpKnitroOutput generalizedassignmentsolver::milp_knitro(
         throw std::runtime_error("Failed to find a valid license.");
 
     // Variables.
-    std::vector<std::vector<KNINT>> x(n, std::vector<KNINT>(m));
-    for (ItemIdx j = 0; j < n; j++) {
-        for (AgentIdx i = 0; i < m; i++) {
-            KN_add_var(kc, &x[j][i]);
-            KN_set_var_type(kc, x[j][i], KN_VARTYPE_BINARY);
+    std::vector<std::vector<KNINT>> x(
+            instance.number_of_items(),
+            std::vector<KNINT>(instance.number_of_agents()));
+    for (ItemIdx item_id = 0;
+            item_id < instance.number_of_items();
+            ++item_id) {
+        for (AgentIdx agent_id = 0;
+                agent_id < instance.number_of_agents();
+                ++agent_id) {
+            KN_add_var(
+                    kc,
+                    &x[item_id][agent_id]);
+            KN_set_var_type(
+                    kc,
+                    x[item_id][agent_id],
+                    KN_VARTYPE_BINARY);
         }
     }
 
     // Objective.
-    for (ItemIdx j = 0; j < n; j++)
-        for (AgentIdx i = 0; i < m; i++)
-            KN_add_obj_linear_term(kc, x[j][i], instance.cost(j, i));
+    for (ItemIdx item_id = 0;
+            item_id < instance.number_of_items();
+            ++item_id) {
+        for (AgentIdx agent_id = 0;
+                agent_id < instance.number_of_agents();
+                ++agent_id) {
+            KN_add_obj_linear_term(
+                    kc,
+                    x[item_id][agent_id],
+                    instance.cost(item_id, agent_id));
+        }
+    }
     KN_set_obj_goal(kc, KN_OBJGOAL_MINIMIZE);
 
     // Capacity constraints.
-    for (AgentIdx i = 0; i < m; i++) {
+    for (AgentIdx agent_id = 0;
+            agent_id < instance.number_of_agents();
+            ++agent_id) {
         KN_add_con(kc, &constraint_id);
-        for (ItemIdx j = 0; j < n; j++)
-            KN_add_con_linear_term(kc, constraint_id, x[j][i], instance.weight(j, i));
-        KN_set_con_upbnd(kc, constraint_id, instance.capacity(i));
+        for (ItemIdx item_id = 0;
+                item_id < instance.number_of_items();
+                ++item_id) {
+            KN_add_con_linear_term(
+                    kc,
+                    constraint_id,
+                    x[item_id][agent_id],
+                    instance.weight(item_id, agent_id));
+        }
+        KN_set_con_upbnd(
+                kc,
+                constraint_id,
+                instance.capacity(agent_id));
     }
 
     // One alternative per item constraint.
-    for (ItemIdx j = 0; j < n; j++) {
+    for (ItemIdx item_id = 0;
+            item_id < instance.number_of_items();
+            ++item_id) {
         KN_add_con(kc, &constraint_id);
-        for (AgentIdx i = 0; i < m; i++)
-            KN_add_con_linear_term(kc, constraint_id, x[j][i], 1);
+        for (AgentIdx agent_id = 0;
+                agent_id < instance.number_of_agents();
+                ++agent_id) {
+            KN_add_con_linear_term(
+                    kc,
+                    constraint_id,
+                    x[item_id][agent_id],
+                    1);
+        }
         KN_set_con_lobnd(kc, constraint_id, 1);
         KN_set_con_upbnd(kc, constraint_id, 1);
     }
@@ -131,28 +172,47 @@ MilpKnitroOutput generalizedassignmentsolver::milp_knitro(
     KN_set_int_param(kc, KN_PARAM_OUTMODE, KN_OUTMODE_FILE);
 
     if (parameters.only_linear_relaxation) {
-        KN_set_int_param(kc, KN_PARAM_MIP_INTVAR_STRATEGY, KN_MIP_INTVAR_STRATEGY_RELAX);
+        KN_set_int_param(
+                kc,
+                KN_PARAM_MIP_INTVAR_STRATEGY,
+                KN_MIP_INTVAR_STRATEGY_RELAX);
         KN_solve(kc);
         double obj;
         KN_get_obj_value(kc, &obj);
         Cost lb = std::ceil(obj - FFOT_TOL);
-        output.update_lower_bound(lb, std::stringstream("linearrelaxation"), parameters.info);
-        for (ItemIdx j = 0; j < n; j++) {
-            output.x.push_back(std::vector<double>(m));
-            for (AgentIdx i = 0; i < m; i++)
-                KN_get_var_primal_value(kc, x[j][i], &(output.x[j][i]));
+        output.update_lower_bound(
+                lb,
+                std::stringstream("linearrelaxation"),
+                parameters.info);
+        for (ItemIdx item_id = 0;
+                item_id < instance.number_of_items();
+                ++item_id) {
+            output.x.push_back(std::vector<double>(instance.number_of_agents()));
+            for (AgentIdx agent_id = 0;
+                    agent_id < instance.number_of_agents();
+                    ++agent_id) {
+                KN_get_var_primal_value(
+                        kc,
+                        x[item_id][agent_id],
+                        &(output.x[item_id][agent_id]));
+            }
         }
         return output.algorithm_end(parameters.info);
     }
 
     // Initial solution.
-    if (parameters.initial_solution != NULL && parameters.initial_solution->feasible()) {
-        for (ItemIdx j = 0; j < n; ++j) {
-            for (AgentIdx i = 0; i < m; ++i) {
+    if (parameters.initial_solution != NULL
+            && parameters.initial_solution->feasible()) {
+        for (ItemIdx item_id = 0;
+                item_id < instance.number_of_items();
+                ++item_id) {
+            for (AgentIdx agent_id = 0;
+                    agent_id < instance.number_of_agents();
+                    ++agent_id) {
                 KN_set_mip_var_primal_init_value(
                         kc,
-                        x[j][i],
-                        (parameters.initial_solution->agent(j) == i)? 1: 0);
+                        x[item_id][agent_id],
+                        (parameters.initial_solution->agent(item_id) == agent_id)? 1: 0);
             }
         }
     }
@@ -161,8 +221,12 @@ MilpKnitroOutput generalizedassignmentsolver::milp_knitro(
     KN_set_double_param(kc, KN_PARAM_MIP_OPTGAPABS, 0); // Fix precision issue
 
     // Time limit.
-    if (parameters.info.time_limit != std::numeric_limits<double>::infinity())
-        KN_set_double_param(kc, KN_PARAM_MIP_MAXTIMECPU, parameters.info.time_limit);
+    if (parameters.info.time_limit != std::numeric_limits<double>::infinity()) {
+        KN_set_double_param(
+                kc,
+                KN_PARAM_MIP_MAXTIMECPU,
+                parameters.info.time_limit);
+    }
 
     // Callback
     MilpKnitroCallbackUserParams user_params {instance, parameters, output, x};
@@ -177,39 +241,73 @@ MilpKnitroOutput generalizedassignmentsolver::milp_knitro(
     double value;
     int return_code = KN_get_mip_incumbent_obj(kc, &obj);
     if (status == KN_RC_MIP_EXH_INFEAS) {
-        output.update_lower_bound(instance.bound(), std::stringstream(""), parameters.info);
+        output.update_lower_bound(
+                instance.bound(),
+                std::stringstream(""),
+                parameters.info);
     } else if (status == KN_RC_OPTIMAL_OR_SATISFACTORY) {
-        if (!output.solution.feasible() || output.solution.cost() > obj + 0.5) {
+        if (!output.solution.feasible()
+                || output.solution.cost() > obj + 0.5) {
             Solution solution(instance);
-            for (ItemIdx j = 0; j < n; ++j) {
-                for (AgentIdx i = 0; i < m; ++i) {
-                    KN_get_var_primal_value(kc, x[j][i], &value);
+            for (ItemIdx item_id = 0;
+                    item_id < instance.number_of_items();
+                    ++item_id) {
+                for (AgentIdx agent_id = 0;
+                        agent_id < instance.number_of_agents();
+                        ++agent_id) {
+                    KN_get_var_primal_value(
+                            kc,
+                            x[item_id][agent_id],
+                            &value);
                     if (value > 0.5)
-                        solution.set(j, i);
+                        solution.set(item_id, agent_id);
                 }
             }
-            output.update_solution(solution, std::stringstream(""), parameters.info);
+            output.update_solution(
+                    solution,
+                    std::stringstream(""),
+                    parameters.info);
         }
-        output.update_lower_bound(output.solution.cost(), std::stringstream(""), parameters.info);
+        output.update_lower_bound(
+                output.solution.cost(),
+                std::stringstream(""),
+                parameters.info);
     } else if (return_code == 0) {
-        if (!output.solution.feasible() || output.solution.cost() > obj + 0.5) {
+        if (!output.solution.feasible()
+                || output.solution.cost() > obj + 0.5) {
             Solution solution(instance);
-            for (ItemIdx j = 0; j < n; ++j) {
-                for (AgentIdx i = 0; i < m; ++i) {
-                    KN_get_var_primal_value(kc, x[j][i], &value);
+            for (ItemIdx item_id = 0;
+                    item_id < instance.number_of_items();
+                    ++item_id) {
+                for (AgentIdx agent_id = 0;
+                        agent_id < instance.number_of_agents();
+                        ++agent_id) {
+                    KN_get_var_primal_value(
+                            kc,
+                            x[item_id][agent_id],
+                            &value);
                     if (value > 0.5)
-                        solution.set(j, i);
+                        solution.set(item_id, agent_id);
                 }
             }
-            output.update_solution(solution, std::stringstream(""), parameters.info);
+            output.update_solution(
+                    solution,
+                    std::stringstream(""),
+                    parameters.info);
         }
         KN_get_mip_relaxation_bnd(kc, &bound);
         Cost lb = std::ceil(bound - FFOT_TOL);
-        output.update_lower_bound(lb, std::stringstream(""), parameters.info);
+        output.update_lower_bound(
+                lb,
+                std::stringstream(""),
+                parameters.info);
     } else {
         KN_get_mip_relaxation_bnd(kc, &bound);
         Cost lb = std::ceil(bound - FFOT_TOL);
-        output.update_lower_bound(lb, std::stringstream(""), parameters.info);
+        output.update_lower_bound(
+                lb,
+                std::stringstream(""),
+                parameters.info);
     }
 
     return output.algorithm_end(parameters.info);

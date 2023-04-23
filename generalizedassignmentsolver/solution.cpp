@@ -11,7 +11,9 @@ Solution::Solution(const Instance& instance):
     agents_(instance.number_of_agents())
 { }
 
-Solution::Solution(const Instance& instance, std::string certificate_path):
+Solution::Solution(
+        const Instance& instance,
+        std::string certificate_path):
     Solution(instance)
 {
     if (certificate_path.empty())
@@ -22,162 +24,70 @@ Solution::Solution(const Instance& instance, std::string certificate_path):
                 "Unable to open file \"" + certificate_path + "\".");
     }
 
-    AgentIdx i = -1;
-    for (ItemPos j = 0; j < instance.number_of_items(); ++j) {
-        file >> i;
-        set(j, i);
+    AgentIdx agent_id = -1;
+    for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id) {
+        file >> agent_id;
+        set(item_id, agent_id);
     }
 }
 
 Solution::Solution(const Instance& instance, const std::vector<std::vector<ItemIdx>>& agents):
     Solution(instance)
 {
-    for (AgentIdx i = 0; i < (AgentIdx)agents.size(); i++)
-        for (ItemIdx j: agents[i])
-            set(j, i);
+    for (AgentIdx agent_id = 0; agent_id < (AgentIdx)agents.size(); agent_id++)
+        for (ItemIdx item_id: agents[agent_id])
+            set(item_id, agent_id);
 }
 
-void Solution::set(ItemIdx j, AgentIdx i)
+void Solution::set(
+        ItemIdx item_id,
+        AgentIdx agent_id)
 {
-    assert(i >= -1 || i < instance().number_of_agents());
-    assert(j >= 0 && j < instance().number_of_items());
+    assert(agent_id >= -1 || agent_id < instance().number_of_agents());
+    assert(item_id >= 0 && item_id < instance().number_of_items());
 
-    AgentIdx i_old = agent(j);
-    if (i_old == i)
+    AgentIdx agent_id_old = agent(item_id);
+    if (agent_id_old == agent_id)
         return;
 
-    if (i_old != -1) {
-        Weight w_old = instance().weight(j, i_old);
-        Cost   c_old = instance().cost(j, i_old);
-        if (agents_[i_old].weight <= instance().capacity(i_old)) {
-        } else if (agents_[i_old].weight - w_old >= instance().capacity(i_old)) {
-            agents_[i_old].overcapacity -= w_old;
-            total_overcapacity_         -= w_old;
-            agents_[i_old].pcost        -= agents_[i_old].penalty * w_old;
-            total_pcost_                -= agents_[i_old].penalty * w_old;
+    if (agent_id_old != -1) {
+        Weight w_old = instance().weight(item_id, agent_id_old);
+        Cost   c_old = instance().cost(item_id, agent_id_old);
+        if (agents_[agent_id_old].weight <= instance().capacity(agent_id_old)) {
+        } else if (agents_[agent_id_old].weight - w_old >= instance().capacity(agent_id_old)) {
+            agents_[agent_id_old].overcapacity -= w_old;
+            total_overcapacity_                -= w_old;
         } else {
-            agents_[i_old].overcapacity -= agents_[i_old].weight - instance().capacity(i_old);
-            total_overcapacity_         -= agents_[i_old].weight - instance().capacity(i_old);
-            agents_[i_old].pcost        -= agents_[i_old].penalty * (agents_[i_old].weight - instance().capacity(i_old));
-            total_pcost_                -= agents_[i_old].penalty * (agents_[i_old].weight - instance().capacity(i_old));
+            agents_[agent_id_old].overcapacity -= agents_[agent_id_old].weight - instance().capacity(agent_id_old);
+            total_overcapacity_                -= agents_[agent_id_old].weight - instance().capacity(agent_id_old);
         }
-        agents_[i_old].cost   -= c_old;
-        total_cost_           -= c_old;
-        agents_[i_old].pcost  -= c_old;
-        total_pcost_          -= c_old;
-        agents_[i_old].weight -= w_old;
-        total_weight_         -= w_old;
-        n_--;
+        agents_[agent_id_old].cost   -= c_old;
+        total_cost_                  -= c_old;
+        agents_[agent_id_old].weight -= w_old;
+        total_weight_                -= w_old;
+        number_of_items_--;
     }
 
-    if (i != -1) {
-        Weight w = instance().weight(j, i);
-        Cost   c = instance().cost(j, i);
-        if (agents_[i].weight >= instance().capacity(i)) {
-            agents_[i].overcapacity    += w;
-            total_overcapacity_        += w;
-            agents_[i].pcost           += agents_[i].penalty * w;
-            total_pcost_               += agents_[i].penalty * w;
-        } else if (agents_[i].weight + w <= instance().capacity(i)) {
+    if (agent_id != -1) {
+        Weight w = instance().weight(item_id, agent_id);
+        Cost   c = instance().cost(item_id, agent_id);
+        if (agents_[agent_id].weight >= instance().capacity(agent_id)) {
+            agents_[agent_id].overcapacity    += w;
+            total_overcapacity_               += w;
+        } else if (agents_[agent_id].weight + w <= instance().capacity(agent_id)) {
         } else {
-            Weight w_tmp = agents_[i].weight + w - instance().capacity(i);
-            agents_[i].overcapacity += w_tmp;
-            total_overcapacity_     += w_tmp;
-            agents_[i].pcost        += agents_[i].penalty * w_tmp;
-            total_pcost_            += agents_[i].penalty * w_tmp;
+            Weight w_tmp = agents_[agent_id].weight + w - instance().capacity(agent_id);
+            agents_[agent_id].overcapacity += w_tmp;
+            total_overcapacity_            += w_tmp;
         }
-        agents_[i].cost   += c;
-        total_cost_       += c;
-        agents_[i].pcost  += c;
-        total_pcost_      += c;
-        agents_[i].weight += w;
-        total_weight_     += w;
-        n_++;
+        agents_[agent_id].cost   += c;
+        total_cost_              += c;
+        agents_[agent_id].weight += w;
+        total_weight_            += w;
+        number_of_items_++;
     }
 
-    x_[j] = i;
-}
-
-void Solution::update_penalties(bool inc, PCost delta_inc, PCost delta_dec)
-{
-    ItemIdx m = instance().number_of_agents();
-    if (inc) {
-        double ratio_max = 0.0;
-        for (AgentIdx i = 0; i < m; ++i) {
-            double r = (double)overcapacity(i) / instance().capacity(i);
-            if (ratio_max < r)
-                ratio_max = r;
-        }
-        double big_delta = (ratio_max > 0)? delta_inc / ratio_max: 0;
-        for (AgentIdx i = 0; i < m; ++i)
-            agents_[i].penalty *= (1 + big_delta * overcapacity(i) / instance().capacity(i));
-    } else {
-        for (AgentIdx i = 0; i < m; ++i)
-            agents_[i].penalty *= (1 - delta_dec);
-    }
-
-    total_pcost_ = 0;
-    //std::cout << ((inc)? "inc": "dec ");
-    //std::cout << " alpha";
-    for (AgentIdx i = 0; i < m; ++i) {
-        //std::cout << " " << agents_[i].penalty;
-        agents_[i].pcost = agents_[i].cost + agents_[i].penalty * agents_[i].overcapacity;
-        total_pcost_    += agents_[i].pcost;
-    }
-    //std::cout << std::endl;
-}
-
-void Solution::update_penalties(PCost delta_inc)
-{
-    ItemIdx m = instance().number_of_agents();
-    total_pcost_ = 0;
-    for (AgentIdx i = 0; i < m; ++i) {
-        agents_[i].penalty *= (1 + delta_inc);
-        agents_[i].pcost = agents_[i].cost + agents_[i].penalty * agents_[i].overcapacity;
-        total_pcost_    += agents_[i].pcost;
-    }
-}
-
-void Solution::update_penalties(const std::vector<PCost>& penalty)
-{
-    ItemIdx m = instance().number_of_agents();
-    total_pcost_ = 0;
-    for (AgentIdx i = 0; i < m; ++i) {
-        agents_[i].penalty = penalty[i];
-        agents_[i].pcost = agents_[i].cost + agents_[i].penalty * agents_[i].overcapacity;
-        total_pcost_    += agents_[i].pcost;
-    }
-}
-
-void Solution::clear()
-{
-    std::fill(x_.begin(), x_.end(), -1);
-    std::fill(agents_.begin(), agents_.end(), SolutionAgent{0, 0, 0, 0, 0});
-    n_ = 0;
-    total_cost_ = 0;
-    total_weight_ = 0;
-    total_overcapacity_ = 0;
-    total_pcost_ = 0;
-}
-
-std::string Solution::to_string(AgentIdx i)
-{
-    std::string s = "agent " + std::to_string(i) + ":";
-    for (ItemIdx j = 0; j < instance().number_of_items(); ++j)
-        if (agent(j) == i)
-            s += " " + std::to_string(j);
-    return s;
-}
-
-ItemIdx generalizedassignmentsolver::distance(
-        const Solution& solution_1,
-        const Solution& solution_2)
-{
-    ItemIdx dist = 0;
-    for (ItemIdx j = 0; j < solution_1.instance().number_of_items(); ++j)
-        if (solution_1.agent(j) != solution_2.agent(j))
-            dist++;
-    return dist;
+    x_[item_id] = agent_id;
 }
 
 void Solution::write(std::string certificate_path)
@@ -193,25 +103,6 @@ void Solution::write(std::string certificate_path)
     std::copy(x_.begin(), x_.end(), std::ostream_iterator<AgentIdx>(file, " "));
     file << std::endl;
     file.close();
-}
-
-std::ostream& generalizedassignmentsolver::operator<<(
-        std::ostream& os,
-        const Solution& solution)
-{
-    os <<  "n " << solution.number_of_items() << "/" << solution.instance().number_of_items()
-        << " cost " << solution.cost()
-        << " overcapacity " << solution.overcapacity()
-        << std::endl;
-    for (AgentIdx i = 0; i < solution.instance().number_of_agents(); ++i) {
-        os << "agent " << i << " (" << solution.remaining_capacity(i) << "/" << solution.instance().capacity(i) <<  "):";
-        for (ItemPos j = 0; j < solution.instance().number_of_items(); ++j)
-            if (solution.agent(j) == i)
-                os << " " << j;
-        if (i != solution.instance().number_of_agents() - 1)
-            os << std::endl;
-    }
-    return os;
 }
 
 bool generalizedassignmentsolver::compare(

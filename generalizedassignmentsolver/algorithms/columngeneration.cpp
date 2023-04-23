@@ -100,23 +100,40 @@ private:
 
 columngenerationsolver::Parameters get_parameters(const Instance& instance)
 {
-    AgentIdx m = instance.number_of_agents();
     ItemIdx n = instance.number_of_items();
-    columngenerationsolver::Parameters p(m + n);
+    columngenerationsolver::Parameters p(instance.number_of_agents() + n);
 
     p.objective_sense = columngenerationsolver::ObjectiveSense::Min;
     p.column_lower_bound = 0;
     p.column_upper_bound = 1;
     // Row lower bounds.
-    std::fill(p.row_lower_bounds.begin(), p.row_lower_bounds.begin() + m, 0);
-    std::fill(p.row_lower_bounds.begin() + m, p.row_lower_bounds.end(), 1);
+    std::fill(
+            p.row_lower_bounds.begin(),
+            p.row_lower_bounds.begin() + instance.number_of_agents(),
+            0);
+    std::fill(
+            p.row_lower_bounds.begin() + instance.number_of_agents(),
+            p.row_lower_bounds.end(),
+            1);
     // Row upper bounds.
-    std::fill(p.row_upper_bounds.begin(), p.row_upper_bounds.begin() + m, 1);
-    std::fill(p.row_upper_bounds.begin() + m, p.row_upper_bounds.end(), 1);
+    std::fill(
+            p.row_upper_bounds.begin(),
+            p.row_upper_bounds.begin() + instance.number_of_agents(),
+            1);
+    std::fill(
+            p.row_upper_bounds.begin() + instance.number_of_agents(),
+            p.row_upper_bounds.end(),
+            1);
     // Row coefficent lower bounds.
-    std::fill(p.row_coefficient_lower_bounds.begin(), p.row_coefficient_lower_bounds.end(), 0);
+    std::fill(
+            p.row_coefficient_lower_bounds.begin(),
+            p.row_coefficient_lower_bounds.end(),
+            0);
     // Row coefficent upper bounds.
-    std::fill(p.row_coefficient_upper_bounds.begin(), p.row_coefficient_upper_bounds.end(), 1);
+    std::fill(
+            p.row_coefficient_upper_bounds.begin(),
+            p.row_coefficient_upper_bounds.end(),
+            1);
     // Dummy column objective coefficient.
     p.dummy_column_objective_coefficient = instance.bound();
     // Pricing solver.
@@ -129,20 +146,24 @@ Solution columns2solution(
         const Instance& instance,
         const std::vector<std::pair<Column, Value>>& columns)
 {
-    AgentIdx m = instance.number_of_agents();
     Solution solution(instance);
     for (const auto& pair: columns) {
         const Column& column = pair.first;
         Value value = pair.second;
         if (value < 0.5)
             continue;
-        AgentIdx i = 0;
+        AgentIdx agent_id = 0;
         for (RowIdx row_pos = 0; row_pos < (RowIdx)column.row_indices.size(); ++row_pos)
-            if (column.row_indices[row_pos] < m && column.row_coefficients[row_pos] > 0.5)
-                i = column.row_indices[row_pos];
-        for (RowIdx row_pos = 0; row_pos < (RowIdx)column.row_indices.size(); ++row_pos)
-            if (column.row_indices[row_pos] >= m && column.row_coefficients[row_pos] > 0.5)
-                solution.set(column.row_indices[row_pos] - m, i);
+            if (column.row_indices[row_pos] < instance.number_of_agents()
+                    && column.row_coefficients[row_pos] > 0.5)
+                agent_id = column.row_indices[row_pos];
+        for (RowIdx row_pos = 0; row_pos < (RowIdx)column.row_indices.size(); ++row_pos) {
+            if (column.row_indices[row_pos] >= instance.number_of_agents()
+                    && column.row_coefficients[row_pos] > 0.5) {
+                ItemIdx item_id = column.row_indices[row_pos] - instance.number_of_agents();
+                solution.set(item_id, agent_id);
+            }
+        }
     }
     return solution;
 }
@@ -176,40 +197,47 @@ std::vector<ColIdx> PricingSolver::initialize_pricing(
 std::vector<Column> PricingSolver::solve_pricing(
             const std::vector<Value>& duals)
 {
-    AgentIdx m = instance_.number_of_agents();
-    ItemIdx n = instance_.number_of_items();
     std::vector<Column> columns;
     knapsacksolver::Profit mult = 10000;
-    for (AgentIdx i = 0; i < instance_.number_of_agents(); ++i) {
-        if (fixed_agents_[i] == 1)
+    for (AgentIdx agent_id = 0;
+            agent_id < instance_.number_of_agents();
+            ++agent_id) {
+        if (fixed_agents_[agent_id] == 1)
             continue;
+
         // Build subproblem instance.
-        knapsacksolver::Instance instance_kp;
-        instance_kp.set_capacity(instance_.capacity(i));
+        knapsacksolver::Instance kp_instance;
+        kp_instance.set_capacity(instance_.capacity(agent_id));
         kp2gap_.clear();
-        for (ItemIdx j = 0; j < n; ++j) {
-            if (fixed_items_[j] == 1)
+        for (ItemIdx item_id = 0; item_id < instance_.number_of_items(); ++item_id) {
+            if (fixed_items_[item_id] == 1)
                 continue;
-            knapsacksolver::Profit profit = std::floor(mult * duals[m + j])
-                    - std::ceil(mult * instance_.cost(j, i));
-            if (profit <= 0 || instance_.weight(j, i) > instance_.capacity(i))
+            knapsacksolver::Profit profit
+                = std::floor(mult * duals[instance_.number_of_agents() + item_id])
+                - std::ceil(mult * instance_.cost(item_id, agent_id));
+            if (profit <= 0
+                    || instance_.weight(item_id, agent_id)
+                    > instance_.capacity(agent_id))
                 continue;
-            instance_kp.add_item(instance_.weight(j, i), profit);
-            kp2gap_.push_back(j);
+            kp_instance.add_item(instance_.weight(item_id, agent_id), profit);
+            kp2gap_.push_back(item_id);
         }
 
         // Solve subproblem instance.
-        auto output_kp = knapsacksolver::dynamic_programming_primal_dual(instance_kp);
+        auto kp_output = knapsacksolver::dynamic_programming_primal_dual(kp_instance);
 
         // Retrieve column.
         Column column;
-        column.row_indices.push_back(i);
+        column.row_indices.push_back(agent_id);
         column.row_coefficients.push_back(1);
-        for (knapsacksolver::ItemIdx j = 0; j < instance_kp.number_of_items(); ++j) {
-            if (output_kp.solution.contains_idx(j)) {
-                column.row_indices.push_back(m + kp2gap_[j]);
+        for (knapsacksolver::ItemIdx kp_item_id = 0;
+                kp_item_id < kp_instance.number_of_items();
+                ++kp_item_id) {
+            if (kp_output.solution.contains_idx(kp_item_id)) {
+                ItemIdx item_id = kp2gap_[kp_item_id];
+                column.row_indices.push_back(instance_.number_of_agents() + item_id);
                 column.row_coefficients.push_back(1);
-                column.objective_coefficient += instance_.cost(kp2gap_[j], i);
+                column.objective_coefficient += instance_.cost(item_id, agent_id);
             }
         }
         columns.push_back(column);

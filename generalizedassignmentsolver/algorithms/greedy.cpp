@@ -11,12 +11,10 @@ std::vector<std::pair<ItemIdx, AgentIdx>> generalizedassignmentsolver::greedy_in
         const Instance& instance,
         const Desirability& f)
 {
-    ItemIdx n = instance.number_of_items();
-    AgentIdx m = instance.number_of_agents();
     std::vector<std::pair<ItemIdx, AgentIdx>> alternatives;
-    for (ItemIdx j = 0; j < n; ++j)
-        for (AgentIdx i = 0; i < m; ++i)
-            alternatives.push_back({j, i});
+    for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id)
+        for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id)
+            alternatives.push_back({item_id, agent_id});
     sort(alternatives.begin(), alternatives.end(), [&f](
                 const std::pair<ItemIdx, AgentIdx>& a,
                 const std::pair<ItemIdx, AgentIdx>& b) -> bool
@@ -32,13 +30,13 @@ void generalizedassignmentsolver::greedy(
 {
     const Instance& instance = solution.instance();
     for (auto p: alternatives) {
-        ItemIdx j = p.first;
-        if (solution.agent(j) != -1)
+        ItemIdx item_id = p.first;
+        if (solution.agent(item_id) != -1)
             continue;
-        AgentIdx i = p.second;
-        if (solution.remaining_capacity(i) < instance.weight(j, i))
+        AgentIdx agent_id = p.second;
+        if (solution.remaining_capacity(agent_id) < instance.weight(item_id, agent_id))
             continue;
-        solution.set(j, i);
+        solution.set(item_id, agent_id);
         if (solution.full())
             break;
     }
@@ -78,12 +76,14 @@ std::vector<std::vector<AgentIdx>> generalizedassignmentsolver::greedyregret_ini
     AgentIdx m = instance.number_of_agents();
 
     std::vector<std::vector<AgentIdx>> agents(n, std::vector<AgentIdx>(m));
-    for (ItemIdx j = 0; j < n; ++j) {
-        std::iota(agents[j].begin(), agents[j].end(), 0);
-        sort(agents[j].begin(), agents[j].end(),
-                [&f, &j](AgentIdx i1, AgentIdx i2) -> bool
+    for (ItemIdx item_id = 0;
+            item_id < instance.number_of_items();
+            ++item_id) {
+        std::iota(agents[item_id].begin(), agents[item_id].end(), 0);
+        sort(agents[item_id].begin(), agents[item_id].end(),
+                [&f, &item_id](AgentIdx agent_id_1, AgentIdx agent_id_2) -> bool
                 {
-                    return f(j, i1) < f(j, i2);
+                    return f(item_id, agent_id_1) < f(item_id, agent_id_2);
                 });
     }
 
@@ -97,55 +97,54 @@ void generalizedassignmentsolver::greedyregret(
         const std::vector<std::vector<int>>& fixed_alternatives)
 {
     const Instance& instance = solution.instance();
-    ItemIdx n = instance.number_of_items();
-    AgentIdx m = instance.number_of_agents();
-    std::vector<std::pair<AgentIdx, AgentIdx>> bests(n, {0, 1});
+    std::vector<std::pair<AgentIdx, AgentIdx>> bests(instance.number_of_items(), {0, 1});
 
     while (!solution.full()) {
-        ItemIdx j_best = -1;
+        ItemIdx item_id_best = -1;
         double f_best = -1;
-        for (ItemIdx j = 0; j < n; ++j) {
-            if (solution.agent(j) != -1)
+        for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id) {
+            if (solution.agent(item_id) != -1)
                 continue;
 
-            AgentIdx& i_first = bests[j].first;
-            AgentIdx& i_second = bests[j].second;
+            AgentIdx& agent_id_first = bests[item_id].first;
+            AgentIdx& agent_id_second = bests[item_id].second;
 
-            while (i_first < m) {
-                AgentIdx i = agents[j][i_first];
-                if (instance.weight(j, i) > solution.remaining_capacity(i)
+            while (agent_id_first < instance.number_of_agents()) {
+                AgentIdx agent_id = agents[item_id][agent_id_first];
+                if (instance.weight(item_id, agent_id) > solution.remaining_capacity(agent_id)
                         || (!fixed_alternatives.empty()
-                            && fixed_alternatives[j][i] != -1)) {
-                    i_first++;
-                    if (i_first == i_second)
-                        i_second++;
+                            && fixed_alternatives[item_id][agent_id] != -1)) {
+                    agent_id_first++;
+                    if (agent_id_first == agent_id_second)
+                        agent_id_second++;
                 } else {
                     break;
                 }
             }
-            if (i_first == m)
+            if (agent_id_first == instance.number_of_agents())
                 return;
 
-            while (i_second < m) {
-                AgentIdx i = agents[j][i_second];
-                if (instance.weight(j, i) > solution.remaining_capacity(i)
+            while (agent_id_second < instance.number_of_agents()) {
+                AgentIdx agent_id = agents[item_id][agent_id_second];
+                if (instance.weight(item_id, agent_id) > solution.remaining_capacity(agent_id)
                         || (!fixed_alternatives.empty()
-                            && fixed_alternatives[j][i] != -1)) {
-                    i_second++;
+                            && fixed_alternatives[item_id][agent_id] != -1)) {
+                    agent_id_second++;
                 } else {
                     break;
                 }
             }
 
-            double f_curr = (i_second == m)?
+            double f_curr = (agent_id_second == instance.number_of_agents())?
                 std::numeric_limits<double>::infinity():
-                f(j, agents[j][i_second]) - f(j, agents[j][i_first]);
-            if (j_best == -1 || f_best < f_curr) {
+                f(item_id, agents[item_id][agent_id_second])
+                - f(item_id, agents[item_id][agent_id_first]);
+            if (item_id_best == -1 || f_best < f_curr) {
                 f_best = f_curr;
-                j_best = j;
+                item_id_best = item_id;
             }
         }
-        solution.set(j_best, agents[j_best][bests[j_best].first]);
+        solution.set(item_id_best, agents[item_id_best][bests[item_id_best].first]);
     }
 }
 
@@ -178,23 +177,27 @@ Output generalizedassignmentsolver::greedyregret(
 void nshift(Solution& solution)
 {
     const Instance& instance = solution.instance();
-    ItemIdx n = instance.number_of_items();
-    AgentIdx m = instance.number_of_agents();
-    for (ItemIdx j = 0; j < n; ++j) {
-        AgentIdx i_old = solution.agent(j);
+    for (ItemIdx item_id = 0;
+            item_id < instance.number_of_items();
+            ++item_id) {
+        AgentIdx agent_id_old = solution.agent(item_id);
         Cost c_best = 0;
-        AgentIdx i_best = -1;
-        for (AgentIdx i = 0; i < m; ++i) {
-            if (i == i_old)
+        AgentIdx agent_id_best = -1;
+        for (AgentIdx agent_id = 0;
+                agent_id < instance.number_of_agents();
+                ++agent_id) {
+            if (agent_id == agent_id_old)
                 continue;
-            if (solution.remaining_capacity(i) >= instance.weight(j, i)
-                    && c_best > instance.cost(j, i) - instance.cost(j, i_old)) {
-                i_best = i;
-                c_best = instance.cost(j, i) - instance.cost(j, i_old);
+            if (solution.remaining_capacity(agent_id) >= instance.weight(item_id, agent_id)
+                    && c_best > instance.cost(item_id, agent_id)
+                    - instance.cost(item_id, agent_id_old)) {
+                agent_id_best = agent_id;
+                c_best = instance.cost(item_id, agent_id)
+                    - instance.cost(item_id, agent_id_old);
             }
         }
-        if (i_best != -1)
-            solution.set(j, i_best);
+        if (agent_id_best != -1)
+            solution.set(item_id, agent_id_best);
     }
 }
 

@@ -39,16 +39,16 @@ Instance Generator::generate()
     // Weights and profits
     Weight wsum_min = 0;
     Weight wsum_max = 0;
-    for (ItemIdx j = 0; j < n_eff; ++j) {
+    for (ItemIdx item_id = 0; item_id < n_eff; ++item_id) {
         ins.add_item();
         Weight wj = std::round(truncated_normal(r / 2, (double)r / 10, 1, r - 1, g));
         Weight wj_min = r;
         Weight wj_max = 0;
         std::normal_distribution<double> d_wij(wj, wj / 10);
-        for (AgentIdx i = 0; i < m_eff; ++i) {
+        for (AgentIdx agent_id = 0; agent_id < m_eff; ++agent_id) {
             Weight wij = std::round(truncated_normal(wj,      (double)wj        / 10, 1, r - 1, g));
             Cost   cij = std::round(truncated_normal(r - wij, (double)(r - wij) / 10, 1, r - 1, g));
-            ins.set_alternative(j, i, wij, cij);
+            ins.set_alternative(item_id, agent_id, wij, cij);
             if (wj_max < wij)
                 wj_max = wij;
             if (wj_min > wij)
@@ -62,9 +62,9 @@ Instance Generator::generate()
     double t = (double)(wsum_min) * (1 - x) + (double)wsum_max * x;
     t = t / m_eff;
     std::normal_distribution<double> d_ti(t, t / 10);
-    for (AgentIdx i = 0; i < m_eff; ++i) {
+    for (AgentIdx agent_id = 0; agent_id < m_eff; ++agent_id) {
         Weight ti = std::ceil(truncated_normal(t, (double)t / 10, 1, 2 * t - 1, g));
-        ins.set_capacity(i, ti);
+        ins.set_capacity(agent_id, ti);
     }
 
     return ins;
