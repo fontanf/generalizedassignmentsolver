@@ -24,15 +24,6 @@ using namespace generalizedassignmentsolver;
 ////////////////////////// lagrelax_assignment_volume //////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-LagRelaxAssignmentVolumeOutput& LagRelaxAssignmentVolumeOutput::algorithm_end(
-        optimizationtools::Info& info)
-{
-    //info.add_to_json("Algorithm", "Iterations", it);
-    Output::algorithm_end(info);
-    //FFOT_VER(info, "Iterations: " << it << std::endl);
-    return *this;
-}
-
 class LagRelaxAssignmentHook: public VOL_user_hooks
 {
 
@@ -199,7 +190,7 @@ LagRelaxAssignmentVolumeOutput generalizedassignmentsolver::lagrelax_assignment_
     // Extract solution
 
     Cost lb = std::ceil(volprob.value - FFOT_TOL); // bound
-    output.update_lower_bound(lb, std::stringstream(""), info);
+    output.update_bound(lb, std::stringstream(""), info);
 
     output.multipliers.resize(instance.number_of_items()); // multipliers
     for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id)
@@ -212,20 +203,13 @@ LagRelaxAssignmentVolumeOutput generalizedassignmentsolver::lagrelax_assignment_
         for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id)
             output.x[item_id][agent_id] = volprob.psol[instance.number_of_agents() * item_id + agent_id];
 
-    return output.algorithm_end(info);
+    output.algorithm_end(info);
+    return output;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /////////////////////////// lagrelax_knapsack_volume ///////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-
-LagRelaxKnapsackVolumeOutput& LagRelaxKnapsackVolumeOutput::algorithm_end(optimizationtools::Info& info)
-{
-    //info.add_to_json("Algorithm", "Iterations", it);
-    Output::algorithm_end(info);
-    //FFOT_VER(info, "Iterations: " << it << std::endl);
-    return *this;
-}
 
 class LagRelaxKnapsackHook: public VOL_user_hooks
 {
@@ -353,7 +337,7 @@ LagRelaxKnapsackVolumeOutput generalizedassignmentsolver::lagrelax_knapsack_volu
     // Extract solution
 
     Cost lb = std::ceil(volprob.value - FFOT_TOL); // bound
-    output.update_lower_bound(lb, std::stringstream(""), info);
+    output.update_bound(lb, std::stringstream(""), info);
 
     output.multipliers.resize(instance.number_of_agents()); // multipliers
     for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id)
@@ -366,7 +350,8 @@ LagRelaxKnapsackVolumeOutput generalizedassignmentsolver::lagrelax_knapsack_volu
         for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id)
             output.x[item_id][agent_id] = volprob.psol[instance.number_of_agents() * item_id + agent_id];
 
-    return output.algorithm_end(info);
+    output.algorithm_end(info);
+    return output;
 }
 
 #endif

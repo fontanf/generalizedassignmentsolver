@@ -10,13 +10,6 @@
 
 using namespace generalizedassignmentsolver;
 
-MilpKnitroOutput& MilpKnitroOutput::algorithm_end(
-        optimizationtools::Info& info)
-{
-    Output::algorithm_end(info);
-    return *this;
-}
-
 struct MilpKnitroCallbackUserParams
 {
     const Instance& instance;
@@ -37,7 +30,7 @@ int milp_knitro_callback(
     double bound;
     KN_get_mip_relaxation_bnd(kc, &bound);
     Cost lb = std::ceil(bound - FFOT_TOL);
-    user_params->output.update_lower_bound(
+    user_params->output.update_bound(
             lb,
             std::stringstream(""),
             user_params->parameters.info);
@@ -84,8 +77,10 @@ MilpKnitroOutput generalizedassignmentsolver::milp_knitro(
 
     MilpKnitroOutput output(instance, parameters.info);
 
-    if (instance.number_of_items() == 0)
-        return output.algorithm_end(parameters.info);
+    if (instance.number_of_items() == 0) {
+        output.algorithm_end(parameters.info);
+        return output;
+    }
 
     KN_context* kc;
     int constraint_id;
@@ -180,7 +175,7 @@ MilpKnitroOutput generalizedassignmentsolver::milp_knitro(
         double obj;
         KN_get_obj_value(kc, &obj);
         Cost lb = std::ceil(obj - FFOT_TOL);
-        output.update_lower_bound(
+        output.update_bound(
                 lb,
                 std::stringstream("linearrelaxation"),
                 parameters.info);
@@ -197,7 +192,9 @@ MilpKnitroOutput generalizedassignmentsolver::milp_knitro(
                         &(output.x[item_id][agent_id]));
             }
         }
-        return output.algorithm_end(parameters.info);
+
+        output.algorithm_end(parameters.info);
+        return output;
     }
 
     // Initial solution.
@@ -241,7 +238,7 @@ MilpKnitroOutput generalizedassignmentsolver::milp_knitro(
     double value;
     int return_code = KN_get_mip_incumbent_obj(kc, &obj);
     if (status == KN_RC_MIP_EXH_INFEAS) {
-        output.update_lower_bound(
+        output.update_bound(
                 instance.bound(),
                 std::stringstream(""),
                 parameters.info);
@@ -268,7 +265,7 @@ MilpKnitroOutput generalizedassignmentsolver::milp_knitro(
                     std::stringstream(""),
                     parameters.info);
         }
-        output.update_lower_bound(
+        output.update_bound(
                 output.solution.cost(),
                 std::stringstream(""),
                 parameters.info);
@@ -297,20 +294,21 @@ MilpKnitroOutput generalizedassignmentsolver::milp_knitro(
         }
         KN_get_mip_relaxation_bnd(kc, &bound);
         Cost lb = std::ceil(bound - FFOT_TOL);
-        output.update_lower_bound(
+        output.update_bound(
                 lb,
                 std::stringstream(""),
                 parameters.info);
     } else {
         KN_get_mip_relaxation_bnd(kc, &bound);
         Cost lb = std::ceil(bound - FFOT_TOL);
-        output.update_lower_bound(
+        output.update_bound(
                 lb,
                 std::stringstream(""),
                 parameters.info);
     }
 
-    return output.algorithm_end(parameters.info);
+    output.algorithm_end(parameters.info);
+    return output;
 }
 
 #endif

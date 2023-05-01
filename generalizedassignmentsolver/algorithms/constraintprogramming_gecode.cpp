@@ -15,13 +15,6 @@ using namespace Gecode;
  * https://www.gecode.org/doc-latest/MPG.pdf
  */
 
-ConstraintProgrammingGecodeOutput& ConstraintProgrammingGecodeOutput::algorithm_end(
-        optimizationtools::Info& info)
-{
-    Output::algorithm_end(info);
-    return *this;
-}
-
 class GapGecode: public IntMinimizeSpace
 {
 
@@ -129,7 +122,7 @@ private:
 
 };
 
-ConstraintProgrammingGecodeOutput generalizedassignmentsolver::constraintprogramming_gecode(
+Output generalizedassignmentsolver::constraintprogramming_gecode(
         const Instance& instance,
         ConstraintProgrammingGecodeOptionalParameters parameters)
 {
@@ -140,7 +133,7 @@ ConstraintProgrammingGecodeOutput generalizedassignmentsolver::constraintprogram
             << "Constraint Programming (Gecode)" << std::endl
             << std::endl;
 
-    ConstraintProgrammingGecodeOutput output(instance, parameters.info);
+    Output output(instance, parameters.info);
 
     if (instance.number_of_items() == 0)
         return output.algorithm_end(parameters.info);
@@ -172,7 +165,7 @@ ConstraintProgrammingGecodeOutput generalizedassignmentsolver::constraintprogram
 
     if (!parameters.info.needs_to_end()) {
         Cost lb = (output.solution.feasible())? output.solution.cost(): instance.bound();
-        output.update_lower_bound(lb, std::stringstream(""), parameters.info);
+        output.update_bound(lb, std::stringstream(""), parameters.info);
     }
 
     return output.algorithm_end(parameters.info);

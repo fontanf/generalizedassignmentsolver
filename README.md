@@ -98,8 +98,8 @@ Solve:
 
 Instance
 --------
-Number of items:    100
-Number of agents:   5
+Number of agents:         5
+Number of items:          100
 
 Algorithm
 ---------
@@ -109,18 +109,24 @@ Parameters
 ----------
 Desirability:  -pij/wij
 
-     T (s)            UB            LB           GAP   GAP (%)                 Comment
-     -----            --            --           ---   -------                 -------
-         0           inf          1694           inf       inf                        
-    0.0001          1713          1694            19      1.12                        
+       T (s)          UB          LB         GAP     GAP (%)                 Comment
+       -----          --          --         ---     -------                 -------
+       0.000         inf        1694         inf         inf                        
+       0.000        1713        1694          19        1.12                        
 
 Final statistics
 ----------------
-Value:                    1713
-Bound:                    1694
-Gap:                      19
-Gap (%):                  1.12
-Time (s):                 0.0001
+Value:                        1713
+Bound:                        1694
+Absolute optimality gap:      19
+Relative optimality gap (%):  1.12161
+Time (s):                     0.000140967
+
+Solution
+--------
+Number of items:  100 / 100 (100%)
+Feasible:         1
+Cost:             1713
 ```
 
 Unit tests:

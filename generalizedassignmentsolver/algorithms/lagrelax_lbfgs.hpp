@@ -14,7 +14,9 @@ struct LagRelaxAssignmentLbfgsOptionalParameters
     optimizationtools::Info info = optimizationtools::Info();
 
     std::vector<int>* initial_multipliers = NULL;
-    std::vector<std::vector<int>>* fixed_alt = NULL; // -1: unfixed, 0: fixed to 0, 1: fixed to 1.
+
+    /** -1: unfixed, 0: fixed to 0, 1: fixed to 1. */
+    std::vector<std::vector<int>>* fixed_alt = NULL;
 };
 
 struct LagRelaxAssignmentLbfgsOutput: Output
@@ -24,14 +26,16 @@ struct LagRelaxAssignmentLbfgsOutput: Output
             optimizationtools::Info& info):
         Output(instance, info) { }
 
-    LagRelaxAssignmentLbfgsOutput& algorithm_end(
-            optimizationtools::Info& info);
+    /** vector of size instance.alternative_number(). */
+    std::vector<std::vector<double>> x;
 
-    std::vector<std::vector<double>> x; // vector of size instance.alternative_number()
-    std::vector<double> multipliers; // vector of size instance.number_of_items()
+    /** vector of size instance.number_of_items() */
+    std::vector<double> multipliers;
 };
 
-LagRelaxAssignmentLbfgsOutput lagrelax_assignment_lbfgs(const Instance& instance, LagRelaxAssignmentLbfgsOptionalParameters p = {});
+LagRelaxAssignmentLbfgsOutput lagrelax_assignment_lbfgs(
+        const Instance& instance,
+        LagRelaxAssignmentLbfgsOptionalParameters p = {});
 
 ////////////////////////////////////////////////////////////////////////////////
 //////////////////////////// lagrelax_knapsack_lbfgs ///////////////////////////
@@ -44,11 +48,11 @@ struct LagRelaxKnapsackLbfgsOutput: Output
             optimizationtools::Info& info):
         Output(instance, info) { }
 
-    LagRelaxKnapsackLbfgsOutput& algorithm_end(
-            optimizationtools::Info& info);
+    /** vector of size instance.alternative_number() */
+    std::vector<std::vector<double>> x;
 
-    std::vector<std::vector<double>> x; // vector of size instance.alternative_number()
-    std::vector<double> multipliers; // vector of size instance.number_of_agents()
+    /** vector of size instance.number_of_agents() */
+    std::vector<double> multipliers;
 };
 
 LagRelaxKnapsackLbfgsOutput lagrelax_knapsack_lbfgs(

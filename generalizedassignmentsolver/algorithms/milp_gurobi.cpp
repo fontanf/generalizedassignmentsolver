@@ -37,7 +37,7 @@ protected:
             return;
 
         Cost lb = std::ceil(getDoubleInfo(GRB_CB_MIPSOL_OBJBND) - FFOT_TOL);
-        output_.update_lower_bound(
+        output_.update_bound(
                 lb,
                 std::stringstream(""),
                 parameters_.info);
@@ -155,7 +155,7 @@ MilpGurobiOutput generalizedassignmentsolver::milp_gurobi(
         }
         model.optimize();
         Cost lb = std::ceil(model.get(GRB_DoubleAttr_ObjVal) - FFOT_TOL);
-        output.update_lower_bound(
+        output.update_bound(
                 lb,
                 std::stringstream("linearrelaxation"),
                 parameters.info);
@@ -205,7 +205,7 @@ MilpGurobiOutput generalizedassignmentsolver::milp_gurobi(
 
     int optimstatus = model.get(GRB_IntAttr_Status);
     if (optimstatus == GRB_INFEASIBLE) {
-        output.update_lower_bound(
+        output.update_bound(
                 instance.bound(),
                 std::stringstream(""),
                 parameters.info);
@@ -228,7 +228,7 @@ MilpGurobiOutput generalizedassignmentsolver::milp_gurobi(
                     std::stringstream(""),
                     parameters.info);
         }
-        output.update_lower_bound(
+        output.update_bound(
                 output.solution.cost(),
                 std::stringstream(""),
                 parameters.info);
@@ -250,13 +250,13 @@ MilpGurobiOutput generalizedassignmentsolver::milp_gurobi(
                     parameters.info);
         }
         Cost lb = std::ceil(model.get(GRB_DoubleAttr_ObjBound) - FFOT_TOL);
-        output.update_lower_bound(
+        output.update_bound(
                 lb,
                 std::stringstream(""),
                 parameters.info);
     } else {
         Cost lb = std::ceil(model.get(GRB_DoubleAttr_ObjBound) - FFOT_TOL);
-        output.update_lower_bound(
+        output.update_bound(
                 lb,
                 std::stringstream(""),
                 parameters.info);

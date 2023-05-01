@@ -15,6 +15,15 @@
 
 using namespace generalizedassignmentsolver;
 
+void RepairOutput::print_statistics(
+        optimizationtools::Info& info) const
+{
+    if (info.verbosity_level() >= 1) {
+        info.os() << "Number of iterations:         " << iterations << std::endl;
+    }
+    info.add_to_json("Algorithm", "NumberOfIterations", iterations);
+}
+
 std::istream& generalizedassignmentsolver::operator>>(std::istream& in, RepairInitialSolution& initial_solution)
 {
     std::string token;
@@ -37,23 +46,28 @@ std::istream& generalizedassignmentsolver::operator>>(std::istream& in, RepairIn
     return in;
 }
 
-Output generalizedassignmentsolver::repair(
+RepairOutput generalizedassignmentsolver::repair(
         const Instance& instance,
         std::mt19937_64& generator,
         RepairOptionalParameters parameters)
 {
-    Output output(instance, parameters.info);
+    RepairOutput output(instance, parameters.info);
 
     Solution solution(instance);
     switch (parameters.initial_solution) {
     case RepairInitialSolution::CombinatorialRelaxation: {
         for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id)
             solution.set(item_id, instance.item(item_id).i_minimum_cost);
-        output.update_lower_bound(solution.cost(), std::stringstream("combinatorialrelaxation"), parameters.info);
+        output.update_bound(
+                solution.cost(),
+                std::stringstream("combinatorialrelaxation"),
+                parameters.info);
         break;
     } case RepairInitialSolution::LagrangianRelaxationKnapsackLbfgs: {
         auto output_lagrelax_knapsack_lbfgs = lagrelax_knapsack_lbfgs(instance);
-        output.update_lower_bound(output_lagrelax_knapsack_lbfgs.lower_bound, std::stringstream("lagrangianrelaxation_knapsack"), parameters.info);
+        output.update_bound(
+                output_lagrelax_knapsack_lbfgs.bound,
+                std::stringstream("lagrangianrelaxation_knapsack"), parameters.info);
         for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id) {
             for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id) {
                 if (output_lagrelax_knapsack_lbfgs.x[item_id][agent_id] > 0.5) {
@@ -86,7 +100,10 @@ Output generalizedassignmentsolver::repair(
         MilpCplexOptionalParameters parameters_linearrelaxation_cplex;
         parameters_linearrelaxation_cplex.only_linear_relaxation = true;
         auto output_linearrelaxation_cplex = milp_cplex(instance, parameters_linearrelaxation_cplex);
-        output.update_lower_bound(output_linearrelaxation_cplex.lower_bound, std::stringstream("linearrelaxation_cplex"), parameters.info);
+        output.update_bound(
+                output_linearrelaxation_cplex.bound,
+                std::stringstream("linearrelaxation_cplex"),
+                parameters.info);
         for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id) {
             AgentIdx agent_id_best = -1;
             Cost c_best = -1;
@@ -243,6 +260,7 @@ Output generalizedassignmentsolver::repair(
     }
 
     output.update_solution(solution, std::stringstream(""), parameters.info);
-    return output.algorithm_end(parameters.info);
+    output.algorithm_end(parameters.info);
+    return output;
 }
 

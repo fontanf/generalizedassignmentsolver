@@ -41,15 +41,6 @@
 
 using namespace generalizedassignmentsolver;
 
-MilpCbcOutput& MilpCbcOutput::algorithm_end(
-        optimizationtools::Info& info)
-{
-    //info.add_to_json("Algorithm", "Iterations", it);
-    Output::algorithm_end(info);
-    //FFOT_VER(info, "Iterations: " << it << std::endl);
-    return *this;
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////// Callback ///////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -64,7 +55,7 @@ public:
     EventHandler(
             const Instance& instance,
             MilpCbcOptionalParameters& parameters,
-            MilpCbcOutput& output):
+            Output& output):
         CbcEventHandler(),
         instance_(instance),
         parameters_(parameters),
@@ -74,7 +65,7 @@ public:
             CbcModel* model,
             const Instance& instance,
             MilpCbcOptionalParameters& parameters,
-            MilpCbcOutput& output):
+            Output& output):
         CbcEventHandler(model),
         instance_(instance),
         parameters_(parameters),
@@ -105,7 +96,7 @@ private:
 
     const Instance& instance_;
     MilpCbcOptionalParameters& parameters_;
-    MilpCbcOutput& output_;
+    Output& output_;
 
 };
 
@@ -115,7 +106,7 @@ CbcEventHandler::CbcAction EventHandler::event(CbcEvent which_event)
         return noAction;
 
     Cost lb = std::ceil(model_->getBestPossibleObjValue() - FFOT_TOL);
-    output_.update_lower_bound(lb, std::stringstream(""), parameters_.info);
+    output_.update_bound(lb, std::stringstream(""), parameters_.info);
 
     if ((which_event != solution && which_event != heuristicSolution)) // no solution found
         return noAction;
@@ -216,7 +207,7 @@ CoinLP::CoinLP(const Instance& instance)
             number_of_elements_in_rows.data());
 }
 
-MilpCbcOutput generalizedassignmentsolver::milp_cbc(
+Output generalizedassignmentsolver::milp_cbc(
         const Instance& instance,
         MilpCbcOptionalParameters parameters)
 {
@@ -227,7 +218,7 @@ MilpCbcOutput generalizedassignmentsolver::milp_cbc(
             << "MILP (CBC)" << std::endl
             << std::endl;
 
-    MilpCbcOutput output(instance, parameters.info);
+    Output output(instance, parameters.info);
 
     if (instance.number_of_items() == 0)
         return output.algorithm_end(parameters.info);
@@ -357,7 +348,7 @@ MilpCbcOutput generalizedassignmentsolver::milp_cbc(
 
     if (model.isProvenInfeasible()) {  // Infeasible.
         // Update dual bound.
-        output.update_lower_bound(
+        output.update_bound(
                 instance.bound(),
                 std::stringstream(""),
                 parameters.info);
@@ -377,7 +368,7 @@ MilpCbcOutput generalizedassignmentsolver::milp_cbc(
                     parameters.info);
         }
         // Update dual bound.
-        output.update_lower_bound(
+        output.update_bound(
                 output.solution.cost(),
                 std::stringstream(""),
                 parameters.info);
@@ -398,11 +389,11 @@ MilpCbcOutput generalizedassignmentsolver::milp_cbc(
         }
         // Update dual bound.
         Cost lb = std::ceil(model.getBestPossibleObjValue() - FFOT_TOL);
-        output.update_lower_bound(lb, std::stringstream(""), parameters.info);
+        output.update_bound(lb, std::stringstream(""), parameters.info);
     } else {   // No feasible solution found.
         // Update dual bound.
         Cost lb = std::ceil(model.getBestPossibleObjValue() - FFOT_TOL);
-        output.update_lower_bound(lb, std::stringstream(""), parameters.info);
+        output.update_bound(lb, std::stringstream(""), parameters.info);
     }
 
     return output.algorithm_end(parameters.info);

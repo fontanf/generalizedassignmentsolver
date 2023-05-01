@@ -13,22 +13,13 @@
 using namespace generalizedassignmentsolver;
 using namespace localsolver;
 
-LocalSolverOutput& LocalSolverOutput::algorithm_end(
-        optimizationtools::Info& info)
-{
-    //info.add_to_json("Algorithm", "Iterations", it);
-    Output::algorithm_end(info);
-    //FFOT_VER(info, "Iterations: " << it << std::endl);
-    return *this;
-}
-
 class MyCallback: public LSCallback
 {
 
 public:
 
     MyCallback(
-            LocalSolverOutput& output,
+            Output& output,
             LocalSolverOptionalParameters& parameters,
             std::vector<LSExpression>& agents):
         output_(output), parameters_(parameters), agents_(agents) { }
@@ -63,13 +54,13 @@ public:
 
 private:
 
-    LocalSolverOutput& output_;
+    Output& output_;
     LocalSolverOptionalParameters& parameters_;
     std::vector<LSExpression>& agents_;
 
 };
 
-LocalSolverOutput generalizedassignmentsolver::localsolver(
+Output generalizedassignmentsolver::localsolver(
         const Instance& instance,
         LocalSolverOptionalParameters parameters)
 {
@@ -80,7 +71,7 @@ LocalSolverOutput generalizedassignmentsolver::localsolver(
             << "Local Solver" << std::endl
             << std::endl;
 
-    LocalSolverOutput output(instance, parameters.info);
+    Output output(instance, parameters.info);
 
     if (instance.number_of_items() == 0)
         return output.algorithm_end(parameters.info);

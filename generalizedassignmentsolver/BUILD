@@ -20,15 +20,9 @@ cc_library(
                 "desirability.cpp",
         ],
         copts = STDCPP,
-        deps = ["@optimizationtools//optimizationtools/utils:info"],
-        visibility = ["//visibility:public"],
-)
-
-cc_library(
-        name = "hpp",
-        hdrs = [
-                "instance.hpp",
-                "solution.hpp",
+        deps = [
+                "@optimizationtools//optimizationtools/utils:info",
+                "@optimizationtools//optimizationtools/utils:utils",
         ],
         visibility = ["//visibility:public"],
 )

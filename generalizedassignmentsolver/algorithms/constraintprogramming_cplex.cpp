@@ -8,14 +8,7 @@ using namespace generalizedassignmentsolver;
 
 ILOSTLBEGIN
 
-ConstraintProgrammingCplexOutput& ConstraintProgrammingCplexOutput::algorithm_end(
-        optimizationtools::Info& info)
-{
-    Output::algorithm_end(info);
-    return *this;
-}
-
-ConstraintProgrammingCplexOutput generalizedassignmentsolver::constraintprogramming_cplex(
+Output generalizedassignmentsolver::constraintprogramming_cplex(
         const Instance& instance,
         ConstraintProgrammingCplexOptionalParameters parameters)
 {
@@ -26,7 +19,7 @@ ConstraintProgrammingCplexOutput generalizedassignmentsolver::constraintprogramm
             << "Constraint Programming (CPLEX)" << std::endl
             << std::endl;
 
-    ConstraintProgrammingCplexOutput output(instance, parameters.info);
+    Output output(instance, parameters.info);
 
     IloEnv env;
     IloModel model(env);
@@ -91,7 +84,7 @@ ConstraintProgrammingCplexOutput generalizedassignmentsolver::constraintprogramm
 
     if (!parameters.info.needs_to_end()) {
         Cost lb = (output.solution.feasible())? output.solution.cost(): instance.bound();
-        output.update_lower_bound(lb, std::stringstream(""), parameters.info);
+        output.update_bound(lb, std::stringstream(""), parameters.info);
     }
 
     env.end();

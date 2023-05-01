@@ -19,12 +19,15 @@ struct ColumnGenerationOutput: Output
             optimizationtools::Info& info):
         Output(instance, info) { }
 
-    ColumnGenerationOutput& algorithm_end(
-            optimizationtools::Info& info);
+    void print_statistics(
+            optimizationtools::Info& info) const override;
 
     std::vector<double> solution;
+
     std::vector<std::vector<double>> x;
+
     Counter number_of_iterations = 0;
+
     Counter number_of_added_columns = 0;
 };
 
@@ -32,7 +35,9 @@ ColumnGenerationOutput columngeneration(
         const Instance& instance,
         ColumnGenerationOptionalParameters parameters = {});
 
-/******************************************************************************/
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 struct ColumnGenerationHeuristicGreedyOutput: Output
 {
@@ -41,10 +46,8 @@ struct ColumnGenerationHeuristicGreedyOutput: Output
             optimizationtools::Info& info):
         Output(instance, info) { }
 
-    ColumnGenerationHeuristicGreedyOutput& algorithm_end(
-            optimizationtools::Info& info);
-
     std::vector<double> solution;
+
     std::vector<std::vector<double>> x;
 };
 
@@ -52,7 +55,9 @@ ColumnGenerationHeuristicGreedyOutput columngenerationheuristic_greedy(
         const Instance& instance,
         ColumnGenerationOptionalParameters parameters = {});
 
-/******************************************************************************/
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 struct ColumnGenerationHeuristicLimitedDiscrepancySearchOutput: Output
 {
@@ -61,10 +66,8 @@ struct ColumnGenerationHeuristicLimitedDiscrepancySearchOutput: Output
             optimizationtools::Info& info):
         Output(instance, info) { }
 
-    ColumnGenerationHeuristicLimitedDiscrepancySearchOutput& algorithm_end(
-            optimizationtools::Info& info);
-
     std::vector<double> solution;
+
     std::vector<std::vector<double>> x;
 };
 

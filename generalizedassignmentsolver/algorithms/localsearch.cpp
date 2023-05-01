@@ -14,15 +14,6 @@
 using namespace generalizedassignmentsolver;
 using namespace localsearchsolver;
 
-LocalSearchOutput& LocalSearchOutput::algorithm_end(
-        optimizationtools::Info& info)
-{
-    //info.add_to_json("Algorithm", "Iterations", iterations);
-    Output::algorithm_end(info);
-    //FFOT_VER(info, "Iterations: " << iterations << std::endl);
-    return *this;
-}
-
 class LocalScheme
 {
 
@@ -388,7 +379,7 @@ public:
     inline PerturbationHasher perturbation_hasher() const { return PerturbationHasher(); }
 
     /*
-     * Outputs.
+     * Outputs
      */
 
     std::ostream& print(
@@ -503,7 +494,7 @@ private:
 
 };
 
-LocalSearchOutput generalizedassignmentsolver::localsearch(
+Output generalizedassignmentsolver::localsearch(
         const Instance& instance,
         std::mt19937_64& generator,
         LocalSearchOptionalParameters parameters)
@@ -515,7 +506,7 @@ LocalSearchOutput generalizedassignmentsolver::localsearch(
             << "Local Search" << std::endl
             << std::endl;
 
-    LocalSearchOutput output(instance, parameters.info);
+    Output output(instance, parameters.info);
 
     // Create LocalScheme.
     LocalScheme::Parameters parameters_local_scheme;

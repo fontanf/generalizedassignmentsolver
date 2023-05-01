@@ -18,15 +18,6 @@ typedef matrix<double,0,1> column_vector;
 /////////////////////////// lagrelax_assignment_lbfgs //////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-LagRelaxAssignmentLbfgsOutput& LagRelaxAssignmentLbfgsOutput::algorithm_end(
-        optimizationtools::Info& info)
-{
-    //info.add_to_json("Algorithm", "Iterations", it);
-    Output::algorithm_end(info);
-    //FFOT_VER(info, "Iterations: " << it << std::endl);
-    return *this;
-}
-
 class LagRelaxAssignmentLbfgsFunction
 {
 
@@ -183,27 +174,19 @@ LagRelaxAssignmentLbfgsOutput generalizedassignmentsolver::lagrelax_assignment_l
 
     // Compute output parameters
     Cost lb = c0 + std::ceil(res - FFOT_TOL);
-    output.update_lower_bound(lb, std::stringstream(""), parameters.info);
+    output.update_bound(lb, std::stringstream(""), parameters.info);
     output.multipliers.resize(instance.number_of_items());
     for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id)
         if (item_indices[item_id] >= 0)
             output.multipliers[item_id] = mu(item_indices[item_id]);
 
-    return output.algorithm_end(parameters.info);
+    output.algorithm_end(parameters.info);
+    return output;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 //////////////////////////// lagrelax_knapsack_lbfgs ///////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-
-LagRelaxKnapsackLbfgsOutput& LagRelaxKnapsackLbfgsOutput::algorithm_end(
-        optimizationtools::Info& info)
-{
-    //info.add_to_json("Algorithm", "Iterations", it);
-    Output::algorithm_end(info);
-    //FFOT_VER(info, "Iterations: " << it << std::endl);
-    return *this;
-}
 
 class LagRelaxKnapsackLbfgsFunction
 {
@@ -311,7 +294,7 @@ LagRelaxKnapsackLbfgsOutput generalizedassignmentsolver::lagrelax_knapsack_lbfgs
 
     // Compute output parameters
     Cost lb = std::ceil(res - FFOT_TOL);
-    output.update_lower_bound(lb, std::stringstream(""), info);
+    output.update_bound(lb, std::stringstream(""), info);
     output.multipliers.resize(instance.number_of_agents());
     for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id)
         output.multipliers[agent_id] = mu(agent_id);
@@ -321,6 +304,7 @@ LagRelaxKnapsackLbfgsOutput generalizedassignmentsolver::lagrelax_knapsack_lbfgs
         output.x[item_id][func.agent(item_id)] = 1;
     }
 
-    return output.algorithm_end(info);
+    output.algorithm_end(info);
+    return output;
 }
 

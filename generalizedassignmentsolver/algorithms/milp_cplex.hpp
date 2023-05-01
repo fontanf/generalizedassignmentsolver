@@ -12,6 +12,7 @@ struct MilpCplexOptionalParameters
     optimizationtools::Info info = optimizationtools::Info();
 
     const Solution* initial_solution = NULL;
+
     bool only_linear_relaxation = false;
 };
 
@@ -21,9 +22,6 @@ struct MilpCplexOutput: Output
             const Instance& instance,
             optimizationtools::Info& info):
         Output(instance, info) { }
-
-    MilpCplexOutput& algorithm_end(
-            optimizationtools::Info& info);
 
     std::vector<std::vector<double>> x;
 };

@@ -36,18 +36,7 @@ struct ConstraintProgrammingGecodeOptionalParameters
     }
 };
 
-struct ConstraintProgrammingGecodeOutput: Output
-{
-    ConstraintProgrammingGecodeOutput(
-            const Instance& instance,
-            optimizationtools::Info& info):
-        Output(instance, info) { }
-
-    ConstraintProgrammingGecodeOutput& algorithm_end(
-            optimizationtools::Info& info);
-};
-
-ConstraintProgrammingGecodeOutput constraintprogramming_gecode(
+Output constraintprogramming_gecode(
         const Instance& instance,
         ConstraintProgrammingGecodeOptionalParameters parameters = {});
 

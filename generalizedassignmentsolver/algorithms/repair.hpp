@@ -23,6 +23,7 @@ struct RepairOptionalParameters
     optimizationtools::Info info = optimizationtools::Info();
 
     RepairInitialSolution initial_solution;
+
     Counter l = -1;
 };
 
@@ -33,13 +34,14 @@ struct RepairOutput: Output
             optimizationtools::Info& info):
         Output(instance, info) { }
 
-    RepairOutput& algorithm_end(
-            optimizationtools::Info& info);
+    void print_statistics(
+            optimizationtools::Info& info) const override;
 
+    /** Number of iterations. */
     Counter iterations = 0;
 };
 
-Output repair(
+RepairOutput repair(
         const Instance& instance,
         std::mt19937_64& generator,
         RepairOptionalParameters parameters = {});

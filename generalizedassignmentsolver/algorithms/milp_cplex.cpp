@@ -8,15 +8,6 @@ using namespace generalizedassignmentsolver;
 
 ILOSTLBEGIN
 
-MilpCplexOutput& MilpCplexOutput::algorithm_end(
-        optimizationtools::Info& info)
-{
-    //info.add_to_json("Algorithm", "Iterations", it);
-    Output::algorithm_end(info);
-    //FFOT_VER(info, "Iterations: " << it << std::endl);
-    return *this;
-}
-
 ILOMIPINFOCALLBACK4(loggingCallback,
                     const Instance&, instance,
                     MilpCplexOptionalParameters&, parameters,
@@ -24,7 +15,7 @@ ILOMIPINFOCALLBACK4(loggingCallback,
                     std::vector<IloNumVarArray>&, x)
 {
     Cost lb = std::ceil(getBestObjValue() - FFOT_TOL);
-    output.update_lower_bound(lb, std::stringstream(""), parameters.info);
+    output.update_bound(lb, std::stringstream(""), parameters.info);
 
     if (!hasIncumbent())
         return;
@@ -62,8 +53,10 @@ MilpCplexOutput generalizedassignmentsolver::milp_cplex(
 
     AgentIdx m = instance.number_of_agents();
 
-    if (instance.number_of_items() == 0)
-        return output.algorithm_end(parameters.info);
+    if (instance.number_of_items() == 0) {
+        output.algorithm_end(parameters.info);
+        return output;
+    }
 
     IloEnv env;
     IloModel model(env);
@@ -125,14 +118,16 @@ MilpCplexOutput generalizedassignmentsolver::milp_cplex(
                 model.add(IloConversion(env, x[item_id][agent_id], ILOFLOAT));
         cplex.solve();
         Cost lb = std::ceil(cplex.getObjValue() - FFOT_TOL);
-        output.update_lower_bound(lb, std::stringstream("linearrelaxation"), parameters.info);
+        output.update_bound(lb, std::stringstream("linearrelaxation"), parameters.info);
         for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id) {
             output.x.push_back(std::vector<double>(instance.number_of_agents(), 0));
             for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id)
                 if (cplex.getValue(x[item_id][agent_id]) > 0.5)
                     output.x[item_id][agent_id] = 1;
         }
-        return output.algorithm_end(parameters.info);
+
+        output.algorithm_end(parameters.info);
+        return output;
     }
 
     cplex.setParam(IloCplex::Param::MIP::Tolerances::MIPGap, 0.0); // Fix precision issue
@@ -149,7 +144,7 @@ MilpCplexOutput generalizedassignmentsolver::milp_cplex(
     cplex.solve();
 
     if (cplex.getStatus() == IloAlgorithm::Infeasible) {
-        output.update_lower_bound(instance.bound(), std::stringstream(""), parameters.info);
+        output.update_bound(instance.bound(), std::stringstream(""), parameters.info);
     } else if (cplex.getStatus() == IloAlgorithm::Optimal) {
         if (!output.solution.feasible() || output.solution.cost() > cplex.getObjValue() + 0.5) {
             Solution solution(instance);
@@ -159,7 +154,7 @@ MilpCplexOutput generalizedassignmentsolver::milp_cplex(
                         solution.set(item_id, agent_id);
             output.update_solution(solution, std::stringstream(""), parameters.info);
         }
-        output.update_lower_bound(output.solution.cost(), std::stringstream(""), parameters.info);
+        output.update_bound(output.solution.cost(), std::stringstream(""), parameters.info);
     } else if (cplex.isPrimalFeasible()) {
         if (!output.solution.feasible() || output.solution.cost() > cplex.getObjValue() + 0.5) {
             Solution solution(instance);
@@ -170,15 +165,16 @@ MilpCplexOutput generalizedassignmentsolver::milp_cplex(
             output.update_solution(solution, std::stringstream(""), parameters.info);
         }
         Cost lb = std::ceil(cplex.getBestObjValue() - FFOT_TOL);
-        output.update_lower_bound(lb, std::stringstream(""), parameters.info);
+        output.update_bound(lb, std::stringstream(""), parameters.info);
     } else {
         Cost lb = std::ceil(cplex.getBestObjValue() - FFOT_TOL);
-        output.update_lower_bound(lb, std::stringstream(""), parameters.info);
+        output.update_bound(lb, std::stringstream(""), parameters.info);
     }
 
     env.end();
 
-    return output.algorithm_end(parameters.info);
+    output.algorithm_end(parameters.info);
+    return output;
 }
 
 #endif

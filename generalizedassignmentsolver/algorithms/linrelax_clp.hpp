@@ -14,9 +14,6 @@ struct LinRelaxClpOutput: Output
             optimizationtools::Info& info):
         Output(instance, info) { }
 
-    LinRelaxClpOutput& algorithm_end(
-            optimizationtools::Info& info);
-
     std::vector<std::vector<double>> x;
 };
 

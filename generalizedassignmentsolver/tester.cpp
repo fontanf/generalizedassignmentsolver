@@ -13,21 +13,21 @@ bool test(const Instance& instance, std::vector<Output (*)(Instance&)> fs, TestT
         Instance instance_tmp = instance;
         Output output = f(instance_tmp);
         if (instance.optimal_solution() == NULL && opt == -1) {
-            feasible = output.feasible();
+            feasible = output.solution.feasible();
             opt = output.solution.cost();
             continue;
         }
         if (tt == SOPT) {
             if (feasible) {
-                EXPECT_EQ(output.lower_bound, opt);
+                EXPECT_EQ(output.bound, opt);
                 EXPECT_TRUE(output.solution.feasible());
-                EXPECT_EQ(output.lower_bound, output.solution.cost());
+                EXPECT_EQ(output.bound, output.solution.cost());
             } else {
-                EXPECT_GE(output.lower_bound, instance.bound());
+                EXPECT_GE(output.bound, instance.bound());
             }
         } else if (tt == LB) {
             if (feasible) {
-                EXPECT_LE(output.lower_bound, opt);
+                EXPECT_LE(output.bound, opt);
             }
         } else if (tt == UB) {
             if (feasible) {

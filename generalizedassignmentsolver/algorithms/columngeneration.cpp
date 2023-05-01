@@ -44,29 +44,17 @@ typedef columngenerationsolver::ColIdx ColIdx;
 typedef columngenerationsolver::Value Value;
 typedef columngenerationsolver::Column Column;
 
-ColumnGenerationOutput& ColumnGenerationOutput::algorithm_end(
-        optimizationtools::Info& info)
+void ColumnGenerationOutput::print_statistics(
+        optimizationtools::Info& info) const
 {
+    if (info.verbosity_level() >= 1) {
+        info.os()
+            << "Iterations:               " << number_of_iterations << std::endl
+            << "Number of columns added:  " << number_of_added_columns << std::endl
+            ;
+    }
     info.add_to_json("Algorithm", "Iterations", number_of_iterations);
     info.add_to_json("Algorithm", "AddedColumns", number_of_added_columns);
-    Output::algorithm_end(info);
-    info.os() << "Iterations:               " << number_of_iterations << std::endl;
-    info.os() << "Number of columns added:  " << number_of_added_columns << std::endl;
-    return *this;
-}
-
-ColumnGenerationHeuristicGreedyOutput& ColumnGenerationHeuristicGreedyOutput::algorithm_end(
-        optimizationtools::Info& info)
-{
-    Output::algorithm_end(info);
-    return *this;
-}
-
-ColumnGenerationHeuristicLimitedDiscrepancySearchOutput& ColumnGenerationHeuristicLimitedDiscrepancySearchOutput::algorithm_end(
-        optimizationtools::Info& info)
-{
-    Output::algorithm_end(info);
-    return *this;
 }
 
 class PricingSolver: public columngenerationsolver::PricingSolver
@@ -273,13 +261,15 @@ ColumnGenerationOutput generalizedassignmentsolver::columngeneration(
         = columngenerationsolver::s2lps(parameters.linear_programming_solver);
     auto column_generation_output = columngenerationsolver::column_generation(p, op);
 
-    output.update_lower_bound(
+    output.update_bound(
             std::ceil(column_generation_output.solution_value - FFOT_TOL),
             std::stringstream(""),
             parameters.info);
     output.number_of_added_columns = column_generation_output.number_of_added_columns;
     output.number_of_iterations = column_generation_output.number_of_iterations;
-    return output.algorithm_end(parameters.info);
+
+    output.algorithm_end(parameters.info);
+    return output;
 }
 
 ColumnGenerationHeuristicGreedyOutput generalizedassignmentsolver::columngenerationheuristic_greedy(
@@ -306,16 +296,19 @@ ColumnGenerationHeuristicGreedyOutput generalizedassignmentsolver::columngenerat
         = columngenerationsolver::s2lps(parameters.linear_programming_solver);
     auto output_greedy = columngenerationsolver::greedy(p, op);
 
-    output.update_lower_bound(
+    output.update_bound(
             std::ceil(output_greedy.bound - FFOT_TOL),
             std::stringstream(""),
             parameters.info);
-    if (output_greedy.solution.size() > 0)
+    if (output_greedy.solution.size() > 0) {
         output.update_solution(
                 columns2solution(instance, output_greedy.solution),
                 std::stringstream(""),
                 parameters.info);
-    return output.algorithm_end(parameters.info);
+    }
+
+    output.algorithm_end(parameters.info);
+    return output;
 }
 
 ColumnGenerationHeuristicLimitedDiscrepancySearchOutput generalizedassignmentsolver::columngenerationheuristic_limiteddiscrepancysearch(
@@ -351,7 +344,7 @@ ColumnGenerationHeuristicLimitedDiscrepancySearchOutput generalizedassignmentsol
                         ss,
                         parameters.info);
             }
-            output.update_lower_bound(
+            output.update_bound(
                     std::ceil(o.bound - FFOT_TOL),
                     ss,
                     parameters.info);
@@ -359,5 +352,7 @@ ColumnGenerationHeuristicLimitedDiscrepancySearchOutput generalizedassignmentsol
     op.info.set_time_limit(parameters.info.remaining_time());
 
     auto output_limited_discrepancy_search = columngenerationsolver::limited_discrepancy_search( p, op);
-    return output.algorithm_end(parameters.info);
+
+    output.algorithm_end(parameters.info);
+    return output;
 }

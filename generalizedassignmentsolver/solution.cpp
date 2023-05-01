@@ -1,5 +1,7 @@
 #include "generalizedassignmentsolver/solution.hpp"
 
+#include "optimizationtools/utils/utils.hpp"
+
 #include <iomanip>
 #include <iostream>
 
@@ -90,6 +92,39 @@ void Solution::set(
     x_[item_id] = agent_id;
 }
 
+std::ostream& Solution::print(
+        std::ostream& os,
+        int verbose) const
+{
+    if (verbose >= 1) {
+        os
+            << "Number of items:  " << optimizationtools::Ratio<ItemIdx>(number_of_items(), instance().number_of_items()) << std::endl
+            << "Feasible:         " << feasible() << std::endl
+            << "Cost:             " << cost() << std::endl
+            ;
+    }
+
+    if (verbose >= 2) {
+        os << std::endl
+            << std::setw(12) << "Item"
+            << std::setw(12) << "Agent"
+            << std::endl
+            << std::setw(12) << "----"
+            << std::setw(12) << "-----"
+            << std::endl;
+        for (ItemIdx item_id = 0;
+                item_id < instance().number_of_items();
+                ++item_id) {
+            os
+                << std::setw(12) << item_id
+                << std::setw(12) << agent(item_id)
+                << std::endl;
+        }
+    }
+
+    return os;
+}
+
 void Solution::write(std::string certificate_path)
 {
     if (certificate_path.empty())
@@ -124,75 +159,55 @@ Output::Output(
         const Instance& instance,
         optimizationtools::Info& info):
     solution(instance),
-    lower_bound(instance.combinatorial_relaxation())
+    bound(instance.combinatorial_relaxation())
 {
     info.os()
-            << std::setw(10) << "T (s)"
-            << std::setw(14) << "UB"
-            << std::setw(14) << "LB"
-            << std::setw(14) << "GAP"
-            << std::setw(10) << "GAP (%)"
-            << std::setw(24) << "Comment"
-            << std::endl
-            << std::setw(10) << "-----"
-            << std::setw(14) << "--"
-            << std::setw(14) << "--"
-            << std::setw(14) << "---"
-            << std::setw(10) << "-------"
-            << std::setw(24) << "-------"
-            << std::endl;
+        << std::setw(12) << "T (s)"
+        << std::setw(12) << "UB"
+        << std::setw(12) << "LB"
+        << std::setw(12) << "GAP"
+        << std::setw(12) << "GAP (%)"
+        << std::setw(24) << "Comment"
+        << std::endl
+        << std::setw(12) << "-----"
+        << std::setw(12) << "--"
+        << std::setw(12) << "--"
+        << std::setw(12) << "---"
+        << std::setw(12) << "-------"
+        << std::setw(24) << "-------"
+        << std::endl;
     print(info, std::stringstream(""));
-    info.reset_time();
-}
-
-bool Output::optimal() const
-{
-    return ((solution.feasible() && solution.cost() == lower_bound)
-        || (lower_bound >= solution.instance().bound()));
-}
-
-std::string Output::upper_bound_string() const
-{
-    return (!solution.feasible())? "inf": std::to_string(solution.cost());
-}
-
-std::string Output::lower_bound_string() const
-{
-    return (lower_bound >= solution.instance().bound())? "inf": std::to_string(lower_bound);
-}
-
-std::string Output::gap_string() const
-{
-    if (lower_bound >= solution.instance().bound())
-        return "0";
-    if (lower_bound == 0 || !solution.feasible())
-        return "inf";
-    return std::to_string(solution.cost() - lower_bound);
-}
-
-double Output::gap() const
-{
-    if (lower_bound >= solution.instance().bound())
-        return 0;
-    if (lower_bound == 0 || !solution.feasible())
-        return std::numeric_limits<double>::infinity();
-    return (double)(solution.cost() - lower_bound) / lower_bound * 100;
 }
 
 void Output::print(
         optimizationtools::Info& info,
         const std::stringstream& s) const
 {
+    std::string solution_value = optimizationtools::solution_value(
+            optimizationtools::ObjectiveDirection::Minimize,
+            solution.feasible(),
+            solution.cost());
+    double absolute_optimality_gap = optimizationtools::absolute_optimality_gap(
+            optimizationtools::ObjectiveDirection::Minimize,
+            solution.feasible(),
+            solution.cost(),
+            bound);
+    double relative_optimality_gap = optimizationtools::relative_optimality_gap(
+            optimizationtools::ObjectiveDirection::Minimize,
+            solution.feasible(),
+            solution.cost(),
+            bound);
     double t = info.elapsed_time();
     std::streamsize precision = std::cout.precision();
 
     info.os()
-            << std::setw(10) << std::fixed << std::setprecision(3) << t << std::defaultfloat << std::setprecision(precision)
-            << std::setw(14) << upper_bound_string()
-            << std::setw(14) << lower_bound_string()
-            << std::setw(14) << gap_string()
-            << std::setw(10) << std::fixed << std::setprecision(2) << gap() << std::defaultfloat << std::setprecision(precision)
-            << std::setw(24) << s.str() << std::endl;
+        << std::setw(12) << std::fixed << std::setprecision(3) << t << std::defaultfloat << std::setprecision(precision)
+        << std::setw(12) << solution_value
+        << std::setw(12) << bound
+        << std::setw(12) << absolute_optimality_gap
+        << std::setw(12) << std::fixed << std::setprecision(2) << relative_optimality_gap * 100 << std::defaultfloat << std::setprecision(precision)
+        << std::setw(24) << s.str()
+        << std::endl;
 
     if (!info.output->only_write_at_the_end)
         info.write_json_output();
@@ -203,48 +218,56 @@ void Output::update_solution(
         const std::stringstream& s,
         optimizationtools::Info& info)
 {
-    if (!compare(solution, solution_new))
-        return;
-
     info.lock();
 
-    if (compare(solution, solution_new)) {
+    if (solution_new.feasible()
+            && (!solution.feasible() || solution.cost() > solution_new.cost())) {
         solution = solution_new;
         print(info, s);
 
+        std::string solution_value = optimizationtools::solution_value(
+                optimizationtools::ObjectiveDirection::Minimize,
+                solution.feasible(),
+                solution.cost());
+        double t = info.elapsed_time();
+
         info.output->number_of_solutions++;
-        double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
         std::string sol_str = "Solution" + std::to_string(info.output->number_of_solutions);
-        info.add_to_json(sol_str, "Value", solution.cost());
+        info.add_to_json(sol_str, "Value", solution_value);
         info.add_to_json(sol_str, "Time", t);
-        if (!info.output->only_write_at_the_end)
+        info.add_to_json(sol_str, "String", s.str());
+        if (!info.output->only_write_at_the_end) {
+            info.write_json_output();
             solution.write(info.output->certificate_path);
+        }
     }
 
     info.unlock();
 }
 
-void Output::update_lower_bound(
-        Cost lower_bound_new,
+void Output::update_bound(
+        Cost bound_new,
         const std::stringstream& s,
         optimizationtools::Info& info)
 {
-    if (lower_bound != -1 && lower_bound >= lower_bound_new)
+    if (bound >= bound_new)
         return;
 
     info.lock();
 
-    if (lower_bound == -1 || lower_bound < lower_bound_new) {
-        lower_bound = lower_bound_new;
+    if (bound < bound_new) {
+        bound = bound_new;
         print(info, s);
 
+        double t = info.elapsed_time();
+
         info.output->number_of_bounds++;
-        double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
         std::string sol_str = "Bound" + std::to_string(info.output->number_of_bounds);
-        info.add_to_json(sol_str, "Value", lower_bound);
+        info.add_to_json(sol_str, "Bound", bound);
         info.add_to_json(sol_str, "Time", t);
+        info.add_to_json(sol_str, "String", s.str());
         if (!info.output->only_write_at_the_end)
-            solution.write(info.output->certificate_path);
+            info.write_json_output();
     }
 
     info.unlock();
@@ -252,42 +275,44 @@ void Output::update_lower_bound(
 
 Output& Output::algorithm_end(optimizationtools::Info& info)
 {
-    time = (double)std::round(info.elapsed_time() * 10000) / 10000;
+    std::string solution_value = optimizationtools::solution_value(
+            optimizationtools::ObjectiveDirection::Minimize,
+            solution.feasible(),
+            solution.cost());
+    double absolute_optimality_gap = optimizationtools::absolute_optimality_gap(
+            optimizationtools::ObjectiveDirection::Minimize,
+            solution.feasible(),
+            solution.cost(),
+            bound);
+    double relative_optimality_gap = optimizationtools::relative_optimality_gap(
+            optimizationtools::ObjectiveDirection::Minimize,
+            solution.feasible(),
+            solution.cost(),
+            bound);
+    time = info.elapsed_time();
 
-    info.add_to_json("Solution", "Value", upper_bound_string());
-    info.add_to_json("Bound", "Value", lower_bound_string());
+    info.add_to_json("Solution", "Value", solution_value);
+    info.add_to_json("Bound", "Value", bound);
     info.add_to_json("Solution", "Time", time);
     info.add_to_json("Bound", "Time", time);
     info.os()
-            << std::endl
-            << "Final statistics" << std::endl
-            << "----------------" << std::endl
-            << "Value:                    " << upper_bound_string() << std::endl
-            << "Bound:                    " << lower_bound_string() << std::endl
-            << "Gap:                      " << gap_string() << std::endl
-            << "Gap (%):                  " << gap() << std::endl
-            << "Time (s):                 " << time << std::endl;
+        << std::endl
+        << "Final statistics" << std::endl
+        << "----------------" << std::endl
+        << "Value:                        " << solution_value << std::endl
+        << "Bound:                        " << bound << std::endl
+        << "Absolute optimality gap:      " << absolute_optimality_gap << std::endl
+        << "Relative optimality gap (%):  " << relative_optimality_gap * 100 << std::endl
+        << "Time (s):                     " << time << std::endl
+        ;
+    print_statistics(info);
+    info.os() << std::endl
+        << "Solution" << std::endl
+        << "--------" << std::endl ;
+    solution.print(info.os(), info.verbosity_level());
 
     info.write_json_output();
     solution.write(info.output->certificate_path);
     return *this;
-}
-
-Cost generalizedassignmentsolver::algorithm_end(
-        Cost lower_bound,
-        optimizationtools::Info& info)
-{
-    double t = (double)std::round(info.elapsed_time() * 10000) / 10000;
-    info.add_to_json("Bound", "Value", lower_bound);
-    info.add_to_json("Bound", "Time", t);
-    info.os()
-            << std::endl
-            << "Final statistics" << std::endl
-            << "----------------" << std::endl
-            << "Bound:                    " << lower_bound << std::endl
-            << "Time (s):                 " << t << std::endl;
-
-    info.write_json_output();
-    return lower_bound;
 }
 

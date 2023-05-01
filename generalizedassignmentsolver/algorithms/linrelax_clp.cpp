@@ -8,15 +8,6 @@
 
 using namespace generalizedassignmentsolver;
 
-LinRelaxClpOutput& LinRelaxClpOutput::algorithm_end(
-        optimizationtools::Info& info)
-{
-    //info.add_to_json("Algorithm", "Iterations", it);
-    Output::algorithm_end(info);
-    //FFOT_VER(info, "Iterations: " << it << std::endl);
-    return *this;
-}
-
 LinRelaxClpOutput generalizedassignmentsolver::linrelax_clp(
         const Instance& instance,
         optimizationtools::Info info)
@@ -51,7 +42,7 @@ LinRelaxClpOutput generalizedassignmentsolver::linrelax_clp(
 
     // Get solution
     Cost lb = std::ceil(model.getObjValue() - FFOT_TOL);
-    output.update_lower_bound(lb, std::stringstream(""), info);
+    output.update_bound(lb, std::stringstream(""), info);
     output.x.resize(instance.number_of_items(), std::vector<double>(instance.number_of_agents()));
     const double* solution = model.getColSolution();
     for (ItemIdx item_id = 0;
@@ -64,7 +55,8 @@ LinRelaxClpOutput generalizedassignmentsolver::linrelax_clp(
         }
     }
 
-    return output.algorithm_end(info);
+    output.algorithm_end(info);
+    return output;
 }
 
 #endif

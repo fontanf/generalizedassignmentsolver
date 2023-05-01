@@ -12,18 +12,7 @@ struct LocalSolverOptionalParameters
     optimizationtools::Info info = optimizationtools::Info();
 };
 
-struct LocalSolverOutput: Output
-{
-    LocalSolverOutput(
-            const Instance& instance,
-            optimizationtools::Info& info):
-        Output(instance, info) { }
-
-    LocalSolverOutput& algorithm_end(
-            optimizationtools::Info& info);
-};
-
-LocalSolverOutput localsolver(
+Output localsolver(
         const Instance& instance,
         LocalSolverOptionalParameters p = {});
 
