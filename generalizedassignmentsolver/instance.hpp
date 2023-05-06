@@ -126,9 +126,6 @@ public:
     /** Set the capacity of all agents. */
     void set_capacities(const std::vector<Weight>& t);
 
-    /** Set the optimal solution. */
-    void set_optimal_solution(Solution& solution);
-
     /*
      * Getters
      */
@@ -162,12 +159,6 @@ public:
 
     /** Get the maximum weight of the instance. */
     inline Cost maximum_weight() const { return maximum_weight_; }
-
-    /** Get the optimal solution. */
-    const Solution* optimal_solution() const { return optimal_solution_.get(); }
-
-    /** Get the optimum value. */
-    Cost optimum() const;
 
     /** Get a trivial bound. */
     Cost bound() const { return total_cost_ + 1; }
@@ -224,12 +215,6 @@ private:
     /** Sum of the minimum cost of each item. */
     Cost sum_of_minimum_costs_ = 0;
 
-    /**
-     * Optimal solution.
-     *
-     * 'nullptr' if not set.
-     */
-    std::shared_ptr<Solution> optimal_solution_;
 };
 
 void init_display(

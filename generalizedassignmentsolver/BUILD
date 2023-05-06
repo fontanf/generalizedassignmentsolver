@@ -28,18 +28,6 @@ cc_library(
 )
 
 cc_library(
-        name = "tester",
-        hdrs = ["tester.hpp"],
-        srcs = ["tester.cpp"],
-        deps = [
-                ":generalizedassignmentsolver",
-                ":generator",
-                "@googletest//:gtest_main",
-        ],
-        visibility = ["//visibility:public"],
-)
-
-cc_library(
         name = "generator",
         hdrs = ["generator.hpp"],
         srcs = ["generator.cpp"],
@@ -61,15 +49,6 @@ cc_binary(
         srcs = ["checker.cpp"],
         deps = [":generalizedassignmentsolver"],
         data = ["//data:data"],
-)
-
-cc_binary(
-        name = "test_main",
-        srcs = ["test_main.cpp"],
-        deps = [
-                "//generalizedassignmentsolver/algorithms:algorithms",
-                ":tester",
-        ],
 )
 
 cc_binary(

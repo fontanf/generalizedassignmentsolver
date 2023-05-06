@@ -4,16 +4,17 @@
 
 using namespace generalizedassignmentsolver;
 
-Instance::Instance(AgentIdx m):
-    capacities_(m, 0)
+Instance::Instance(AgentIdx number_of_agents):
+    capacities_(number_of_agents, 0)
 { }
 
-void Instance::set_capacities(const std::vector<Weight>& t)
+void Instance::set_capacities(
+        const std::vector<Weight>& capacities)
 {
     for (AgentIdx agent_id = 0;
-            agent_id < (AgentIdx)t.size();
+            agent_id < (AgentIdx)capacities.size();
             ++agent_id) {
-        set_capacity(agent_id, t[agent_id]);
+        set_capacity(agent_id, capacities[agent_id]);
     }
 }
 
@@ -90,11 +91,6 @@ void Instance::set_alternative(
     total_cost_ += cost;
 }
 
-void Instance::set_optimal_solution(Solution& solution)
-{
-    optimal_solution_ = std::make_shared<Solution>(solution);
-}
-
 Instance::Instance(std::string instance_path, std::string format):
     name_(instance_path)
 {
@@ -168,19 +164,14 @@ void Instance::read_standard(std::ifstream& file)
     }
 }
 
-Cost Instance::optimum() const
-{
-    return optimal_solution()->cost();
-}
-
 std::ostream& Instance::print(
         std::ostream& os,
         int verbose) const
 {
     if (verbose >= 1) {
         os
-            << "Number of agents:         " << number_of_agents() << std::endl
-            << "Number of items:          " << number_of_items() << std::endl
+            << "Number of agents:  " << number_of_agents() << std::endl
+            << "Number of items:   " << number_of_items() << std::endl
             ;
     }
 

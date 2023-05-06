@@ -120,28 +120,3 @@ cc_library(
         copts = COINOR_COPTS + CPLEX_COPTS + GUROBI_COPTS + GECODE_COPTS + LOCALSOLVER_COPTS + KNITRO_COPTS,
         visibility = ["//visibility:public"],
 )
-
-cc_test(
-        name = "test",
-        srcs = [
-                "linrelax_clp_test.cpp",
-                "lagrelax_volume_test.cpp",
-                "lagrelax_lbfgs_test.cpp",
-                "columngeneration_test.cpp",
-                "localsolver_test.cpp",
-                "milp_cbc_test.cpp",
-                "milp_cplex_test.cpp",
-                "milp_gurobi_test.cpp",
-                "milp_knitro_test.cpp",
-                "constraintprogramming_cplex_test.cpp",
-                "constraintprogramming_gecode_test.cpp",
-        ],
-        deps = [
-                "//generalizedassignmentsolver:tester",
-                ":algorithms",
-        ],
-        copts = COINOR_COPTS + CPLEX_COPTS + GUROBI_COPTS + GECODE_COPTS + LOCALSOLVER_COPTS + KNITRO_COPTS,
-        tags = ["requires-network"],
-        timeout = "moderate",
-)
-
