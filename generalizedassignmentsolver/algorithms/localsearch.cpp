@@ -20,7 +20,7 @@ class LocalScheme
 public:
 
     /*
-     * Constructors and destructor.
+     * Constructors and destructor
      */
 
     struct Parameters
@@ -51,7 +51,7 @@ public:
     inline Cost          cost(const GlobalCost& global_cost) const { return std::get<1>(global_cost); }
 
     /*
-     * Solutions.
+     * Solutions
      */
 
     struct Solution
@@ -266,7 +266,7 @@ public:
     }
 
     /*
-     * Iterated local search.
+     * Iterated local search
      */
 
     struct Perturbation
@@ -280,7 +280,9 @@ public:
             std::mt19937_64& generator)
     {
         std::vector<Perturbation> perturbations;
-        for (Counter perturbation_id = 0; perturbation_id < parameters_.number_of_perturbations; ++perturbation_id) {
+        for (Counter perturbation_id = 0;
+                perturbation_id < parameters_.number_of_perturbations;
+                ++perturbation_id) {
             std::vector<ItemIdx> items = optimizationtools::bob_floyd<ItemIdx>(
                     (ItemIdx)8, instance_.number_of_items(), generator);
             std::shuffle(items.begin(), items.end(), generator);
@@ -404,7 +406,7 @@ public:
 private:
 
     /*
-     * Manipulate solutions.
+     * Manipulate solutions
      */
 
     inline void add(
@@ -456,7 +458,7 @@ private:
     }
 
     /*
-     * Evaluate moves.
+     * Evaluate moves
      */
 
     inline GlobalCost cost_add(
@@ -481,7 +483,7 @@ private:
     }
 
     /*
-     * Private attributes.
+     * Private attributes
      */
 
     /** Instance. */

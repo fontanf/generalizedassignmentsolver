@@ -25,6 +25,9 @@ using Seed = int64_t;
 
 class Solution;
 
+/**
+ * Structure for an alternative.
+ */
 struct Alternative
 {
     /** Id of the item. */
@@ -43,6 +46,9 @@ struct Alternative
     double efficiency() const { return cost * weight; }
 };
 
+/**
+ * Structure for an item.
+ */
 struct Item
 {
     /** Alternatives of the item. */
@@ -80,7 +86,7 @@ struct Item
 };
 
 /**
- * Instance class for a Generalized Assignment Problem.
+ * Instance class for a generalized assignment problem.
  */
 class Instance
 {
@@ -88,7 +94,7 @@ class Instance
 public:
 
     /*
-     * Constructors and destructor.
+     * Constructors and destructor
      */
 
     /** Create an instance from a file. */
@@ -121,10 +127,10 @@ public:
             Cost cost);
 
     /** Add an item with its weights and costs. */
-    void add_item(const std::vector<std::pair<Weight, Cost>>& a);
+    void add_item(const std::vector<std::pair<Weight, Cost>>& alternatives);
 
     /** Set the capacity of all agents. */
-    void set_capacities(const std::vector<Weight>& t);
+    void set_capacities(const std::vector<Weight>& capacities);
 
     /*
      * Getters
@@ -191,7 +197,7 @@ private:
     void read_standard(std::ifstream& file);
 
     /*
-     * Private attributes.
+     * Private attributes
      */
 
     /** Name of the instance. */

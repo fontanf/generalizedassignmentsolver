@@ -294,15 +294,15 @@ ColumnGenerationHeuristicGreedyOutput generalizedassignmentsolver::columngenerat
     op.info.set_time_limit(parameters.info.remaining_time());
     op.column_generation_parameters.linear_programming_solver
         = columngenerationsolver::s2lps(parameters.linear_programming_solver);
-    auto output_greedy = columngenerationsolver::greedy(p, op);
+    auto greedy_output = columngenerationsolver::greedy(p, op);
 
     output.update_bound(
-            std::ceil(output_greedy.bound - FFOT_TOL),
+            std::ceil(greedy_output.bound - FFOT_TOL),
             std::stringstream(""),
             parameters.info);
-    if (output_greedy.solution.size() > 0) {
+    if (greedy_output.solution.size() > 0) {
         output.update_solution(
-                columns2solution(instance, output_greedy.solution),
+                columns2solution(instance, greedy_output.solution),
                 std::stringstream(""),
                 parameters.info);
     }
@@ -351,7 +351,7 @@ ColumnGenerationHeuristicLimitedDiscrepancySearchOutput generalizedassignmentsol
         };
     op.info.set_time_limit(parameters.info.remaining_time());
 
-    auto output_limited_discrepancy_search = columngenerationsolver::limited_discrepancy_search( p, op);
+    auto lds_output = columngenerationsolver::limited_discrepancy_search( p, op);
 
     output.algorithm_end(parameters.info);
     return output;

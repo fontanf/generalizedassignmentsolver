@@ -146,10 +146,10 @@ void Instance::read_standard(std::ifstream& file)
     file >> number_of_agents >> number_of_items;
 
     capacities_.resize(number_of_agents);
-    Weight t = -1;
+    Weight capacity = -1;
     for (AgentIdx agent_id = 0; agent_id < number_of_agents; ++agent_id) {
-        file >> t;
-        set_capacity(agent_id, t);
+        file >> capacity;
+        set_capacity(agent_id, capacity);
     }
 
     items_.reserve(number_of_items);
