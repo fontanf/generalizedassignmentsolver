@@ -1,6 +1,6 @@
-# Generalized Assignment Solver
+# Generalized assignment solver
 
-A solver for the Generalized Assignment Problem.
+A solver for the generalized assignment problem.
 
 This problem is interesting because many different optimization methods can and have been applied to solve it (Branch-and-cut, Branch-and-price, Branch-and-relax, Local search, Constraint programming, Column generation heuristics...). Thus, the main goal of this repository is for me to have reference implementations for classical algorithms and optimization solvers.
 

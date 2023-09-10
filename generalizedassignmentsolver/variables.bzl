@@ -47,6 +47,9 @@ KNITRO_COPTS = select({
             "//generalizedassignmentsolver:knitro_build": ["-DKNITRO_FOUND"],
             "//conditions:default": []})
 KNITRO_DEP = select({
-            "//generalizedassignmentsolver:knitro_build": ["@knitro//:knitro"],
+            "//generalizedassignmentsolver:knitro_build": [
+                    "@knitro//:knitro",
+                    "@knitrocpp//knitrocpp:knitrocpp",
+            ],
             "//conditions:default": []})
 

@@ -34,7 +34,7 @@ cc_library(
 git_repository(
     name = "optimizationtools",
     remote = "https://github.com/fontanf/optimizationtools.git",
-    commit = "e9f078f5d20dccd8f029c2a09a9d5c008e3251f8",
+    commit = "0a010f3b3c0fbd6feeea1376474835f1b3ac9547",
 )
 
 local_repository(
@@ -197,29 +197,18 @@ cc_library(
 """,
 )
 
-new_local_repository(
-    name = "knitro",
-    path = "/home/florian/Programmes/knitro-13.1.0-z-Linux-Intel17-64/",
-    build_file_content = """
-cc_library(
-    name = "knitro",
-    hdrs = [
-            "include/knitro.h",
-    ],
-    strip_include_prefix = "include/",
-    srcs = [
-            "lib/libknitro.so",
-            "lib/libiomp5.so",
-    ],
-    copts = [
-            "-fopenmp",
-    ],
-    linkopts = [
-            "-fopenmp",
-            "-ldl",
-            "-liomp5",
-    ],
-    visibility = ["//visibility:public"],
+# Knitro
+
+load("//bazel:knitro.bzl", "knitro")
+knitro(name = "knitro")
+
+git_repository(
+    name = "knitrocpp",
+    remote = "https://github.com/fontanf/knitrocpp.git",
+    commit = "125c6c359fdfc74fbeec5c0497de4e6b4820e909",
 )
-""",
+
+local_repository(
+    name = "knitrocpp_",
+    path = "../knitrocpp/",
 )
