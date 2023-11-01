@@ -41,9 +41,16 @@ def Settings(**kwargs):
                 '-I', './bazel-generalizedassignmentsolver/external/'
                 'dlib/dlib-19.19/',
 
-                # COINOR
-                '-DCOINOR_FOUND',
-                '-I', '/home/florian/Programmes/coinbrew/dist/include/',
+                # CLP
+                '-DCLP_FOUND',
+                '-I', './bazel-generalizedassignmentsolver/external/clp_linux/include/coin/',
+
+                # CBC
+                '-DCBC_FOUND',
+                '-I', './bazel-generalizedassignmentsolver/external/cbc_linux/include/coin/',
+
+                # Volume
+                # '-DVOLUME_FOUND',
 
                 # Gurobi
                 '-DGUROBI_FOUND',

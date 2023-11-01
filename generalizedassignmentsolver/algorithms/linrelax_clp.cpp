@@ -1,10 +1,10 @@
-#if COINOR_FOUND
+#if CLP_FOUND
 
 #include "generalizedassignmentsolver/algorithms/linrelax_clp.hpp"
 #include "generalizedassignmentsolver/algorithms/milp_cbc.hpp"
 
-#include <coin/ClpModel.hpp>
-#include <coin/OsiClpSolverInterface.hpp>
+#include <ClpModel.hpp>
+#include <OsiClpSolverInterface.hpp>
 
 using namespace generalizedassignmentsolver;
 
@@ -16,7 +16,7 @@ LinRelaxClpOutput generalizedassignmentsolver::linrelax_clp(
     info.os()
             << "Algorithm" << std::endl
             << "---------" << std::endl
-            << "Linear Relaxation (CLP)" << std::endl
+            << "Linear relaxation (CLP)" << std::endl
             << std::endl;
 
     LinRelaxClpOutput output(instance, info);

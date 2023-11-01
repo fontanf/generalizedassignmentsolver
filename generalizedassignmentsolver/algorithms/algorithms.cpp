@@ -1,12 +1,14 @@
 #include "generalizedassignmentsolver/algorithms/algorithms.hpp"
 
-#if COINOR_FOUND
+#if CLP_FOUND
 #include "generalizedassignmentsolver/algorithms/linrelax_clp.hpp"
+#endif
+#if VOLUME_FOUND
 #include "generalizedassignmentsolver/algorithms/lagrelax_volume.hpp"
 #endif
 #include "generalizedassignmentsolver/algorithms/lagrelax_lbfgs.hpp"
 #include "generalizedassignmentsolver/algorithms/column_generation.hpp"
-#if COINOR_FOUND
+#if CBC_FOUND
 #include "generalizedassignmentsolver/algorithms/milp_cbc.hpp"
 #endif
 #if CPLEX_FOUND
@@ -195,17 +197,17 @@ Output generalizedassignmentsolver::run(
     /*
      * Lower bounds
      */
-#if COINOR_FOUND
+#if CLP_FOUND
     } else if (algorithm_args[0] == "linrelax-clp") {
         return linrelax_clp(instance, info);
 #endif
-#if COINOR_FOUND
+#if VOLUME_FOUND
     } else if (algorithm_args[0] == "lagrelax-knapsack-volume") {
         return lagrelax_knapsack_volume(instance, info);
 #endif
     } else if (algorithm_args[0] == "lagrelax-knapsack-lbfgs") {
         return lagrelax_knapsack_lbfgs(instance, info);
-#if COINOR_FOUND
+#if VOLUME_FOUND
     } else if (algorithm_args[0] == "lagrelax-assignment-volume") {
         return lagrelax_assignment_volume(instance, info);
 #endif
@@ -221,7 +223,7 @@ Output generalizedassignmentsolver::run(
     /*
      * Exact algorithms
      */
-#if COINOR_FOUND
+#if CBC_FOUND
     } else if (algorithm_args[0] == "milp-cbc") {
         MilpCbcOptionalParameters parameters;
         parameters.info = info;

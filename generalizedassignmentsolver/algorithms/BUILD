@@ -1,5 +1,7 @@
 load("//generalizedassignmentsolver:variables.bzl", "STDCPP",
-         "COINOR_COPTS", "COINOR_DEP",
+         "CBC_COPTS", "CBC_DEP",
+         "CLP_COPTS", "CLP_DEP",
+         "VOLUME_COPTS", "VOLUME_DEP",
          "CPLEX_COPTS", "CPLEX_DEP", "CPOPTIMIZER_DEP",
          "GUROBI_COPTS", "GUROBI_DEP",
          "GECODE_COPTS", "GECODE_DEP",
@@ -28,8 +30,8 @@ cc_library(
         srcs = ["milp_cbc.cpp"],
         deps = [
                 "//generalizedassignmentsolver:generalizedassignmentsolver",
-        ] + COINOR_DEP,
-        copts = COINOR_COPTS,
+        ] + CBC_DEP,
+        copts = CBC_COPTS,
         visibility = ["//visibility:public"],
 )
 
@@ -84,7 +86,7 @@ cc_library(
         name = "algorithms",
         hdrs = [
                 "linrelax_clp.hpp",
-                "lagrelax_volume.hpp",
+                #"lagrelax_volume.hpp",
                 "lagrelax_lbfgs.hpp",
                 "repair.hpp",
                 "column_generation.hpp",
@@ -94,7 +96,7 @@ cc_library(
                 "algorithms.hpp"],
         srcs = [
                 "linrelax_clp.cpp",
-                "lagrelax_volume.cpp",
+                #"lagrelax_volume.cpp",
                 "lagrelax_lbfgs.cpp",
                 "local_search.cpp",
                 "repair.cpp",
@@ -116,7 +118,7 @@ cc_library(
                 "@knapsacksolver//knapsacksolver/algorithms:dynamic_programming_bellman",
                 "@dlib//:dlib",
                 "@boost//:program_options",
-        ] + COINOR_DEP + CPLEX_DEP + GUROBI_DEP + CPOPTIMIZER_DEP + GECODE_DEP + LOCALSOLVER_DEP + KNITRO_DEP,
-        copts = COINOR_COPTS + CPLEX_COPTS + GUROBI_COPTS + GECODE_COPTS + LOCALSOLVER_COPTS + KNITRO_COPTS,
+        ] + CLP_DEP + CBC_DEP + VOLUME_DEP + CPLEX_DEP + GUROBI_DEP + CPOPTIMIZER_DEP + GECODE_DEP + LOCALSOLVER_DEP + KNITRO_DEP,
+        copts = CLP_COPTS + CBC_COPTS + VOLUME_COPTS + CPLEX_COPTS + GUROBI_COPTS + GECODE_COPTS + LOCALSOLVER_COPTS + KNITRO_COPTS,
         visibility = ["//visibility:public"],
 )

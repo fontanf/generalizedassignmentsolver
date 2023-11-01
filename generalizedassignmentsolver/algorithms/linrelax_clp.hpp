@@ -1,6 +1,6 @@
 #pragma once
 
-#if COINOR_FOUND
+#if CLP_FOUND
 
 #include "generalizedassignmentsolver/solution.hpp"
 

@@ -1,13 +1,10 @@
 #pragma once
 
-#if COINOR_FOUND
+#if defined(CBC_FOUND) || defined(CLP_FOUND)
 
 #include "generalizedassignmentsolver/solution.hpp"
 
-#include <coin/CbcModel.hpp>
-#include <coin/OsiCbcSolverInterface.hpp>
-#include <coin/CglKnapsackCover.hpp>
-#include <coin/CglClique.hpp>
+#include <OsiCbcSolverInterface.hpp>
 
 namespace generalizedassignmentsolver
 {
@@ -24,6 +21,17 @@ struct CoinLP
     std::vector<double> row_upper_bounds;
     CoinPackedMatrix matrix;
 };
+
+}
+
+#endif
+
+#if CBC_FOUND
+
+#include <CbcModel.hpp>
+
+namespace generalizedassignmentsolver
+{
 
 struct MilpCbcOptionalParameters
 {

@@ -1,4 +1,4 @@
-#if COINOR_FOUND
+#if VOLUME_FOUND
 
 #include "generalizedassignmentsolver/algorithms/lagrelax_volume.hpp"
 

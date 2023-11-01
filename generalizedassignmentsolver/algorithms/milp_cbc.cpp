@@ -1,35 +1,110 @@
-#if COINOR_FOUND
+#if defined(CBC_FOUND) || defined(CLP_FOUND)
 
 #include "generalizedassignmentsolver/algorithms/milp_cbc.hpp"
 
-#include "coin/CbcHeuristicDiveCoefficient.hpp"
-#include "coin/CbcHeuristicDiveFractional.hpp"
-#include "coin/CbcHeuristicDiveGuided.hpp"
-#include "coin/CbcHeuristicDiveVectorLength.hpp"
-#include "coin/CbcLinked.hpp"
-#include "coin/CbcHeuristicGreedy.hpp"
-#include "coin/CbcHeuristicLocal.hpp"
-#include "coin/CbcHeuristic.hpp"
-#include "coin/CbcHeuristicRINS.hpp"
-#include "coin/CbcHeuristicRENS.hpp"
+using namespace generalizedassignmentsolver;
 
-#include "coin/CglAllDifferent.hpp"
-#include "coin/CglClique.hpp"
-#include "coin/CglDuplicateRow.hpp"
-#include "coin/CglFlowCover.hpp"
-#include "coin/CglGomory.hpp"
-#include "coin/CglKnapsackCover.hpp"
-#include "coin/CglLandP.hpp"
-#include "coin/CglLiftAndProject.hpp"
-#include "coin/CglMixedIntegerRounding.hpp"
-#include "coin/CglMixedIntegerRounding2.hpp"
-#include "coin/CglOddHole.hpp"
-#include "coin/CglProbing.hpp"
-#include "coin/CglRedSplit.hpp"
-#include "coin/CglResidualCapacity.hpp"
-#include "coin/CglSimpleRounding.hpp"
-#include "coin/CglStored.hpp"
-#include "coin/CglTwomir.hpp"
+CoinLP::CoinLP(const Instance& instance)
+{
+    // Variables
+    int number_of_columns = instance.number_of_agents() * instance.number_of_items();
+    column_lower_bounds.resize(number_of_columns, 0);
+    column_upper_bounds.resize(number_of_columns, 1);
+
+    // Objective
+    objective = std::vector<double>(number_of_columns);
+    for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id)
+        for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id)
+            objective[instance.number_of_agents() * item_id + agent_id] = instance.cost(item_id, agent_id);
+
+    // Constraints
+    int number_of_rows = 0; // will be increased each time we add a constraint
+    std::vector<CoinBigIndex> row_starts;
+    std::vector<int> number_of_elements_in_rows;
+    std::vector<int> element_columns;
+    std::vector<double> elements;
+
+    // Every item needs to be assigned
+    // sum_i xij = 1 for all j
+    for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id) {
+        // Initialize new row
+        row_starts.push_back(elements.size());
+        number_of_elements_in_rows.push_back(0);
+        number_of_rows++;
+        // Add elements
+        for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id) {
+            elements.push_back(1);
+            element_columns.push_back(instance.number_of_agents() * item_id + agent_id);
+            number_of_elements_in_rows.back()++;
+        }
+        // Add row bounds
+        row_lower_bounds.push_back(1);
+        row_upper_bounds.push_back(1);
+    }
+
+    // Capacity constraint
+    // sum_j wj xij <= ci
+    for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id) {
+        // Initialize new row
+        row_starts.push_back(elements.size());
+        number_of_elements_in_rows.push_back(0);
+        number_of_rows++;
+        // Add row elements
+        for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id) {
+            elements.push_back(instance.weight(item_id, agent_id));
+            element_columns.push_back(instance.number_of_agents() * item_id + agent_id);
+            number_of_elements_in_rows.back()++;
+        }
+        // Add row bounds
+        row_lower_bounds.push_back(0);
+        row_upper_bounds.push_back(instance.capacity(agent_id));
+    }
+
+    // Create matrix
+    row_starts.push_back(elements.size());
+    matrix = CoinPackedMatrix(
+            false,
+            number_of_columns,
+            number_of_rows,
+            elements.size(),
+            elements.data(),
+            element_columns.data(),
+            row_starts.data(),
+            number_of_elements_in_rows.data());
+}
+
+#endif
+
+#if CBC_FOUND
+
+#include "CbcHeuristicDiveCoefficient.hpp"
+#include "CbcHeuristicDiveFractional.hpp"
+#include "CbcHeuristicDiveGuided.hpp"
+#include "CbcHeuristicDiveVectorLength.hpp"
+//#include "CbcLinked.hpp"
+#include "CbcHeuristicGreedy.hpp"
+#include "CbcHeuristicLocal.hpp"
+#include "CbcHeuristic.hpp"
+#include "CbcHeuristicRINS.hpp"
+#include "CbcHeuristicRENS.hpp"
+
+//#include "CglAllDifferent.hpp"
+//#include "CglClique.hpp"
+//#include "CglDuplicateRow.hpp"
+//#include "CglFlowCover.hpp"
+//#include "CglGomory.hpp"
+//#include "CglKnapsackCover.hpp"
+//#include "CglLandP.hpp"
+//#include "CglLiftAndProject.hpp"
+//#include "CglMixedIntegerRounding.hpp"
+//#include "CglMixedIntegerRounding2.hpp"
+//#include "CglOddHole.hpp"
+//#include "CglProbing.hpp"
+//#include "CglRedSplit.hpp"
+//#include "CglResidualCapacity.hpp"
+//#include "CglSimpleRounding.hpp"
+//#include "CglStored.hpp"
+//#include "CglTwomir.hpp"
 
 /**
  * Useful links:
@@ -38,8 +113,6 @@
  * https://github.com/coin-or/Cbc/blob/master/Cbc/examples/sample3.cpp
  * Callback https://github.com/coin-or/Cbc/blob/master/Cbc/examples/inc.cpp
  */
-
-using namespace generalizedassignmentsolver;
 
 ////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////// Callback ///////////////////////////////////
@@ -137,75 +210,6 @@ CbcEventHandler::CbcAction EventHandler::event(CbcEvent which_event)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-
-CoinLP::CoinLP(const Instance& instance)
-{
-    // Variables
-    int number_of_columns = instance.number_of_agents() * instance.number_of_items();
-    column_lower_bounds.resize(number_of_columns, 0);
-    column_upper_bounds.resize(number_of_columns, 1);
-
-    // Objective
-    objective = std::vector<double>(number_of_columns);
-    for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id)
-        for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id)
-            objective[instance.number_of_agents() * item_id + agent_id] = instance.cost(item_id, agent_id);
-
-    // Constraints
-    int number_of_rows = 0; // will be increased each time we add a constraint
-    std::vector<CoinBigIndex> row_starts;
-    std::vector<int> number_of_elements_in_rows;
-    std::vector<int> element_columns;
-    std::vector<double> elements;
-
-    // Every item needs to be assigned
-    // sum_i xij = 1 for all j
-    for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id) {
-        // Initialize new row
-        row_starts.push_back(elements.size());
-        number_of_elements_in_rows.push_back(0);
-        number_of_rows++;
-        // Add elements
-        for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id) {
-            elements.push_back(1);
-            element_columns.push_back(instance.number_of_agents() * item_id + agent_id);
-            number_of_elements_in_rows.back()++;
-        }
-        // Add row bounds
-        row_lower_bounds.push_back(1);
-        row_upper_bounds.push_back(1);
-    }
-
-    // Capacity constraint
-    // sum_j wj xij <= ci
-    for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id) {
-        // Initialize new row
-        row_starts.push_back(elements.size());
-        number_of_elements_in_rows.push_back(0);
-        number_of_rows++;
-        // Add row elements
-        for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id) {
-            elements.push_back(instance.weight(item_id, agent_id));
-            element_columns.push_back(instance.number_of_agents() * item_id + agent_id);
-            number_of_elements_in_rows.back()++;
-        }
-        // Add row bounds
-        row_lower_bounds.push_back(0);
-        row_upper_bounds.push_back(instance.capacity(agent_id));
-    }
-
-    // Create matrix
-    row_starts.push_back(elements.size());
-    matrix = CoinPackedMatrix(
-            false,
-            number_of_columns,
-            number_of_rows,
-            elements.size(),
-            elements.data(),
-            element_columns.data(),
-            row_starts.data(),
-            number_of_elements_in_rows.data());
-}
 
 Output generalizedassignmentsolver::milp_cbc(
         const Instance& instance,

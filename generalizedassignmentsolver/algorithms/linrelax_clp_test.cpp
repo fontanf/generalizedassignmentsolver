@@ -1,4 +1,4 @@
-#if COINOR_FOUND
+#if CLP_FOUND
 
 #include "generalizedassignmentsolver/tester.hpp"
 #include "generalizedassignmentsolver/algorithms/linrelax_clp.hpp"

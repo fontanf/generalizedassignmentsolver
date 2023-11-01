@@ -8,7 +8,7 @@ namespace generalizedassignmentsolver
 enum class RepairInitialSolution
 {
     CombinatorialRelaxation,
-#if COINOR_FOUND
+#if CLP_FOUND
     LinearRelaxationClp,
 #endif
 #if CPLEX_FOUND
