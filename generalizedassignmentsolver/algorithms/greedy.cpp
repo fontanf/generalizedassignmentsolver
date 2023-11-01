@@ -70,7 +70,7 @@ Output generalizedassignmentsolver::greedy(
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-std::vector<std::vector<AgentIdx>> generalizedassignmentsolver::greedyregret_init(
+std::vector<std::vector<AgentIdx>> generalizedassignmentsolver::greedy_regret_init(
         const Instance& instance,
         const Desirability& f)
 {
@@ -92,7 +92,7 @@ std::vector<std::vector<AgentIdx>> generalizedassignmentsolver::greedyregret_ini
     return agents;
 }
 
-void generalizedassignmentsolver::greedyregret(
+void generalizedassignmentsolver::greedy_regret(
         Solution& solution,
         const Desirability& f,
         const std::vector<std::vector<AgentIdx>>& agents,
@@ -150,7 +150,7 @@ void generalizedassignmentsolver::greedyregret(
     }
 }
 
-Output generalizedassignmentsolver::greedyregret(
+Output generalizedassignmentsolver::greedy_regret(
         const Instance& instance,
         const Desirability& f,
         optimizationtools::Info info)
@@ -168,8 +168,8 @@ Output generalizedassignmentsolver::greedyregret(
 
     Output output(instance, info);
     Solution solution(instance);
-    auto agents = greedyregret_init(instance, f);
-    greedyregret(solution, f, agents, {});
+    auto agents = greedy_regret_init(instance, f);
+    greedy_regret(solution, f, agents, {});
     output.update_solution(solution, std::stringstream(""), info);
     return output.algorithm_end(info);
 }
@@ -238,18 +238,18 @@ Output generalizedassignmentsolver::mthg(
     return output.algorithm_end(info);
 }
 
-void generalizedassignmentsolver::mthgregret(
+void generalizedassignmentsolver::mthg_regret(
         Solution& solution,
         const Desirability& f,
         const std::vector<std::vector<AgentIdx>>& agents,
         const std::vector<std::vector<int>>& fixed_alternatives)
 {
-    greedyregret(solution, f, agents, fixed_alternatives);
+    greedy_regret(solution, f, agents, fixed_alternatives);
     if (solution.feasible())
         nshift(solution);
 }
 
-Output generalizedassignmentsolver::mthgregret(
+Output generalizedassignmentsolver::mthg_regret(
         const Instance& instance,
         const Desirability& f,
         optimizationtools::Info info)
@@ -267,8 +267,8 @@ Output generalizedassignmentsolver::mthgregret(
 
     Output output(instance, info);
     Solution solution(instance);
-    auto agents = greedyregret_init(instance, f);
-    mthgregret(solution, f, agents, {});
+    auto agents = greedy_regret_init(instance, f);
+    mthg_regret(solution, f, agents, {});
     output.update_solution(solution, std::stringstream(""), info);
     return output.algorithm_end(info);
 }

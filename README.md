@@ -1,4 +1,4 @@
-# Generalized assignment solver
+# GeneralizedAssignmentSolver
 
 A solver for the generalized assignment problem.
 
@@ -17,33 +17,33 @@ It is possible to solve the variant where not all items have to be assigned by a
 ### Lower bounds
 
 - Linear relaxation
-  - solved with CLP `-a linrelax_clp`
-  - solved with Gurobi `-a "milp_gurobi --only-linear-relaxation"`
-  - solved with Cplex `-a "milp_cplex --only-linear-relaxation"`
+  - solved with CLP `-a linrelax-clp`
+  - solved with Gurobi `-a "milp-gurobi --only-linear-relaxation"`
+  - solved with Cplex `-a "milp-cplex --only-linear-relaxation"`
 
 - Lagrangian relaxation of knapsack constraints. The value of this relaxation is the same as the value of the linear relaxation. However, it might be cheaper to compute, especially on large instances.
-  - solved with volume method `-a lagrelax_knapsack_volume`
-  - solved with L-BFGS method `-a lagrelax_knapsack_lbfgs`
+  - solved with volume method `-a lagrelax-knapsack-volume`
+  - solved with L-BFGS method `-a lagrelax-knapsack-lbfgs`
 
 - Lagrangian relaxation of assignment constraints
-  - solved with volume method `-a lagrelax_assignment_volume`
-  - solved with L-BFGS method `-a lagrelax_assignment_lbfgs`
+  - solved with volume method `-a lagrelax-assignment-volume`
+  - solved with L-BFGS method `-a lagrelax-assignment-lbfgs`
 
-- Column generation `-a "columngeneration --linear-programming-solver clp"` `-a "columngeneration --linear-programming-solver cplex"`
+- Column generation `-a "column-generation --linear-programming-solver clp"` `-a "column-generation --linear-programming-solver cplex"`
 
 ### Upper bounds
 
 - Polynomial algorithms from "Generalized Assignment Problems" (Martello et al., 1992), options `-f cij` `-f wij` `-f cij*wij` `-f -pij/wij` `-f wij/ti`:
   - Basic greedy `-a "greedy -f wij"`
-  - Greedy with regret measure `-a "greedyregret -f wij"`
+  - Greedy with regret measure `-a "greedy-regret -f wij"`
   - MTHG, basic greedy (+ n shifts) `-a "mthg -f wij"`
-  - MTHG, greedy with regret measure (+ n shifts) `-a "mthgregret -f wij"`
+  - MTHG, greedy with regret measure (+ n shifts) `-a "mthg-regret -f wij"`
 
-- Local search algorithm implemented with [fontanf/localsearchsolver](https://github.com/fontanf/localsearchsolver) `-a "localsearch --threads 3"`
+- Local search algorithm implemented with [fontanf/localsearchsolver](https://github.com/fontanf/localsearchsolver) `-a "local-search --threads 3"`
 
 - Tree search algorithms based on the Dantzig-Wolfe reformulation branching scheme (i.e. column generation heuristics) implemented with [fontanf/columngenerationsolver](https://github.com/fontanf/columngenerationsolver):
-  - Greedy `-a "columngenerationheuristic_greedy --linear-programming-solver cplex"`
-  - Limited discrepency search `-a "columngenerationheuristic_limiteddiscrepancysearch --linear-programming-solver cplex"`
+  - Greedy `-a "column-generation-heuristic-greedy --linear-programming-solver cplex"`
+  - Limited discrepency search `-a "column-generation-heuristic-limited-discrepancy-search --linear-programming-solver cplex"`
 
 - Others heuristics:
   - Random feasible solution found with a Local search `-a random`
@@ -52,14 +52,14 @@ It is possible to solve the variant where not all items have to be assigned by a
 ### Exact algorithms
 
 - Mixed-Integer Linear Programs
-  - with CBC `-a milp_cbc`
-  - with CPLEX `-a milp_cplex`
-  - with Gurobi `-a milp_gurobi`
-  - with Knitro `-a milp_knitro`
+  - with CBC `-a milp-cbc`
+  - with CPLEX `-a milp-cplex`
+  - with Gurobi `-a milp-gurobi`
+  - with Knitro `-a milp-knitro`
 
 - Constraint programming
-  - with Gecode `-a constraintprogramming_gecode`
-  - with CPLEX `-a constraintprogramming_cplex`
+  - with Gecode `-a constraint-programming-gecode`
+  - with CPLEX `-a constraint-programming-cplex`
 
 ## Usage (command line)
 
@@ -93,7 +93,7 @@ Solve:
 ```
 ```
 =====================================
-    Generalized Assignment Solver    
+     GeneralizedAssignmentSolver     
 =====================================
 
 Instance
@@ -141,8 +141,8 @@ Checker:
 
 Run benchmarks:
 ```shell
-python3 ../optimizationtools/optimizationtools/bench_run.py --algorithms "mthg -f cij" "mthg -f wij" "mthg -f cij*wij" "mthg -f -pij/wij" "mthg -f wij/ti" "mthgregret -f cij" "mthgregret -f wij" "mthgregret -f cij*wij" "mthgregret -f -pij/wij" "mthgregret -f wij/ti" "random"
-python3 ../optimizationtools/optimizationtools/bench_process.py --benchmark heuristicshort --labels "mthg -f cij" "mthg -f wij" "mthg -f cij*wij" "mthg -f -pij/wij" "mthg -f wij/ti" "mthgregret -f cij" "mthgregret -f wij" "mthgregret -f cij*wij" "mthgregret -f -pij/wij" "mthgregret -f wij/ti" "random" --timelimit 0.1
+python3 ../optimizationtools/optimizationtools/bench_run.py --algorithms "mthg -f cij" "mthg -f wij" "mthg -f cij*wij" "mthg -f -pij/wij" "mthg -f wij/ti" "mthg-regret -f cij" "mthg-regret -f wij" "mthg-regret -f cij*wij" "mthg-regret -f -pij/wij" "mthg-regret -f wij/ti" "random"
+python3 ../optimizationtools/optimizationtools/bench_process.py --benchmark heuristicshort --labels "mthg -f cij" "mthg -f wij" "mthg -f cij*wij" "mthg -f -pij/wij" "mthg -f wij/ti" "mthg-regret -f cij" "mthg-regret -f wij" "mthg-regret -f cij*wij" "mthg-regret -f -pij/wij" "mthg-regret -f wij/ti" "random" --timelimit 0.1
 ```
 
 ![heuristicshort](img/heuristicshort.png?raw=true "heuristicshort")

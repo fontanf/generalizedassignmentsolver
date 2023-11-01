@@ -1,4 +1,4 @@
-#include "generalizedassignmentsolver/algorithms/constraintprogramming_cplex.hpp"
+#include "generalizedassignmentsolver/algorithms/constraint_programming_cplex.hpp"
 
 #if CPLEX_FOUND
 

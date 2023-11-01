@@ -31,7 +31,7 @@ struct ColumnGenerationOutput: Output
     Counter number_of_added_columns = 0;
 };
 
-ColumnGenerationOutput columngeneration(
+ColumnGenerationOutput column_generation(
         const Instance& instance,
         ColumnGenerationOptionalParameters parameters = {});
 
@@ -51,7 +51,7 @@ struct ColumnGenerationHeuristicGreedyOutput: Output
     std::vector<std::vector<double>> x;
 };
 
-ColumnGenerationHeuristicGreedyOutput columngenerationheuristic_greedy(
+ColumnGenerationHeuristicGreedyOutput column_generation_heuristic_greedy(
         const Instance& instance,
         ColumnGenerationOptionalParameters parameters = {});
 
@@ -71,7 +71,7 @@ struct ColumnGenerationHeuristicLimitedDiscrepancySearchOutput: Output
     std::vector<std::vector<double>> x;
 };
 
-ColumnGenerationHeuristicLimitedDiscrepancySearchOutput columngenerationheuristic_limiteddiscrepancysearch(
+ColumnGenerationHeuristicLimitedDiscrepancySearchOutput column_generation_heuristic_limited_discrepancy_search(
         const Instance& instance,
         ColumnGenerationOptionalParameters parameters = {});
 

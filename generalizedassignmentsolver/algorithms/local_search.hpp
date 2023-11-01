@@ -14,7 +14,7 @@ struct LocalSearchOptionalParameters
     const Solution* initial_solution = nullptr;
 };
 
-Output localsearch(
+Output local_search(
         const Instance& instance,
         std::mt19937_64& generator,
         LocalSearchOptionalParameters parameters = {});

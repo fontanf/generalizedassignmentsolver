@@ -13,7 +13,7 @@ Output greedy(
         const Desirability& f,
         optimizationtools::Info info = optimizationtools::Info());
 
-Output greedyregret(
+Output greedy_regret(
         const Instance& instance,
         const Desirability& f,
         optimizationtools::Info info = optimizationtools::Info());
@@ -23,7 +23,7 @@ Output mthg(
         const Desirability& f,
         optimizationtools::Info info = optimizationtools::Info());
 
-Output mthgregret(
+Output mthg_regret(
         const Instance& instance,
         const Desirability& f,
         optimizationtools::Info info = optimizationtools::Info());
@@ -51,17 +51,17 @@ void mthg(
         const std::vector<std::pair<ItemIdx, AgentIdx>>& alternatives);
 
 
-std::vector<std::vector<AgentIdx>> greedyregret_init(
+std::vector<std::vector<AgentIdx>> greedy_regret_init(
         const Instance& instance,
         const Desirability& f);
 
-void greedyregret(
+void greedy_regret(
         Solution& solution,
         const Desirability& f,
         const std::vector<std::vector<AgentIdx>>& agents,
         const std::vector<std::vector<int>>& fixed_alternatives = {});
 
-void mthgregret(
+void mthg_regret(
         Solution& instance,
         const Desirability& f,
         const std::vector<std::vector<AgentIdx>>& agents,

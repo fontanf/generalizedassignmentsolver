@@ -1,4 +1,4 @@
-#include "generalizedassignmentsolver/algorithms/localsearch.hpp"
+#include "generalizedassignmentsolver/algorithms/local_search.hpp"
 #include "generalizedassignmentsolver/algorithms/random.hpp"
 #include "generalizedassignmentsolver/algorithms/greedy.hpp"
 
@@ -496,7 +496,7 @@ private:
 
 };
 
-Output generalizedassignmentsolver::localsearch(
+Output generalizedassignmentsolver::local_search(
         const Instance& instance,
         std::mt19937_64& generator,
         LocalSearchOptionalParameters parameters)

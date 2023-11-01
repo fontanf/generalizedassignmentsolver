@@ -255,7 +255,7 @@ void generalizedassignmentsolver::init_display(
 {
     info.os()
             << "=====================================" << std::endl
-            << "    Generalized Assignment Solver    " << std::endl
+            << "     GeneralizedAssignmentSolver     " << std::endl
             << "=====================================" << std::endl
             << std::endl
             << "Instance" << std::endl

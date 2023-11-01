@@ -1,6 +1,6 @@
 #if GECODE_FOUND
 
-#include "generalizedassignmentsolver/algorithms/constraintprogramming_gecode.hpp"
+#include "generalizedassignmentsolver/algorithms/constraint_programming_gecode.hpp"
 
 #include <gecode/int.hh>
 #include <gecode/search.hh>

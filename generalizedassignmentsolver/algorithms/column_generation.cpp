@@ -29,7 +29,7 @@
  *
  */
 
-#include "generalizedassignmentsolver/algorithms/columngeneration.hpp"
+#include "generalizedassignmentsolver/algorithms/column_generation.hpp"
 
 #include "columngenerationsolver/algorithms/greedy.hpp"
 #include "columngenerationsolver/algorithms/limited_discrepancy_search.hpp"
@@ -237,7 +237,7 @@ std::vector<Column> PricingSolver::solve_pricing(
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-ColumnGenerationOutput generalizedassignmentsolver::columngeneration(
+ColumnGenerationOutput generalizedassignmentsolver::column_generation(
         const Instance& instance,
         ColumnGenerationOptionalParameters parameters)
 {
@@ -245,7 +245,7 @@ ColumnGenerationOutput generalizedassignmentsolver::columngeneration(
     parameters.info.os()
             << "Algorithm" << std::endl
             << "---------" << std::endl
-            << "Column Generation" << std::endl
+            << "Column generation" << std::endl
             << std::endl
             << "Parameters" << std::endl
             << "----------" << std::endl
@@ -272,7 +272,7 @@ ColumnGenerationOutput generalizedassignmentsolver::columngeneration(
     return output;
 }
 
-ColumnGenerationHeuristicGreedyOutput generalizedassignmentsolver::columngenerationheuristic_greedy(
+ColumnGenerationHeuristicGreedyOutput generalizedassignmentsolver::column_generation_heuristic_greedy(
         const Instance& instance,
         ColumnGenerationOptionalParameters parameters)
 {
@@ -280,7 +280,7 @@ ColumnGenerationHeuristicGreedyOutput generalizedassignmentsolver::columngenerat
     parameters.info.os()
             << "Algorithm" << std::endl
             << "---------" << std::endl
-            << "Column Generation Heuristic - Greedy" << std::endl
+            << "Column generation heuristic - greedy" << std::endl
             << std::endl
             << "Parameters" << std::endl
             << "----------" << std::endl
@@ -311,7 +311,7 @@ ColumnGenerationHeuristicGreedyOutput generalizedassignmentsolver::columngenerat
     return output;
 }
 
-ColumnGenerationHeuristicLimitedDiscrepancySearchOutput generalizedassignmentsolver::columngenerationheuristic_limiteddiscrepancysearch(
+ColumnGenerationHeuristicLimitedDiscrepancySearchOutput generalizedassignmentsolver::column_generation_heuristic_limited_discrepancy_search(
         const Instance& instance,
         ColumnGenerationOptionalParameters parameters)
 {
@@ -319,7 +319,7 @@ ColumnGenerationHeuristicLimitedDiscrepancySearchOutput generalizedassignmentsol
     parameters.info.os()
             << "Algorithm" << std::endl
             << "---------" << std::endl
-            << "Column Generation Heuristic - Limited Discrepancy Search" << std::endl
+            << "Column generation heuristic - limited discrepancy search" << std::endl
             << std::endl
             << "Parameters" << std::endl
             << "----------" << std::endl
