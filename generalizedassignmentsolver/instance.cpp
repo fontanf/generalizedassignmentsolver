@@ -1,98 +1,13 @@
 #include "generalizedassignmentsolver/instance.hpp"
 
+#include "generalizedassignmentsolver/instance_builder.hpp"
 #include "generalizedassignmentsolver/solution.hpp"
 
 using namespace generalizedassignmentsolver;
 
-Instance::Instance(AgentIdx number_of_agents):
-    capacities_(number_of_agents, 0)
-{ }
-
-void Instance::set_capacities(
-        const std::vector<Weight>& capacities)
-{
-    for (AgentIdx agent_id = 0;
-            agent_id < (AgentIdx)capacities.size();
-            ++agent_id) {
-        set_capacity(agent_id, capacities[agent_id]);
-    }
-}
-
-void Instance::add_item()
-{
-    ItemIdx item_id = items_.size();
-    items_.push_back({});
-    items_[item_id].alternatives.resize(number_of_agents());
-    for (AgentIdx agent_id = 0;
-            agent_id < number_of_agents();
-            ++agent_id) {
-        items_[item_id].alternatives[agent_id].item_id = item_id;
-        items_[item_id].alternatives[agent_id].agent_id = agent_id;
-    }
-}
-
-void Instance::add_item(const std::vector<std::pair<Weight, Cost>>& a)
-{
-    ItemIdx item_id = number_of_items();
-    add_item();
-    for (AgentIdx agent_id = 0;
-            agent_id < (AgentIdx)a.size();
-            ++agent_id) {
-        set_alternative(item_id, agent_id, a[agent_id].first, a[agent_id].second);
-    }
-}
-
-void Instance::set_alternative(
-        ItemIdx item_id,
-        AgentIdx agent_id,
-        Weight weight,
-        Cost cost)
-{
-    // Update the weight and the cost of the alternative.
-    items_[item_id].alternatives[agent_id].weight = weight;
-    items_[item_id].alternatives[agent_id].cost = cost;
-
-    // Update the total weight of the item.
-    items_[item_id].total_weight += weight;
-    // Update the total cost of the item.
-    items_[item_id].total_cost += cost;
-
-    // Update the minimum costl of the item.
-    if (items_[item_id].i_minimum_cost != -1 && items_[item_id].minimum_cost > cost)
-        sum_of_minimum_costs_ -= items_[item_id].minimum_cost;
-    if (items_[item_id].i_minimum_cost == -1 || items_[item_id].minimum_cost > cost) {
-        items_[item_id].i_minimum_cost = agent_id;
-        items_[item_id].minimum_cost = cost;
-        sum_of_minimum_costs_ += cost;
-    }
-    // Update the minimum weight of the item.
-    if (items_[item_id].i_minimum_weight == -1 || items_[item_id].minimum_weight > weight) {
-        items_[item_id].i_minimum_weight = agent_id;
-        items_[item_id].minimum_weight = weight;
-    }
-    // Update the maximum cost of the item.
-    if (items_[item_id].maximum_cost < cost) {
-        items_[item_id].i_maximum_cost = agent_id;
-        items_[item_id].maximum_cost = cost;
-    }
-    // Update to maximum weight of the item.
-    if (items_[item_id].maximum_weight < weight) {
-        items_[item_id].i_maximum_weight = agent_id;
-        items_[item_id].maximum_weight = weight;
-    }
-
-    // Update the maximum cost of the instance.
-    if (maximum_cost_ < cost)
-        maximum_cost_ = cost;
-    // Update the maximum weight of the instance.
-    if (maximum_weight_ < weight)
-        maximum_weight_ = weight;
-    // Update the total cost of the instance.
-    total_cost_ += cost;
-}
-
-Instance::Instance(std::string instance_path, std::string format):
-    name_(instance_path)
+Instance::Instance(
+        std::string instance_path,
+        std::string format)
 {
     std::ifstream file(instance_path);
     if (!file.good()) {
@@ -118,25 +33,41 @@ void Instance::read_orlibrary(std::ifstream& file)
     AgentIdx number_of_agents;
     file >> number_of_agents >> number_of_items;
 
-    capacities_.resize(number_of_agents);
-    items_.reserve(number_of_items);
-    for (ItemPos item_id = 0; item_id < number_of_items; ++item_id)
-        add_item();
-    for (AgentIdx agent_id = 0; agent_id < number_of_agents; ++agent_id)
-        for (ItemPos item_id = 0; item_id < number_of_items; ++item_id)
-            file >> items_[item_id].alternatives[agent_id].cost;
-    for (AgentIdx agent_id = 0; agent_id < number_of_agents; ++agent_id)
-        for (ItemPos item_id = 0; item_id < number_of_items; ++item_id)
-            file >> items_[item_id].alternatives[agent_id].weight;
-    for (AgentIdx agent_id = 0; agent_id < number_of_agents; ++agent_id)
-        for (ItemPos item_id = 0; item_id < number_of_items; ++item_id)
-            set_alternative(item_id, agent_id, items_[item_id].alternatives[agent_id].weight, items_[item_id].alternatives[agent_id].cost);
+    InstanceBuilder instance_builder;
+    instance_builder.add_agents(number_of_agents);
+    instance_builder.add_items(number_of_items);
 
-    Weight t = -1;
+    Cost cost;
     for (AgentIdx agent_id = 0; agent_id < number_of_agents; ++agent_id) {
-        file >> t;
-        set_capacity(agent_id, t);
+        for (ItemPos item_id = 0; item_id < number_of_items; ++item_id) {
+            file >> cost;
+            instance_builder.set_cost(
+                    item_id,
+                    agent_id,
+                    cost);
+        }
     }
+
+    Cost weight;
+    for (AgentIdx agent_id = 0; agent_id < number_of_agents; ++agent_id) {
+        for (ItemPos item_id = 0; item_id < number_of_items; ++item_id) {
+            file >> weight;
+            instance_builder.set_weight(
+                    item_id,
+                    agent_id,
+                    weight);
+        }
+    }
+
+    Weight capacity = -1;
+    for (AgentIdx agent_id = 0; agent_id < number_of_agents; ++agent_id) {
+        file >> capacity;
+        instance_builder.set_capacity(
+                agent_id,
+                capacity);
+    }
+
+    *this = instance_builder.build();
 }
 
 void Instance::read_standard(std::ifstream& file)
@@ -145,23 +76,35 @@ void Instance::read_standard(std::ifstream& file)
     AgentIdx number_of_agents;
     file >> number_of_agents >> number_of_items;
 
-    capacities_.resize(number_of_agents);
+    InstanceBuilder instance_builder;
+    instance_builder.add_agents(number_of_agents);
+    instance_builder.add_items(number_of_items);
+
     Weight capacity = -1;
     for (AgentIdx agent_id = 0; agent_id < number_of_agents; ++agent_id) {
         file >> capacity;
-        set_capacity(agent_id, capacity);
+        instance_builder.set_capacity(
+                agent_id,
+                capacity);
     }
 
-    items_.reserve(number_of_items);
     Weight weight;
     Cost cost;
     for (ItemPos item_id = 0; item_id < number_of_items; ++item_id) {
-        add_item();
         for (AgentIdx agent_id = 0; agent_id < number_of_agents; ++agent_id) {
             file >> weight >> cost;
-            set_alternative(item_id, agent_id, weight, cost);
+            instance_builder.set_weight(
+                    item_id,
+                    agent_id,
+                    weight);
+            instance_builder.set_cost(
+                    item_id,
+                    agent_id,
+                    cost);
         }
     }
+
+    *this = instance_builder.build();
 }
 
 std::ostream& Instance::print(
@@ -172,6 +115,9 @@ std::ostream& Instance::print(
         os
             << "Number of agents:  " << number_of_agents() << std::endl
             << "Number of items:   " << number_of_items() << std::endl
+            << "Total cost:        " << total_cost() << std::endl
+            << "Maximum cost:      " << maximum_cost() << std::endl
+            << "Maximum weight:    " << maximum_weight() << std::endl
             ;
     }
 

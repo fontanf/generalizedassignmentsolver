@@ -99,11 +99,13 @@ cc_library(
         name = "generalizedassignmentsolver",
         hdrs = [
                 "instance.hpp",
+                "instance_builder.hpp",
                 "solution.hpp",
                 "desirability.hpp",
         ],
         srcs = [
                 "instance.cpp",
+                "instance_builder.cpp",
                 "solution.cpp",
                 "desirability.cpp",
         ],
@@ -112,14 +114,6 @@ cc_library(
                 "@optimizationtools//optimizationtools/utils:info",
                 "@optimizationtools//optimizationtools/utils:utils",
         ],
-        visibility = ["//visibility:public"],
-)
-
-cc_library(
-        name = "generator",
-        hdrs = ["generator.hpp"],
-        srcs = ["generator.cpp"],
-        deps = [":generalizedassignmentsolver"],
         visibility = ["//visibility:public"],
 )
 
@@ -137,14 +131,5 @@ cc_binary(
         srcs = ["checker.cpp"],
         deps = [":generalizedassignmentsolver"],
         data = ["//data:data"],
-)
-
-cc_binary(
-        name = "generator_main",
-        srcs = ["generator_main.cpp"],
-        deps = [
-                ":generator",
-                "@boost//:program_options",
-        ],
 )
 

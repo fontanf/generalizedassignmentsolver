@@ -57,7 +57,7 @@ RepairOutput generalizedassignmentsolver::repair(
     switch (parameters.initial_solution) {
     case RepairInitialSolution::CombinatorialRelaxation: {
         for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id)
-            solution.set(item_id, instance.item(item_id).i_minimum_cost);
+            solution.set(item_id, instance.item(item_id).minimum_cost_agent_id);
         output.update_bound(
                 solution.cost(),
                 std::stringstream("combinatorialrelaxation"),

@@ -54,35 +54,35 @@ struct Item
     /** Alternatives of the item. */
     std::vector<Alternative> alternatives;
 
-    /** Total weight of the item. */
-    Weight total_weight;
-
     /** Total cost of the item. */
     Cost total_cost;
 
     /** Minimum cost of the item. */
     Cost minimum_cost = -1;
 
+    /** Id of an agent of minimum cost of the item. */
+    AgentIdx minimum_cost_agent_id = -1;
+
     /** Maximum cost of the item. */
     Cost maximum_cost = -1;
 
-    /** Id of an agent of minimum cost of the item. */
-    AgentIdx i_minimum_cost = -1;
-
     /** Id of an agent of maximum cost of the item. */
-    AgentIdx i_maximum_cost = -1;
+    AgentIdx maximum_cost_agent_id = -1;
+
+    /** Total weight of the item. */
+    Weight total_weight;
 
     /** Minimum weight of the item. */
     Weight minimum_weight = -1;
 
+    /** Id of an agent of minimum weight of the item. */
+    AgentIdx minimum_weight_agent_id = -1;
+
     /** Maximum weight of the item. */
     Weight maximum_weight = -1;
 
-    /** Id of an agent of minimum weight of the item. */
-    AgentIdx i_minimum_weight = -1;
-
     /** Id of an agent of maximum weight of hte item. */
-    AgentIdx i_maximum_weight = -1;
+    AgentIdx maximum_weight_agent_id = -1;
 };
 
 /**
@@ -102,42 +102,9 @@ public:
             std::string instance_path,
             std::string format = "orlibrary");
 
-    /** Create an instance manually. */
-    Instance(AgentIdx number_of_agents);
-
-    /** Set the name of the instance. */
-    void set_name(std::string name) { name_ = name; }
-
-    /** Set the capacity of an agent. */
-    void set_capacity(
-            AgentIdx agent_id,
-            Weight capacity)
-    {
-        capacities_[agent_id] = capacity;
-    }
-
-    /** Add an item. */
-    void add_item();
-
-    /** Set the weight and the profit of assigning item 'j' to agent 'i'. */
-    void set_alternative(
-            ItemIdx item_id,
-            AgentIdx agent_id,
-            Weight weight,
-            Cost cost);
-
-    /** Add an item with its weights and costs. */
-    void add_item(const std::vector<std::pair<Weight, Cost>>& alternatives);
-
-    /** Set the capacity of all agents. */
-    void set_capacities(const std::vector<Weight>& capacities);
-
     /*
      * Getters
      */
-
-    /** Get the name of the instance. */
-    std::string name() const { return name_; }
 
     /** Get the number of items. */
     ItemIdx number_of_items() const { return items_.size(); }
@@ -159,6 +126,9 @@ public:
 
     /** Get the profit of an item when assigned to an agent. */
     inline Cost profit(ItemIdx item_id, AgentIdx agent_id) const { return items_[item_id].maximum_cost - items_[item_id].alternatives[agent_id].cost; }
+
+    /** Get the total cost of the instance. */
+    inline Cost total_cost() const { return total_cost_; }
 
     /** Get the maximum cost of the instance. */
     inline Cost maximum_cost() const { return maximum_cost_; }
@@ -190,6 +160,9 @@ private:
      * Private methods
      */
 
+    /** Create an instance manually. */
+    Instance() { }
+
     /** Read an instance in 'orlibrary' format. */
     void read_orlibrary(std::ifstream& file);
 
@@ -199,9 +172,6 @@ private:
     /*
      * Private attributes
      */
-
-    /** Name of the instance. */
-    std::string name_;
 
     /** Items. */
     std::vector<Item> items_;
@@ -220,6 +190,8 @@ private:
 
     /** Sum of the minimum cost of each item. */
     Cost sum_of_minimum_costs_ = 0;
+
+    friend class InstanceBuilder;
 
 };
 

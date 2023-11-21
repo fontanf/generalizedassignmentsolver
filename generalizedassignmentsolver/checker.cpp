@@ -9,11 +9,16 @@ int main(int, char *argv[])
     std::string instance_path = argv[1];
     std::string solution_path = argv[2];
     Instance instance(instance_path);
+    optimizationtools::Info info;
+    info.set_verbosity_level(1);
+    init_display(instance, info);
+
     Solution solution(instance, solution_path);
-    std::cout << "Item number: " << solution.number_of_items() << "/" << instance.number_of_items() << std::endl;
-    std::cout << "Overcapacity: " << solution.overcapacity() << std::endl;
-    std::cout << "Feasible: " << solution.feasible() << std::endl;
-    std::cout << "Cost: " << solution.cost() << std::endl;
+    info.os()
+            << "Solution" << std::endl
+            << "--------" << std::endl ;
+    solution.print(info.os(), info.verbosity_level());
+
     return 0;
 }
 

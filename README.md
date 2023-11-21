@@ -136,7 +136,7 @@ bazel test --compilation_mode=dbg -- //...
 
 Checker:
 ```shell
-./bazel-bin/generalizedassignmentsolver/checker data/a05100 output/best/a05100_solution.txt
+./bazel-bin/generalizedassignmentsolver/checker data/chu1997/a05100 a05100_solution.txt
 ```
 
 Run benchmarks:

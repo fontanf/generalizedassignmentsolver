@@ -6,7 +6,7 @@ namespace generalizedassignmentsolver
 {
 
 /**
- * Solution class for a Generalized Assignment Problem.
+ * Solution class for a generalized assignment problem.
  */
 class Solution
 {
@@ -14,7 +14,7 @@ class Solution
 public:
 
     /*
-     * Structures.
+     * Structures
      */
 
     struct SolutionAgent
@@ -25,7 +25,7 @@ public:
     };
 
     /*
-     * Constructors and destructor.
+     * Constructors and destructor
      */
 
     /** Create an empty solution. */
@@ -41,7 +41,7 @@ public:
             const std::vector<std::vector<ItemIdx>>& agents);
 
     /*
-     * Getters.
+     * Getters
      */
 
     /** Get the instance. */
@@ -85,7 +85,7 @@ public:
     inline AgentIdx agent(ItemIdx item_id) const { return x_[item_id]; }
 
     /*
-     * Setters.
+     * Setters
      */
 
     /**
@@ -96,7 +96,7 @@ public:
     void set(ItemIdx item_id, AgentIdx agent_id);
 
     /*
-     * Export.
+     * Export
      */
 
     /** Print the instance. */
