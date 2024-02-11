@@ -36,6 +36,11 @@ public:
             AgentIdx agent_id,
             Cost cost);
 
+    /** Read an instance from a file. */
+    void read(
+            const std::string& instance_path,
+            const std::string& format = "orlibrary");
+
     /*
      * Build
      */
@@ -48,6 +53,12 @@ private:
     /*
      * Private methods
      */
+
+    /** Read an instance in 'orlibrary' format. */
+    void read_orlibrary(std::ifstream& file);
+
+    /** Read an instance in 'standard' format. */
+    void read_standard(std::ifstream& file);
 
     /*
      * Private attributes

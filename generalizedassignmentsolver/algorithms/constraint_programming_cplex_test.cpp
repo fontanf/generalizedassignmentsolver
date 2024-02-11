@@ -7,7 +7,7 @@ using namespace generalizedassignmentsolver;
 
 Output constraintprogramming_cplex_test(Instance& instance)
 {
-    ConstraintProgrammingCplexOptionalParameters parameters;
+    ConstraintProgrammingCplexParameters parameters;
     return constraintprogramming_cplex(instance, parameters);
 }
 

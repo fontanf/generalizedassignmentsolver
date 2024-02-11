@@ -18,10 +18,8 @@ enum class RepairInitialSolution
 };
 std::istream& operator>>(std::istream& in, RepairInitialSolution& initial_solution);
 
-struct RepairOptionalParameters
+struct RepairParameters: Parameters
 {
-    optimizationtools::Info info = optimizationtools::Info();
-
     RepairInitialSolution initial_solution;
 
     Counter l = -1;
@@ -30,12 +28,9 @@ struct RepairOptionalParameters
 struct RepairOutput: Output
 {
     RepairOutput(
-            const Instance& instance,
-            optimizationtools::Info& info):
-        Output(instance, info) { }
+            const Instance& instance):
+        Output(instance) { }
 
-    void print_statistics(
-            optimizationtools::Info& info) const override;
 
     /** Number of iterations. */
     Counter iterations = 0;
@@ -44,7 +39,7 @@ struct RepairOutput: Output
 RepairOutput repair(
         const Instance& instance,
         std::mt19937_64& generator,
-        RepairOptionalParameters parameters = {});
+        const RepairParameters& parameters = {});
 
 }
 

@@ -1,5 +1,7 @@
 #include "generalizedassignmentsolver/instance_builder.hpp"
 
+#include <fstream>
+
 using namespace generalizedassignmentsolver;
 
 void InstanceBuilder::add_agents(AgentIdx number_of_agents)
@@ -49,6 +51,104 @@ void InstanceBuilder::set_cost(
         Cost cost)
 {
     instance_.items_[item_id].alternatives[agent_id].cost = cost;
+}
+
+void InstanceBuilder::read(
+        const std::string& instance_path,
+        const std::string& format)
+{
+    std::ifstream file(instance_path);
+    if (!file.good()) {
+        throw std::runtime_error(
+                "Unable to open file \"" + instance_path + "\".");
+    }
+
+    if (format == "orlibrary" || format == "") {
+        read_orlibrary(file);
+    } else if (format == "standard") {
+        read_standard(file);
+    } else {
+        throw std::invalid_argument(
+                "Unknown instance format \"" + format + "\".");
+    }
+
+    file.close();
+}
+
+void InstanceBuilder::read_orlibrary(
+        std::ifstream& file)
+{
+    ItemIdx number_of_items;
+    AgentIdx number_of_agents;
+    file >> number_of_agents >> number_of_items;
+
+    add_agents(number_of_agents);
+    add_items(number_of_items);
+
+    Cost cost;
+    for (AgentIdx agent_id = 0; agent_id < number_of_agents; ++agent_id) {
+        for (ItemPos item_id = 0; item_id < number_of_items; ++item_id) {
+            file >> cost;
+            set_cost(
+                    item_id,
+                    agent_id,
+                    cost);
+        }
+    }
+
+    Cost weight;
+    for (AgentIdx agent_id = 0; agent_id < number_of_agents; ++agent_id) {
+        for (ItemPos item_id = 0; item_id < number_of_items; ++item_id) {
+            file >> weight;
+            set_weight(
+                    item_id,
+                    agent_id,
+                    weight);
+        }
+    }
+
+    Weight capacity = -1;
+    for (AgentIdx agent_id = 0; agent_id < number_of_agents; ++agent_id) {
+        file >> capacity;
+        set_capacity(
+                agent_id,
+                capacity);
+    }
+}
+
+void InstanceBuilder::read_standard(
+        std::ifstream& file)
+{
+    ItemIdx number_of_items;
+    AgentIdx number_of_agents;
+    file >> number_of_agents >> number_of_items;
+
+    add_agents(number_of_agents);
+    add_items(number_of_items);
+
+    Weight capacity = -1;
+    for (AgentIdx agent_id = 0; agent_id < number_of_agents; ++agent_id) {
+        file >> capacity;
+        set_capacity(
+                agent_id,
+                capacity);
+    }
+
+    Weight weight;
+    Cost cost;
+    for (ItemPos item_id = 0; item_id < number_of_items; ++item_id) {
+        for (AgentIdx agent_id = 0; agent_id < number_of_agents; ++agent_id) {
+            file >> weight >> cost;
+            set_weight(
+                    item_id,
+                    agent_id,
+                    weight);
+            set_cost(
+                    item_id,
+                    agent_id,
+                    cost);
+        }
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

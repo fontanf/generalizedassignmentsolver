@@ -1,117 +1,15 @@
 #include "generalizedassignmentsolver/instance.hpp"
 
-#include "generalizedassignmentsolver/instance_builder.hpp"
-#include "generalizedassignmentsolver/solution.hpp"
+#include <fstream>
+#include <iomanip>
 
 using namespace generalizedassignmentsolver;
 
-Instance::Instance(
-        std::string instance_path,
-        std::string format)
-{
-    std::ifstream file(instance_path);
-    if (!file.good()) {
-        throw std::runtime_error(
-                "Unable to open file \"" + instance_path + "\".");
-    }
-
-    if (format == "orlibrary") {
-        read_orlibrary(file);
-    } else if (format == "standard") {
-        read_standard(file);
-    } else {
-        throw std::invalid_argument(
-                "Unknown instance format \"" + format + "\".");
-    }
-
-    file.close();
-}
-
-void Instance::read_orlibrary(std::ifstream& file)
-{
-    ItemIdx number_of_items;
-    AgentIdx number_of_agents;
-    file >> number_of_agents >> number_of_items;
-
-    InstanceBuilder instance_builder;
-    instance_builder.add_agents(number_of_agents);
-    instance_builder.add_items(number_of_items);
-
-    Cost cost;
-    for (AgentIdx agent_id = 0; agent_id < number_of_agents; ++agent_id) {
-        for (ItemPos item_id = 0; item_id < number_of_items; ++item_id) {
-            file >> cost;
-            instance_builder.set_cost(
-                    item_id,
-                    agent_id,
-                    cost);
-        }
-    }
-
-    Cost weight;
-    for (AgentIdx agent_id = 0; agent_id < number_of_agents; ++agent_id) {
-        for (ItemPos item_id = 0; item_id < number_of_items; ++item_id) {
-            file >> weight;
-            instance_builder.set_weight(
-                    item_id,
-                    agent_id,
-                    weight);
-        }
-    }
-
-    Weight capacity = -1;
-    for (AgentIdx agent_id = 0; agent_id < number_of_agents; ++agent_id) {
-        file >> capacity;
-        instance_builder.set_capacity(
-                agent_id,
-                capacity);
-    }
-
-    *this = instance_builder.build();
-}
-
-void Instance::read_standard(std::ifstream& file)
-{
-    ItemIdx number_of_items;
-    AgentIdx number_of_agents;
-    file >> number_of_agents >> number_of_items;
-
-    InstanceBuilder instance_builder;
-    instance_builder.add_agents(number_of_agents);
-    instance_builder.add_items(number_of_items);
-
-    Weight capacity = -1;
-    for (AgentIdx agent_id = 0; agent_id < number_of_agents; ++agent_id) {
-        file >> capacity;
-        instance_builder.set_capacity(
-                agent_id,
-                capacity);
-    }
-
-    Weight weight;
-    Cost cost;
-    for (ItemPos item_id = 0; item_id < number_of_items; ++item_id) {
-        for (AgentIdx agent_id = 0; agent_id < number_of_agents; ++agent_id) {
-            file >> weight >> cost;
-            instance_builder.set_weight(
-                    item_id,
-                    agent_id,
-                    weight);
-            instance_builder.set_cost(
-                    item_id,
-                    agent_id,
-                    cost);
-        }
-    }
-
-    *this = instance_builder.build();
-}
-
-std::ostream& Instance::print(
+std::ostream& Instance::format(
         std::ostream& os,
-        int verbose) const
+        int verbosity_level) const
 {
-    if (verbose >= 1) {
+    if (verbosity_level >= 1) {
         os
             << "Number of agents:  " << number_of_agents() << std::endl
             << "Number of items:   " << number_of_items() << std::endl
@@ -121,7 +19,7 @@ std::ostream& Instance::print(
             ;
     }
 
-    if (verbose >= 2) {
+    if (verbosity_level >= 2) {
         os
             << std::endl
             << std::setw(12) << "Agent"
@@ -193,19 +91,4 @@ void Instance::write(std::string instance_path)
         file << capacity(agent_id) << " ";
     file << std::endl;
     file.close();
-}
-
-void generalizedassignmentsolver::init_display(
-        const Instance& instance,
-        optimizationtools::Info& info)
-{
-    info.os()
-            << "=====================================" << std::endl
-            << "     GeneralizedAssignmentSolver     " << std::endl
-            << "=====================================" << std::endl
-            << std::endl
-            << "Instance" << std::endl
-            << "--------" << std::endl;
-    instance.print(info.os(), info.verbosity_level());
-    info.os() << std::endl;
 }

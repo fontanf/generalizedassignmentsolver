@@ -5,35 +5,67 @@
 namespace generalizedassignmentsolver
 {
 
-struct ColumnGenerationOptionalParameters
+struct ColumnGenerationParameters: Parameters
 {
-    optimizationtools::Info info = optimizationtools::Info();
-
     std::string linear_programming_solver = "CLP";
+
+
+    virtual int format_width() const override { return 37; }
+
+    virtual void format(std::ostream& os) const override
+    {
+        Parameters::format(os);
+        int width = format_width();
+        os
+            << std::setw(width) << std::left << "Linear programming solver: " << linear_programming_solver << std::endl
+            ;
+    }
+
+    virtual nlohmann::json to_json() const override
+    {
+        nlohmann::json json = Parameters::to_json();
+        json.merge_patch({
+                {"LinearProgrammingSolver", linear_programming_solver},
+                });
+        return json;
+    }
 };
 
 struct ColumnGenerationOutput: Output
 {
     ColumnGenerationOutput(
-            const Instance& instance,
-            optimizationtools::Info& info):
-        Output(instance, info) { }
+            const Instance& instance):
+        Output(instance) { }
 
-    void print_statistics(
-            optimizationtools::Info& info) const override;
 
-    std::vector<double> solution;
-
-    std::vector<std::vector<double>> x;
+    std::vector<std::vector<double>> relaxation_solution;
 
     Counter number_of_iterations = 0;
 
     Counter number_of_added_columns = 0;
+
+
+    virtual void format(std::ostream& os) const override
+    {
+        Output::format(os);
+        int width = format_width();
+        os
+            << std::setw(width) << std::left << "Number of iterations: " << number_of_iterations << std::endl
+            ;
+    }
+
+    virtual nlohmann::json to_json() const override
+    {
+        nlohmann::json json = Output::to_json();
+        json.merge_patch({
+                {"NumberOfIterations", number_of_iterations}});
+        return json;
+    }
 };
 
-ColumnGenerationOutput column_generation(
+const ColumnGenerationOutput column_generation(
         const Instance& instance,
-        ColumnGenerationOptionalParameters parameters = {});
+        const ColumnGenerationParameters& parameters = {});
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -42,18 +74,16 @@ ColumnGenerationOutput column_generation(
 struct ColumnGenerationHeuristicGreedyOutput: Output
 {
     ColumnGenerationHeuristicGreedyOutput(
-            const Instance& instance,
-            optimizationtools::Info& info):
-        Output(instance, info) { }
+            const Instance& instance):
+        Output(instance) { }
 
-    std::vector<double> solution;
 
-    std::vector<std::vector<double>> x;
+    std::vector<std::vector<double>> relaxation_solution;
 };
 
-ColumnGenerationHeuristicGreedyOutput column_generation_heuristic_greedy(
+const ColumnGenerationHeuristicGreedyOutput column_generation_heuristic_greedy(
         const Instance& instance,
-        ColumnGenerationOptionalParameters parameters = {});
+        const ColumnGenerationParameters& parameters = {});
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -62,18 +92,15 @@ ColumnGenerationHeuristicGreedyOutput column_generation_heuristic_greedy(
 struct ColumnGenerationHeuristicLimitedDiscrepancySearchOutput: Output
 {
     ColumnGenerationHeuristicLimitedDiscrepancySearchOutput(
-            const Instance& instance,
-            optimizationtools::Info& info):
-        Output(instance, info) { }
+            const Instance& instance):
+        Output(instance) { }
 
-    std::vector<double> solution;
 
-    std::vector<std::vector<double>> x;
+    std::vector<std::vector<double>> relaxation_solution;
 };
 
-ColumnGenerationHeuristicLimitedDiscrepancySearchOutput column_generation_heuristic_limited_discrepancy_search(
+const ColumnGenerationHeuristicLimitedDiscrepancySearchOutput column_generation_heuristic_limited_discrepancy_search(
         const Instance& instance,
-        ColumnGenerationOptionalParameters parameters = {});
+        const ColumnGenerationParameters& parameters = {});
 
 }
-

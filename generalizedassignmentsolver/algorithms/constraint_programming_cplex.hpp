@@ -7,14 +7,13 @@
 namespace generalizedassignmentsolver
 {
 
-struct ConstraintProgrammingCplexOptionalParameters
+struct ConstraintProgrammingCplexParameters: Parameters
 {
-    optimizationtools::Info info = optimizationtools::Info();
 };
 
-Output constraintprogramming_cplex(
+const Output constraintprogramming_cplex(
         const Instance& instance,
-        ConstraintProgrammingCplexOptionalParameters parameters = {});
+        const ConstraintProgrammingCplexParameters& parameters = {});
 
 }
 

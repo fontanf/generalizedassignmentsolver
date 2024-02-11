@@ -1,5 +1,7 @@
 #include "generalizedassignmentsolver/algorithms/lagrelax_lbfgs.hpp"
 
+#include "generalizedassignmentsolver/algorithm_formatter.hpp"
+
 #include "knapsacksolver/algorithms/dynamic_programming_primal_dual.hpp"
 #include "knapsacksolver/algorithms/dynamic_programming_bellman.hpp"
 
@@ -25,7 +27,7 @@ public:
 
     LagRelaxAssignmentLbfgsFunction(
             const Instance& instance,
-            LagRelaxAssignmentLbfgsOptionalParameters& p,
+            LagRelaxAssignmentLbfgsParameters& p,
             ItemIdx number_of_unfixed_items,
             const std::vector<ItemIdx>& item_indices):
         instance_(instance), p_(p), item_indices_(item_indices), grad_(number_of_unfixed_items)
@@ -55,7 +57,7 @@ public:
 private:
 
     const Instance& instance_;
-    LagRelaxAssignmentLbfgsOptionalParameters& p_;
+    LagRelaxAssignmentLbfgsParameters& p_;
     /** item_indices_[item_id] is the index of item j in mu and grad_. */
     const std::vector<ItemIdx>& item_indices_;
 
@@ -99,7 +101,7 @@ double LagRelaxAssignmentLbfgsFunction::f(const column_vector& mu)
         }
 
         // Solve knapsack instance
-        //auto kp_output = knapsacksolver::dynamic_programming_bellman_array_all(kp_instance, Info().set_verbose(false));
+        //auto kp_output = knapsacksolver::dynamic_programming_bellman_array_all(kp_instance, kp_parameters);
         auto kp_output = knapsacksolver::dynamic_programming_primal_dual(kp_instance);
         //std::cout << "i " << i << " opt " << kp_output.solution.profit() << std::endl;
 
@@ -115,18 +117,14 @@ double LagRelaxAssignmentLbfgsFunction::f(const column_vector& mu)
     return l;
 }
 
-LagRelaxAssignmentLbfgsOutput generalizedassignmentsolver::lagrelax_assignment_lbfgs(
+const LagRelaxAssignmentLbfgsOutput generalizedassignmentsolver::lagrelax_assignment_lbfgs(
         const Instance& instance,
-        LagRelaxAssignmentLbfgsOptionalParameters parameters)
+        const LagRelaxAssignmentLbfgsParameters& parameters)
 {
-    init_display(instance, parameters.info);
-    parameters.info.os()
-            << "Algorithm" << std::endl
-            << "---------" << std::endl
-            << "Lagrangian Relaxation - Assignment Constraints (LBFGS)" << std::endl
-            << std::endl;
-
-    LagRelaxAssignmentLbfgsOutput output(instance, parameters.info);
+    LagRelaxAssignmentLbfgsOutput o output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("Lagrangian relaxation - assignment constraints (LBFGS)");
+    algorithm_formatter.print_header();
 
     // Compute c0, item_indices and number_of_unfixed_items
     ItemIdx item_idx = 0;
@@ -163,7 +161,7 @@ LagRelaxAssignmentLbfgsOutput generalizedassignmentsolver::lagrelax_assignment_l
     auto f   = [&func](const column_vector& x) { return func.f(x); };
     auto def = [&func](const column_vector& x) { return func.der(x); };
     auto stop_strategy = objective_delta_stop_strategy(0.0001);
-    //auto stop_strategy = gradient_norm_stop_strategy().be_verbose(),
+    //auto stop_strategy = gradient_norm_stop_strategy().be_verbosity_level(),
     double res = find_max(
             lbfgs_search_strategy(256),
             stop_strategy,
@@ -174,13 +172,13 @@ LagRelaxAssignmentLbfgsOutput generalizedassignmentsolver::lagrelax_assignment_l
 
     // Compute output parameters
     Cost lb = c0 + std::ceil(res - FFOT_TOL);
-    output.update_bound(lb, std::stringstream(""), parameters.info);
+    algorithm_formatter.update_bound(lb, "");
     output.multipliers.resize(instance.number_of_items());
     for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id)
         if (item_indices[item_id] >= 0)
             output.multipliers[item_id] = mu(item_indices[item_id]);
 
-    output.algorithm_end(parameters.info);
+    algorithm_formatter.end();
     return output;
 }
 
@@ -252,18 +250,14 @@ double LagRelaxKnapsackLbfgsFunction::f(const column_vector& mu)
     return l;
 }
 
-LagRelaxKnapsackLbfgsOutput generalizedassignmentsolver::lagrelax_knapsack_lbfgs(
+const LagRelaxKnapsackLbfgsOutput generalizedassignmentsolver::lagrelax_knapsack_lbfgs(
         const Instance& instance,
-        optimizationtools::Info info)
+        const Parameters& parameters)
 {
-    init_display(instance, info);
-    info.os()
-            << "Algorithm" << std::endl
-            << "---------" << std::endl
-            << "Lagrangian Relaxation - Knapsack Constraints (LBFGS)" << std::endl
-            << std::endl;
-
-    LagRelaxKnapsackLbfgsOutput output(instance, info);
+    LagRelaxKnapsackLbfgsOutput output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("Lagrangian relaxation - knapsack constraints (LBFGS)");
+    algorithm_formatter.print_header();
 
     // Initialize multipliers
     column_vector mu(instance.number_of_agents());
@@ -294,7 +288,7 @@ LagRelaxKnapsackLbfgsOutput generalizedassignmentsolver::lagrelax_knapsack_lbfgs
 
     // Compute output parameters
     Cost lb = std::ceil(res - FFOT_TOL);
-    output.update_bound(lb, std::stringstream(""), info);
+    algorithm_formatter.update_bound(lb, "");
     output.multipliers.resize(instance.number_of_agents());
     for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id)
         output.multipliers[agent_id] = mu(agent_id);
@@ -304,7 +298,6 @@ LagRelaxKnapsackLbfgsOutput generalizedassignmentsolver::lagrelax_knapsack_lbfgs
         output.x[item_id][func.agent(item_id)] = 1;
     }
 
-    output.algorithm_end(info);
+    algorithm_formatter.end();
     return output;
 }
-

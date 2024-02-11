@@ -7,7 +7,7 @@ using namespace generalizedassignmentsolver;
 
 Output constraintprogramming_gecode_test(Instance& instance)
 {
-    ConstraintProgrammingGecodeOptionalParameters parameters;
+    ConstraintProgrammingGecodeParameters parameters;
     return constraintprogramming_gecode(instance, parameters);
 }
 

@@ -89,7 +89,7 @@ bazel build \
 
 Solve:
 ```shell
-./bazel-bin/generalizedassignmentsolver/main -v 1 -a 'mthg -f -pij/wij' -i "data/chu1997/a05100" -o "a05100_output.json" -c "a05100_solution.txt"
+./bazel-bin/generalizedassignmentsolver/main --verbosity-level 1 --algorithm mthg --desirability "-pij/wij" --input "data/chu1997/a05100" --output "a05100_output.json" --certificate "a05100_solution.txt"
 ```
 ```
 =====================================
@@ -98,8 +98,11 @@ Solve:
 
 Instance
 --------
-Number of agents:         5
-Number of items:          100
+Number of agents:  5
+Number of items:   100
+Total cost:        15634
+Maximum cost:      50
+Maximum weight:    25
 
 Algorithm
 ---------
@@ -107,12 +110,21 @@ MTHG
 
 Parameters
 ----------
-Desirability:  -pij/wij
+Time limit:            inf
+Messages
+    Verbosity level:   1
+    Standard output:   1
+    File path:         
+    # streams:         0
+Logger
+    Has logger:        0
+    Standard error:    0
+    File path:         
 
-       T (s)          UB          LB         GAP     GAP (%)                 Comment
-       -----          --          --         ---     -------                 -------
+    Time (s)       Value       Bound         Gap     Gap (%)                 Comment
+    --------       -----       -----         ---     -------                 -------
        0.000         inf        1694         inf         inf                        
-       0.000        1713        1694          19        1.12                        
+       0.001        1713        1694          19        1.12                        
 
 Final statistics
 ----------------
@@ -120,7 +132,7 @@ Value:                        1713
 Bound:                        1694
 Absolute optimality gap:      19
 Relative optimality gap (%):  1.12161
-Time (s):                     0.000140967
+Time (s):                     0.0082436
 
 Solution
 --------

@@ -1,5 +1,6 @@
 #include "generalizedassignmentsolver/algorithms/repair.hpp"
 
+#include "generalizedassignmentsolver/algorithm_formatter.hpp"
 #include "generalizedassignmentsolver/algorithms/lagrelax_lbfgs.hpp"
 #if CLP_FOUND
 #include "generalizedassignmentsolver/algorithms/linrelax_clp.hpp"
@@ -14,15 +15,6 @@
 #include <vector>
 
 using namespace generalizedassignmentsolver;
-
-void RepairOutput::print_statistics(
-        optimizationtools::Info& info) const
-{
-    if (info.verbosity_level() >= 1) {
-        info.os() << "Number of iterations:         " << iterations << std::endl;
-    }
-    info.add_to_json("Algorithm", "NumberOfIterations", iterations);
-}
 
 std::istream& generalizedassignmentsolver::operator>>(std::istream& in, RepairInitialSolution& initial_solution)
 {
@@ -49,25 +41,27 @@ std::istream& generalizedassignmentsolver::operator>>(std::istream& in, RepairIn
 RepairOutput generalizedassignmentsolver::repair(
         const Instance& instance,
         std::mt19937_64& generator,
-        RepairOptionalParameters parameters)
+        const RepairParameters& parameters)
 {
-    RepairOutput output(instance, parameters.info);
+    RepairOutput output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("Repair");
+    algorithm_formatter.print_header();
 
     Solution solution(instance);
     switch (parameters.initial_solution) {
     case RepairInitialSolution::CombinatorialRelaxation: {
         for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id)
             solution.set(item_id, instance.item(item_id).minimum_cost_agent_id);
-        output.update_bound(
+        algorithm_formatter.update_bound(
                 solution.cost(),
-                std::stringstream("combinatorialrelaxation"),
-                parameters.info);
+                "combinatorial relaxation");
         break;
     } case RepairInitialSolution::LagrangianRelaxationKnapsackLbfgs: {
         auto output_lagrelax_knapsack_lbfgs = lagrelax_knapsack_lbfgs(instance);
-        output.update_bound(
+        algorithm_formatter.update_bound(
                 output_lagrelax_knapsack_lbfgs.bound,
-                std::stringstream("lagrangianrelaxation_knapsack"), parameters.info);
+                "lagrangian relaxation knapsack");
         for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id) {
             for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id) {
                 if (output_lagrelax_knapsack_lbfgs.x[item_id][agent_id] > 0.5) {
@@ -97,13 +91,12 @@ RepairOutput generalizedassignmentsolver::repair(
 #endif
 #if CPLEX_FOUND
     } case RepairInitialSolution::LinearRelaxationCplex: {
-        MilpCplexOptionalParameters parameters_linearrelaxation_cplex;
+        MilpCplexParameters parameters_linearrelaxation_cplex;
         parameters_linearrelaxation_cplex.only_linear_relaxation = true;
         auto output_linearrelaxation_cplex = milp_cplex(instance, parameters_linearrelaxation_cplex);
-        output.update_bound(
+        algorithm_formatter.update_bound(
                 output_linearrelaxation_cplex.bound,
-                std::stringstream("linearrelaxation_cplex"),
-                parameters.info);
+                "linear relaxation cplex");
         for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id) {
             AgentIdx agent_id_best = -1;
             Cost c_best = -1;
@@ -123,7 +116,7 @@ RepairOutput generalizedassignmentsolver::repair(
     }
 
     if (parameters.l == -1) {
-        while (solution.overcapacity() > 0 && !parameters.info.needs_to_end()) {
+        while (solution.overcapacity() > 0 && !parameters.timer.needs_to_end()) {
             //std::cout << "cost " << solution.cost() << " oc " << solution.overcapacity() << std::endl;
             ItemIdx item_id_1_best = -1;
             ItemIdx item_id_2_best = -1;
@@ -194,7 +187,7 @@ RepairOutput generalizedassignmentsolver::repair(
         ItemIdx agent_id_2_best = -1;
         Cost v_best = -1;
         Counter it = 0;
-        while (solution.overcapacity() > 0 && !parameters.info.needs_to_end()) {
+        while (solution.overcapacity() > 0 && !parameters.timer.needs_to_end()) {
             Counter x = dis_ss(generator);
             if (x <= instance.number_of_agents() * instance.number_of_items()) { // shift
                 ItemIdx item_id = dis_j(generator);
@@ -259,8 +252,8 @@ RepairOutput generalizedassignmentsolver::repair(
 
     }
 
-    output.update_solution(solution, std::stringstream(""), parameters.info);
-    output.algorithm_end(parameters.info);
+    algorithm_formatter.update_solution(solution, "");
+
+    algorithm_formatter.end();
     return output;
 }
-

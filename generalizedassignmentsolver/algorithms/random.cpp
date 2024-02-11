@@ -1,9 +1,9 @@
 #include "generalizedassignmentsolver/algorithms/random.hpp"
 
-#include <set>
+#include "generalizedassignmentsolver/algorithm_formatter.hpp"
+
 #include <random>
 #include <algorithm>
-#include <vector>
 
 using namespace generalizedassignmentsolver;
 
@@ -21,16 +21,12 @@ Solution generalizedassignmentsolver::random_infeasible(
 Output generalizedassignmentsolver::random(
         const Instance& instance,
         std::mt19937_64& generator,
-        optimizationtools::Info info)
+        const Parameters& parameters)
 {
-    init_display(instance, info);
-    info.os()
-            << "Algorithm" << std::endl
-            << "---------" << std::endl
-            << "Random" << std::endl
-            << std::endl;
-
-    Output output(instance, info);
+    Output output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("Random");
+    algorithm_formatter.print_header();
 
     Solution solution = random_infeasible(instance, generator);
     std::uniform_int_distribution<Counter> dis_ss(1, instance.number_of_items() * instance.number_of_agents() + (instance.number_of_items() * (instance.number_of_items() + 1)) / 2);
@@ -42,7 +38,7 @@ Output generalizedassignmentsolver::random(
     Counter it_max = 2 * (instance.number_of_items() * instance.number_of_agents() + (instance.number_of_items() * (instance.number_of_items() + 1)) / 2);
     Counter it_without_change = 0;
 
-    while (it_without_change < it_max && !info.needs_to_end()) {
+    while (it_without_change < it_max && !parameters.timer.needs_to_end()) {
         Counter p = dis_ss(generator);
         if (p <= instance.number_of_agents() * instance.number_of_items()) { // shift
             ItemIdx item_id = dis_j(generator);
@@ -78,11 +74,14 @@ Output generalizedassignmentsolver::random(
             }
         }
         if (solution.overcapacity() == 0) {
-            output.update_solution(solution, std::stringstream(""), info);
-            return output.algorithm_end(info);
+            algorithm_formatter.update_solution(solution, "");
+
+            algorithm_formatter.end();
+            return output;
         }
     }
 
-    return output.algorithm_end(info);
+    algorithm_formatter.end();
+    return output;
 }
 

@@ -1,12 +1,11 @@
 #include "generalizedassignmentsolver/algorithms/local_search.hpp"
-#include "generalizedassignmentsolver/algorithms/random.hpp"
-#include "generalizedassignmentsolver/algorithms/greedy.hpp"
+
+#include "generalizedassignmentsolver/algorithm_formatter.hpp"
 
 #include "localsearchsolver/best_first_local_search.hpp"
 
 #include "optimizationtools/containers/indexed_set.hpp"
 
-#include <set>
 #include <random>
 #include <algorithm>
 #include <vector>
@@ -496,55 +495,51 @@ private:
 
 };
 
-Output generalizedassignmentsolver::local_search(
+const generalizedassignmentsolver::Output generalizedassignmentsolver::local_search(
         const Instance& instance,
         std::mt19937_64& generator,
-        LocalSearchOptionalParameters parameters)
+        const LocalSearchParameters& parameters)
 {
-    init_display(instance, parameters.info);
-    parameters.info.os()
-            << "Algorithm" << std::endl
-            << "---------" << std::endl
-            << "Local Search" << std::endl
-            << std::endl;
-
-    Output output(instance, parameters.info);
+    Output output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("Local search");
+    algorithm_formatter.print_header();
 
     // Create LocalScheme.
     LocalScheme::Parameters parameters_local_scheme;
     LocalScheme local_scheme(instance, parameters_local_scheme);
 
     // Run best first local search.
-    BestFirstLocalSearchOptionalParameters<LocalScheme> parameters_bfls;
-    parameters_bfls.info.set_verbosity_level(0);
-    parameters_bfls.info.set_time_limit(parameters.info.remaining_time());
-    parameters_bfls.number_of_threads_1 = 1;
-    parameters_bfls.number_of_threads_2 = parameters.number_of_threads;
+    BestFirstLocalSearchParameters<LocalScheme> lssbfls_parameters;
+    lssbfls_parameters.verbosity_level = 0;
+    lssbfls_parameters.timer = parameters.timer;
+    lssbfls_parameters.number_of_threads_1 = 1;
+    lssbfls_parameters.number_of_threads_2 = parameters.number_of_threads;
     if (parameters.initial_solution == nullptr) {
-        parameters_bfls.initial_solution_ids = std::vector<Counter>(
-                parameters_bfls.number_of_threads_2, 0);
+        lssbfls_parameters.initial_solution_ids = std::vector<Counter>(
+                lssbfls_parameters.number_of_threads_2, 0);
     } else {
         LocalScheme::Solution solution = local_scheme.solution(*parameters.initial_solution, generator);
-        parameters_bfls.initial_solution_ids = {};
-        parameters_bfls.initial_solutions = {solution};
+        lssbfls_parameters.initial_solution_ids = {};
+        lssbfls_parameters.initial_solutions = {solution};
     }
-    parameters_bfls.new_solution_callback
-        = [&instance, &parameters, &output](
-                const LocalScheme::Solution& solution)
+    lssbfls_parameters.new_solution_callback
+        = [&instance, &algorithm_formatter](
+                const localsearchsolver::Output<LocalScheme>& lss_output)
         {
-            Solution sol(instance);
+            const LocalScheme::Solution& lss_solution = lss_output.solution_pool.best();
+            Solution solution(instance);
             for (ItemIdx item_id = 0;
                     item_id < instance.number_of_items();
                     ++item_id) {
-                AgentIdx agent_id = solution.agents[item_id];
-                sol.set(item_id, agent_id);
+                AgentIdx agent_id = lss_solution.agents[item_id];
+                solution.set(item_id, agent_id);
             }
             std::stringstream ss;
-            output.update_solution(sol, ss, parameters.info);
+            algorithm_formatter.update_solution(solution, "");
         };
-    best_first_local_search(local_scheme, parameters_bfls);
+    best_first_local_search(local_scheme, lssbfls_parameters);
 
-    return output.algorithm_end(parameters.info);
+    algorithm_formatter.end();
+    return output;
 }
-
-

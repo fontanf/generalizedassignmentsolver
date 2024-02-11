@@ -20,7 +20,7 @@ class GapGecode: public IntMinimizeSpace
 
 public:
 
-    GapGecode(const Instance& instance, ConstraintProgrammingGecodeOptionalParameters& p):
+    GapGecode(const Instance& instance, ConstraintProgrammingGecodeParameters& p):
         instance_(instance),
         p_(p),
         xij0_(*this, instance.number_of_items() * instance.number_of_agents(), 0, 1),
@@ -111,7 +111,7 @@ public:
 private:
 
     const Instance& instance_;
-    ConstraintProgrammingGecodeOptionalParameters& p_;
+    ConstraintProgrammingGecodeParameters& p_;
     std::vector<IntArgs> weights_;
     std::vector<IntArgs> costs_;
     BoolVarArray xij0_;
@@ -122,21 +122,19 @@ private:
 
 };
 
-Output generalizedassignmentsolver::constraintprogramming_gecode(
+const Output generalizedassignmentsolver::constraintprogramming_gecode(
         const Instance& instance,
-        ConstraintProgrammingGecodeOptionalParameters parameters)
+        const ConstraintProgrammingGecodeParameters& parameters)
 {
-    init_display(instance, parameters.info);
-    parameters.info.os()
-            << "Algorithm" << std::endl
-            << "---------" << std::endl
-            << "Constraint Programming (Gecode)" << std::endl
-            << std::endl;
+    Output output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("Constraint programming (Gecode));
+    algorithm_formatter.print_header();
 
-    Output output(instance, parameters.info);
-
-    if (instance.number_of_items() == 0)
-        return output.algorithm_end(parameters.info);
+    if (instance.number_of_items() == 0) {
+        algorithm_formatter.end();
+        return output;
+    }
 
     GapGecode model(instance, parameters);
     //Gist::bab(&model);
@@ -144,8 +142,8 @@ Output generalizedassignmentsolver::constraintprogramming_gecode(
     Search::Options options;
 
     // Time limit
-    if (parameters.info.time_limit != std::numeric_limits<double>::infinity()) {
-        Search::Stop* stoptime = Search::Stop::time(parameters.info.time_limit * 1000);
+    if (parameters.timer.remaining_time() != std::numeric_limits<double>::infinity()) {
+        Search::Stop* stoptime = Search::Stop::time(parameters.timer.remaining_time() * 1000);
         options.stop = stoptime;
     }
 
@@ -159,16 +157,17 @@ Output generalizedassignmentsolver::constraintprogramming_gecode(
                 item_id++) {
             sol_curr.set(item_id, sol_ptr->agent(item_id));
         }
-        output.update_solution(sol_curr, std::stringstream(""), parameters.info);
+        algorithm_formatter.update_solution(sol_curr, "");
         delete sol_ptr;
     }
 
-    if (!parameters.info.needs_to_end()) {
+    if (!parameters.timer.needs_to_end()) {
         Cost lb = (output.solution.feasible())? output.solution.cost(): instance.bound();
-        output.update_bound(lb, std::stringstream(""), parameters.info);
+        algorithm_formatter.update_bound(lb, "");
     }
 
-    return output.algorithm_end(parameters.info);
+    algorithm_formatter.end();
+    return output;
 }
 
 #endif

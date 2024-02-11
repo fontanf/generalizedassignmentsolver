@@ -102,16 +102,17 @@ cc_library(
                 "instance_builder.hpp",
                 "solution.hpp",
                 "desirability.hpp",
+                "algorithm_formatter.hpp",
         ],
         srcs = [
                 "instance.cpp",
                 "instance_builder.cpp",
                 "solution.cpp",
                 "desirability.cpp",
+                "algorithm_formatter.cpp",
         ],
         copts = STDCPP,
         deps = [
-                "@optimizationtools//optimizationtools/utils:info",
                 "@optimizationtools//optimizationtools/utils:utils",
         ],
         visibility = ["//visibility:public"],
@@ -121,8 +122,20 @@ cc_binary(
         name = "main",
         srcs = ["main.cpp"],
         deps = [
-                "//generalizedassignmentsolver/algorithms:algorithms",
+                "//generalizedassignmentsolver/algorithms:greedy",
+                "//generalizedassignmentsolver/algorithms:random",
+                "//generalizedassignmentsolver/algorithms:milp_cbc",
+                "//generalizedassignmentsolver/algorithms:milp_cplex",
+                "//generalizedassignmentsolver/algorithms:milp_gurobi",
+                "//generalizedassignmentsolver/algorithms:milp_knitro",
+                "//generalizedassignmentsolver/algorithms:local_search",
+                "//generalizedassignmentsolver/algorithms:column_generation",
+                "@boost//:program_options",
         ],
+        linkopts = select({
+                    "@bazel_tools//src/conditions:windows": [],
+                    "//conditions:default": ["-lpthread"],
+        }),
         data = ["//data:data"],
 )
 
@@ -132,4 +145,3 @@ cc_binary(
         deps = [":generalizedassignmentsolver"],
         data = ["//data:data"],
 )
-

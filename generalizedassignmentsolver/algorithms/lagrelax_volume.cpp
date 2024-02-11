@@ -152,21 +152,17 @@ int LagRelaxAssignmentHook::solve_subproblem(const VOL_dvector& dual, const VOL_
     return 0;
 }
 
-LagRelaxAssignmentVolumeOutput generalizedassignmentsolver::lagrelax_assignment_volume(
+const LagRelaxAssignmentVolumeOutput generalizedassignmentsolver::lagrelax_assignment_volume(
         const Instance& instance,
-        optimizationtools::Info info)
+        const Parameters& parameters)
 {
-    init_display(instance, info);
-    info.os()
-            << "Algorithm" << std::endl
-            << "---------" << std::endl
-            << "Lagrangian Relaxation - Assignment Constraints (Volume)" << std::endl
-            << std::endl;
-
-    LagRelaxAssignmentVolumeOutput output(instance, info);
+    LagRelaxAssignmentVolumeOutput output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("Lagrangian relaxation - assignment constraints (Volume)");
+    algorithm_formatter.print_header();
 
     VOL_problem volprob;
-    volprob.parm.printflag = (info.output->verbosity_level)? 1: 0;
+    volprob.parm.printflag = (parameters.verbosity_level > 0)? 1: 0;
 
     // These parameters don't seem too bad...
     volprob.parm.heurinvl = 10;
@@ -190,7 +186,7 @@ LagRelaxAssignmentVolumeOutput generalizedassignmentsolver::lagrelax_assignment_
     // Extract solution
 
     Cost lb = std::ceil(volprob.value - FFOT_TOL); // bound
-    output.update_bound(lb, std::stringstream(""), info);
+    algorithm_formatter.update_bound(lb, "");
 
     output.multipliers.resize(instance.number_of_items()); // multipliers
     for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id)
@@ -203,7 +199,7 @@ LagRelaxAssignmentVolumeOutput generalizedassignmentsolver::lagrelax_assignment_
         for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id)
             output.x[item_id][agent_id] = volprob.psol[instance.number_of_agents() * item_id + agent_id];
 
-    output.algorithm_end(info);
+    algorithm_formatter.end();
     return output;
 }
 
@@ -305,21 +301,17 @@ int LagRelaxKnapsackHook::solve_subproblem(const VOL_dvector& dual, const VOL_dv
     return 0;
 }
 
-LagRelaxKnapsackVolumeOutput generalizedassignmentsolver::lagrelax_knapsack_volume(
+const LagRelaxKnapsackVolumeOutput generalizedassignmentsolver::lagrelax_knapsack_volume(
         const Instance& instance,
-        optimizationtools::Info info)
+        const Parameters& parameters)
 {
-    init_display(instance, info);
-    info.os()
-            << "Algorithm" << std::endl
-            << "---------" << std::endl
-            << "Lagrangian Relaxation - Knapsack Constraints (Volume)" << std::endl
-            << std::endl;
-
-    LagRelaxKnapsackVolumeOutput output(instance, info);
+    LagRelaxKnapsackVolumeOutput output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("Lagrangian relaxation - knapsack constraints (Volume)");
+    algorithm_formatter.print_header();
 
     VOL_problem volprob;
-    volprob.parm.printflag = (info.output->verbosity_level)? 1: 0;
+    volprob.parm.printflag = (parameters.verbosity_level > 0)? 1: 0;
 
     // Set the lb/ub on the duals
     volprob.psize = instance.number_of_agents() * instance.number_of_items();
@@ -337,7 +329,7 @@ LagRelaxKnapsackVolumeOutput generalizedassignmentsolver::lagrelax_knapsack_volu
     // Extract solution
 
     Cost lb = std::ceil(volprob.value - FFOT_TOL); // bound
-    output.update_bound(lb, std::stringstream(""), info);
+    algorithm_formatter.update_bound(lb, "");
 
     output.multipliers.resize(instance.number_of_agents()); // multipliers
     for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id)
@@ -350,9 +342,8 @@ LagRelaxKnapsackVolumeOutput generalizedassignmentsolver::lagrelax_knapsack_volu
         for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id)
             output.x[item_id][agent_id] = volprob.psol[instance.number_of_agents() * item_id + agent_id];
 
-    output.algorithm_end(info);
+    algorithm_formatter.end();
     return output;
 }
 
 #endif
-

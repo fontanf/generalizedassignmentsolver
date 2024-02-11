@@ -1,15 +1,9 @@
 #pragma once
 
-#include "optimizationtools/utils/info.hpp"
-
 #include <cstdint>
-#include <random>
 #include <string>
-#include <algorithm>
 #include <iostream>
-#include <chrono>
-#include <memory>
-#include <map>
+#include <vector>
 
 namespace generalizedassignmentsolver
 {
@@ -22,8 +16,6 @@ using AgentIdx = int64_t;
 using AgentPos = int64_t;
 using Counter = int64_t;
 using Seed = int64_t;
-
-class Solution;
 
 /**
  * Structure for an alternative.
@@ -94,15 +86,6 @@ class Instance
 public:
 
     /*
-     * Constructors and destructor
-     */
-
-    /** Create an instance from a file. */
-    Instance(
-            std::string instance_path,
-            std::string format = "orlibrary");
-
-    /*
      * Getters
      */
 
@@ -147,9 +130,9 @@ public:
      */
 
     /** Print the instance into a stream. */
-    std::ostream& print(
+    std::ostream& format(
             std::ostream& os,
-            int verbose = 1) const;
+            int verbosity_level = 1) const;
 
     /** Write the instance to a file. */
     void write(std::string instance_path);
@@ -162,12 +145,6 @@ private:
 
     /** Create an instance manually. */
     Instance() { }
-
-    /** Read an instance in 'orlibrary' format. */
-    void read_orlibrary(std::ifstream& file);
-
-    /** Read an instance in 'standard' format. */
-    void read_standard(std::ifstream& file);
 
     /*
      * Private attributes
@@ -195,9 +172,4 @@ private:
 
 };
 
-void init_display(
-        const Instance& instance,
-        optimizationtools::Info& info);
-
 }
-

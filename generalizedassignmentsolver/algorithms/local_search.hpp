@@ -5,19 +5,16 @@
 namespace generalizedassignmentsolver
 {
 
-struct LocalSearchOptionalParameters
+struct LocalSearchParameters: Parameters
 {
-    optimizationtools::Info info = optimizationtools::Info();
-
     Counter number_of_threads = 1;
 
     const Solution* initial_solution = nullptr;
 };
 
-Output local_search(
+const Output local_search(
         const Instance& instance,
         std::mt19937_64& generator,
-        LocalSearchOptionalParameters parameters = {});
+        const LocalSearchParameters& parameters = {});
 
 }
-

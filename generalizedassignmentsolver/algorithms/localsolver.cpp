@@ -20,7 +20,7 @@ public:
 
     MyCallback(
             Output& output,
-            LocalSolverOptionalParameters& parameters,
+            LocalSolverParameters& parameters,
             std::vector<LSExpression>& agents):
         output_(output), parameters_(parameters), agents_(agents) { }
 
@@ -45,36 +45,31 @@ public:
                 }
             }
             std::stringstream ss;
-            output_.update_solution(
-                    sol_curr,
-                    std::stringstream(""),
-                    parameters_.info);
+            algorithm_formatter_.update_solution(sol_curr, "");
         }
     }
 
 private:
 
     Output& output_;
-    LocalSolverOptionalParameters& parameters_;
+    LocalSolverParameters& parameters_;
     std::vector<LSExpression>& agents_;
 
 };
 
-Output generalizedassignmentsolver::localsolver(
+const Output generalizedassignmentsolver::localsolver(
         const Instance& instance,
-        LocalSolverOptionalParameters parameters)
+        const LocalSolverParameters& parameters)
 {
-    init_display(instance, parameters.info);
-    parameters.info.os()
-            << "Algorithm" << std::endl
-            << "---------" << std::endl
-            << "Local Solver" << std::endl
-            << std::endl;
+    Output output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("LocalSolver");
+    algorithm_formatter.print_header();
 
-    Output output(instance, parameters.info);
-
-    if (instance.number_of_items() == 0)
-        return output.algorithm_end(parameters.info);
+    if (instance.number_of_items() == 0) {
+        algorithm_formatter.end();
+        return output;
+    }
 
     LocalSolver localsolver;
 
@@ -157,8 +152,8 @@ Output generalizedassignmentsolver::localsolver(
     model.close();
 
     // Time limit
-    if (parameters.info.time_limit != std::numeric_limits<double>::infinity())
-        localsolver.getParam().setTimeLimit(parameters.info.time_limit);
+    if (parameters.timer.time_limit() != std::numeric_limits<double>::infinity())
+        localsolver.getParam().setTimeLimit(parameters.timer.time_limit());
 
     // Custom callback
     MyCallback cb(output, parameters, agents);
@@ -177,9 +172,10 @@ Output generalizedassignmentsolver::localsolver(
             sol_curr.set(bin_collection[item_id_pos], agent_id);
         }
     }
-    output.update_solution(sol_curr, std::stringstream(""), parameters.info);
+    algorithm_formatter.update_solution(sol_curr, "");
 
-    return output.algorithm_end(parameters.info);
+    algorithm_formatter.end();
+    return output;
 }
 
 #endif

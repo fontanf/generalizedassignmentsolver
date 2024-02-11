@@ -10,7 +10,7 @@ Output milp_cbc_test(Instance& instance)
     optimizationtools::Info info = optimizationtools::Info()
         .set_verbosity_level(1)
         ;
-    MilpCbcOptionalParameters parameters;
+    MilpCbcParameters parameters;
     parameters.info = info;
     return milp_cbc(instance, parameters);
 }

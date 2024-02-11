@@ -7,10 +7,8 @@
 namespace generalizedassignmentsolver
 {
 
-struct MilpCplexOptionalParameters
+struct MilpCplexParameters: Parameters
 {
-    optimizationtools::Info info = optimizationtools::Info();
-
     const Solution* initial_solution = NULL;
 
     bool only_linear_relaxation = false;
@@ -19,18 +17,17 @@ struct MilpCplexOptionalParameters
 struct MilpCplexOutput: Output
 {
     MilpCplexOutput(
-            const Instance& instance,
-            optimizationtools::Info& info):
-        Output(instance, info) { }
+            const Instance& instance):
+        Output(instance) { }
+
 
     std::vector<std::vector<double>> x;
 };
 
-MilpCplexOutput milp_cplex(
+const MilpCplexOutput milp_cplex(
         const Instance& instance,
-        MilpCplexOptionalParameters parameters = {});
+        const MilpCplexParameters& parameters = {});
 
 }
 
 #endif
-

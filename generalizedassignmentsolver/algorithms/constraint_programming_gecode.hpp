@@ -7,17 +7,15 @@
 namespace generalizedassignmentsolver
 {
 
-struct ConstraintProgrammingGecodeOptionalParameters
+struct ConstraintProgrammingGecodeParameters: Parameters
 {
-    optimizationtools::Info info = optimizationtools::Info();
-
     std::string bound = "none"; // "none", "lagrelax", "colgen"
     std::string search_strategy = "dfs"; // "dfs", "lds"
     std::string branching_strategy = "most_efficient"; // "most_efficient", "most_fractional", "closest_to_one"
     /** if dual = true, branch first on the objective value **/
     bool dual = false;
 
-    ConstraintProgrammingGecodeOptionalParameters& primal_solution()
+    ConstraintProgrammingGecodeParameters& primal_solution()
     {
         bound = "lagrelax";
         search_strategy = "lds";
@@ -26,7 +24,7 @@ struct ConstraintProgrammingGecodeOptionalParameters
         return *this;
     }
 
-    ConstraintProgrammingGecodeOptionalParameters& dual_bound()
+    ConstraintProgrammingGecodeParameters& dual_bound()
     {
         bound = "lagrelax";
         search_strategy = "dfs";
@@ -36,9 +34,9 @@ struct ConstraintProgrammingGecodeOptionalParameters
     }
 };
 
-Output constraintprogramming_gecode(
+const Output constraintprogramming_gecode(
         const Instance& instance,
-        ConstraintProgrammingGecodeOptionalParameters parameters = {});
+        const ConstraintProgrammingGecodeParameters& parameters = {});
 
 }
 

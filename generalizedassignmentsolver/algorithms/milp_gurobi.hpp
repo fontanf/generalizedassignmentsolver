@@ -7,30 +7,26 @@
 namespace generalizedassignmentsolver
 {
 
-struct MilpGurobiOptionalParameters
+struct MilpGurobiParameters: Parameters
 {
-    optimizationtools::Info info = optimizationtools::Info();
-
     const Solution* initial_solution = NULL;
+
     bool only_linear_relaxation = false;
 };
 
 struct MilpGurobiOutput: Output
 {
     MilpGurobiOutput(
-            const Instance& instance,
-            optimizationtools::Info& info):
-        Output(instance, info) { }
+            const Instance& instance):
+        Output(instance) { }
 
-    MilpGurobiOutput& algorithm_end(
-            optimizationtools::Info& info);
 
     std::vector<std::vector<double>> x;
 };
 
-MilpGurobiOutput milp_gurobi(
+const MilpGurobiOutput milp_gurobi(
         const Instance& instance,
-        MilpGurobiOptionalParameters parameters = {});
+        const MilpGurobiParameters& parameters = {});
 
 }
 

@@ -9,10 +9,8 @@ namespace generalizedassignmentsolver
 /////////////////////////// lagrelax_assignment_lbfgs //////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-struct LagRelaxAssignmentLbfgsOptionalParameters
+struct LagRelaxAssignmentLbfgsParameters: Parameters
 {
-    optimizationtools::Info info = optimizationtools::Info();
-
     std::vector<int>* initial_multipliers = NULL;
 
     /** -1: unfixed, 0: fixed to 0, 1: fixed to 1. */
@@ -22,9 +20,9 @@ struct LagRelaxAssignmentLbfgsOptionalParameters
 struct LagRelaxAssignmentLbfgsOutput: Output
 {
     LagRelaxAssignmentLbfgsOutput(
-            const Instance& instance,
-            optimizationtools::Info& info):
-        Output(instance, info) { }
+            const Instance& instance):
+        Output(instance) { }
+
 
     /** vector of size instance.alternative_number(). */
     std::vector<std::vector<double>> x;
@@ -33,9 +31,9 @@ struct LagRelaxAssignmentLbfgsOutput: Output
     std::vector<double> multipliers;
 };
 
-LagRelaxAssignmentLbfgsOutput lagrelax_assignment_lbfgs(
+const LagRelaxAssignmentLbfgsOutput lagrelax_assignment_lbfgs(
         const Instance& instance,
-        LagRelaxAssignmentLbfgsOptionalParameters p = {});
+        const LagRelaxAssignmentLbfgsParameters& parameters = {});
 
 ////////////////////////////////////////////////////////////////////////////////
 //////////////////////////// lagrelax_knapsack_lbfgs ///////////////////////////
@@ -44,9 +42,9 @@ LagRelaxAssignmentLbfgsOutput lagrelax_assignment_lbfgs(
 struct LagRelaxKnapsackLbfgsOutput: Output
 {
     LagRelaxKnapsackLbfgsOutput(
-            const Instance& instance,
-            optimizationtools::Info& info):
-        Output(instance, info) { }
+            const Instance& instance):
+        Output(instance) { }
+
 
     /** vector of size instance.alternative_number() */
     std::vector<std::vector<double>> x;
@@ -55,9 +53,8 @@ struct LagRelaxKnapsackLbfgsOutput: Output
     std::vector<double> multipliers;
 };
 
-LagRelaxKnapsackLbfgsOutput lagrelax_knapsack_lbfgs(
+const LagRelaxKnapsackLbfgsOutput lagrelax_knapsack_lbfgs(
         const Instance& instance,
-        optimizationtools::Info info = optimizationtools::Info());
+        const Parameters& parameters = {});
 
 }
-

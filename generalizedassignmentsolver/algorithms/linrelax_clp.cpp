@@ -8,18 +8,14 @@
 
 using namespace generalizedassignmentsolver;
 
-LinRelaxClpOutput generalizedassignmentsolver::linrelax_clp(
+const LinRelaxClpOutput generalizedassignmentsolver::linrelax_clp(
         const Instance& instance,
-        optimizationtools::Info info)
+        const Parameters& parameters = {})
 {
-    init_display(instance, info);
-    info.os()
-            << "Algorithm" << std::endl
-            << "---------" << std::endl
-            << "Linear relaxation (CLP)" << std::endl
-            << std::endl;
-
-    LinRelaxClpOutput output(instance, info);
+    LinRelaxClpOutput output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("Linear relaxation (CLP)");
+    algorithm_formatter.print_header();
 
     CoinLP problem(instance);
 
@@ -42,7 +38,7 @@ LinRelaxClpOutput generalizedassignmentsolver::linrelax_clp(
 
     // Get solution
     Cost lb = std::ceil(model.getObjValue() - FFOT_TOL);
-    output.update_bound(lb, std::stringstream(""), info);
+    algorithm_formatter.update_bound(lb, "");
     output.x.resize(instance.number_of_items(), std::vector<double>(instance.number_of_agents()));
     const double* solution = model.getColSolution();
     for (ItemIdx item_id = 0;
@@ -55,7 +51,7 @@ LinRelaxClpOutput generalizedassignmentsolver::linrelax_clp(
         }
     }
 
-    output.algorithm_end(info);
+    algorithm_formatter.end();
     return output;
 }
 

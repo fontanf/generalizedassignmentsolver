@@ -2,6 +2,13 @@
 
 #include "generalizedassignmentsolver/instance.hpp"
 
+#include "optimizationtools/utils/output.hpp"
+#include "optimizationtools/utils/utils.hpp"
+
+#include "nlohmann//json.hpp"
+
+#include <iomanip>
+
 namespace generalizedassignmentsolver
 {
 
@@ -74,6 +81,9 @@ public:
     /** Return 'true' iff the solution is feasible. */
     inline bool feasible() const { return full() && (overcapacity() == 0); }
 
+    /** Get the total cost of the solution. */
+    inline Cost objective_value() const { return cost(); }
+
     /** Get the number of items in the solution. */
     inline ItemIdx number_of_items() const { return number_of_items_; }
 
@@ -100,12 +110,15 @@ public:
      */
 
     /** Print the instance. */
-    std::ostream& print(
+    std::ostream& format(
             std::ostream& os,
-            int verbose = 1) const;
+            int verbosity_level = 1) const;
+
+    /** Export solution characteristics to a JSON structure. */
+    nlohmann::json to_json() const;
 
     /** Write the solution to a file. */
-    void write(std::string filepath);
+    void write(const std::string& certificate_path) const;
 
 private:
 
@@ -136,27 +149,25 @@ private:
 
 };
 
-/**
- * Return 'true' iff 'current_solution' is strictly better than
- * 'best_solution'.
- */
-bool compare(
-        const Solution& best_solution,
-        const Solution& current_solution);
-
 ////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////// Output ////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+inline optimizationtools::ObjectiveDirection objective_direction()
+{
+    return optimizationtools::ObjectiveDirection::Minimize;
+}
+
 /**
  * Output structure for a generalized assignment problem.
  */
-struct Output
+struct Output: optimizationtools::Output
 {
     /** Constructor. */
-    Output(
-            const Instance& instance,
-            optimizationtools::Info& info);
+    Output(const Instance& instance):
+        solution(instance),
+        bound(instance.combinatorial_relaxation()) { }
+
 
     /** Solution. */
     Solution solution;
@@ -165,35 +176,83 @@ struct Output
     Cost bound = 0;
 
     /** Elapsed time. */
-    double time = -1;
+    double time = 0.0;
 
-    /** Return 'true' iff the solution is optimal. */
-    bool optimal() const { return solution.feasible() && solution.cost() == bound; }
 
-    /** Print current state. */
-    void print(
-            optimizationtools::Info& info,
-            const std::stringstream& s) const;
+    std::string solution_value() const
+    {
+        return optimizationtools::solution_value(
+            objective_direction(),
+            solution.feasible(),
+            solution.objective_value());
+    }
 
-    /** Update the solution. */
-    void update_solution(
-            const Solution& solution_new,
-            const std::stringstream& s,
-            optimizationtools::Info& info);
+    double absolute_optimality_gap() const
+    {
+        return optimizationtools::absolute_optimality_gap(
+                objective_direction(),
+                solution.feasible(),
+                solution.objective_value(),
+                bound);
+    }
 
-    /** Update the bound. */
-    void update_bound(
-            Cost bound_new,
-            const std::stringstream& s,
-            optimizationtools::Info& info);
+    double relative_optimality_gap() const
+    {
+       return optimizationtools::relative_optimality_gap(
+            objective_direction(),
+            solution.feasible(),
+            solution.objective_value(),
+            bound);
+    }
 
-    /** Print the algorithm statistics. */
-    virtual void print_statistics(
-            optimizationtools::Info& info) const { (void)info; }
+    virtual nlohmann::json to_json() const
+    {
+        return nlohmann::json {
+            {"Solution", solution.to_json()},
+            {"Value", solution_value()},
+            {"Bound", bound},
+            {"AbsoluteOptimalityGap", absolute_optimality_gap()},
+            {"RelativeOptimalityGap", relative_optimality_gap()},
+            {"Time", time}
+        };
+    }
 
-    /** Method to call at the end of the algorithm. */
-    Output& algorithm_end(optimizationtools::Info& info);
+    virtual int format_width() const { return 30; }
+
+    virtual void format(std::ostream& os) const
+    {
+        int width = format_width();
+        os
+            << std::setw(width) << std::left << "Value: " << solution_value() << std::endl
+            << std::setw(width) << std::left << "Bound: " << bound << std::endl
+            << std::setw(width) << std::left << "Absolute optimality gap: " << absolute_optimality_gap() << std::endl
+            << std::setw(width) << std::left << "Relative optimality gap (%): " << relative_optimality_gap() * 100 << std::endl
+            << std::setw(width) << std::left << "Time (s): " << time << std::endl
+            ;
+    }
+};
+
+using NewSolutionCallback = std::function<void(const Output&, const std::string&)>;
+
+struct Parameters: optimizationtools::Parameters
+{
+    /** Callback function called when a new best solution is found. */
+    NewSolutionCallback new_solution_callback = [](const Output&, const std::string&) { };
+
+
+    virtual nlohmann::json to_json() const override
+    {
+        nlohmann::json json = optimizationtools::Parameters::to_json();
+        json.merge_patch({});
+        return json;
+    }
+
+    virtual int format_width() const override { return 23; }
+
+    virtual void format(std::ostream& os) const override
+    {
+        optimizationtools::Parameters::format(os);
+    }
 };
 
 }
-

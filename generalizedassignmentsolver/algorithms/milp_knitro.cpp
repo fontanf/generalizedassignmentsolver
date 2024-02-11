@@ -10,21 +10,17 @@
 
 using namespace generalizedassignmentsolver;
 
-MilpKnitroOutput generalizedassignmentsolver::milp_knitro(
+const MilpKnitroOutput generalizedassignmentsolver::milp_knitro(
         const Instance& instance,
-        MilpKnitroOptionalParameters parameters)
+        const MilpKnitroParameters& parameters)
 {
-    init_display(instance, parameters.info);
-    parameters.info.os()
-            << "Algorithm" << std::endl
-            << "---------" << std::endl
-            << "MILP (Knitro)" << std::endl
-            << std::endl;
-
-    MilpKnitroOutput output(instance, parameters.info);
+    MilpKnitroOutput output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("MILP (Knitro)");
+    algorithm_formatter.print_header();
 
     if (instance.number_of_items() == 0) {
-        output.algorithm_end(parameters.info);
+        algorithm_formatter.end();
         return output;
     }
 
@@ -107,10 +103,7 @@ MilpKnitroOutput generalizedassignmentsolver::milp_knitro(
         knitro_context.solve();
         double obj = knitro_context.get_obj_value();
         Cost lb = std::ceil(obj - FFOT_TOL);
-        output.update_bound(
-                lb,
-                std::stringstream("linearrelaxation"),
-                parameters.info);
+        algorithm_formatter.update_bound(lb, "linearrelaxation");
         for (ItemIdx item_id = 0;
                 item_id < instance.number_of_items();
                 ++item_id) {
@@ -123,7 +116,7 @@ MilpKnitroOutput generalizedassignmentsolver::milp_knitro(
             }
         }
 
-        output.algorithm_end(parameters.info);
+        algorithm_formatter.end();
         return output;
     }
 
@@ -147,10 +140,10 @@ MilpKnitroOutput generalizedassignmentsolver::milp_knitro(
     knitro_context.set_double_param(KN_PARAM_MIP_OPTGAPABS, 0); // Fix precision issue
 
     // Time limit.
-    if (parameters.info.time_limit != std::numeric_limits<double>::infinity()) {
+    if (parameters.timer.time_limit() != std::numeric_limits<double>::infinity()) {
         knitro_context.set_double_param(
                 KN_PARAM_MIP_MAXTIMECPU,
-                parameters.info.time_limit);
+                parameters.timer.time_limit());
     }
 
     // Callback
@@ -162,10 +155,7 @@ MilpKnitroOutput generalizedassignmentsolver::milp_knitro(
         {
             double bound = knitro_context.get_mip_relaxation_bnd();
             Cost lb = std::ceil(bound - FFOT_TOL);
-            output.update_bound(
-                    lb,
-                    std::stringstream(""),
-                    parameters.info);
+            algorithm_formatter.update_bound(lb, "");
 
             if (knitro_context.has_mip_incumbent()) {
                 double obj = knitro_context.get_mip_incumbent_obj();
@@ -183,11 +173,7 @@ MilpKnitroOutput generalizedassignmentsolver::milp_knitro(
                                 solution.set(item_id, agent_id);
                         }
                     }
-                    std::stringstream ss;
-                    output.update_solution(
-                            solution,
-                            std::stringstream(""),
-                            parameters.info);
+                    algorithm_formatter.update_solution(solution, "");
                 }
             }
             return 0;
@@ -198,10 +184,7 @@ MilpKnitroOutput generalizedassignmentsolver::milp_knitro(
 
     // https://www.artelys.com/docs/knitro/3_referenceManual/returnCodes.html#returncodes
     if (!knitro_context.has_mip_incumbent()) {
-        output.update_bound(
-                instance.bound(),
-                std::stringstream(""),
-                parameters.info);
+        algorithm_formatter.update_bound(instance.bound(), "");
     } else if (status == KN_RC_OPTIMAL_OR_SATISFACTORY) {
         double obj = knitro_context.get_mip_incumbent_obj();
         if (!output.solution.feasible()
@@ -219,15 +202,9 @@ MilpKnitroOutput generalizedassignmentsolver::milp_knitro(
                         solution.set(item_id, agent_id);
                 }
             }
-            output.update_solution(
-                    solution,
-                    std::stringstream(""),
-                    parameters.info);
+            algorithm_formatter.update_solution(solution, "");
         }
-        output.update_bound(
-                output.solution.cost(),
-                std::stringstream(""),
-                parameters.info);
+        algorithm_formatter.update_bound(output.solution.cost(), "");
     } else if (status == 0) {
         double obj = knitro_context.get_mip_incumbent_obj();
         if (!output.solution.feasible()
@@ -245,29 +222,19 @@ MilpKnitroOutput generalizedassignmentsolver::milp_knitro(
                         solution.set(item_id, agent_id);
                 }
             }
-            output.update_solution(
-                    solution,
-                    std::stringstream(""),
-                    parameters.info);
+            algorithm_formatter.update_solution(solution, "");
         }
         double bound = knitro_context.get_mip_relaxation_bnd();
         Cost lb = std::ceil(bound - FFOT_TOL);
-        output.update_bound(
-                lb,
-                std::stringstream(""),
-                parameters.info);
+        algorithm_formatter.update_bound(lb, "");
     } else {
         double bound = knitro_context.get_mip_relaxation_bnd();
         Cost lb = std::ceil(bound - FFOT_TOL);
-        output.update_bound(
-                lb,
-                std::stringstream(""),
-                parameters.info);
+        algorithm_formatter.update_bound(lb, "");
     }
 
-    output.algorithm_end(parameters.info);
+    algorithm_formatter.end();
     return output;
 }
 
 #endif
-

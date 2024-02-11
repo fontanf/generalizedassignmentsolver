@@ -1,10 +1,5 @@
 #include "generalizedassignmentsolver/desirability.hpp"
 
-#include <set>
-#include <random>
-#include <algorithm>
-#include <vector>
-
 using namespace generalizedassignmentsolver;
 
 std::unique_ptr<Desirability> generalizedassignmentsolver::desirability(
@@ -21,9 +16,9 @@ std::unique_ptr<Desirability> generalizedassignmentsolver::desirability(
         return std::make_unique<DesirabilityEfficiency>(instance);
     } else if (str == "wij/ti") {
         return std::make_unique<DesirabilityWeightCapacity>(instance);
+
     } else {
         std::cout << "unknown desirability function" << std::endl;
         return std::make_unique<DesirabilityCost>(instance);
     }
 }
-

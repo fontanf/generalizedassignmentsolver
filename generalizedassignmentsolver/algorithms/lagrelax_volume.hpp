@@ -14,9 +14,9 @@ namespace generalizedassignmentsolver
 struct LagRelaxAssignmentVolumeOutput: Output
 {
     LagRelaxAssignmentVolumeOutput(
-            const Instance& instance,
-            optimizationtools::Info& info):
-        Output(instance, info) { }
+            const Instance& instance):
+        Output(instance) { }
+
 
     std::vector<std::vector<double>> x;
 
@@ -24,9 +24,9 @@ struct LagRelaxAssignmentVolumeOutput: Output
     std::vector<double> multipliers;
 };
 
-LagRelaxAssignmentVolumeOutput lagrelax_assignment_volume(
+const LagRelaxAssignmentVolumeOutput lagrelax_assignment_volume(
         const Instance& instance,
-        optimizationtools::Info info = optimizationtools::Info());
+        const Parameters& parameters = {});
 
 ////////////////////////////////////////////////////////////////////////////////
 /////////////////////////// lagrelax_knapsack_volume ///////////////////////////
@@ -35,9 +35,9 @@ LagRelaxAssignmentVolumeOutput lagrelax_assignment_volume(
 struct LagRelaxKnapsackVolumeOutput: Output
 {
     LagRelaxKnapsackVolumeOutput(
-            const Instance& instance,
-            optimizationtools::Info& info):
-        Output(instance, info) { }
+            const Instance& instance):
+        Output(instance) { }
+
 
     std::vector<std::vector<double>> x;
 
@@ -45,9 +45,9 @@ struct LagRelaxKnapsackVolumeOutput: Output
     std::vector<double> multipliers;
 };
 
-LagRelaxKnapsackVolumeOutput lagrelax_knapsack_volume(
+const LagRelaxKnapsackVolumeOutput lagrelax_knapsack_volume(
         const Instance& instance,
-        optimizationtools::Info info = optimizationtools::Info());
+        const Parameters& parameters = {});
 
 }
 

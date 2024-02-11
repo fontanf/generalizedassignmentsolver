@@ -1,6 +1,5 @@
 #include "generalizedassignmentsolver/solution.hpp"
-
-#include <iomanip>
+#include "generalizedassignmentsolver/instance_builder.hpp"
 
 using namespace generalizedassignmentsolver;
 
@@ -8,16 +7,16 @@ int main(int, char *argv[])
 {
     std::string instance_path = argv[1];
     std::string solution_path = argv[2];
-    Instance instance(instance_path);
-    optimizationtools::Info info;
-    info.set_verbosity_level(1);
-    init_display(instance, info);
+    InstanceBuilder instance_builder;
+    instance_builder.read(
+            instance_path);
+    const Instance instance = instance_builder.build();
 
     Solution solution(instance, solution_path);
-    info.os()
+    std::cout
             << "Solution" << std::endl
             << "--------" << std::endl ;
-    solution.print(info.os(), info.verbosity_level());
+    solution.format(std::cout, 2);
 
     return 0;
 }

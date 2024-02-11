@@ -1,42 +1,212 @@
-#include "generalizedassignmentsolver/algorithms/algorithms.hpp"
+#include "generalizedassignmentsolver/instance_builder.hpp"
+
+#if CLP_FOUND
+#include "generalizedassignmentsolver/algorithms/linrelax_clp.hpp"
+#endif
+#include "generalizedassignmentsolver/algorithms/column_generation.hpp"
+#if CBC_FOUND
+#include "generalizedassignmentsolver/algorithms/milp_cbc.hpp"
+#endif
+#if CPLEX_FOUND
+#include "generalizedassignmentsolver/algorithms/milp_cplex.hpp"
+#endif
+#if GUROBI_FOUND
+#include "generalizedassignmentsolver/algorithms/milp_gurobi.hpp"
+#endif
+#if KNITRO_FOUND
+#include "generalizedassignmentsolver/algorithms/milp_knitro.hpp"
+#endif
+#if GECODE_FOUND
+#include "generalizedassignmentsolver/algorithms/constraint_programming_gecode.hpp"
+#endif
+#if CPLEX_FOUND
+#include "generalizedassignmentsolver/algorithms/constraint_programming_cplex.hpp"
+#endif
+#include "generalizedassignmentsolver/algorithms/random.hpp"
+#include "generalizedassignmentsolver/algorithms/greedy.hpp"
+#include "generalizedassignmentsolver/algorithms/local_search.hpp"
+#if LOCALSOLVER_FOUND
+#include "generalizedassignmentsolver/algorithms/localsolver.hpp"
+#endif
 
 #include <boost/program_options.hpp>
 
 using namespace generalizedassignmentsolver;
 
+namespace po = boost::program_options;
+
+void read_args(
+        Parameters& parameters,
+        const po::variables_map& vm)
+{
+    parameters.timer.set_sigint_handler();
+    parameters.messages_to_stdout = true;
+    if (vm.count("time-limit"))
+        parameters.timer.set_time_limit(vm["time-limit"].as<double>());
+    if (vm.count("verbosity-level"))
+        parameters.verbosity_level = vm["verbosity-level"].as<int>();
+    if (vm.count("log"))
+        parameters.log_path = vm["log"].as<std::string>();
+    parameters.log_to_stderr = vm.count("log-to-stderr");
+    bool only_write_at_the_end = vm.count("only-write-at-the-end");
+    if (!only_write_at_the_end) {
+        std::string certificate_path = vm["certificate"].as<std::string>();
+        std::string json_output_path = vm["output"].as<std::string>();
+        parameters.new_solution_callback = [
+            json_output_path,
+            certificate_path](
+                    const Output& output,
+                    const std::string&)
+        {
+            output.write_json_output(json_output_path);
+            output.solution.write(certificate_path);
+        };
+    }
+}
+
+Output run(
+        const Instance& instance,
+        const po::variables_map& vm)
+{
+    std::mt19937_64 generator(vm["seed"].as<Seed>());
+    Solution initial_solution(instance, vm["initial-solution"].as<std::string>());
+
+    // Run algorithm.
+    std::string algorithm = vm["algorithm"].as<std::string>();
+    if (algorithm == "greedy") {
+        Parameters parameters;
+        read_args(parameters, vm);
+        std::string desirability_string = "cij";
+        if (vm.count("desirability"))
+            desirability_string = vm["desirability"].as<std::string>();
+        std::unique_ptr<Desirability> f = desirability(desirability_string, instance);
+        return greedy(instance, *f, parameters);
+    } else if (algorithm == "greedy-regret") {
+        Parameters parameters;
+        read_args(parameters, vm);
+        std::string desirability_string = "cij";
+        if (vm.count("desirability"))
+            desirability_string = vm["desirability"].as<std::string>();
+        std::unique_ptr<Desirability> f = desirability(desirability_string, instance);
+        return greedy_regret(instance, *f, parameters);
+    } else if (algorithm == "mthg") {
+        Parameters parameters;
+        read_args(parameters, vm);
+        std::string desirability_string = "cij";
+        if (vm.count("desirability"))
+            desirability_string = vm["desirability"].as<std::string>();
+        std::unique_ptr<Desirability> f = desirability(desirability_string, instance);
+        return mthg(instance, *f, parameters);
+    } else if (algorithm == "mthg-regret") {
+        Parameters parameters;
+        read_args(parameters, vm);
+        std::string desirability_string = "cij";
+        if (vm.count("desirability"))
+            desirability_string = vm["desirability"].as<std::string>();
+        std::unique_ptr<Desirability> f = desirability(desirability_string, instance);
+        return mthg_regret(instance, *f, parameters);
+
+    } else if (algorithm == "random") {
+        Parameters parameters;
+        read_args(parameters, vm);
+        return random(instance, generator, parameters);
+
+#if CLP_FOUND
+    } else if (algorithm == "linrelax-clp") {
+        Parameters parameters;
+        read_args(parameters, vm);
+        return linrelax_clp(instance, parameters);
+#endif
+#if CBC_FOUND
+    } else if (algorithm == "milp-cbc") {
+        MilpCbcParameters parameters;
+        read_args(parameters, vm);
+        return milp_cbc(instance, parameters);
+#endif
+#if CPLEX_FOUND
+    } else if (algorithm == "milp-cplex") {
+        MilpCplexParameters parameters;
+        read_args(parameters, vm);
+        return milp_cplex(instance, parameters);
+#endif
+#if GUROBI_FOUND
+    } else if (algorithm == "milp-gurobi") {
+        MilpGurobiParameters parameters;
+        read_args(parameters, vm);
+        return milp_gurobi(instance, parameters);
+#endif
+#if KNITRO_FOUND
+    } else if (algorithm == "milp-knitro") {
+        MilpKnitroParameters parameters;
+        read_args(parameters, vm);
+        return milp_knitro(instance, parameters);
+#endif
+
+    } else if (algorithm == "column-generation") {
+        ColumnGenerationParameters parameters;
+        read_args(parameters, vm);
+        return column_generation(instance, parameters);
+    } else if (algorithm == "column-generation-heuristic-greedy") {
+        ColumnGenerationParameters parameters;
+        read_args(parameters, vm);
+        return column_generation_heuristic_greedy(instance, parameters);
+    } else if (algorithm == "column-generation-heuristic-limited-discrepancy-search") {
+        ColumnGenerationParameters parameters;
+        read_args(parameters, vm);
+        return column_generation_heuristic_limited_discrepancy_search(instance, parameters);
+
+#if GECODE_FOUND
+    } else if (algorithm == "constraint-programming-gecode") {
+        ConstraintProgrammingGecodeParameters parameters;
+        read_args(parameters, vm);
+        return constraintprogramming_gecode(instance, parameters);
+#endif
+#if CPLEX_FOUND
+    } else if (algorithm == "constraint-programming-cplex") {
+        ConstraintProgrammingCplexParameters parameters;
+        read_args(parameters, vm);
+        return constraintprogramming_cplex(instance, parameters);
+#endif
+
+    } else if (algorithm == "local-search") {
+        LocalSearchParameters parameters;
+        read_args(parameters, vm);
+        parameters.initial_solution = &initial_solution;
+        return local_search(instance, generator, parameters);
+#if LOCALSOLVER_FOUND
+    } else if (algorithm == "localsolver") {
+        LocalSolverParameters parameters;
+        read_args(parameters, vm);
+        return localsolver(instance, parameters);
+#endif
+
+    } else {
+        throw std::invalid_argument(
+                "Unknown algorithm \"" + algorithm + "\".");
+    }
+}
+
 int main(int argc, char *argv[])
 {
-    namespace po = boost::program_options;
-
     // Parse program options
-
-    std::string algorithm = "milp_cbc";
-    std::string instance_path = "";
-    std::string format = "orlibrary";
-    std::string output_path = "";
-    std::string initial_solution_path = "";
-    std::string certificate_path = "";
-    std::string log_path = "";
-    int loglevelmax = 999;
-    int seed = 0;
-    int verbosity_level = 1;
-    double time_limit = std::numeric_limits<double>::infinity();
-
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "produce help message")
-        ("algorithm,a", po::value<std::string>(&algorithm), "set algorithm")
-        ("input,i", po::value<std::string>(&instance_path)->required(), "set input file (required)")
-        ("format,f", po::value<std::string>(&format), "set input file format (default: orlibrary)")
-        ("initial-solution", po::value<std::string>(&initial_solution_path), "set initial solution file")
-        ("output,o", po::value<std::string>(&output_path), "set output file")
-        ("certificate,c", po::value<std::string>(&certificate_path), "set certificate file")
-        ("time-limit,t", po::value<double>(&time_limit), "set time limit in seconds\n  ex: 3600")
-        ("seed,s", po::value<int>(&seed), "set seed")
-        ("verbosity-level,v", po::value<int>(&verbosity_level), "set verbosity level")
-        ("log,l", po::value<std::string>(&log_path), "set log file")
-        ("loglevelmax", po::value<int>(&loglevelmax), "set log max level")
-        ("log2stderr", "write log in stderr")
+        ("algorithm,a", po::value<std::string>()->default_value("large-neighborhood-search"), "set algorithm")
+        ("input,i", po::value<std::string>()->required(), "set input file (required)")
+        ("format,f", po::value<std::string>()->default_value(""), "set input file format (default: standard)")
+        ("unicost,u", "set unicost")
+        ("output,o", po::value<std::string>()->default_value(""), "set JSON output file")
+        ("initial-solution,", po::value<std::string>()->default_value(""), "")
+        ("certificate,c", po::value<std::string>()->default_value(""), "set certificate file")
+        ("seed,s", po::value<Seed>()->default_value(0), "set seed")
+        ("time-limit,t", po::value<double>(), "set time limit in seconds")
+        ("verbosity-level,v", po::value<int>(), "set verbosity level")
+        ("only-write-at-the-end,e", "only write output and certificate files at the end")
+        ("log,l", po::value<std::string>(), "set log file")
+        ("log-to-stderr", "write log to stderr")
+
+        ("desirability,", po::value<std::string>(), "set desirability")
         ;
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -51,27 +221,21 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    // Run algorithm
+    // Build instance.
+    InstanceBuilder instance_builder;
+    instance_builder.read(
+            vm["input"].as<std::string>(),
+            vm["format"].as<std::string>());
+    const Instance instance = instance_builder.build();
 
-    std::mt19937_64 gen(seed);
+    // Run.
+    Output output = run(instance, vm);
 
-    Instance instance(instance_path, format);
-    Solution initial_solution(instance, initial_solution_path);
-
-    optimizationtools::Info info = optimizationtools::Info()
-        .set_verbosity_level(verbosity_level)
-        .set_time_limit(time_limit)
-        .set_certificate_path(certificate_path)
-        .set_json_output_path(output_path)
-        .set_only_write_at_the_end(true)
-        .set_log_path(log_path)
-        .set_log2stderr(vm.count("log2stderr"))
-        .set_maximum_log_level(loglevelmax)
-        .set_sigint_handler()
-        ;
-
-    run(algorithm, instance, initial_solution, gen, info);
+    // Write outputs.
+    std::string certificate_path = vm["certificate"].as<std::string>();
+    std::string json_output_path = vm["output"].as<std::string>();
+    output.write_json_output(json_output_path);
+    output.solution.write(certificate_path);
 
     return 0;
 }
-

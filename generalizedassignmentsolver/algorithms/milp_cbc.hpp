@@ -33,19 +33,17 @@ struct CoinLP
 namespace generalizedassignmentsolver
 {
 
-struct MilpCbcOptionalParameters
+struct MilpCbcParameters: Parameters
 {
-    optimizationtools::Info info = optimizationtools::Info();
-
     const Solution* initial_solution = NULL;
+
     bool stop_at_first_improvment = false;
 };
 
-Output milp_cbc(
+const Output milp_cbc(
         const Instance& instance,
-        MilpCbcOptionalParameters parameters = {});
+        const MilpCbcParameters& parameters = {});
 
 }
 
 #endif
-

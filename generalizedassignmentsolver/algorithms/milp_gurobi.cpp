@@ -10,13 +10,6 @@
 
 using namespace generalizedassignmentsolver;
 
-MilpGurobiOutput& MilpGurobiOutput::algorithm_end(
-        optimizationtools::Info& info)
-{
-    Output::algorithm_end(info);
-    return *this;
-}
-
 class MilpGurobiCallback: public GRBCallback
 {
 
@@ -24,7 +17,7 @@ public:
 
     MilpGurobiCallback(
             const Instance& instance,
-            MilpGurobiOptionalParameters& parameters,
+            MilpGurobiParameters& parameters,
             MilpGurobiOutput& output,
             std::vector<GRBVar*>& x):
         instance_(instance), parameters_(parameters), output_(output), x_(x) { }
@@ -37,10 +30,7 @@ protected:
             return;
 
         Cost lb = std::ceil(getDoubleInfo(GRB_CB_MIPSOL_OBJBND) - FFOT_TOL);
-        output_.update_bound(
-                lb,
-                std::stringstream(""),
-                parameters_.info);
+        algorithm_formatter_.update_bound(lb, "");
 
         if (!output_.solution.feasible()
                 || output_.solution.cost() > getDoubleInfo(GRB_CB_MIPSOL_OBJ) + 0.5) {
@@ -56,38 +46,34 @@ protected:
                 }
             }
             std::stringstream ss;
-            output_.update_solution(
-                    solution,
-                    std::stringstream(""),
-                    parameters_.info);
+            algorithm_formatter_.update_solution(solution, "");
         }
     }
 
 private:
 
     const Instance& instance_;
-    MilpGurobiOptionalParameters& parameters_;
+    MilpGurobiParameters& parameters_;
     MilpGurobiOutput& output_;
     std::vector<GRBVar*>& x_;
 
 };
 
-MilpGurobiOutput generalizedassignmentsolver::milp_gurobi(
+const MilpGurobiOutput generalizedassignmentsolver::milp_gurobi(
         const Instance& instance,
-        MilpGurobiOptionalParameters parameters)
+        const MilpGurobiParameters& parameters)
 {
+    MilpGurobiOutput output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("MILP (Gurobi)");
+    algorithm_formatter.print_header();
+
     GRBEnv env;
-    init_display(instance, parameters.info);
-    parameters.info.os()
-            << "Algorithm" << std::endl
-            << "---------" << std::endl
-            << "MILP (Gurobi)" << std::endl
-            << std::endl;
 
-    MilpGurobiOutput output(instance, parameters.info);
-
-    if (instance.number_of_items() == 0)
-        return output.algorithm_end(parameters.info);
+    if (instance.number_of_items() == 0) {
+        algorithm_formatter.end();
+        return output;
+    }
 
     GRBModel model(env);
 
@@ -155,10 +141,7 @@ MilpGurobiOutput generalizedassignmentsolver::milp_gurobi(
         }
         model.optimize();
         Cost lb = std::ceil(model.get(GRB_DoubleAttr_ObjVal) - FFOT_TOL);
-        output.update_bound(
-                lb,
-                std::stringstream("linearrelaxation"),
-                parameters.info);
+        algorithm_formatter.update_bound(lb, "linearrelaxation");
 
         for (ItemIdx item_id = 0;
                 item_id < instance.number_of_items();
@@ -170,7 +153,8 @@ MilpGurobiOutput generalizedassignmentsolver::milp_gurobi(
                 output.x[item_id][agent_id] = x[item_id][agent_id].get(GRB_DoubleAttr_X);
         }
 
-        return output.algorithm_end(parameters.info);
+        algorithm_formatter.end();
+        return output;
     }
 
     // Initial solution
@@ -193,8 +177,8 @@ MilpGurobiOutput generalizedassignmentsolver::milp_gurobi(
     model.set(GRB_DoubleParam_NodefileStart, 0.5); // Avoid running out of memory
 
     // Time limit
-    if (parameters.info.time_limit != std::numeric_limits<double>::infinity())
-        model.set(GRB_DoubleParam_TimeLimit, parameters.info.time_limit);
+    if (parameters.timer.time_limit() != std::numeric_limits<double>::infinity())
+        model.set(GRB_DoubleParam_TimeLimit, parameters.timer.time_limit());
 
     // Callback
     MilpGurobiCallback cb = MilpGurobiCallback(instance, parameters, output, x);
@@ -205,10 +189,7 @@ MilpGurobiOutput generalizedassignmentsolver::milp_gurobi(
 
     int optimstatus = model.get(GRB_IntAttr_Status);
     if (optimstatus == GRB_INFEASIBLE) {
-        output.update_bound(
-                instance.bound(),
-                std::stringstream(""),
-                parameters.info);
+        algorithm_formatter.update_bound(instance.bound(), "");
     } else if (optimstatus == GRB_OPTIMAL) {
         if (!output.solution.feasible()
                 || output.solution.cost() > model.get(GRB_DoubleAttr_ObjVal) + 0.5) {
@@ -223,15 +204,9 @@ MilpGurobiOutput generalizedassignmentsolver::milp_gurobi(
                         solution.set(item_id, agent_id);
                 }
             }
-            output.update_solution(
-                    solution,
-                    std::stringstream(""),
-                    parameters.info);
+            algorithm_formatter.update_solution(solution, "");
         }
-        output.update_bound(
-                output.solution.cost(),
-                std::stringstream(""),
-                parameters.info);
+        algorithm_formatter.update_bound(output.solution.cost(), "");
     } else if (model.get(GRB_IntAttr_SolCount) > 0) {
         if (!output.solution.feasible()
                 || output.solution.cost() > model.get(GRB_DoubleAttr_ObjVal) + 0.5) {
@@ -244,25 +219,17 @@ MilpGurobiOutput generalizedassignmentsolver::milp_gurobi(
                         ++agent_id)
                     if (x[item_id][agent_id].get(GRB_DoubleAttr_X) > 0.5)
                         solution.set(item_id, agent_id);
-            output.update_solution(
-                    solution,
-                    std::stringstream(""),
-                    parameters.info);
+            algorithm_formatter.update_solution(solution, "");
         }
         Cost lb = std::ceil(model.get(GRB_DoubleAttr_ObjBound) - FFOT_TOL);
-        output.update_bound(
-                lb,
-                std::stringstream(""),
-                parameters.info);
+        algorithm_formatter.update_bound(lb, "");
     } else {
         Cost lb = std::ceil(model.get(GRB_DoubleAttr_ObjBound) - FFOT_TOL);
-        output.update_bound(
-                lb,
-                std::stringstream(""),
-                parameters.info);
+        algorithm_formatter.update_bound(lb, "");
     }
 
-    return output.algorithm_end(parameters.info);
+    algorithm_formatter.end();
+    return output;
 }
 
 #endif

@@ -10,7 +10,7 @@ Output milp_cplex_test(Instance& instance)
     optimizationtools::Info info = optimizationtools::Info()
         .set_verbosity_level(1)
         ;
-    MilpCplexOptionalParameters parameters;
+    MilpCplexParameters parameters;
     parameters.info = info;
     return milp_cplex(instance, parameters);
 }

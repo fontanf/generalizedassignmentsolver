@@ -10,12 +10,12 @@ ILOSTLBEGIN
 
 ILOMIPINFOCALLBACK4(loggingCallback,
                     const Instance&, instance,
-                    MilpCplexOptionalParameters&, parameters,
+                    MilpCplexParameters&, parameters,
                     MilpCplexOutput&, output,
                     std::vector<IloNumVarArray>&, x)
 {
     Cost lb = std::ceil(getBestObjValue() - FFOT_TOL);
-    output.update_bound(lb, std::stringstream(""), parameters.info);
+    algorithm_formatter.update_bound(lb, "");
 
     if (!hasIncumbent())
         return;
@@ -34,27 +34,23 @@ ILOMIPINFOCALLBACK4(loggingCallback,
                     solution.set(item_id, agent_id);
             }
         }
-        output.update_solution(solution, std::stringstream(""), parameters.info);
+        algorithm_formatter.update_solution(solution, "");
     }
 }
 
-MilpCplexOutput generalizedassignmentsolver::milp_cplex(
+const MilpCplexOutput generalizedassignmentsolver::milp_cplex(
         const Instance& instance,
-        MilpCplexOptionalParameters parameters)
+        const MilpCplexParameters& parameters)
 {
-    init_display(instance, parameters.info);
-    parameters.info.os()
-            << "Algorithm" << std::endl
-            << "---------" << std::endl
-            << "MILP (CPLEX)" << std::endl
-            << std::endl;
-
-    MilpCplexOutput output(instance, parameters.info);
+    MilpCplexOutput output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("MILP (CPLEX)");
+    algorithm_formatter.print_header();
 
     AgentIdx m = instance.number_of_agents();
 
     if (instance.number_of_items() == 0) {
-        output.algorithm_end(parameters.info);
+        algorithm_formatter.end();
         return output;
     }
 
@@ -118,7 +114,7 @@ MilpCplexOutput generalizedassignmentsolver::milp_cplex(
                 model.add(IloConversion(env, x[item_id][agent_id], ILOFLOAT));
         cplex.solve();
         Cost lb = std::ceil(cplex.getObjValue() - FFOT_TOL);
-        output.update_bound(lb, std::stringstream("linearrelaxation"), parameters.info);
+        algorithm_formatter.update_bound(lb, "linearrelaxation");
         for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id) {
             output.x.push_back(std::vector<double>(instance.number_of_agents(), 0));
             for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id)
@@ -126,7 +122,7 @@ MilpCplexOutput generalizedassignmentsolver::milp_cplex(
                     output.x[item_id][agent_id] = 1;
         }
 
-        output.algorithm_end(parameters.info);
+        algorithm_formatter.end();
         return output;
     }
 
@@ -134,8 +130,8 @@ MilpCplexOutput generalizedassignmentsolver::milp_cplex(
     cplex.setParam(IloCplex::Param::MIP::Strategy::File, 2); // Avoid running out of memory
 
     // Time limit
-    if (parameters.info.time_limit != std::numeric_limits<double>::infinity())
-        cplex.setParam(IloCplex::TiLim, parameters.info.remaining_time());
+    if (parameters.timer.remaining_time() != std::numeric_limits<double>::infinity())
+        cplex.setParam(IloCplex::TiLim, parameters.timer.remaining_time());
 
     // Callback
     cplex.use(loggingCallback(env, instance, parameters, output, x));
@@ -144,7 +140,7 @@ MilpCplexOutput generalizedassignmentsolver::milp_cplex(
     cplex.solve();
 
     if (cplex.getStatus() == IloAlgorithm::Infeasible) {
-        output.update_bound(instance.bound(), std::stringstream(""), parameters.info);
+        algorithm_formatter.update_bound(instance.bound(), "");
     } else if (cplex.getStatus() == IloAlgorithm::Optimal) {
         if (!output.solution.feasible() || output.solution.cost() > cplex.getObjValue() + 0.5) {
             Solution solution(instance);
@@ -152,9 +148,9 @@ MilpCplexOutput generalizedassignmentsolver::milp_cplex(
                 for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id)
                     if (cplex.getValue(x[item_id][agent_id]) > 0.5)
                         solution.set(item_id, agent_id);
-            output.update_solution(solution, std::stringstream(""), parameters.info);
+            algorithm_formatter.update_solution(solution, "");
         }
-        output.update_bound(output.solution.cost(), std::stringstream(""), parameters.info);
+        algorithm_formatter.update_bound(output.solution.cost(), "");
     } else if (cplex.isPrimalFeasible()) {
         if (!output.solution.feasible() || output.solution.cost() > cplex.getObjValue() + 0.5) {
             Solution solution(instance);
@@ -162,18 +158,18 @@ MilpCplexOutput generalizedassignmentsolver::milp_cplex(
                 for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id)
                     if (cplex.getValue(x[item_id][agent_id]) > 0.5)
                         solution.set(item_id, agent_id);
-            output.update_solution(solution, std::stringstream(""), parameters.info);
+            algorithm_formatter.update_solution(solution, "");
         }
         Cost lb = std::ceil(cplex.getBestObjValue() - FFOT_TOL);
-        output.update_bound(lb, std::stringstream(""), parameters.info);
+        algorithm_formatter.update_bound(lb, "");
     } else {
         Cost lb = std::ceil(cplex.getBestObjValue() - FFOT_TOL);
-        output.update_bound(lb, std::stringstream(""), parameters.info);
+        algorithm_formatter.update_bound(lb, "");
     }
 
     env.end();
 
-    output.algorithm_end(parameters.info);
+    algorithm_formatter.end();
     return output;
 }
 

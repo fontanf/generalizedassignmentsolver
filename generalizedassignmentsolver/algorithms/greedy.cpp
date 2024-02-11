@@ -1,7 +1,7 @@
 #include "generalizedassignmentsolver/algorithms/greedy.hpp"
 
-#include <set>
-#include <random>
+#include "generalizedassignmentsolver/algorithm_formatter.hpp"
+
 #include <algorithm>
 #include <vector>
 
@@ -42,28 +42,23 @@ void generalizedassignmentsolver::greedy(
     }
 }
 
-Output generalizedassignmentsolver::greedy(
+const Output generalizedassignmentsolver::greedy(
         const Instance& instance,
         const Desirability& f,
-        optimizationtools::Info info)
+        const Parameters& parameters)
 {
-    init_display(instance, info);
-    info.os()
-            << "Algorithm" << std::endl
-            << "---------" << std::endl
-            << "Greedy" << std::endl
-            << std::endl
-            << "Parameters" << std::endl
-            << "----------" << std::endl
-            << "Desirability:  " << f.to_string() << std::endl
-            << std::endl;
+    Output output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("Greedy");
+    algorithm_formatter.print_header();
 
-    Output output(instance, info);
     Solution solution(instance);
     auto alternatives = greedy_init(instance, f);
     greedy(solution, alternatives);
-    output.update_solution(solution, std::stringstream(""), info);
-    return output.algorithm_end(info);
+    algorithm_formatter.update_solution(solution, "");
+
+    algorithm_formatter.end();
+    return output;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -150,28 +145,23 @@ void generalizedassignmentsolver::greedy_regret(
     }
 }
 
-Output generalizedassignmentsolver::greedy_regret(
+const Output generalizedassignmentsolver::greedy_regret(
         const Instance& instance,
         const Desirability& f,
-        optimizationtools::Info info)
+        const Parameters& parameters)
 {
-    init_display(instance, info);
-    info.os()
-            << "Algorithm" << std::endl
-            << "---------" << std::endl
-            << "Regret greedy" << std::endl
-            << std::endl
-            << "Parameters" << std::endl
-            << "----------" << std::endl
-            << "Desirability:  " << f.to_string() << std::endl
-            << std::endl;
+    Output output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("Regret greedy");
+    algorithm_formatter.print_header();
 
-    Output output(instance, info);
     Solution solution(instance);
     auto agents = greedy_regret_init(instance, f);
     greedy_regret(solution, f, agents, {});
-    output.update_solution(solution, std::stringstream(""), info);
-    return output.algorithm_end(info);
+    algorithm_formatter.update_solution(solution, "");
+
+    algorithm_formatter.end();
+    return output;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -214,28 +204,23 @@ void generalizedassignmentsolver::mthg(
         nshift(solution);
 }
 
-Output generalizedassignmentsolver::mthg(
+const Output generalizedassignmentsolver::mthg(
         const Instance& instance,
         const Desirability& f,
-        optimizationtools::Info info)
+        const Parameters& parameters)
 {
-    init_display(instance, info);
-    info.os()
-            << "Algorithm" << std::endl
-            << "---------" << std::endl
-            << "MTHG" << std::endl
-            << std::endl
-            << "Parameters" << std::endl
-            << "----------" << std::endl
-            << "Desirability:  " << f.to_string() << std::endl
-            << std::endl;
+    Output output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("MTHG");
+    algorithm_formatter.print_header();
 
-    Output output(instance, info);
     Solution solution(instance);
     auto alt = greedy_init(instance, f);
     mthg(solution, alt);
-    output.update_solution(solution, std::stringstream(""), info);
-    return output.algorithm_end(info);
+    algorithm_formatter.update_solution(solution, "");
+
+    algorithm_formatter.end();
+    return output;
 }
 
 void generalizedassignmentsolver::mthg_regret(
@@ -249,27 +234,21 @@ void generalizedassignmentsolver::mthg_regret(
         nshift(solution);
 }
 
-Output generalizedassignmentsolver::mthg_regret(
+const Output generalizedassignmentsolver::mthg_regret(
         const Instance& instance,
         const Desirability& f,
-        optimizationtools::Info info)
+        const Parameters& parameters)
 {
-    init_display(instance, info);
-    info.os()
-            << "Algorithm" << std::endl
-            << "---------" << std::endl
-            << "Regret MTHG" << std::endl
-            << std::endl
-            << "Parameters" << std::endl
-            << "----------" << std::endl
-            << "Desirability:  " << f.to_string() << std::endl
-            << std::endl;
+    Output output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("Regret MTHG");
+    algorithm_formatter.print_header();
 
-    Output output(instance, info);
     Solution solution(instance);
     auto agents = greedy_regret_init(instance, f);
     mthg_regret(solution, f, agents, {});
-    output.update_solution(solution, std::stringstream(""), info);
-    return output.algorithm_end(info);
-}
+    algorithm_formatter.update_solution(solution, "");
 
+    algorithm_formatter.end();
+    return output;
+}

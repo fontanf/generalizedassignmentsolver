@@ -1,6 +1,8 @@
 #pragma once
 
-#include "generalizedassignmentsolver/solution.hpp"
+#include "generalizedassignmentsolver/instance.hpp"
+
+#include <memory>
 
 namespace generalizedassignmentsolver
 {

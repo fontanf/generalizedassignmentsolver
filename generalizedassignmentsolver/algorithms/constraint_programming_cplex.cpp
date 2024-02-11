@@ -8,18 +8,14 @@ using namespace generalizedassignmentsolver;
 
 ILOSTLBEGIN
 
-Output generalizedassignmentsolver::constraintprogramming_cplex(
+const Output generalizedassignmentsolver::constraintprogramming_cplex(
         const Instance& instance,
-        ConstraintProgrammingCplexOptionalParameters parameters)
+        const ConstraintProgrammingCplexParameters& parameters)
 {
-    init_display(instance, parameters.info);
-    parameters.info.os()
-            << "Algorithm" << std::endl
-            << "---------" << std::endl
-            << "Constraint Programming (CPLEX)" << std::endl
-            << std::endl;
-
-    Output output(instance, parameters.info);
+    Output output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("Constraint programming (CPLEX)");
+    algorithm_formatter.print_header();
 
     IloEnv env;
     IloModel model(env);
@@ -70,8 +66,8 @@ Output generalizedassignmentsolver::constraintprogramming_cplex(
     cp.setOut(env.getNullStream());
 
     // Time limit
-    if (parameters.info.time_limit != std::numeric_limits<double>::infinity())
-        cp.setParameter(IloCP::TimeLimit, parameters.info.time_limit);
+    if (parameters.timer.time_limit() != std::numeric_limits<double>::infinity())
+        cp.setParameter(IloCP::TimeLimit, parameters.timer.time_limit);
 
     // Solve
     cp.startNewSearch();
@@ -79,17 +75,18 @@ Output generalizedassignmentsolver::constraintprogramming_cplex(
         Solution sol_curr(instance);
         for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id)
             sol_curr.set(item_id, cp.getValue(xj[item_id]));
-        output.update_solution(sol_curr, std::stringstream(""), parameters.info);
+        algorithm_formatter.update_solution(sol_curr, "");
     }
 
-    if (!parameters.info.needs_to_end()) {
+    if (!parameters.timer.needs_to_end()) {
         Cost lb = (output.solution.feasible())? output.solution.cost(): instance.bound();
-        output.update_bound(lb, std::stringstream(""), parameters.info);
+        algorithm_formatter.update_bound(lb, "");
     }
 
     env.end();
 
-    return output.algorithm_end(parameters.info);
+    algorithm_formatter.end();
+    return output;
 }
 
 #endif

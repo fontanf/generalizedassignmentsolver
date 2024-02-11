@@ -10,18 +10,17 @@ namespace generalizedassignmentsolver
 struct LinRelaxClpOutput: Output
 {
     LinRelaxClpOutput(
-            const Instance& instance,
-            optimizationtools::Info& info):
-        Output(instance, info) { }
+            const Instance& instance):
+        Output(instance) { }
+
 
     std::vector<std::vector<double>> x;
 };
 
-LinRelaxClpOutput linrelax_clp(
+const LinRelaxClpOutput linrelax_clp(
         const Instance& instance,
-        optimizationtools::Info info = optimizationtools::Info());
+        const Parameters& parameters = {});
 
 }
 
 #endif
-

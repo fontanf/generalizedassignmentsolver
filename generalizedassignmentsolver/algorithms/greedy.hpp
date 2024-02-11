@@ -8,25 +8,25 @@ namespace generalizedassignmentsolver
 
 // These are the 4 main functions of the package.
 
-Output greedy(
+const Output greedy(
         const Instance& instance,
         const Desirability& f,
-        optimizationtools::Info info = optimizationtools::Info());
+        const Parameters& parameters = {});
 
-Output greedy_regret(
+const Output greedy_regret(
         const Instance& instance,
         const Desirability& f,
-        optimizationtools::Info info = optimizationtools::Info());
+        const Parameters& parameters = {});
 
-Output mthg(
+const Output mthg(
         const Instance& instance,
         const Desirability& f,
-        optimizationtools::Info info = optimizationtools::Info());
+        const Parameters& parameters = {});
 
-Output mthg_regret(
+const Output mthg_regret(
         const Instance& instance,
         const Desirability& f,
-        optimizationtools::Info info = optimizationtools::Info());
+        const Parameters& parameters = {});
 
 // These additional functions can be used to fill a partial solutions.
 //
@@ -68,4 +68,3 @@ void mthg_regret(
         const std::vector<std::vector<int>>& fixed_alternatives = {});
 
 }
-

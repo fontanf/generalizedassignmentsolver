@@ -7,14 +7,13 @@
 namespace generalizedassignmentsolver
 {
 
-struct LocalSolverOptionalParameters
+struct LocalSolverParameters: Parameters
 {
-    optimizationtools::Info info = optimizationtools::Info();
 };
 
-Output localsolver(
+const Output localsolver(
         const Instance& instance,
-        LocalSolverOptionalParameters p = {});
+        const LocalSolverParameters& parameters = {});
 
 }
 

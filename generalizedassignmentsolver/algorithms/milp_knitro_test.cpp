@@ -13,7 +13,7 @@ Cost milp_gurobi_test(Instance& ins)
 {
     Solution sol(ins);
     Cost lb = 0;
-    MilpGurobiData d {.ins = ins, .sol = sol, .lb = lb, .info = Info().set_verbose(true)};
+    MilpGurobiData d {.ins = ins, .sol = sol, .lb = lb, .info = Info().set_verbosity_level(true)};
     std::cout << "toto" << std::endl;
     return milp_gurobi(d).cost();
 }
