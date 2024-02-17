@@ -33,11 +33,11 @@ It is possible to solve the variant where not all items have to be assigned by a
 
 ### Upper bounds
 
-- Polynomial algorithms from "Generalized Assignment Problems" (Martello et al., 1992), options `-f cij` `-f wij` `-f cij*wij` `-f -pij/wij` `-f wij/ti`:
-  - Basic greedy `-a "greedy -f wij"`
-  - Greedy with regret measure `-a "greedy-regret -f wij"`
-  - MTHG, basic greedy (+ n shifts) `-a "mthg -f wij"`
-  - MTHG, greedy with regret measure (+ n shifts) `-a "mthg-regret -f wij"`
+- Polynomial algorithms from "Generalized Assignment Problems" (Martello et al., 1992), options `--desirability cij` `--desirability wij` `--desirability cij*wij` `--desirability -pij/wij` `--desirability wij/ti`:
+  - Basic greedy `-a "greedy --desirability wij"`
+  - Greedy with regret measure `-a "greedy-regret --desirability wij"`
+  - MTHG, basic greedy (+ n shifts) `-a "mthg --desirability wij"`
+  - MTHG, greedy with regret measure (+ n shifts) `-a "mthg-regret --desirability wij"`
 
 - Local search algorithm implemented with [fontanf/localsearchsolver](https://github.com/fontanf/localsearchsolver) `-a "local-search --threads 3"`
 
@@ -167,12 +167,7 @@ Here are some notes for their installations:
 
 ### COIN-OR (CLP, CBC, VOL, DIP)
 
-Install (https://coin-or.github.io/coinbrew/):
-```shell
-git clone https://www.github.com/coin-or/coinbrew
-cd coinbrew
-./coinbrew fetch build Vol --no-prompt
-```
+Automatically installed through Bazel.
 
 ### Gecode
 

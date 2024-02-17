@@ -200,7 +200,11 @@ std::vector<std::shared_ptr<const Column>> PricingSolver::solve_pricing(
         const knapsacksolver::knapsack::Instance kp_instance = kp_instance_builder.build();
 
         // Solve subproblem instance.
-        auto kp_output = knapsacksolver::knapsack::dynamic_programming_primal_dual(kp_instance);
+        knapsacksolver::knapsack::DynamicProgrammingPrimalDualParameters kp_parameters;
+        kp_parameters.verbosity_level = 0;
+        auto kp_output = knapsacksolver::knapsack::dynamic_programming_primal_dual(
+                kp_instance,
+                kp_parameters);
 
         // Retrieve column.
         Column column;

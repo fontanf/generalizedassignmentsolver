@@ -34,7 +34,7 @@ cc_library(
 git_repository(
     name = "optimizationtools",
     remote = "https://github.com/fontanf/optimizationtools.git",
-    commit = "9c47813badb03c9b46c5f7c3e60a8b5f8647ac5b",
+    commit = "84680ca09424021b4d6507c2407c0d828f053d07",
 )
 
 local_repository(
@@ -56,7 +56,7 @@ local_repository(
 git_repository(
     name = "columngenerationsolver",
     remote = "https://github.com/fontanf/columngenerationsolver.git",
-    commit = "56d84cde75a222f64e4eae5f37b57427e429f4b1",
+    commit = "0834b90d691916cf8ec1ab39a41bb913d11f6948",
 )
 
 local_repository(
@@ -67,7 +67,7 @@ local_repository(
 git_repository(
     name = "knapsacksolver",
     remote = "https://github.com/fontanf/knapsacksolver.git",
-    commit = "5eb7326256722cff7ead250168d6cd97191da078",
+    commit = "d202db40ed10100ff9cdf7ec3fb36b9243cc012b",
 )
 
 http_archive(
@@ -134,7 +134,7 @@ cc_library(
 http_archive(
     name = "coinutils_linux",
     urls = ["https://github.com/coin-or/CoinUtils/releases/download/releases%2F2.11.9/CoinUtils-releases.2.11.9-x86_64-ubuntu20-gcc940-static.tar.gz"],
-    sha256 = "872c78bfcdd1566f134d2f7757b76b2a2479a5b1ade065cdd1d4b303ed6f8006",
+    sha256 = "14d07de1b7961f68e037da6f0c57844fd67d4cc1a4b125642f42cd134b228094",
     build_file_content = """
 cc_library(
     name = "coinutils",
