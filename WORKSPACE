@@ -56,7 +56,7 @@ local_repository(
 git_repository(
     name = "columngenerationsolver",
     remote = "https://github.com/fontanf/columngenerationsolver.git",
-    commit = "0834b90d691916cf8ec1ab39a41bb913d11f6948",
+    commit = "040d409e84eea13893b20ba5b0415357d6a30580",
 )
 
 local_repository(
@@ -67,7 +67,12 @@ local_repository(
 git_repository(
     name = "knapsacksolver",
     remote = "https://github.com/fontanf/knapsacksolver.git",
-    commit = "d202db40ed10100ff9cdf7ec3fb36b9243cc012b",
+    commit = "0a526a7c224075159b22b7c1211858505fc23b17",
+)
+
+local_repository(
+    name = "knapsacksolver_",
+    path = "../knapsacksolver/",
 )
 
 http_archive(
