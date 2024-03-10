@@ -74,37 +74,29 @@ Output run(
     // Run algorithm.
     std::string algorithm = vm["algorithm"].as<std::string>();
     if (algorithm == "greedy") {
-        Parameters parameters;
+        GreedyParameters parameters;
         read_args(parameters, vm);
-        std::string desirability_string = "cij";
         if (vm.count("desirability"))
-            desirability_string = vm["desirability"].as<std::string>();
-        std::unique_ptr<Desirability> f = desirability(desirability_string, instance);
-        return greedy(instance, *f, parameters);
+            parameters.desirability = vm["desirability"].as<std::string>();
+        return greedy(instance, parameters);
     } else if (algorithm == "greedy-regret") {
-        Parameters parameters;
+        GreedyParameters parameters;
         read_args(parameters, vm);
-        std::string desirability_string = "cij";
         if (vm.count("desirability"))
-            desirability_string = vm["desirability"].as<std::string>();
-        std::unique_ptr<Desirability> f = desirability(desirability_string, instance);
-        return greedy_regret(instance, *f, parameters);
+            parameters.desirability = vm["desirability"].as<std::string>();
+        return greedy_regret(instance, parameters);
     } else if (algorithm == "mthg") {
-        Parameters parameters;
+        GreedyParameters parameters;
         read_args(parameters, vm);
-        std::string desirability_string = "cij";
         if (vm.count("desirability"))
-            desirability_string = vm["desirability"].as<std::string>();
-        std::unique_ptr<Desirability> f = desirability(desirability_string, instance);
-        return mthg(instance, *f, parameters);
+            parameters.desirability = vm["desirability"].as<std::string>();
+        return mthg(instance, parameters);
     } else if (algorithm == "mthg-regret") {
-        Parameters parameters;
+        GreedyParameters parameters;
         read_args(parameters, vm);
-        std::string desirability_string = "cij";
         if (vm.count("desirability"))
-            desirability_string = vm["desirability"].as<std::string>();
-        std::unique_ptr<Desirability> f = desirability(desirability_string, instance);
-        return mthg_regret(instance, *f, parameters);
+            parameters.desirability = vm["desirability"].as<std::string>();
+        return mthg_regret(instance, parameters);
 
     } else if (algorithm == "random") {
         Parameters parameters;
@@ -120,6 +112,8 @@ Output run(
 #if CBC_FOUND
     } else if (algorithm == "milp-cbc") {
         MilpCbcParameters parameters;
+        if (vm.count("maximum-number-of-nodes"))
+            parameters.maximum_number_of_nodes = vm["maximum-number-of-nodes"].as<Counter>();
         read_args(parameters, vm);
         return milp_cbc(instance, parameters);
 #endif
@@ -171,6 +165,8 @@ Output run(
     } else if (algorithm == "local-search") {
         LocalSearchParameters parameters;
         read_args(parameters, vm);
+        if (vm.count("maximum-number-of-nodes"))
+            parameters.maximum_number_of_nodes = vm["maximum-number-of-nodes"].as<Counter>();
         parameters.initial_solution = &initial_solution;
         return local_search(instance, generator, parameters);
 #if LOCALSOLVER_FOUND
@@ -207,6 +203,7 @@ int main(int argc, char *argv[])
         ("log-to-stderr", "write log to stderr")
 
         ("desirability,", po::value<std::string>(), "set desirability")
+        ("maximum-number-of-nodes,", po::value<Counter>(), "set maximum number of nodes")
         ;
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);

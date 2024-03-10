@@ -515,6 +515,7 @@ const generalizedassignmentsolver::Output generalizedassignmentsolver::local_sea
     lssbfls_parameters.timer = parameters.timer;
     lssbfls_parameters.number_of_threads_1 = 1;
     lssbfls_parameters.number_of_threads_2 = parameters.number_of_threads;
+    lssbfls_parameters.maximum_number_of_nodes = parameters.maximum_number_of_nodes;
     if (parameters.initial_solution == nullptr) {
         lssbfls_parameters.initial_solution_ids = std::vector<Counter>(
                 lssbfls_parameters.number_of_threads_2, 0);
@@ -527,6 +528,8 @@ const generalizedassignmentsolver::Output generalizedassignmentsolver::local_sea
         = [&instance, &algorithm_formatter](
                 const localsearchsolver::Output<LocalScheme>& lss_output)
         {
+            const localsearchsolver::BestFirstLocalSearchOutput<LocalScheme>& lssbfls_output
+                = static_cast<const localsearchsolver::BestFirstLocalSearchOutput<LocalScheme>&>(lss_output);
             const LocalScheme::Solution& lss_solution = lss_output.solution_pool.best();
             Solution solution(instance);
             for (ItemIdx item_id = 0;
@@ -536,7 +539,8 @@ const generalizedassignmentsolver::Output generalizedassignmentsolver::local_sea
                 solution.set(item_id, agent_id);
             }
             std::stringstream ss;
-            algorithm_formatter.update_solution(solution, "");
+            ss << "node " << lssbfls_output.number_of_nodes;
+            algorithm_formatter.update_solution(solution, ss.str());
         };
     best_first_local_search(local_scheme, lssbfls_parameters);
 

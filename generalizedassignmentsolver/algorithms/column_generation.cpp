@@ -37,6 +37,7 @@
 
 #include "knapsacksolver/knapsack/instance_builder.hpp"
 #include "knapsacksolver/knapsack/algorithms/dynamic_programming_primal_dual.hpp"
+#include <iostream>
 //#include "knapsacksolver/knapsack/algorithms/dynamic_programming_bellman.hpp"
 
 using namespace generalizedassignmentsolver;
@@ -80,8 +81,6 @@ columngenerationsolver::Model get_model(const Instance& instance)
     columngenerationsolver::Model model;
 
     model.objective_sense = optimizationtools::ObjectiveDirection::Minimize;
-    model.column_lower_bound = 0;
-    model.column_upper_bound = 1;
 
     // Rows.
     // Assignment constraints.
@@ -116,7 +115,7 @@ columngenerationsolver::Model get_model(const Instance& instance)
 
 Solution columns2solution(
         const Instance& instance,
-        const std::vector<std::pair<std::shared_ptr<const Column>, Value>>& columns)
+        const std::unordered_map<std::shared_ptr<const Column>, Value>& columns)
 {
     Solution solution(instance);
     for (const auto& pair: columns) {
@@ -191,7 +190,9 @@ std::vector<std::shared_ptr<const Column>> PricingSolver::solve_pricing(
                     || instance_.weight(item_id, agent_id)
                     > instance_.capacity(agent_id))
                 continue;
-            kp_instance_builder.add_item(profit, instance_.weight(item_id, agent_id));
+            kp_instance_builder.add_item(
+                    profit,
+                    instance_.weight(item_id, agent_id));
             kp2gap_.push_back(item_id);
         }
         const knapsacksolver::knapsack::Instance kp_instance = kp_instance_builder.build();
@@ -245,6 +246,9 @@ const ColumnGenerationOutput generalizedassignmentsolver::column_generation(
     cgs_parameters.timer = parameters.timer;
     cgs_parameters.linear_programming_solver
         = columngenerationsolver::s2lps(parameters.linear_programming_solver);
+    cgs_parameters.internal_diving = true;
+    cgs_parameters.self_adjusting_wentges_smoothing = true;
+    cgs_parameters.automatic_directional_smoothing = true;
     auto cgscg_output = columngenerationsolver::column_generation(model, cgs_parameters);
 
     Cost bound = std::ceil(cgscg_output.relaxation_solution.objective_value() - FFOT_TOL);
@@ -271,6 +275,9 @@ const ColumnGenerationHeuristicGreedyOutput generalizedassignmentsolver::column_
     cgsg_parameters.timer = parameters.timer;
     cgsg_parameters.column_generation_parameters.linear_programming_solver
         = columngenerationsolver::s2lps(parameters.linear_programming_solver);
+    cgsg_parameters.internal_diving = true;
+    cgsg_parameters.column_generation_parameters.self_adjusting_wentges_smoothing = true;
+    cgsg_parameters.column_generation_parameters.automatic_directional_smoothing = true;
     cgsg_parameters.new_solution_callback = [&instance, &algorithm_formatter](
             const columngenerationsolver::Output& cgs_output)
     {
@@ -303,6 +310,8 @@ const ColumnGenerationHeuristicLimitedDiscrepancySearchOutput generalizedassignm
     cgslds_parameters.timer = parameters.timer;
     cgslds_parameters.column_generation_parameters.linear_programming_solver
         = columngenerationsolver::s2lps(parameters.linear_programming_solver);
+    cgslds_parameters.column_generation_parameters.self_adjusting_wentges_smoothing = true;
+    cgslds_parameters.column_generation_parameters.automatic_directional_smoothing = true;
     cgslds_parameters.new_solution_callback = [&instance, &algorithm_formatter](
                 const columngenerationsolver::Output& cgs_output)
         {

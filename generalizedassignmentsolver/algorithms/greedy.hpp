@@ -1,32 +1,53 @@
 #pragma once
 
 #include "generalizedassignmentsolver/solution.hpp"
-#include "generalizedassignmentsolver/desirability.hpp"
 
 namespace generalizedassignmentsolver
 {
 
 // These are the 4 main functions of the package.
 
+struct GreedyParameters: Parameters
+{
+    std::string desirability = "cij";
+
+
+    virtual int format_width() const override { return 26; }
+
+    virtual void format(std::ostream& os) const override
+    {
+        Parameters::format(os);
+        int width = format_width();
+        os
+            << std::setw(width) << std::left << "Desirability: " << desirability << std::endl
+            ;
+    }
+
+    virtual nlohmann::json to_json() const override
+    {
+        nlohmann::json json = Parameters::to_json();
+        json.merge_patch({
+                {"Desirability", desirability},
+                });
+        return json;
+    }
+};
+
 const Output greedy(
         const Instance& instance,
-        const Desirability& f,
-        const Parameters& parameters = {});
+        const GreedyParameters& parameters = {});
 
 const Output greedy_regret(
         const Instance& instance,
-        const Desirability& f,
-        const Parameters& parameters = {});
+        const GreedyParameters& parameters = {});
 
 const Output mthg(
         const Instance& instance,
-        const Desirability& f,
-        const Parameters& parameters = {});
+        const GreedyParameters& parameters = {});
 
 const Output mthg_regret(
         const Instance& instance,
-        const Desirability& f,
-        const Parameters& parameters = {});
+        const GreedyParameters& parameters = {});
 
 // These additional functions can be used to fill a partial solutions.
 //
@@ -40,7 +61,7 @@ const Output mthg_regret(
 
 std::vector<std::pair<ItemIdx, AgentIdx>> greedy_init(
         const Instance& instance,
-        const Desirability& f);
+        const std::vector<std::vector<double>>& desirability);
 
 void greedy(
         Solution& solution,
@@ -53,17 +74,17 @@ void mthg(
 
 std::vector<std::vector<AgentIdx>> greedy_regret_init(
         const Instance& instance,
-        const Desirability& f);
+        const std::vector<std::vector<double>>& desirability);
 
 void greedy_regret(
         Solution& solution,
-        const Desirability& f,
+        const std::vector<std::vector<double>>& desirability,
         const std::vector<std::vector<AgentIdx>>& agents,
         const std::vector<std::vector<int>>& fixed_alternatives = {});
 
 void mthg_regret(
         Solution& instance,
-        const Desirability& f,
+        const std::vector<std::vector<double>>& desirability,
         const std::vector<std::vector<AgentIdx>>& agents,
         const std::vector<std::vector<int>>& fixed_alternatives = {});
 

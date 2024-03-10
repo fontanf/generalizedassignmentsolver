@@ -2,6 +2,8 @@
 
 #include "generalizedassignmentsolver/algorithms/milp_cbc.hpp"
 
+#include "generalizedassignmentsolver/algorithm_formatter.hpp"
+
 using namespace generalizedassignmentsolver;
 
 CoinLP::CoinLP(const Instance& instance)
@@ -77,16 +79,16 @@ CoinLP::CoinLP(const Instance& instance)
 
 #if CBC_FOUND
 
-#include "CbcHeuristicDiveCoefficient.hpp"
-#include "CbcHeuristicDiveFractional.hpp"
-#include "CbcHeuristicDiveGuided.hpp"
-#include "CbcHeuristicDiveVectorLength.hpp"
+//#include "CbcHeuristicDiveCoefficient.hpp"
+//#include "CbcHeuristicDiveFractional.hpp"
+//#include "CbcHeuristicDiveGuided.hpp"
+//#include "CbcHeuristicDiveVectorLength.hpp"
 //#include "CbcLinked.hpp"
-#include "CbcHeuristicGreedy.hpp"
-#include "CbcHeuristicLocal.hpp"
+//#include "CbcHeuristicGreedy.hpp"
+//#include "CbcHeuristicLocal.hpp"
 #include "CbcHeuristic.hpp"
-#include "CbcHeuristicRINS.hpp"
-#include "CbcHeuristicRENS.hpp"
+//#include "CbcHeuristicRINS.hpp"
+//#include "CbcHeuristicRENS.hpp"
 
 //#include "CglAllDifferent.hpp"
 //#include "CglClique.hpp"
@@ -127,22 +129,26 @@ public:
 
     EventHandler(
             const Instance& instance,
-            MilpCbcParameters& parameters,
-            Output& output):
+            const MilpCbcParameters& parameters,
+            MilpCbcOutput& output,
+            AlgorithmFormatter& algorithm_formatter):
         CbcEventHandler(),
         instance_(instance),
         parameters_(parameters),
-        output_(output) { }
+        output_(output),
+        algorithm_formatter_(algorithm_formatter) { }
 
     EventHandler(
             CbcModel* model,
             const Instance& instance,
-            MilpCbcParameters& parameters,
-            Output& output):
+            const MilpCbcParameters& parameters,
+            MilpCbcOutput& output,
+            AlgorithmFormatter& algorithm_formatter):
         CbcEventHandler(model),
         instance_(instance),
         parameters_(parameters),
-        output_(output) { }
+        output_(output),
+        algorithm_formatter_(algorithm_formatter) { }
 
     virtual ~EventHandler() { }
 
@@ -150,15 +156,17 @@ public:
         CbcEventHandler(rhs),
         instance_(rhs.instance_),
         parameters_(rhs.parameters_),
-        output_(rhs.output_) { }
+        output_(rhs.output_),
+        algorithm_formatter_(rhs.algorithm_formatter_) { }
 
     EventHandler &operator=(const EventHandler &rhs)
     {
         if (this != &rhs) {
             CbcEventHandler::operator=(rhs);
             //this->instance_  = rhs.instance_;
-            this->parameters_ = rhs.parameters_;
-            this->output_ = rhs.output_;
+            //this->parameters_ = rhs.parameters_;
+            //this->output_ = rhs.output_;
+            //this->algorithm_formatter_ = rhs.algorithm_formatter_;
         }
         return *this;
     }
@@ -168,20 +176,29 @@ public:
 private:
 
     const Instance& instance_;
-    MilpCbcParameters& parameters_;
-    Output& output_;
+    const MilpCbcParameters& parameters_;
+    MilpCbcOutput& output_;
+    AlgorithmFormatter& algorithm_formatter_;
 
 };
 
 CbcEventHandler::CbcAction EventHandler::event(CbcEvent which_event)
 {
-    if ((model_->specialOptions() & 2048) != 0) // not in subtree
+    // Not in subtree.
+    if ((model_->specialOptions() & 2048) != 0)
         return noAction;
 
-    Cost lb = std::ceil(model_->getBestPossibleObjValue() - FFOT_TOL);
-    algorithm_formatter_.update_bound(lb, "");
+    // Update output.
+    output_.number_of_nodes = model_->getNodeCount();
 
-    if ((which_event != solution && which_event != heuristicSolution)) // no solution found
+    std::stringstream ss;
+    ss << "node " << model_->getNodeCount();
+
+    Cost lb = std::ceil(model_->getBestPossibleObjValue() - FFOT_TOL);
+    algorithm_formatter_.update_bound(lb, ss.str());
+
+    // No solution found.
+    if ((which_event != solution && which_event != heuristicSolution))
         return noAction;
 
     OsiSolverInterface* origSolver = model_->solver();
@@ -201,8 +218,13 @@ CbcEventHandler::CbcAction EventHandler::event(CbcEvent which_event)
                     solution.set(item_id, agent_id);
             }
         }
-        algorithm_formatter_.update_solution(solution, std::stringstream(""), parameters_.info);
+
+        algorithm_formatter_.update_solution(solution, ss.str());
     }
+
+    // Check end.
+    if (parameters_.timer.needs_to_end())
+        return stop;
 
     return noAction;
 }
@@ -211,11 +233,11 @@ CbcEventHandler::CbcAction EventHandler::event(CbcEvent which_event)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-const Output generalizedassignmentsolver::milp_cbc(
+const MilpCbcOutput generalizedassignmentsolver::milp_cbc(
         const Instance& instance,
         const MilpCbcParameters& parameters)
 {
-    Output output(instance);
+    MilpCbcOutput output(instance);
     AlgorithmFormatter algorithm_formatter(parameters, output);
     algorithm_formatter.start("MILP (CBC)");
     algorithm_formatter.print_header();
@@ -251,7 +273,7 @@ const Output generalizedassignmentsolver::milp_cbc(
     CbcModel model(solver1);
 
     // Callback.
-    EventHandler event_handler(instance, parameters, output);
+    EventHandler event_handler(instance, parameters, output, algorithm_formatter);
     model.passInEventHandler(&event_handler);
 
     // Reduce printout.
@@ -342,18 +364,27 @@ const Output generalizedassignmentsolver::milp_cbc(
     }
 
     // Stop af first improvment.
-    if (parameters.stop_at_first_improvment)
+    if (parameters.stop_at_first_improvement)
         model.setMaximumSolutions(1);
+
+    // Set maximum number of nodes.
+    if (parameters.maximum_number_of_nodes != -1)
+        model.setMaximumNodes(parameters.maximum_number_of_nodes);
 
     // Do complete search.
     model.branchAndBound();
 
-    if (model.isProvenInfeasible()) {  // Infeasible.
+    if (model.isProvenInfeasible()) {
+        // Infeasible.
+
         // Update dual bound.
         algorithm_formatter.update_bound(
                 instance.bound(),
                 "");
-    } else if (model.isProvenOptimal()) {  // Optimal
+
+    } else if (model.isProvenOptimal()) {
+        // Optimal.
+
         // Update primal solution.
         if (!output.solution.feasible()
                 || output.solution.cost() > model.getObjValue() + 0.5) {
@@ -371,7 +402,10 @@ const Output generalizedassignmentsolver::milp_cbc(
         algorithm_formatter.update_bound(
                 output.solution.cost(),
                 "");
-    } else if (model.bestSolution() != NULL) {  // Feasible solution found.
+
+    } else if (model.bestSolution() != NULL) {
+        // Feasible solution found.
+
         // Update primal solution.
         if (!output.solution.feasible()
                 || output.solution.cost() > model.getObjValue() + 0.5) {
@@ -385,14 +419,21 @@ const Output generalizedassignmentsolver::milp_cbc(
                     solution,
                     "");
         }
+
         // Update dual bound.
         Cost lb = std::ceil(model.getBestPossibleObjValue() - FFOT_TOL);
         algorithm_formatter.update_bound(lb, "");
-    } else {   // No feasible solution found.
+
+    } else {
+        // No feasible solution found.
+
         // Update dual bound.
         Cost lb = std::ceil(model.getBestPossibleObjValue() - FFOT_TOL);
         algorithm_formatter.update_bound(lb, "");
     }
+
+    // Update output.
+    output.number_of_nodes = model.getNodeCount();
 
     algorithm_formatter.end();
     return output;

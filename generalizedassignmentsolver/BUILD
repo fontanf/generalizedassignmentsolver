@@ -1,5 +1,16 @@
 load("@bazel_skylib//lib:selects.bzl", "selects")
 
+load("//generalizedassignmentsolver:variables.bzl", "STDCPP",
+         "CBC_COPTS", "CBC_DEP",
+         "CLP_COPTS", "CLP_DEP",
+         "VOLUME_COPTS", "VOLUME_DEP",
+         "CPLEX_COPTS", "CPLEX_DEP", "CPOPTIMIZER_DEP",
+         "GUROBI_COPTS", "GUROBI_DEP",
+         "GECODE_COPTS", "GECODE_DEP",
+         "LOCALSOLVER_COPTS", "LOCALSOLVER_DEP",
+         "KNITRO_COPTS", "KNITRO_DEP")
+
+
 config_setting(
         name = "clp_build",
         values = {"define": "clp=true"},
@@ -101,14 +112,12 @@ cc_library(
                 "instance.hpp",
                 "instance_builder.hpp",
                 "solution.hpp",
-                "desirability.hpp",
                 "algorithm_formatter.hpp",
         ],
         srcs = [
                 "instance.cpp",
                 "instance_builder.cpp",
                 "solution.cpp",
-                "desirability.cpp",
                 "algorithm_formatter.cpp",
         ],
         copts = STDCPP,
@@ -136,6 +145,7 @@ cc_binary(
                     "@bazel_tools//src/conditions:windows": [],
                     "//conditions:default": ["-lpthread"],
         }),
+        copts = CBC_COPTS,
         data = ["//data:data"],
 )
 

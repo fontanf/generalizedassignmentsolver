@@ -7,19 +7,100 @@
 
 using namespace generalizedassignmentsolver;
 
+std::vector<std::vector<double>> compute_desirability(
+        const Instance& instance,
+        std::string str)
+{
+    std::vector<std::vector<double>> desirability(
+            instance.number_of_items(),
+            std::vector<double>(instance.number_of_agents(), 0));
+
+    if (str == "cij") {
+        for (ItemIdx item_id = 0;
+                item_id < instance.number_of_items();
+                ++item_id) {
+            for (AgentIdx agent_id = 0;
+                    agent_id < instance.number_of_agents();
+                    ++agent_id) {
+                desirability[item_id][agent_id] = instance.cost(item_id, agent_id);
+            }
+        }
+
+    } else if (str == "wij") {
+        for (ItemIdx item_id = 0;
+                item_id < instance.number_of_items();
+                ++item_id) {
+            for (AgentIdx agent_id = 0;
+                    agent_id < instance.number_of_agents();
+                    ++agent_id) {
+                desirability[item_id][agent_id] = instance.weight(item_id, agent_id);
+            }
+        }
+
+    } else if (str == "cij*wij") {
+        for (ItemIdx item_id = 0;
+                item_id < instance.number_of_items();
+                ++item_id) {
+            for (AgentIdx agent_id = 0;
+                    agent_id < instance.number_of_agents();
+                    ++agent_id) {
+                desirability[item_id][agent_id]
+                    = instance.cost(item_id, agent_id)
+                    * instance.cost(item_id, agent_id);
+            }
+        }
+
+    } else if (str == "-pij/wij") {
+        for (ItemIdx item_id = 0;
+                item_id < instance.number_of_items();
+                ++item_id) {
+            for (AgentIdx agent_id = 0;
+                    agent_id < instance.number_of_agents();
+                    ++agent_id) {
+                desirability[item_id][agent_id]
+                    = -(double)instance.profit(item_id, agent_id)
+                    / instance.weight(item_id, agent_id);
+            }
+        }
+
+    } else if (str == "wij/ti") {
+        for (ItemIdx item_id = 0;
+                item_id < instance.number_of_items();
+                ++item_id) {
+            for (AgentIdx agent_id = 0;
+                    agent_id < instance.number_of_agents();
+                    ++agent_id) {
+                desirability[item_id][agent_id]
+                    = (double)instance.weight(item_id, agent_id)
+                    / instance.capacity(agent_id);
+            }
+        }
+
+    } else {
+
+        throw std::invalid_argument("Unknown desirability.");
+    }
+
+    return desirability;
+}
+
 std::vector<std::pair<ItemIdx, AgentIdx>> generalizedassignmentsolver::greedy_init(
         const Instance& instance,
-        const Desirability& f)
+        const std::vector<std::vector<double>>& desirability)
 {
     std::vector<std::pair<ItemIdx, AgentIdx>> alternatives;
     for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id)
         for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id)
             alternatives.push_back({item_id, agent_id});
-    sort(alternatives.begin(), alternatives.end(), [&f](
+    sort(
+            alternatives.begin(),
+            alternatives.end(),
+            [&desirability](
                 const std::pair<ItemIdx, AgentIdx>& a,
                 const std::pair<ItemIdx, AgentIdx>& b) -> bool
             {
-                return f(a.first, a.second) < f(b.first, b.second);
+                return desirability[a.first][a.second]
+                    < desirability[b.first][b.second];
             });
     return alternatives;
 }
@@ -44,8 +125,7 @@ void generalizedassignmentsolver::greedy(
 
 const Output generalizedassignmentsolver::greedy(
         const Instance& instance,
-        const Desirability& f,
-        const Parameters& parameters)
+        const GreedyParameters& parameters)
 {
     Output output(instance);
     AlgorithmFormatter algorithm_formatter(parameters, output);
@@ -53,7 +133,8 @@ const Output generalizedassignmentsolver::greedy(
     algorithm_formatter.print_header();
 
     Solution solution(instance);
-    auto alternatives = greedy_init(instance, f);
+    auto desirability = compute_desirability(instance, parameters.desirability);
+    auto alternatives = greedy_init(instance, desirability);
     greedy(solution, alternatives);
     algorithm_formatter.update_solution(solution, "");
 
@@ -67,20 +148,24 @@ const Output generalizedassignmentsolver::greedy(
 
 std::vector<std::vector<AgentIdx>> generalizedassignmentsolver::greedy_regret_init(
         const Instance& instance,
-        const Desirability& f)
+        const std::vector<std::vector<double>>& desirability)
 {
-    ItemIdx n = instance.number_of_items();
-    AgentIdx m = instance.number_of_agents();
-
-    std::vector<std::vector<AgentIdx>> agents(n, std::vector<AgentIdx>(m));
+    std::vector<std::vector<AgentIdx>> agents(
+            instance.number_of_items(),
+            std::vector<AgentIdx>(instance.number_of_agents()));
     for (ItemIdx item_id = 0;
             item_id < instance.number_of_items();
             ++item_id) {
         std::iota(agents[item_id].begin(), agents[item_id].end(), 0);
-        sort(agents[item_id].begin(), agents[item_id].end(),
-                [&f, &item_id](AgentIdx agent_id_1, AgentIdx agent_id_2) -> bool
+        sort(
+                agents[item_id].begin(),
+                agents[item_id].end(),
+                [&desirability, &item_id](
+                    AgentIdx agent_id_1,
+                    AgentIdx agent_id_2) -> bool
                 {
-                    return f(item_id, agent_id_1) < f(item_id, agent_id_2);
+                    return desirability[item_id][agent_id_1]
+                        < desirability[item_id][agent_id_2];
                 });
     }
 
@@ -89,7 +174,7 @@ std::vector<std::vector<AgentIdx>> generalizedassignmentsolver::greedy_regret_in
 
 void generalizedassignmentsolver::greedy_regret(
         Solution& solution,
-        const Desirability& f,
+        const std::vector<std::vector<double>>& desirability,
         const std::vector<std::vector<AgentIdx>>& agents,
         const std::vector<std::vector<int>>& fixed_alternatives)
 {
@@ -134,8 +219,8 @@ void generalizedassignmentsolver::greedy_regret(
 
             double f_curr = (agent_id_second == instance.number_of_agents())?
                 std::numeric_limits<double>::infinity():
-                f(item_id, agents[item_id][agent_id_second])
-                - f(item_id, agents[item_id][agent_id_first]);
+                desirability[item_id][agents[item_id][agent_id_second]]
+                - desirability[item_id][agents[item_id][agent_id_first]];
             if (item_id_best == -1 || f_best < f_curr) {
                 f_best = f_curr;
                 item_id_best = item_id;
@@ -147,8 +232,7 @@ void generalizedassignmentsolver::greedy_regret(
 
 const Output generalizedassignmentsolver::greedy_regret(
         const Instance& instance,
-        const Desirability& f,
-        const Parameters& parameters)
+        const GreedyParameters& parameters)
 {
     Output output(instance);
     AlgorithmFormatter algorithm_formatter(parameters, output);
@@ -156,8 +240,9 @@ const Output generalizedassignmentsolver::greedy_regret(
     algorithm_formatter.print_header();
 
     Solution solution(instance);
-    auto agents = greedy_regret_init(instance, f);
-    greedy_regret(solution, f, agents, {});
+    auto desirability = compute_desirability(instance, parameters.desirability);
+    auto agents = greedy_regret_init(instance, desirability);
+    greedy_regret(solution, desirability, agents, {});
     algorithm_formatter.update_solution(solution, "");
 
     algorithm_formatter.end();
@@ -206,8 +291,7 @@ void generalizedassignmentsolver::mthg(
 
 const Output generalizedassignmentsolver::mthg(
         const Instance& instance,
-        const Desirability& f,
-        const Parameters& parameters)
+        const GreedyParameters& parameters)
 {
     Output output(instance);
     AlgorithmFormatter algorithm_formatter(parameters, output);
@@ -215,7 +299,8 @@ const Output generalizedassignmentsolver::mthg(
     algorithm_formatter.print_header();
 
     Solution solution(instance);
-    auto alt = greedy_init(instance, f);
+    auto desirability = compute_desirability(instance, parameters.desirability);
+    auto alt = greedy_init(instance, desirability);
     mthg(solution, alt);
     algorithm_formatter.update_solution(solution, "");
 
@@ -225,19 +310,18 @@ const Output generalizedassignmentsolver::mthg(
 
 void generalizedassignmentsolver::mthg_regret(
         Solution& solution,
-        const Desirability& f,
+        const std::vector<std::vector<double>>& desirability,
         const std::vector<std::vector<AgentIdx>>& agents,
         const std::vector<std::vector<int>>& fixed_alternatives)
 {
-    greedy_regret(solution, f, agents, fixed_alternatives);
+    greedy_regret(solution, desirability, agents, fixed_alternatives);
     if (solution.feasible())
         nshift(solution);
 }
 
 const Output generalizedassignmentsolver::mthg_regret(
         const Instance& instance,
-        const Desirability& f,
-        const Parameters& parameters)
+        const GreedyParameters& parameters)
 {
     Output output(instance);
     AlgorithmFormatter algorithm_formatter(parameters, output);
@@ -245,8 +329,9 @@ const Output generalizedassignmentsolver::mthg_regret(
     algorithm_formatter.print_header();
 
     Solution solution(instance);
-    auto agents = greedy_regret_init(instance, f);
-    mthg_regret(solution, f, agents, {});
+    auto desirability = compute_desirability(instance, parameters.desirability);
+    auto agents = greedy_regret_init(instance, desirability);
+    mthg_regret(solution, desirability, agents, {});
     algorithm_formatter.update_solution(solution, "");
 
     algorithm_formatter.end();

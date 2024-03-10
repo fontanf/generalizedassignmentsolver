@@ -10,7 +10,7 @@ struct ColumnGenerationParameters: Parameters
     std::string linear_programming_solver = "CLP";
 
 
-    virtual int format_width() const override { return 37; }
+    virtual int format_width() const override { return 28; }
 
     virtual void format(std::ostream& os) const override
     {
