@@ -68,7 +68,7 @@ std::ostream& Instance::format(
     return os;
 }
 
-void Instance::write(std::string instance_path)
+void Instance::write(const std::string& instance_path)
 {
     std::ofstream file(instance_path);
     if (!file.good()) {

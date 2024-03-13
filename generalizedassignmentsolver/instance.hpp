@@ -135,7 +135,7 @@ public:
             int verbosity_level = 1) const;
 
     /** Write the instance to a file. */
-    void write(std::string instance_path);
+    void write(const std::string& instance_path);
 
 private:
 
