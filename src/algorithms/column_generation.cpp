@@ -115,7 +115,7 @@ columngenerationsolver::Model get_model(const Instance& instance)
 
 Solution columns2solution(
         const Instance& instance,
-        const std::unordered_map<std::shared_ptr<const Column>, Value>& columns)
+        const std::vector<std::pair<std::shared_ptr<const Column>, Value>>& columns)
 {
     Solution solution(instance);
     for (const auto& pair: columns) {
