@@ -271,7 +271,7 @@ const ColumnGenerationHeuristicGreedyOutput generalizedassignmentsolver::column_
 
     columngenerationsolver::Model model = get_model(instance);
     columngenerationsolver::GreedyParameters cgsg_parameters;
-    //cgsg_parameters.verbosity_level = 0;
+    cgsg_parameters.verbosity_level = 0;
     cgsg_parameters.timer = parameters.timer;
     cgsg_parameters.column_generation_parameters.linear_programming_solver
         = columngenerationsolver::s2lps(parameters.linear_programming_solver);
