@@ -47,7 +47,7 @@ if args.tests is None or "greedy" in args.tests:
                 json_output_path = os.path.join(
                         args.directory,
                         algorithm.replace("-", "_"),
-                        desirability.replace("/", "_"),
+                        desirability.replace("/", "_").replace("*", "_"),
                         instance + ".json")
                 if not os.path.exists(os.path.dirname(json_output_path)):
                     os.makedirs(os.path.dirname(json_output_path))
