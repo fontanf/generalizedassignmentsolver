@@ -1,7 +1,7 @@
 #include "generalizedassignmentsolver/instance_builder.hpp"
 
 #if CLP_FOUND
-#include "generalizedassignmentsolver/algorithms/linrelax_clp.hpp"
+//#include "generalizedassignmentsolver/algorithms/linrelax_clp.hpp"
 #endif
 #include "generalizedassignmentsolver/algorithms/column_generation.hpp"
 #if CBC_FOUND
@@ -104,10 +104,10 @@ Output run(
         return random(instance, generator, parameters);
 
 #if CLP_FOUND
-    } else if (algorithm == "linrelax-clp") {
-        Parameters parameters;
-        read_args(parameters, vm);
-        return linrelax_clp(instance, parameters);
+    //} else if (algorithm == "linrelax-clp") {
+    //    Parameters parameters;
+    //    read_args(parameters, vm);
+    //    return linrelax_clp(instance, parameters);
 #endif
 #if CBC_FOUND
     } else if (algorithm == "milp-cbc") {

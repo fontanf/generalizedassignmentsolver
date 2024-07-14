@@ -63,33 +63,16 @@ It is possible to solve the variant where not all items have to be assigned by a
 
 ## Usage (command line)
 
-The only required dependency is Boost:
-```shell
-sudo apt-get install libboost-all-dev
-```
-
 Compile:
 ```shell
-bazel build -- //...
-```
-
-However, most algorithms require additional libraries (see below).
-Compile with additional libraries (or just uncomment the corresponding lines in `.bazelrc`):
-```shell
-bazel build \
-    --define coinor=true \
-    --define cplex=true \
-    --define gurobi=true \
-    --define gecode=true \
-    --define dlib=true \
-    --define localsolver=true \
-    --define knitro=true \
-    -- //...
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release --parallel
+cmake --install build --config Release --prefix install
 ```
 
 Solve:
 ```shell
-./bazel-bin/generalizedassignmentsolver/main --verbosity-level 1 --algorithm mthg --desirability "-pij/wij" --input "data/chu1997/a05100" --output "a05100_output.json" --certificate "a05100_solution.txt"
+./install/bin/generalizedassignmentsolver --verbosity-level 1 --algorithm mthg --desirability "-pij/wij" --input "data/chu1997/a05100" --output "a05100_output.json" --certificate "a05100_solution.txt"
 ```
 ```
 =====================================
@@ -141,50 +124,7 @@ Feasible:         1
 Cost:             1713
 ```
 
-Unit tests:
-```shell
-bazel test --compilation_mode=dbg -- //...
-```
-
 Checker:
 ```shell
-./bazel-bin/generalizedassignmentsolver/checker data/chu1997/a05100 a05100_solution.txt
+./install/bin/generalizedassignmentsolver_checker data/chu1997/a05100 a05100_solution.txt
 ```
-
-Run benchmarks:
-```shell
-python3 ../optimizationtools/optimizationtools/bench_run.py --algorithms "mthg -f cij" "mthg -f wij" "mthg -f cij*wij" "mthg -f -pij/wij" "mthg -f wij/ti" "mthg-regret -f cij" "mthg-regret -f wij" "mthg-regret -f cij*wij" "mthg-regret -f -pij/wij" "mthg-regret -f wij/ti" "random"
-python3 ../optimizationtools/optimizationtools/bench_process.py --benchmark heuristicshort --labels "mthg -f cij" "mthg -f wij" "mthg -f cij*wij" "mthg -f -pij/wij" "mthg -f wij/ti" "mthg-regret -f cij" "mthg-regret -f wij" "mthg-regret -f cij*wij" "mthg-regret -f -pij/wij" "mthg-regret -f wij/ti" "random" --timelimit 0.1
-```
-
-![heuristicshort](img/heuristicshort.png?raw=true "heuristicshort")
-
-## Optional dependencies
-
-To enable a dependency, uncomment the corresponding line in the `.bazelrc` file and adapt its path in the `WORKSPACEi` file.
-
-Here are some notes for their installations:
-
-### COIN-OR (CLP, CBC, VOL, DIP)
-
-Automatically installed through Bazel.
-
-### Gecode
-
-Download latest version: download https://www.gecode.org/download.html
-
-Compile (more info https://www.gecode.org/doc/2.2.0/reference/PageComp.html):
-```shell
-./configure
-make
-```
-
-### Gurobi
-
-After installing, execute the following commands:
-```shell
-cd ${GUROBI_HOME}/linux64/src/build/
-make
-cp libgurobi_c++.a ../../lib/
-```
-
