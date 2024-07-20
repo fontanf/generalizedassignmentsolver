@@ -79,32 +79,32 @@ column_generation_data = [
         (os.path.join("chu1997", "d10100"), "orlibrary"),
         ]
 
-# if args.tests is None or "greedy" in args.tests:
-#     print("Column generation heuristic greedy")
-#     print("----------------------------------")
-#     print()
+if args.tests is None or "greedy" in args.tests:
+    print("Column generation heuristic greedy")
+    print("----------------------------------")
+    print()
 
-#     for instance, instance_format in column_generation_data:
-#         instance_path = os.path.join(
-#                 data_dir,
-#                 instance)
-#         json_output_path = os.path.join(
-#                 args.directory,
-#                 algorithm.replace("-", "_"),
-#                 instance + ".json")
-#         if not os.path.exists(os.path.dirname(json_output_path)):
-#             os.makedirs(os.path.dirname(json_output_path))
-#         command = (
-#                 generalizedassignmentsolver_main
-#                 + "  --verbosity-level 1"
-#                 + "  --input \"" + instance_path + "\""
-#                 + "  --format \"" + instance_format + "\""
-#                 + "  --algorithm \"column-generation-heuristic-greedy\""
-#                 + "  --output \"" + json_output_path + "\"")
-#         print(command)
-#         status = os.system(command)
-#         if status != 0:
-#             sys.exit(1)
-#         print()
-#     print()
-#     print()
+    for instance, instance_format in column_generation_data:
+        instance_path = os.path.join(
+                data_dir,
+                instance)
+        json_output_path = os.path.join(
+                args.directory,
+                algorithm.replace("-", "_"),
+                instance + ".json")
+        if not os.path.exists(os.path.dirname(json_output_path)):
+            os.makedirs(os.path.dirname(json_output_path))
+        command = (
+                generalizedassignmentsolver_main
+                + "  --verbosity-level 1"
+                + "  --input \"" + instance_path + "\""
+                + "  --format \"" + instance_format + "\""
+                + "  --algorithm \"column-generation-heuristic-greedy\""
+                + "  --output \"" + json_output_path + "\"")
+        print(command)
+        status = os.system(command)
+        if status != 0:
+            sys.exit(1)
+        print()
+    print()
+    print()
