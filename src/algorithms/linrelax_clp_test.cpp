@@ -1,4 +1,4 @@
-#if CLP_FOUND
+#if CBC_FOUND
 
 #include "generalizedassignmentsolver/tester.hpp"
 #include "generalizedassignmentsolver/algorithms/linrelax_clp.hpp"

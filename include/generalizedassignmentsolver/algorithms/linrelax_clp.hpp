@@ -1,6 +1,6 @@
 #pragma once
 
-#if CLP_FOUND
+#if CBC_FOUND
 
 #include "generalizedassignmentsolver/solution.hpp"
 
