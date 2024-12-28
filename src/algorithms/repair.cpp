@@ -2,7 +2,7 @@
 
 #include "generalizedassignmentsolver/algorithm_formatter.hpp"
 #include "generalizedassignmentsolver/algorithms/lagrelax_lbfgs.hpp"
-#if CLP_FOUND
+#if CBC_FOUND
 #include "generalizedassignmentsolver/algorithms/linrelax_clp.hpp"
 #endif
 #if CPLEX_FOUND
@@ -22,7 +22,7 @@ std::istream& generalizedassignmentsolver::operator>>(std::istream& in, RepairIn
     in >> token;
     if (token == "combinatorial_relaxation") {
         initial_solution = RepairInitialSolution::CombinatorialRelaxation;
-#if CLP_FOUND
+#if CBC_FOUND
     } else if (token == "linrelax_clp") {
         initial_solution = RepairInitialSolution::LinearRelaxationClp;
 #endif
@@ -71,7 +71,7 @@ RepairOutput generalizedassignmentsolver::repair(
             }
         }
         break;
-#if CLP_FOUND
+#if CBC_FOUND
     } case RepairInitialSolution::LinearRelaxationClp: {
         LinRelaxClpOutput output_linrelax_clp = linrelax_clp(instance);
         for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id) {

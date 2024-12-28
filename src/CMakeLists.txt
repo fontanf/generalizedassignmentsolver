@@ -21,25 +21,25 @@ target_link_libraries(GeneralizedAssignmentSolver_main PUBLIC
     GeneralizedAssignmentSolver_local_search
     GeneralizedAssignmentSolver_column_generation
     Boost::program_options)
-if(COLORINGSOLVER_USE_CBC)
+if(GENERALIZEDASSIGNMENTSOLVER_USE_CBC)
     target_compile_definitions(GeneralizedAssignmentSolver_main PUBLIC
         CBC_FOUND=1)
     target_link_libraries(GeneralizedAssignmentSolver_main PUBLIC
         GeneralizedAssignmentSolver_milp_cbc)
 endif()
-if(COLORINGSOLVER_USE_GUROBI)
+if(GENERALIZEDASSIGNMENTSOLVER_USE_GUROBI)
     target_compile_definitions(GeneralizedAssignmentSolver_main PUBLIC
         GUROBI_FOUND=1)
     target_link_libraries(GeneralizedAssignmentSolver_main PUBLIC
         GeneralizedAssignmentSolver_milp_gurobi)
 endif()
-if(COLORINGSOLVER_USE_CPLEX)
+if(GENERALIZEDASSIGNMENTSOLVER_USE_CPLEX)
     target_compile_definitions(GeneralizedAssignmentSolver_main PUBLIC
         CPLEX_FOUND=1)
     target_link_libraries(GeneralizedAssignmentSolver_main PUBLIC
         GeneralizedAssignmentSolver_milp_cplex)
 endif()
-if(COLORINGSOLVER_USE_KNITRO)
+if(GENERALIZEDASSIGNMENTSOLVER_USE_KNITRO)
     target_compile_definitions(GeneralizedAssignmentSolver_main PUBLIC
         KNITRO_FOUND=1)
     target_link_libraries(GeneralizedAssignmentSolver_main PUBLIC

@@ -1,5 +1,3 @@
-#if defined(CBC_FOUND) || defined(CLP_FOUND)
-
 #include "generalizedassignmentsolver/algorithms/milp_cbc.hpp"
 
 #include "generalizedassignmentsolver/algorithm_formatter.hpp"
@@ -75,38 +73,34 @@ CoinLP::CoinLP(const Instance& instance)
             number_of_elements_in_rows.data());
 }
 
-#endif
+//#include "coin/CbcHeuristicDiveCoefficient.hpp"
+//#include "coin/CbcHeuristicDiveFractional.hpp"
+//#include "coin/CbcHeuristicDiveGuided.hpp"
+//#include "coin/CbcHeuristicDiveVectorLength.hpp"
+//#include "coin/CbcLinked.hpp"
+//#include "coin/CbcHeuristicGreedy.hpp"
+//#include "coin/CbcHeuristicLocal.hpp"
+#include "coin/CbcHeuristic.hpp"
+//#include "coin/CbcHeuristicRINS.hpp"
+//#include "coin/CbcHeuristicRENS.hpp"
 
-#if CBC_FOUND
-
-//#include "CbcHeuristicDiveCoefficient.hpp"
-//#include "CbcHeuristicDiveFractional.hpp"
-//#include "CbcHeuristicDiveGuided.hpp"
-//#include "CbcHeuristicDiveVectorLength.hpp"
-//#include "CbcLinked.hpp"
-//#include "CbcHeuristicGreedy.hpp"
-//#include "CbcHeuristicLocal.hpp"
-#include "CbcHeuristic.hpp"
-//#include "CbcHeuristicRINS.hpp"
-//#include "CbcHeuristicRENS.hpp"
-
-//#include "CglAllDifferent.hpp"
-//#include "CglClique.hpp"
-//#include "CglDuplicateRow.hpp"
-//#include "CglFlowCover.hpp"
-//#include "CglGomory.hpp"
-//#include "CglKnapsackCover.hpp"
-//#include "CglLandP.hpp"
-//#include "CglLiftAndProject.hpp"
-//#include "CglMixedIntegerRounding.hpp"
-//#include "CglMixedIntegerRounding2.hpp"
-//#include "CglOddHole.hpp"
-//#include "CglProbing.hpp"
-//#include "CglRedSplit.hpp"
-//#include "CglResidualCapacity.hpp"
-//#include "CglSimpleRounding.hpp"
-//#include "CglStored.hpp"
-//#include "CglTwomir.hpp"
+//#include "coin/CglAllDifferent.hpp"
+//#include "coin/CglClique.hpp"
+//#include "coin/CglDuplicateRow.hpp"
+//#include "coin/CglFlowCover.hpp"
+//#include "coin/CglGomory.hpp"
+//#include "coin/CglKnapsackCover.hpp"
+//#include "coin/CglLandP.hpp"
+//#include "coin/CglLiftAndProject.hpp"
+//#include "coin/CglMixedIntegerRounding.hpp"
+//#include "coin/CglMixedIntegerRounding2.hpp"
+//#include "coin/CglOddHole.hpp"
+//#include "coin/CglProbing.hpp"
+//#include "coin/CglRedSplit.hpp"
+//#include "coin/CglResidualCapacity.hpp"
+//#include "coin/CglSimpleRounding.hpp"
+//#include "coin/CglStored.hpp"
+//#include "coin/CglTwomir.hpp"
 
 /**
  * Useful links:
@@ -438,5 +432,3 @@ const MilpCbcOutput generalizedassignmentsolver::milp_cbc(
     algorithm_formatter.end();
     return output;
 }
-
-#endif

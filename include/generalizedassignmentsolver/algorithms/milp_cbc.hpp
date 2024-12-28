@@ -1,10 +1,8 @@
 #pragma once
 
-#if defined(CBC_FOUND) || defined(CLP_FOUND)
-
 #include "generalizedassignmentsolver/solution.hpp"
 
-#include <OsiCbcSolverInterface.hpp>
+#include <coin/OsiCbcSolverInterface.hpp>
 
 namespace generalizedassignmentsolver
 {
@@ -24,11 +22,7 @@ struct CoinLP
 
 }
 
-#endif
-
-#if CBC_FOUND
-
-#include <CbcModel.hpp>
+#include <coin/CbcModel.hpp>
 
 namespace generalizedassignmentsolver
 {
@@ -104,5 +98,3 @@ const MilpCbcOutput milp_cbc(
         const MilpCbcParameters& parameters = {});
 
 }
-
-#endif
