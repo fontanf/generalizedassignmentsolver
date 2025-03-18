@@ -45,7 +45,7 @@ endif()
 FetchContent_Declare(
     columngenerationsolver
     GIT_REPOSITORY https://github.com/fontanf/columngenerationsolver.git
-    GIT_TAG 1414cd0ca3185f301664c9e840aeda20a72e1844
+    GIT_TAG 17af477eb1ff576ce09b3d9a9c3369bdc7463c62
     #SOURCE_DIR "${PROJECT_SOURCE_DIR}/../columngenerationsolver/"
     EXCLUDE_FROM_ALL)
 FetchContent_MakeAvailable(columngenerationsolver)

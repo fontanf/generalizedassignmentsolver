@@ -139,14 +139,20 @@ Output run(
     } else if (algorithm == "column-generation") {
         ColumnGenerationParameters parameters;
         read_args(parameters, vm);
+        if (vm.count("linear-programming-solver"))
+            parameters.linear_programming_solver = vm["linear-programming-solver"].as<std::string>();
         return column_generation(instance, parameters);
     } else if (algorithm == "column-generation-heuristic-greedy") {
         ColumnGenerationParameters parameters;
         read_args(parameters, vm);
+        if (vm.count("linear-programming-solver"))
+            parameters.linear_programming_solver = vm["linear-programming-solver"].as<std::string>();
         return column_generation_heuristic_greedy(instance, parameters);
     } else if (algorithm == "column-generation-heuristic-limited-discrepancy-search") {
         ColumnGenerationParameters parameters;
         read_args(parameters, vm);
+        if (vm.count("linear-programming-solver"))
+            parameters.linear_programming_solver = vm["linear-programming-solver"].as<std::string>();
         return column_generation_heuristic_limited_discrepancy_search(instance, parameters);
 
 #if GECODE_FOUND
@@ -204,6 +210,7 @@ int main(int argc, char *argv[])
 
         ("desirability,", po::value<std::string>(), "set desirability")
         ("maximum-number-of-nodes,", po::value<Counter>(), "set maximum number of nodes")
+        ("linear-programming-solver,", po::value<std::string>(), "set linear programming solver")
         ;
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
