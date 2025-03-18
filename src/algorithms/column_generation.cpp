@@ -42,10 +42,9 @@
 
 using namespace generalizedassignmentsolver;
 
-typedef columngenerationsolver::RowIdx RowIdx;
-typedef columngenerationsolver::ColIdx ColIdx;
-typedef columngenerationsolver::Value Value;
-typedef columngenerationsolver::Column Column;
+using Value = columngenerationsolver::Value;
+using Column = columngenerationsolver::Column;
+using PricingOutput = columngenerationsolver::PricingSolver::PricingOutput;
 
 class PricingSolver: public columngenerationsolver::PricingSolver
 {
@@ -61,7 +60,7 @@ public:
     virtual std::vector<std::shared_ptr<const Column>> initialize_pricing(
             const std::vector<std::pair<std::shared_ptr<const Column>, Value>>& fixed_columns);
 
-    virtual std::vector<std::shared_ptr<const Column>> solve_pricing(
+    virtual PricingOutput solve_pricing(
             const std::vector<Value>& duals);
 
 private:
@@ -164,10 +163,12 @@ std::vector<std::shared_ptr<const Column>> PricingSolver::initialize_pricing(
     return {};
 }
 
-std::vector<std::shared_ptr<const Column>> PricingSolver::solve_pricing(
+PricingOutput PricingSolver::solve_pricing(
             const std::vector<Value>& duals)
 {
-    std::vector<std::shared_ptr<const Column>> columns;
+    PricingOutput output;
+    Value reduced_cost_bound = 0.0;
+
     for (AgentIdx agent_id = 0;
             agent_id < instance_.number_of_agents();
             ++agent_id) {
@@ -222,9 +223,14 @@ std::vector<std::shared_ptr<const Column>> PricingSolver::solve_pricing(
                 column.objective_coefficient += instance_.cost(item_id, agent_id);
             }
         }
-        columns.push_back(std::shared_ptr<const Column>(new Column(column)));
+        output.columns.push_back(std::shared_ptr<const Column>(new Column(column)));
+        reduced_cost_bound = (std::min)(
+                reduced_cost_bound,
+                columngenerationsolver::compute_reduced_cost(column, duals));
     }
-    return columns;
+
+    output.overcost = instance_.number_of_agents() * std::min(0.0, reduced_cost_bound);
+    return output;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -244,7 +250,7 @@ const ColumnGenerationOutput generalizedassignmentsolver::column_generation(
     columngenerationsolver::ColumnGenerationParameters cgs_parameters;
     cgs_parameters.verbosity_level = 0;
     cgs_parameters.timer = parameters.timer;
-    cgs_parameters.linear_programming_solver
+    cgs_parameters.solver_name
         = columngenerationsolver::s2lps(parameters.linear_programming_solver);
     cgs_parameters.internal_diving = true;
     cgs_parameters.self_adjusting_wentges_smoothing = true;
@@ -273,7 +279,7 @@ const ColumnGenerationHeuristicGreedyOutput generalizedassignmentsolver::column_
     columngenerationsolver::GreedyParameters cgsg_parameters;
     cgsg_parameters.verbosity_level = 0;
     cgsg_parameters.timer = parameters.timer;
-    cgsg_parameters.column_generation_parameters.linear_programming_solver
+    cgsg_parameters.column_generation_parameters.solver_name
         = columngenerationsolver::s2lps(parameters.linear_programming_solver);
     cgsg_parameters.internal_diving = true;
     cgsg_parameters.column_generation_parameters.self_adjusting_wentges_smoothing = true;
@@ -308,7 +314,7 @@ const ColumnGenerationHeuristicLimitedDiscrepancySearchOutput generalizedassignm
     columngenerationsolver::LimitedDiscrepancySearchParameters cgslds_parameters;
     cgslds_parameters.verbosity_level = 0;
     cgslds_parameters.timer = parameters.timer;
-    cgslds_parameters.column_generation_parameters.linear_programming_solver
+    cgslds_parameters.column_generation_parameters.solver_name
         = columngenerationsolver::s2lps(parameters.linear_programming_solver);
     cgslds_parameters.column_generation_parameters.self_adjusting_wentges_smoothing = true;
     cgslds_parameters.column_generation_parameters.automatic_directional_smoothing = true;
