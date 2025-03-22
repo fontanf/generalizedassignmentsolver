@@ -14,7 +14,7 @@ enum class RepairInitialSolution
 #if CPLEX_FOUND
     LinearRelaxationCplex,
 #endif
-    LagrangianRelaxationKnapsackLbfgs,
+    LagrangianRelaxationKnapsackDlib,
 };
 std::istream& operator>>(std::istream& in, RepairInitialSolution& initial_solution);
 

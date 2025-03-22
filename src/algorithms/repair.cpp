@@ -1,9 +1,9 @@
 #include "generalizedassignmentsolver/algorithms/repair.hpp"
 
 #include "generalizedassignmentsolver/algorithm_formatter.hpp"
-#include "generalizedassignmentsolver/algorithms/lagrelax_lbfgs.hpp"
+#include "generalizedassignmentsolver/algorithms/lagrangian_relaxation_dlib.hpp"
 #if CBC_FOUND
-#include "generalizedassignmentsolver/algorithms/linrelax_clp.hpp"
+#include "generalizedassignmentsolver/algorithms/linear_relaxation_clp.hpp"
 #endif
 #if CPLEX_FOUND
 #include "generalizedassignmentsolver/algorithms/milp_cplex.hpp"
@@ -23,15 +23,15 @@ std::istream& generalizedassignmentsolver::operator>>(std::istream& in, RepairIn
     if (token == "combinatorial_relaxation") {
         initial_solution = RepairInitialSolution::CombinatorialRelaxation;
 #if CBC_FOUND
-    } else if (token == "linrelax_clp") {
+    } else if (token == "linear_relaxation_clp") {
         initial_solution = RepairInitialSolution::LinearRelaxationClp;
 #endif
 #if CPLEX_FOUND
     } else if (token == "linearrelaxation_cplex") {
         initial_solution = RepairInitialSolution::LinearRelaxationCplex;
 #endif
-    } else if (token == "lagrelax_knapsack_lbfgs") {
-        initial_solution = RepairInitialSolution::LagrangianRelaxationKnapsackLbfgs;
+    } else if (token == "lagrangian_relaxation_knapsack_dlib") {
+        initial_solution = RepairInitialSolution::LagrangianRelaxationKnapsackDlib;
     } else  {
         in.setstate(std::ios_base::failbit);
     }
@@ -57,14 +57,14 @@ RepairOutput generalizedassignmentsolver::repair(
                 solution.cost(),
                 "combinatorial relaxation");
         break;
-    } case RepairInitialSolution::LagrangianRelaxationKnapsackLbfgs: {
-        auto output_lagrelax_knapsack_lbfgs = lagrelax_knapsack_lbfgs(instance);
+    } case RepairInitialSolution::LagrangianRelaxationKnapsackDlib: {
+        auto output_lagrangian_relaxation_knapsack_dlib = lagrangian_relaxation_knapsack_dlib(instance);
         algorithm_formatter.update_bound(
-                output_lagrelax_knapsack_lbfgs.bound,
+                output_lagrangian_relaxation_knapsack_dlib.bound,
                 "lagrangian relaxation knapsack");
         for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id) {
             for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id) {
-                if (output_lagrelax_knapsack_lbfgs.x[item_id][agent_id] > 0.5) {
+                if (output_lagrangian_relaxation_knapsack_dlib.x[item_id][agent_id] > 0.5) {
                     solution.set(item_id, agent_id);
                     break;
                 }
@@ -73,12 +73,12 @@ RepairOutput generalizedassignmentsolver::repair(
         break;
 #if CBC_FOUND
     } case RepairInitialSolution::LinearRelaxationClp: {
-        LinRelaxClpOutput output_linrelax_clp = linrelax_clp(instance);
+        LinearRelaxationClpOutput output_linear_relaxation_clp = linear_relaxation_clp(instance);
         for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id) {
             AgentIdx agent_id_best = -1;
             Cost c_best = -1;
             for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id) {
-                double x = output_linrelax_clp.x[item_id][agent_id];
+                double x = output_linear_relaxation_clp.x[item_id][agent_id];
                 Cost c = instance.cost(item_id, agent_id);
                 if (x > 0 && (c_best == -1 || c_best > c)) {
                     agent_id_best = agent_id;

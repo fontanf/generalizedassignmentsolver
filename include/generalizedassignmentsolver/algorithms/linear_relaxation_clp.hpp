@@ -7,9 +7,9 @@
 namespace generalizedassignmentsolver
 {
 
-struct LinRelaxClpOutput: Output
+struct LinearRelaxationClpOutput: Output
 {
-    LinRelaxClpOutput(
+    LinearRelaxationClpOutput(
             const Instance& instance):
         Output(instance) { }
 
@@ -17,7 +17,7 @@ struct LinRelaxClpOutput: Output
     std::vector<std::vector<double>> x;
 };
 
-const LinRelaxClpOutput linrelax_clp(
+const LinearRelaxationClpOutput linear_relaxation_clp(
         const Instance& instance,
         const Parameters& parameters = {});
 
