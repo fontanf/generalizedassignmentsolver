@@ -1,4 +1,4 @@
-#include "generalizedassignmentsolver/algorithms/lagrelax_lbfgs.hpp"
+#include "generalizedassignmentsolver/algorithms/lagrangian_relaxation_dlib.hpp"
 
 #include "generalizedassignmentsolver/algorithm_formatter.hpp"
 
@@ -17,17 +17,17 @@ using namespace dlib;
 typedef matrix<double,0,1> column_vector;
 
 ////////////////////////////////////////////////////////////////////////////////
-/////////////////////////// lagrelax_assignment_lbfgs //////////////////////////
+////////////////////// lagrangian_relaxation_assignment_dlib ///////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-class LagRelaxAssignmentLbfgsFunction
+class LagrangianRelaxationAssignmentDlibFunction
 {
 
 public:
 
-    LagRelaxAssignmentLbfgsFunction(
+    LagrangianRelaxationAssignmentDlibFunction(
             const Instance& instance,
-            LagRelaxAssignmentLbfgsParameters& p,
+            LagrangianRelaxationAssignmentDlibParameters& p,
             ItemIdx number_of_unfixed_items,
             const std::vector<ItemIdx>& item_indices):
         instance_(instance), p_(p), item_indices_(item_indices), grad_(number_of_unfixed_items)
@@ -48,7 +48,7 @@ public:
         kp_indices_.resize(instance.number_of_items());
     }
 
-    virtual ~LagRelaxAssignmentLbfgsFunction() { }
+    virtual ~LagrangianRelaxationAssignmentDlibFunction() { }
 
     double f(const column_vector& x);
 
@@ -57,7 +57,7 @@ public:
 private:
 
     const Instance& instance_;
-    LagRelaxAssignmentLbfgsParameters& p_;
+    LagrangianRelaxationAssignmentDlibParameters& p_;
     /** item_indices_[item_id] is the index of item j in mu and grad_. */
     const std::vector<ItemIdx>& item_indices_;
 
@@ -69,7 +69,7 @@ private:
 
 };
 
-double LagRelaxAssignmentLbfgsFunction::f(const column_vector& mu)
+double LagrangianRelaxationAssignmentDlibFunction::f(const column_vector& mu)
 {
     // Initialize bound and gradient;
     double l = 0;
@@ -117,13 +117,13 @@ double LagRelaxAssignmentLbfgsFunction::f(const column_vector& mu)
     return l;
 }
 
-const LagRelaxAssignmentLbfgsOutput generalizedassignmentsolver::lagrelax_assignment_lbfgs(
+const LagrangianRelaxationAssignmentDlibOutput generalizedassignmentsolver::lagrangian_relaxation_assignment_dlib(
         const Instance& instance,
-        const LagRelaxAssignmentLbfgsParameters& parameters)
+        const LagrangianRelaxationAssignmentDlibParameters& parameters)
 {
-    LagRelaxAssignmentLbfgsOutput o output(instance);
+    LagrangianRelaxationAssignmentDlibOutput o output(instance);
     AlgorithmFormatter algorithm_formatter(parameters, output);
-    algorithm_formatter.start("Lagrangian relaxation - assignment constraints (LBFGS)");
+    algorithm_formatter.start("Lagrangian relaxation - assignment constraints (dlib)");
     algorithm_formatter.print_header();
 
     // Compute c0, item_indices and number_of_unfixed_items
@@ -157,13 +157,13 @@ const LagRelaxAssignmentLbfgsOutput generalizedassignmentsolver::lagrelax_assign
     }
 
     // Solve
-    LagRelaxAssignmentLbfgsFunction func(instance, parameters, number_of_unfixed_items, item_indices);
+    LagrangianRelaxationAssignmentDlibFunction func(instance, parameters, number_of_unfixed_items, item_indices);
     auto f   = [&func](const column_vector& x) { return func.f(x); };
     auto def = [&func](const column_vector& x) { return func.der(x); };
     auto stop_strategy = objective_delta_stop_strategy(0.0001);
     //auto stop_strategy = gradient_norm_stop_strategy().be_verbosity_level(),
     double res = find_max(
-            lbfgs_search_strategy(256),
+            dlib_search_strategy(256),
             stop_strategy,
             f,
             def,
@@ -183,20 +183,20 @@ const LagRelaxAssignmentLbfgsOutput generalizedassignmentsolver::lagrelax_assign
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-//////////////////////////// lagrelax_knapsack_lbfgs ///////////////////////////
+/////////////////////// lagrangian_relaxation_knapsack_dlib ////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-class LagRelaxKnapsackLbfgsFunction
+class LagrangianRelaxationKnapsackDlibFunction
 {
 
 public:
 
-    LagRelaxKnapsackLbfgsFunction(const Instance& instance):
+    LagrangianRelaxationKnapsackDlibFunction(const Instance& instance):
         instance_(instance),
         x_(instance.number_of_items()),
         grad_(instance.number_of_agents())
     {  }
-    virtual ~LagRelaxKnapsackLbfgsFunction() { };
+    virtual ~LagrangianRelaxationKnapsackDlibFunction() { };
 
     double f(const column_vector& x);
 
@@ -212,7 +212,7 @@ private:
 
 };
 
-double LagRelaxKnapsackLbfgsFunction::f(const column_vector& mu)
+double LagrangianRelaxationKnapsackDlibFunction::f(const column_vector& mu)
 {
     // Initialize bound and gradient
     double l = 0;
@@ -250,13 +250,13 @@ double LagRelaxKnapsackLbfgsFunction::f(const column_vector& mu)
     return l;
 }
 
-const LagRelaxKnapsackLbfgsOutput generalizedassignmentsolver::lagrelax_knapsack_lbfgs(
+const LagrangianRelaxationKnapsackDlibOutput generalizedassignmentsolver::lagrangian_relaxation_knapsack_dlib(
         const Instance& instance,
         const Parameters& parameters)
 {
-    LagRelaxKnapsackLbfgsOutput output(instance);
+    LagrangianRelaxationKnapsackDlibOutput output(instance);
     AlgorithmFormatter algorithm_formatter(parameters, output);
-    algorithm_formatter.start("Lagrangian relaxation - knapsack constraints (LBFGS)");
+    algorithm_formatter.start("Lagrangian relaxation - knapsack constraints (dlib)");
     algorithm_formatter.print_header();
 
     // Initialize multipliers
@@ -272,13 +272,13 @@ const LagRelaxKnapsackLbfgsOutput generalizedassignmentsolver::lagrelax_knapsack
     }
 
     // Solve
-    LagRelaxKnapsackLbfgsFunction func(instance);
+    LagrangianRelaxationKnapsackDlibFunction func(instance);
     auto f   = [&func](const column_vector& x) { return func.f(x); };
     auto def = [&func](const column_vector& x) { return func.der(x); };
     auto stop_strategy = objective_delta_stop_strategy();
     //auto stop_strategy = gradient_norm_stop_strategy();
     double res = find_max_box_constrained(
-            lbfgs_search_strategy(256),
+            dlib_search_strategy(256),
             stop_strategy,
             f,
             def,

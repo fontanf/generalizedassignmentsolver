@@ -8,12 +8,12 @@ namespace generalizedassignmentsolver
 {
 
 ////////////////////////////////////////////////////////////////////////////////
-////////////////////////// lagrelax_assignment_volume //////////////////////////
+//////////////////// lagrangian_relaxation_assignment_volume ///////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-struct LagRelaxAssignmentVolumeOutput: Output
+struct LagrangianRelaxationAssignmentVolumeOutput: Output
 {
-    LagRelaxAssignmentVolumeOutput(
+    LagrangianRelaxationAssignmentVolumeOutput(
             const Instance& instance):
         Output(instance) { }
 
@@ -24,17 +24,17 @@ struct LagRelaxAssignmentVolumeOutput: Output
     std::vector<double> multipliers;
 };
 
-const LagRelaxAssignmentVolumeOutput lagrelax_assignment_volume(
+const LagrangianRelaxationAssignmentVolumeOutput lagrangian_relaxation_assignment_volume(
         const Instance& instance,
         const Parameters& parameters = {});
 
 ////////////////////////////////////////////////////////////////////////////////
-/////////////////////////// lagrelax_knapsack_volume ///////////////////////////
+///////////////////// lagrangian_relaxation_knapsack_volume ////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-struct LagRelaxKnapsackVolumeOutput: Output
+struct LagrangianRelaxationKnapsackVolumeOutput: Output
 {
-    LagRelaxKnapsackVolumeOutput(
+    LagrangianRelaxationKnapsackVolumeOutput(
             const Instance& instance):
         Output(instance) { }
 
@@ -45,7 +45,7 @@ struct LagRelaxKnapsackVolumeOutput: Output
     std::vector<double> multipliers;
 };
 
-const LagRelaxKnapsackVolumeOutput lagrelax_knapsack_volume(
+const LagrangianRelaxationKnapsackVolumeOutput lagrangian_relaxation_knapsack_volume(
         const Instance& instance,
         const Parameters& parameters = {});
 

@@ -1,6 +1,6 @@
 #if VOLUME_FOUND
 
-#include "generalizedassignmentsolver/algorithms/lagrelax_volume.hpp"
+#include "generalizedassignmentsolver/algorithms/lagrangian_relaxation_volume.hpp"
 
 #include "knapsacksolver/algorithms/dynamic_programming_primal_dual.hpp"
 
@@ -21,18 +21,18 @@ using namespace generalizedassignmentsolver;
  */
 
 ////////////////////////////////////////////////////////////////////////////////
-////////////////////////// lagrelax_assignment_volume //////////////////////////
+//////////////////// lagrangian_relaxation_assignment_volume ///////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-class LagRelaxAssignmentHook: public VOL_user_hooks
+class LagrangianRelaxationAssignmentHook: public VOL_user_hooks
 {
 
 public:
 
-    LagRelaxAssignmentHook(const Instance& instance):
+    LagrangianRelaxationAssignmentHook(const Instance& instance):
         instance_(instance) {  }
 
-    virtual ~LagRelaxAssignmentHook() { }
+    virtual ~LagrangianRelaxationAssignmentHook() { }
 
     // for all hooks: return value of -1 means that volume should quit
 
@@ -101,7 +101,7 @@ private:
 
 };
 
-int LagRelaxAssignmentHook::compute_rc(const VOL_dvector& u, VOL_dvector& rc)
+int LagrangianRelaxationAssignmentHook::compute_rc(const VOL_dvector& u, VOL_dvector& rc)
 {
     for (ItemIdx item_id = 0; item_id < instance_.number_of_items(); ++item_id)
         for (AgentIdx agent_id = 0; agent_id < instance_.number_of_agents(); ++agent_id)
@@ -110,7 +110,7 @@ int LagRelaxAssignmentHook::compute_rc(const VOL_dvector& u, VOL_dvector& rc)
     return 0;
 }
 
-int LagRelaxAssignmentHook::solve_subproblem(const VOL_dvector& dual, const VOL_dvector& rc,
+int LagrangianRelaxationAssignmentHook::solve_subproblem(const VOL_dvector& dual, const VOL_dvector& rc,
         double& lcost, VOL_dvector& x, VOL_dvector& v, double& pcost)
 {
     lcost = 0;
@@ -152,11 +152,11 @@ int LagRelaxAssignmentHook::solve_subproblem(const VOL_dvector& dual, const VOL_
     return 0;
 }
 
-const LagRelaxAssignmentVolumeOutput generalizedassignmentsolver::lagrelax_assignment_volume(
+const LagrangianRelaxationAssignmentVolumeOutput generalizedassignmentsolver::lagrangian_relaxation_assignment_volume(
         const Instance& instance,
         const Parameters& parameters)
 {
-    LagRelaxAssignmentVolumeOutput output(instance);
+    LagrangianRelaxationAssignmentVolumeOutput output(instance);
     AlgorithmFormatter algorithm_formatter(parameters, output);
     algorithm_formatter.start("Lagrangian relaxation - assignment constraints (Volume)");
     algorithm_formatter.print_header();
@@ -180,7 +180,7 @@ const LagRelaxAssignmentVolumeOutput generalizedassignmentsolver::lagrelax_assig
         volprob.dual_ub[item_id] =  1.0e31;
     }
 
-    LagRelaxAssignmentHook hook(instance);
+    LagrangianRelaxationAssignmentHook hook(instance);
     volprob.solve(hook, false /* no warmstart */);
 
     // Extract solution
@@ -204,18 +204,18 @@ const LagRelaxAssignmentVolumeOutput generalizedassignmentsolver::lagrelax_assig
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/////////////////////////// lagrelax_knapsack_volume ///////////////////////////
+///////////////////// lagrangian_relaxation_knapsack_volume ////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-class LagRelaxKnapsackHook: public VOL_user_hooks
+class LagrangianRelaxationKnapsackHook: public VOL_user_hooks
 {
 
 public:
 
-    LagRelaxKnapsackHook(const Instance& instance):
+    LagrangianRelaxationKnapsackHook(const Instance& instance):
         instance_(instance) {  }
 
-    virtual ~LagRelaxKnapsackHook() { }
+    virtual ~LagrangianRelaxationKnapsackHook() { }
 
     // for all hooks: return value of -1 means that volume should quit
 
@@ -260,7 +260,7 @@ private:
 
 };
 
-int LagRelaxKnapsackHook::compute_rc(const VOL_dvector& u, VOL_dvector& rc)
+int LagrangianRelaxationKnapsackHook::compute_rc(const VOL_dvector& u, VOL_dvector& rc)
 {
     for (ItemIdx item_id = 0; item_id < instance_.number_of_items(); ++item_id)
         for (AgentIdx agent_id = 0; agent_id < instance_.number_of_agents(); ++agent_id)
@@ -270,7 +270,7 @@ int LagRelaxKnapsackHook::compute_rc(const VOL_dvector& u, VOL_dvector& rc)
     return 0;
 }
 
-int LagRelaxKnapsackHook::solve_subproblem(const VOL_dvector& dual, const VOL_dvector& rc,
+int LagrangianRelaxationKnapsackHook::solve_subproblem(const VOL_dvector& dual, const VOL_dvector& rc,
         double& lcost, VOL_dvector& x, VOL_dvector& v, double& pcost)
 {
     lcost = 0;
@@ -301,11 +301,11 @@ int LagRelaxKnapsackHook::solve_subproblem(const VOL_dvector& dual, const VOL_dv
     return 0;
 }
 
-const LagRelaxKnapsackVolumeOutput generalizedassignmentsolver::lagrelax_knapsack_volume(
+const LagrangianRelaxationKnapsackVolumeOutput generalizedassignmentsolver::lagrangian_relaxation_knapsack_volume(
         const Instance& instance,
         const Parameters& parameters)
 {
-    LagRelaxKnapsackVolumeOutput output(instance);
+    LagrangianRelaxationKnapsackVolumeOutput output(instance);
     AlgorithmFormatter algorithm_formatter(parameters, output);
     algorithm_formatter.start("Lagrangian relaxation - knapsack constraints (Volume)");
     algorithm_formatter.print_header();
@@ -323,7 +323,7 @@ const LagRelaxKnapsackVolumeOutput generalizedassignmentsolver::lagrelax_knapsac
         volprob.dual_lb[agent_id] = -1.0e31;
     }
 
-    LagRelaxKnapsackHook hook(instance);
+    LagrangianRelaxationKnapsackHook hook(instance);
     volprob.solve(hook, false /* no warmstart */);
 
     // Extract solution

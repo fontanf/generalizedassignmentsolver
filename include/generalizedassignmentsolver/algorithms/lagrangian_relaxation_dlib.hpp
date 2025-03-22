@@ -6,10 +6,10 @@ namespace generalizedassignmentsolver
 {
 
 ////////////////////////////////////////////////////////////////////////////////
-/////////////////////////// lagrelax_assignment_lbfgs //////////////////////////
+///////////////////// lagrangian_relaxation_assignment_dlib ////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-struct LagRelaxAssignmentLbfgsParameters: Parameters
+struct LagrangianRelaxationAssignmentDlibParameters: Parameters
 {
     std::vector<int>* initial_multipliers = NULL;
 
@@ -17,9 +17,9 @@ struct LagRelaxAssignmentLbfgsParameters: Parameters
     std::vector<std::vector<int>>* fixed_alt = NULL;
 };
 
-struct LagRelaxAssignmentLbfgsOutput: Output
+struct LagrangianRelaxationAssignmentDlibOutput: Output
 {
-    LagRelaxAssignmentLbfgsOutput(
+    LagrangianRelaxationAssignmentDlibOutput(
             const Instance& instance):
         Output(instance) { }
 
@@ -31,17 +31,17 @@ struct LagRelaxAssignmentLbfgsOutput: Output
     std::vector<double> multipliers;
 };
 
-const LagRelaxAssignmentLbfgsOutput lagrelax_assignment_lbfgs(
+const LagrangianRelaxationAssignmentDlibOutput lagrangian_relaxation_assignment_dlib(
         const Instance& instance,
-        const LagRelaxAssignmentLbfgsParameters& parameters = {});
+        const LagrangianRelaxationAssignmentDlibParameters& parameters = {});
 
 ////////////////////////////////////////////////////////////////////////////////
-//////////////////////////// lagrelax_knapsack_lbfgs ///////////////////////////
+/////////////////////// lagrangian_relaxation_knapsack_dlib ////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-struct LagRelaxKnapsackLbfgsOutput: Output
+struct LagrangianRelaxationKnapsackDlibOutput: Output
 {
-    LagRelaxKnapsackLbfgsOutput(
+    LagrangianRelaxationKnapsackDlibOutput(
             const Instance& instance):
         Output(instance) { }
 
@@ -53,7 +53,7 @@ struct LagRelaxKnapsackLbfgsOutput: Output
     std::vector<double> multipliers;
 };
 
-const LagRelaxKnapsackLbfgsOutput lagrelax_knapsack_lbfgs(
+const LagrangianRelaxationKnapsackDlibOutput lagrangian_relaxation_knapsack_dlib(
         const Instance& instance,
         const Parameters& parameters = {});
 

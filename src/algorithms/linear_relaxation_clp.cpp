@@ -1,6 +1,6 @@
 #if CBC_FOUND
 
-#include "generalizedassignmentsolver/algorithms/linrelax_clp.hpp"
+#include "generalizedassignmentsolver/algorithms/linear_relaxation_clp.hpp"
 #include "generalizedassignmentsolver/algorithms/milp_cbc.hpp"
 
 #include <ClpModel.hpp>
@@ -8,11 +8,11 @@
 
 using namespace generalizedassignmentsolver;
 
-const LinRelaxClpOutput generalizedassignmentsolver::linrelax_clp(
+const LinearRelaxationClpOutput generalizedassignmentsolver::linear_relaxation_clp(
         const Instance& instance,
         const Parameters& parameters = {})
 {
-    LinRelaxClpOutput output(instance);
+    LinearRelaxationClpOutput output(instance);
     AlgorithmFormatter algorithm_formatter(parameters, output);
     algorithm_formatter.start("Linear relaxation (CLP)");
     algorithm_formatter.print_header();
