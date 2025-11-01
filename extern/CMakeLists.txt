@@ -15,7 +15,7 @@ FetchContent_MakeAvailable(Boost)
 FetchContent_Declare(
     optimizationtools
     GIT_REPOSITORY https://github.com/fontanf/optimizationtools.git
-    GIT_TAG a0973a7dfa64b9d305f75879c80d252e714ce2cf
+    GIT_TAG e8c379203792fcad764cce239986b325619475fd
     #SOURCE_DIR "${PROJECT_SOURCE_DIR}/../optimizationtools/"
     EXCLUDE_FROM_ALL)
 FetchContent_MakeAvailable(optimizationtools)
@@ -24,20 +24,29 @@ FetchContent_MakeAvailable(optimizationtools)
 if(GENERALIZEDASSIGNMENTSOLVER_USE_CBC)
     set(MATHOPTSOLVERSCMAKE_USE_CBC ON)
 endif()
+if(GENERALIZEDASSIGNMENTSOLVER_USE_CLP)
+    set(MATHOPTSOLVERSCMAKE_USE_CLP ON)
+endif()
+if(GENERALIZEDASSIGNMENTSOLVER_USE_HIGHS)
+    set(MATHOPTSOLVERSCMAKE_USE_HIGHS ON)
+endif()
 if(GENERALIZEDASSIGNMENTSOLVER_USE_CPLEX)
     set(MATHOPTSOLVERSCMAKE_USE_CPLEX ON)
 endif()
 FetchContent_Declare(
     mathoptsolverscmake
     GIT_REPOSITORY https://github.com/fontanf/mathoptsolverscmake.git
-    GIT_TAG 4472814a28a40f4d861ccd757e140835c3a31bd0
+    GIT_TAG f03fa63814eae3a253675ed14dd618a8a0d19a11
     #SOURCE_DIR "${PROJECT_SOURCE_DIR}/../mathoptsolverscmake/"
     EXCLUDE_FROM_ALL)
 FetchContent_MakeAvailable(mathoptsolverscmake)
 
 # Fetch fontanf/columngenerationsolver.
-if(GENERALIZEDASSIGNMENTSOLVER_USE_CBC)
+if(GENERALIZEDASSIGNMENTSOLVER_USE_CLP)
     set(COLUMNGENERATIONSOLVER_USE_CLP ON)
+endif()
+if(GENERALIZEDASSIGNMENTSOLVER_USE_HIGHS)
+    set(COLUMNGENERATIONSOLVER_USE_HIGHS ON)
 endif()
 if(GENERALIZEDASSIGNMENTSOLVER_USE_CPLEX)
     set(COLUMNGENERATIONSOLVER_USE_CPLEX ON)
@@ -45,7 +54,7 @@ endif()
 FetchContent_Declare(
     columngenerationsolver
     GIT_REPOSITORY https://github.com/fontanf/columngenerationsolver.git
-    GIT_TAG 17af477eb1ff576ce09b3d9a9c3369bdc7463c62
+    GIT_TAG 556971624c92c23c961371ce5721ff9eb920a874
     #SOURCE_DIR "${PROJECT_SOURCE_DIR}/../columngenerationsolver/"
     EXCLUDE_FROM_ALL)
 FetchContent_MakeAvailable(columngenerationsolver)

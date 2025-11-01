@@ -1,33 +1,9 @@
 #include "generalizedassignmentsolver/instance_builder.hpp"
 
-#if CBC_FOUND
-//#include "generalizedassignmentsolver/algorithms/linear_relaxation_clp.hpp"
-#endif
 #include "generalizedassignmentsolver/algorithms/column_generation.hpp"
-#if CBC_FOUND
-#include "generalizedassignmentsolver/algorithms/milp_cbc.hpp"
-#endif
-#if CPLEX_FOUND
-#include "generalizedassignmentsolver/algorithms/milp_cplex.hpp"
-#endif
-#if GUROBI_FOUND
-#include "generalizedassignmentsolver/algorithms/milp_gurobi.hpp"
-#endif
-#if KNITRO_FOUND
-#include "generalizedassignmentsolver/algorithms/milp_knitro.hpp"
-#endif
-#if GECODE_FOUND
-#include "generalizedassignmentsolver/algorithms/constraint_programming_gecode.hpp"
-#endif
-#if CPLEX_FOUND
-#include "generalizedassignmentsolver/algorithms/constraint_programming_cplex.hpp"
-#endif
-#include "generalizedassignmentsolver/algorithms/random.hpp"
+#include "generalizedassignmentsolver/algorithms/milp.hpp"
 #include "generalizedassignmentsolver/algorithms/greedy.hpp"
 #include "generalizedassignmentsolver/algorithms/local_search.hpp"
-#if LOCALSOLVER_FOUND
-#include "generalizedassignmentsolver/algorithms/localsolver.hpp"
-#endif
 
 #include <boost/program_options.hpp>
 
@@ -98,43 +74,19 @@ Output run(
             parameters.desirability = vm["desirability"].as<std::string>();
         return mthg_regret(instance, parameters);
 
-    } else if (algorithm == "random") {
-        Parameters parameters;
-        read_args(parameters, vm);
-        return random(instance, generator, parameters);
-
-#if CBC_FOUND
-    //} else if (algorithm == "linear-relaxation-clp") {
-    //    Parameters parameters;
-    //    read_args(parameters, vm);
-    //    return linear_relaxation_clp(instance, parameters);
+    } else if (algorithm == "milp") {
+#ifdef XPRESS_FOUND
+        XPRSinit(NULL);
 #endif
-#if CBC_FOUND
-    } else if (algorithm == "milp-cbc") {
-        MilpCbcParameters parameters;
-        if (vm.count("maximum-number-of-nodes"))
-            parameters.maximum_number_of_nodes = vm["maximum-number-of-nodes"].as<Counter>();
+        MilpParameters parameters;
         read_args(parameters, vm);
-        return milp_cbc(instance, parameters);
+        if (vm.count("solver"))
+            parameters.solver = vm["solver"].as<mathoptsolverscmake::SolverName>();
+        auto output = milp(instance, nullptr, parameters);
+#ifdef XPRESS_FOUND
+        XPRSfree();
 #endif
-#if CPLEX_FOUND
-    } else if (algorithm == "milp-cplex") {
-        MilpCplexParameters parameters;
-        read_args(parameters, vm);
-        return milp_cplex(instance, parameters);
-#endif
-#if GUROBI_FOUND
-    } else if (algorithm == "milp-gurobi") {
-        MilpGurobiParameters parameters;
-        read_args(parameters, vm);
-        return milp_gurobi(instance, parameters);
-#endif
-#if KNITRO_FOUND
-    } else if (algorithm == "milp-knitro") {
-        MilpKnitroParameters parameters;
-        read_args(parameters, vm);
-        return milp_knitro(instance, parameters);
-#endif
+        return output;
 
     } else if (algorithm == "column-generation") {
         ColumnGenerationParameters parameters;
@@ -155,19 +107,6 @@ Output run(
             parameters.linear_programming_solver = vm["linear-programming-solver"].as<std::string>();
         return column_generation_heuristic_limited_discrepancy_search(instance, parameters);
 
-#if GECODE_FOUND
-    } else if (algorithm == "constraint-programming-gecode") {
-        ConstraintProgrammingGecodeParameters parameters;
-        read_args(parameters, vm);
-        return constraintprogramming_gecode(instance, parameters);
-#endif
-#if CPLEX_FOUND
-    } else if (algorithm == "constraint-programming-cplex") {
-        ConstraintProgrammingCplexParameters parameters;
-        read_args(parameters, vm);
-        return constraintprogramming_cplex(instance, parameters);
-#endif
-
     } else if (algorithm == "local-search") {
         LocalSearchParameters parameters;
         read_args(parameters, vm);
@@ -175,12 +114,6 @@ Output run(
             parameters.maximum_number_of_nodes = vm["maximum-number-of-nodes"].as<Counter>();
         parameters.initial_solution = &initial_solution;
         return local_search(instance, generator, parameters);
-#if LOCALSOLVER_FOUND
-    } else if (algorithm == "localsolver") {
-        LocalSolverParameters parameters;
-        read_args(parameters, vm);
-        return localsolver(instance, parameters);
-#endif
 
     } else {
         throw std::invalid_argument(

@@ -2,38 +2,18 @@
 
 #include "generalizedassignmentsolver/solution.hpp"
 
-#include <coin/OsiCbcSolverInterface.hpp>
+#include "mathoptsolverscmake/milp.hpp"
 
 namespace generalizedassignmentsolver
 {
 
-struct CoinLP
+struct MilpParameters: Parameters
 {
-    CoinLP(const Instance& instance);
+    /** Solver. */
+    mathoptsolverscmake::SolverName solver = mathoptsolverscmake::SolverName::Highs;
 
-    std::vector<double> column_lower_bounds;
-    std::vector<double> column_upper_bounds;
-    std::vector<double> objective;
-
-    std::vector<double> row_lower_bounds;
-    std::vector<double> row_upper_bounds;
-    CoinPackedMatrix matrix;
-};
-
-}
-
-#include <coin/CbcModel.hpp>
-
-namespace generalizedassignmentsolver
-{
-
-struct MilpCbcParameters: Parameters
-{
     /** Maximum number of nodes. */
     Counter maximum_number_of_nodes = -1;
-
-    /** Stop at first improvement. */
-    bool stop_at_first_improvement = false;
 
     /** Initial solution. */
     const Solution* initial_solution = NULL;
@@ -47,7 +27,6 @@ struct MilpCbcParameters: Parameters
         int width = format_width();
         os
             << std::setw(width) << std::left << "Maximum number of nodes: " << maximum_number_of_nodes << std::endl
-            << std::setw(width) << std::left << "Stop at first improvement: " << maximum_number_of_nodes << std::endl
             << std::setw(width) << std::left << "Has initial solution: " << (initial_solution != nullptr) << std::endl
             ;
     }
@@ -57,16 +36,15 @@ struct MilpCbcParameters: Parameters
         nlohmann::json json = Parameters::to_json();
         json.merge_patch({
                 {"MaximumNumberOfNodes", maximum_number_of_nodes},
-                {"StopAtFirstImprovement", stop_at_first_improvement},
                 {"HasInitialSolution", (initial_solution != nullptr)},
                 });
         return json;
     }
 };
 
-struct MilpCbcOutput: Output
+struct MilpOutput: Output
 {
-    MilpCbcOutput(
+    MilpOutput(
             const Instance& instance):
         Output(instance) { }
 
@@ -93,8 +71,9 @@ struct MilpCbcOutput: Output
     }
 };
 
-const MilpCbcOutput milp_cbc(
+MilpOutput milp(
         const Instance& instance,
-        const MilpCbcParameters& parameters = {});
+        const Solution* initial_solution = nullptr,
+        const MilpParameters& parameters = {});
 
 }

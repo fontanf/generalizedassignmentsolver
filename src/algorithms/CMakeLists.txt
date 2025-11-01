@@ -7,50 +7,15 @@ target_link_libraries(GeneralizedAssignmentSolver_greedy PUBLIC
     GeneralizedAssignmentSolver_generalizedassignment)
 add_library(GeneralizedAssignmentSolver::greedy ALIAS GeneralizedAssignmentSolver_greedy)
 
-add_library(GeneralizedAssignmentSolver_random)
-target_sources(GeneralizedAssignmentSolver_random PRIVATE
-    random.cpp)
-target_include_directories(GeneralizedAssignmentSolver_random PUBLIC
+add_library(GeneralizedAssignmentSolver_milp)
+target_sources(GeneralizedAssignmentSolver_milp PRIVATE
+    milp.cpp)
+target_include_directories(GeneralizedAssignmentSolver_milp PUBLIC
     ${PROJECT_SOURCE_DIR}/include)
-target_link_libraries(GeneralizedAssignmentSolver_random PUBLIC
-    GeneralizedAssignmentSolver_generalizedassignment)
-add_library(GeneralizedAssignmentSolver::random ALIAS GeneralizedAssignmentSolver_random)
-
-if(GENERALIZEDASSIGNMENTSOLVER_USE_CBC)
-    add_library(GeneralizedAssignmentSolver_milp_cbc)
-    target_sources(GeneralizedAssignmentSolver_milp_cbc PRIVATE
-        milp_cbc.cpp)
-    target_include_directories(GeneralizedAssignmentSolver_milp_cbc PUBLIC
-        ${PROJECT_SOURCE_DIR}/include)
-    target_link_libraries(GeneralizedAssignmentSolver_milp_cbc PUBLIC
-        GeneralizedAssignmentSolver_generalizedassignment
-        MathOptSolversCMake::cbc)
-    add_library(GeneralizedAssignmentSolver::milp_cbc ALIAS GeneralizedAssignmentSolver_milp_cbc)
-endif()
-
-if(GENERALIZEDASSIGNMENTSOLVER_USE_GUROBI)
-    add_library(GeneralizedAssignmentSolver_milp_gurobi)
-    target_sources(GeneralizedAssignmentSolver_milp_gurobi PRIVATE
-        milp_gurobi.cpp)
-    target_include_directories(GeneralizedAssignmentSolver_milp_gurobi PUBLIC
-        ${PROJECT_SOURCE_DIR}/include)
-    target_link_libraries(GeneralizedAssignmentSolver_milp_gurobi PUBLIC
-        GeneralizedAssignmentSolver_generalizedassignment
-        MathOptSolversCMake::gurobi)
-    add_library(GeneralizedAssignmentSolver::milp_gurobi ALIAS GeneralizedAssignmentSolver_milp_gurobi)
-endif()
-
-if(GENERALIZEDASSIGNMENTSOLVER_USE_CPLEX)
-    add_library(GeneralizedAssignmentSolver_milp_cplex)
-    target_sources(GeneralizedAssignmentSolver_milp_cplex PRIVATE
-        milp_cplex.cpp)
-    target_include_directories(GeneralizedAssignmentSolver_milp_cplex PUBLIC
-        ${PROJECT_SOURCE_DIR}/include)
-    target_link_libraries(GeneralizedAssignmentSolver_milp_cplex PUBLIC
-        GeneralizedAssignmentSolver_generalizedassignment
-        MathOptSolversCMake::cplex)
-    add_library(GeneralizedAssignmentSolver::milp_cplex ALIAS GeneralizedAssignmentSolver_milp_cplex)
-endif()
+target_link_libraries(GeneralizedAssignmentSolver_milp PUBLIC
+    GeneralizedAssignmentSolver_generalizedassignment
+    MathOptSolversCMake::milp)
+add_library(GeneralizedAssignmentSolver::milp ALIAS GeneralizedAssignmentSolver_milp)
 
 if(GENERALIZEDASSIGNMENTSOLVER_USE_KNITRO)
     add_library(GeneralizedAssignmentSolver_milp_knitro)
@@ -82,5 +47,5 @@ target_include_directories(GeneralizedAssignmentSolver_column_generation PUBLIC
 target_link_libraries(GeneralizedAssignmentSolver_column_generation PUBLIC
     GeneralizedAssignmentSolver_generalizedassignment
     ColumnGenerationSolver::columngenerationsolver
-    KnapsackSolver::knapsack::dynamic_programming_primal_dual)
+    KnapsackSolver::dynamic_programming_primal_dual)
 add_library(GeneralizedAssignmentSolver::column_generation ALIAS GeneralizedAssignmentSolver_column_generation)
