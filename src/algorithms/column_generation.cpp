@@ -35,10 +35,11 @@
 #include "columngenerationsolver/algorithms/greedy.hpp"
 #include "columngenerationsolver/algorithms/limited_discrepancy_search.hpp"
 
-#include "knapsacksolver/knapsack/instance_builder.hpp"
-#include "knapsacksolver/knapsack/algorithms/dynamic_programming_primal_dual.hpp"
+#include "knapsacksolver/instance_builder.hpp"
+#include "knapsacksolver/algorithms/dynamic_programming_primal_dual.hpp"
+//#include "knapsacksolver/algorithms/dynamic_programming_bellman.hpp"
+
 #include <iostream>
-//#include "knapsacksolver/knapsack/algorithms/dynamic_programming_bellman.hpp"
 
 using namespace generalizedassignmentsolver;
 
@@ -176,7 +177,7 @@ PricingOutput PricingSolver::solve_pricing(
             continue;
 
         // Build subproblem instance.
-        knapsacksolver::knapsack::InstanceFromFloatProfitsBuilder kp_instance_builder;
+        knapsacksolver::InstanceFromFloatProfitsBuilder kp_instance_builder;
         kp_instance_builder.set_capacity(instance_.capacity(agent_id));
         kp2gap_.clear();
         for (ItemIdx item_id = 0;
@@ -196,12 +197,12 @@ PricingOutput PricingSolver::solve_pricing(
                     instance_.weight(item_id, agent_id));
             kp2gap_.push_back(item_id);
         }
-        const knapsacksolver::knapsack::Instance kp_instance = kp_instance_builder.build();
+        const knapsacksolver::Instance kp_instance = kp_instance_builder.build();
 
         // Solve subproblem instance.
-        knapsacksolver::knapsack::DynamicProgrammingPrimalDualParameters kp_parameters;
+        knapsacksolver::DynamicProgrammingPrimalDualParameters kp_parameters;
         kp_parameters.verbosity_level = 0;
-        auto kp_output = knapsacksolver::knapsack::dynamic_programming_primal_dual(
+        auto kp_output = knapsacksolver::dynamic_programming_primal_dual(
                 kp_instance,
                 kp_parameters);
 
@@ -211,7 +212,7 @@ PricingOutput PricingSolver::solve_pricing(
         element.row = agent_id;
         element.coefficient = 1;
         column.elements.push_back(element);
-        for (knapsacksolver::knapsack::ItemId kp_item_id = 0;
+        for (knapsacksolver::ItemId kp_item_id = 0;
                 kp_item_id < kp_instance.number_of_items();
                 ++kp_item_id) {
             if (kp_output.solution.contains(kp_item_id)) {
