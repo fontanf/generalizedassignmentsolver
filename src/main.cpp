@@ -4,6 +4,9 @@
 #include "generalizedassignmentsolver/algorithms/milp.hpp"
 #include "generalizedassignmentsolver/algorithms/greedy.hpp"
 #include "generalizedassignmentsolver/algorithms/local_search.hpp"
+#ifdef CONIC_BUNDLE_FOUND
+#include "generalizedassignmentsolver/algorithms/lagrangian_relaxation_conic_bundle.hpp"
+#endif
 
 #include <boost/program_options.hpp>
 
@@ -106,6 +109,13 @@ Output run(
         if (vm.count("linear-programming-solver"))
             parameters.linear_programming_solver = vm["linear-programming-solver"].as<std::string>();
         return column_generation_heuristic_limited_discrepancy_search(instance, parameters);
+
+#ifdef CONIC_BUNDLE_FOUND
+    } else if (algorithm == "lagrangian-relaxation-assignment-conic-bundle") {
+        LagrangianRelaxationAssignmentConicBundleParameters parameters;
+        read_args(parameters, vm);
+        return lagrangian_relaxation_assignment_conic_bundle(instance, parameters);
+#endif
 
     } else if (algorithm == "local-search") {
         LocalSearchParameters parameters;

@@ -78,3 +78,13 @@ if (GENERALIZEDASSIGNMENTSOLVER_USE_KNITRO)
         EXCLUDE_FROM_ALL)
     FetchContent_MakeAvailable(knitrocpp)
 endif()
+
+# Fetch ConicBundle.
+if (GENERALIZEDASSIGNMENTSOLVER_USE_CONICBUNDLE)
+    FetchContent_Declare(
+        conicbundle
+        GIT_REPOSITORY https://github.com/fontanf/ConicBundle.git
+        GIT_TAG b256eda2a7ac6fe5fcc92d479f95ca606f361ad1
+        EXCLUDE_FROM_ALL)
+    FetchContent_MakeAvailable(conicbundle)
+endif()

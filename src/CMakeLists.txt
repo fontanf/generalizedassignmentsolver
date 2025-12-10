@@ -23,10 +23,12 @@ if(GENERALIZEDASSIGNMENTSOLVER_BUILD_MAIN)
         GeneralizedAssignmentSolver_column_generation
         Boost::program_options)
     if(GENERALIZEDASSIGNMENTSOLVER_USE_KNITRO)
-        target_compile_definitions(GeneralizedAssignmentSolver_main PUBLIC
-            KNITRO_FOUND=1)
         target_link_libraries(GeneralizedAssignmentSolver_main PUBLIC
             GeneralizedAssignmentSolver_milp_knitro)
+    endif()
+    if(GENERALIZEDASSIGNMENTSOLVER_USE_CONICBUNDLE)
+        target_link_libraries(GeneralizedAssignmentSolver_main PUBLIC
+            GeneralizedAssignmentSolver_lagrangian_relaxation_conic_bundle)
     endif()
     set_target_properties(GeneralizedAssignmentSolver_main PROPERTIES OUTPUT_NAME "generalizedassignmentsolver")
     install(TARGETS GeneralizedAssignmentSolver_main)

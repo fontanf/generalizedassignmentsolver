@@ -49,3 +49,18 @@ target_link_libraries(GeneralizedAssignmentSolver_column_generation PUBLIC
     ColumnGenerationSolver::columngenerationsolver
     KnapsackSolver::dynamic_programming_primal_dual)
 add_library(GeneralizedAssignmentSolver::column_generation ALIAS GeneralizedAssignmentSolver_column_generation)
+
+if(GENERALIZEDASSIGNMENTSOLVER_USE_CONICBUNDLE)
+    add_library(GeneralizedAssignmentSolver_lagrangian_relaxation_conic_bundle)
+    target_sources(GeneralizedAssignmentSolver_lagrangian_relaxation_conic_bundle PRIVATE
+        lagrangian_relaxation_conic_bundle.cpp)
+    target_include_directories(GeneralizedAssignmentSolver_lagrangian_relaxation_conic_bundle PUBLIC
+        ${PROJECT_SOURCE_DIR}/include)
+    target_compile_definitions(GeneralizedAssignmentSolver_lagrangian_relaxation_conic_bundle PUBLIC
+        CONIC_BUNDLE_FOUND=1)
+    target_link_libraries(GeneralizedAssignmentSolver_lagrangian_relaxation_conic_bundle PUBLIC
+        GeneralizedAssignmentSolver_generalizedassignment
+        cb
+        KnapsackSolver::dynamic_programming_primal_dual)
+    add_library(GeneralizedAssignmentSolver::lagrangian_relaxation_conic_bundle ALIAS GeneralizedAssignmentSolver_lagrangian_relaxation_conic_bundle)
+endif()
