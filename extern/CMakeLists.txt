@@ -36,10 +36,13 @@ endif()
 if(GENERALIZEDASSIGNMENTSOLVER_USE_DLIB)
     set(MATHOPTSOLVERSCMAKE_USE_DLIB ON)
 endif()
+if(GENERALIZEDASSIGNMENTSOLVER_USE_CONICBUNDLE)
+    set(MATHOPTSOLVERSCMAKE_USE_CONICBUNDLE ON)
+endif()
 FetchContent_Declare(
     mathoptsolverscmake
     GIT_REPOSITORY https://github.com/fontanf/mathoptsolverscmake.git
-    GIT_TAG a6b015ba99f28fe2a1257e70e00d11fb87c0c387
+    GIT_TAG 7a2b2078fe6dba5f26b6ea46e525e3fe817b429a
     #SOURCE_DIR "${PROJECT_SOURCE_DIR}/../mathoptsolverscmake/"
     EXCLUDE_FROM_ALL)
 FetchContent_MakeAvailable(mathoptsolverscmake)

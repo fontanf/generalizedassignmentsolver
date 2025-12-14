@@ -111,10 +111,14 @@ Output run(
     } else if (algorithm == "lagrangian-relaxation-assignment") {
         LagrangianRelaxationAssignmentParameters parameters;
         read_args(parameters, vm);
+        if (vm.count("solver"))
+            parameters.solver = vm["solver"].as<mathoptsolverscmake::SolverName>();
         return lagrangian_relaxation_assignment(instance, nullptr, nullptr, parameters);
     } else if (algorithm == "lagrangian-relaxation-knapsack") {
         LagrangianRelaxationKnapsackParameters parameters;
         read_args(parameters, vm);
+        if (vm.count("solver"))
+            parameters.solver = vm["solver"].as<mathoptsolverscmake::SolverName>();
         return lagrangian_relaxation_knapsack(instance, nullptr, nullptr, parameters);
 
     } else if (algorithm == "local-search") {
@@ -154,6 +158,7 @@ int main(int argc, char *argv[])
         ("desirability,", po::value<std::string>(), "set desirability")
         ("maximum-number-of-nodes,", po::value<Counter>(), "set maximum number of nodes")
         ("linear-programming-solver,", po::value<std::string>(), "set linear programming solver")
+        ("solver,", po::value<mathoptsolverscmake::SolverName>(), "set solver (milp, Lagrangian relaxation)")
         ;
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);

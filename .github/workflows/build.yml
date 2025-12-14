@@ -34,8 +34,8 @@ jobs:
       if: ${{ (matrix.os == 'macos-13') || (matrix.os == 'macos-latest') }}
     - name: Build
       run: |
-        cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DGENERALIZEDASSIGNMENTSOLVER_USE_CLP=ON -DGENERALIZEDASSIGNMENTSOLVER_USE_CBC=ON -DGENERALIZEDASSIGNMENTSOLVER_USE_HIGHS=ON -DGENERALIZEDASSIGNMENTSOLVER_USE_DLIB=ON
-        cmake --build build --config Release --parallel
+        cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DGENERALIZEDASSIGNMENTSOLVER_USE_CLP=ON -DGENERALIZEDASSIGNMENTSOLVER_USE_CBC=ON -DGENERALIZEDASSIGNMENTSOLVER_USE_HIGHS=ON -DGENERALIZEDASSIGNMENTSOLVER_USE_DLIB=ON -DGENERALIZEDASSIGNMENTSOLVER_USE_CONICBUNDLE=ON
+        cmake --build build --config Release
         cmake --install build --config Release --prefix install
     - name: Run tests
       run: python3 -u scripts/run_tests.py test_results
@@ -46,8 +46,8 @@ jobs:
         git checkout master
     - name: Build
       run: |
-        cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DGENERALIZEDASSIGNMENTSOLVER_USE_CLP=ON -DGENERALIZEDASSIGNMENTSOLVER_USE_CBC=ON -DGENERALIZEDASSIGNMENTSOLVER_USE_HIGHS=ON -DGENERALIZEDASSIGNMENTSOLVER_USE_DLIB=ON
-        cmake --build build --config Release --parallel
+        cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DGENERALIZEDASSIGNMENTSOLVER_USE_CLP=ON -DGENERALIZEDASSIGNMENTSOLVER_USE_CBC=ON -DGENERALIZEDASSIGNMENTSOLVER_USE_HIGHS=ON -DGENERALIZEDASSIGNMENTSOLVER_USE_DLIB=ON -DGENERALIZEDASSIGNMENTSOLVER_USE_CONICBUNDLE=ON
+        cmake --build build --config Release
         cmake --install build --config Release --prefix install
     - name: Run tests
       run: python3 -u scripts/run_tests.py test_results_ref
