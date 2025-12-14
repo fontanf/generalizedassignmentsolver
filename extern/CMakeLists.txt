@@ -33,10 +33,13 @@ endif()
 if(GENERALIZEDASSIGNMENTSOLVER_USE_CPLEX)
     set(MATHOPTSOLVERSCMAKE_USE_CPLEX ON)
 endif()
+if(GENERALIZEDASSIGNMENTSOLVER_USE_DLIB)
+    set(MATHOPTSOLVERSCMAKE_USE_DLIB ON)
+endif()
 FetchContent_Declare(
     mathoptsolverscmake
     GIT_REPOSITORY https://github.com/fontanf/mathoptsolverscmake.git
-    GIT_TAG 235bb3c282312ed9d8fb78a0d2b52ff376d5976b
+    GIT_TAG a6b015ba99f28fe2a1257e70e00d11fb87c0c387
     #SOURCE_DIR "${PROJECT_SOURCE_DIR}/../mathoptsolverscmake/"
     EXCLUDE_FROM_ALL)
 FetchContent_MakeAvailable(mathoptsolverscmake)
@@ -77,13 +80,4 @@ if (GENERALIZEDASSIGNMENTSOLVER_USE_KNITRO)
         #SOURCE_DIR "${PROJECT_SOURCE_DIR}/../knitrocpp/"
         EXCLUDE_FROM_ALL)
     FetchContent_MakeAvailable(knitrocpp)
-endif()
-
-# Fetch dlib.
-if (GENERALIZEDASSIGNMENTSOLVER_USE_DLIB)
-    FetchContent_Declare(
-        dlib
-        GIT_REPOSITORY https://github.com/davisking/dlib.git
-        GIT_TAG v20.0)
-    FetchContent_MakeAvailable(dlib)
 endif()

@@ -2,7 +2,7 @@
 
 #include "generalizedassignmentsolver/solution.hpp"
 
-#include "mathoptsolverscmake/milp.hpp"
+#include "mathoptsolverscmake/common.hpp"
 
 namespace generalizedassignmentsolver
 {

@@ -2,6 +2,8 @@
 
 #include "generalizedassignmentsolver/algorithm_formatter.hpp"
 
+#include "mathoptsolverscmake/milp.hpp"
+
 using namespace generalizedassignmentsolver;
 
 namespace
