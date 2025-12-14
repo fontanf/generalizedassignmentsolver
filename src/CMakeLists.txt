@@ -28,6 +28,10 @@ if(GENERALIZEDASSIGNMENTSOLVER_BUILD_MAIN)
         target_link_libraries(GeneralizedAssignmentSolver_main PUBLIC
             GeneralizedAssignmentSolver_milp_knitro)
     endif()
+    if(GENERALIZEDASSIGNMENTSOLVER_USE_DLIB)
+        target_link_libraries(GeneralizedAssignmentSolver_main PUBLIC
+            GeneralizedAssignmentSolver_lagrangian_relaxation_dlib)
+    endif()
     set_target_properties(GeneralizedAssignmentSolver_main PROPERTIES OUTPUT_NAME "generalizedassignmentsolver")
     install(TARGETS GeneralizedAssignmentSolver_main)
 

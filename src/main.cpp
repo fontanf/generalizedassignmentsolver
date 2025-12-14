@@ -4,6 +4,9 @@
 #include "generalizedassignmentsolver/algorithms/milp.hpp"
 #include "generalizedassignmentsolver/algorithms/greedy.hpp"
 #include "generalizedassignmentsolver/algorithms/local_search.hpp"
+#ifdef DLIB_FOUND
+#include "generalizedassignmentsolver/algorithms/lagrangian_relaxation_dlib.hpp"
+#endif
 
 #include <boost/program_options.hpp>
 
@@ -106,6 +109,17 @@ Output run(
         if (vm.count("linear-programming-solver"))
             parameters.linear_programming_solver = vm["linear-programming-solver"].as<std::string>();
         return column_generation_heuristic_limited_discrepancy_search(instance, parameters);
+
+#ifdef DLIB_FOUND
+    } else if (algorithm == "lagrangian-relaxation-assignment-dlib") {
+        LagrangianRelaxationAssignmentDlibParameters parameters;
+        read_args(parameters, vm);
+        return lagrangian_relaxation_assignment_dlib(instance, nullptr, nullptr, parameters);
+    } else if (algorithm == "lagrangian-relaxation-knapsack-dlib") {
+        LagrangianRelaxationKnapsackDlibParameters parameters;
+        read_args(parameters, vm);
+        return lagrangian_relaxation_knapsack_dlib(instance, nullptr, nullptr, parameters);
+#endif
 
     } else if (algorithm == "local-search") {
         LocalSearchParameters parameters;
