@@ -114,12 +114,21 @@ const LagrangianRelaxationAssignmentOutput generalizedassignmentsolver::lagrangi
         model.variables_initial_values = std::vector<double>(model.number_of_variables(), 0);
     }
 
+    // Solve.
     double bcnlp_bound = 0;
 #if DLIB_FOUND
-    // Solve.
-    mathoptsolverscmake::BoxConstrainedNlpDlibOutput dlib_output = mathoptsolverscmake::solve_dlib(model);
-    bcnlp_bound = dlib_output.objective_value;
-    output.multipliers = dlib_output.solution;
+    if (parameters.solver == mathoptsolverscmake::SolverName::Dlib) {
+        mathoptsolverscmake::BoxConstrainedNlpDlibOutput dlib_output = mathoptsolverscmake::solve_dlib(model);
+        bcnlp_bound = dlib_output.objective_value;
+        output.multipliers = dlib_output.solution;
+    }
+#endif
+#if CONICBUNDLE_FOUND
+    if (parameters.solver == mathoptsolverscmake::SolverName::ConicBundle) {
+        mathoptsolverscmake::BoxConstrainedNlpConicBundleOutput conicbundle_output = mathoptsolverscmake::solve_conicbundle(model);
+        bcnlp_bound = conicbundle_output.objective_value;
+        output.multipliers = conicbundle_output.solution;
+    }
 #endif
 
     // Fill output.
@@ -202,12 +211,21 @@ const LagrangianRelaxationKnapsackOutput generalizedassignmentsolver::lagrangian
         model.variables_initial_values = std::vector<double>(model.number_of_variables(), 0);
     }
 
+    // Solve.
     double bcnlp_bound = 0;
 #if DLIB_FOUND
-    // Solve.
-    mathoptsolverscmake::BoxConstrainedNlpDlibOutput dlib_output = mathoptsolverscmake::solve_dlib(model);
-    bcnlp_bound = dlib_output.objective_value;
-    output.multipliers = dlib_output.solution;
+    if (parameters.solver == mathoptsolverscmake::SolverName::Dlib) {
+        mathoptsolverscmake::BoxConstrainedNlpDlibOutput dlib_output = mathoptsolverscmake::solve_dlib(model);
+        bcnlp_bound = dlib_output.objective_value;
+        output.multipliers = dlib_output.solution;
+    }
+#endif
+#if CONICBUNDLE_FOUND
+    if (parameters.solver == mathoptsolverscmake::SolverName::ConicBundle) {
+        mathoptsolverscmake::BoxConstrainedNlpConicBundleOutput conicbundle_output = mathoptsolverscmake::solve_conicbundle(model);
+        bcnlp_bound = conicbundle_output.objective_value;
+        output.multipliers = conicbundle_output.solution;
+    }
 #endif
 
     // Fill output.
