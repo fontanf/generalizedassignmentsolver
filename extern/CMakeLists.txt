@@ -36,7 +36,7 @@ endif()
 FetchContent_Declare(
     mathoptsolverscmake
     GIT_REPOSITORY https://github.com/fontanf/mathoptsolverscmake.git
-    GIT_TAG f03fa63814eae3a253675ed14dd618a8a0d19a11
+    GIT_TAG 235bb3c282312ed9d8fb78a0d2b52ff376d5976b
     #SOURCE_DIR "${PROJECT_SOURCE_DIR}/../mathoptsolverscmake/"
     EXCLUDE_FROM_ALL)
 FetchContent_MakeAvailable(mathoptsolverscmake)
@@ -77,4 +77,13 @@ if (GENERALIZEDASSIGNMENTSOLVER_USE_KNITRO)
         #SOURCE_DIR "${PROJECT_SOURCE_DIR}/../knitrocpp/"
         EXCLUDE_FROM_ALL)
     FetchContent_MakeAvailable(knitrocpp)
+endif()
+
+# Fetch dlib.
+if (GENERALIZEDASSIGNMENTSOLVER_USE_DLIB)
+    FetchContent_Declare(
+        dlib
+        GIT_REPOSITORY https://github.com/davisking/dlib.git
+        GIT_TAG v20.0)
+    FetchContent_MakeAvailable(dlib)
 endif()

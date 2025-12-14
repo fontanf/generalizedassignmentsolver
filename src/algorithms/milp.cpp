@@ -112,7 +112,7 @@ public:
 
     EventHandler(
             const Instance& instance,
-            const MilpDisjunctiveParameters& parameters,
+            const MilpParameters& parameters,
             const Model& milp_model,
             Output& output,
             AlgorithmFormatter& algorithm_formatter):
@@ -138,7 +138,7 @@ public:
 private:
 
     const Instance& instance_;
-    const MilpDisjunctiveParameters& parameters_;
+    const MilpParameters& parameters_;
     const Model& milp_model_;
     Output& output_;
     AlgorithmFormatter& algorithm_formatter_;
@@ -181,7 +181,7 @@ CbcEventHandler::CbcAction EventHandler::event(CbcEvent which_event)
 struct XpressCallbackUser
 {
     const Instance& instance;
-    const MilpDisjunctiveParameters& parameters;
+    const MilpParameters& parameters;
     Output& output;
     AlgorithmFormatter& algorithm_formatter;
 };

@@ -23,13 +23,11 @@ It is possible to solve the variant where not all items have to be assigned by a
 <!--- Constraint programming-->
 <!--  - with Gecode `--algorithm constraint-programming-gecode`-->
 
-<!--- Lagrangian relaxation-->
-<!--  - of knapsack constraints. The value of this relaxation is the same as the value of the linear relaxation. However, it might be cheaper to compute, especially on large instances.-->
-<!--    - solved with volume method `--algorithm lagrangian-relaxation-knapsack-volume`-->
-<!--    - solved with L-BFGS method `--algorithm lagrangian-relaxation-knapsack-lbfgs`-->
-<!--  - of assignment constraints-->
-<!--    - solved with volume method `--algorithm lagrangian-relaxation-assignment-volume`-->
-<!--    - solved with L-BFGS method `--algorithm lagrangian-relaxation-assignment-lbfgs`-->
+- Lagrangian relaxation
+  - of knapsack constraints. The value of this relaxation is the same as the value of the linear relaxation. However, it might be cheaper to compute, especially on large instances.
+    - solved with dlib `--algorithm lagrangian-relaxation-knapsack-dlib`
+  - of assignment constraints
+    - solved with dlib `--algorithm lagrangian-relaxation-assignment-dlib`
 
 - Local search algorithm implemented with [fontanf/localsearchsolver](https://github.com/fontanf/localsearchsolver) `--algorithm "local-search --threads 3"`
 

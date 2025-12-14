@@ -2,13 +2,13 @@
 
 #include "generalizedassignmentsolver/algorithm_formatter.hpp"
 
+#include "knapsacksolver/instance_builder.hpp"
 #include "knapsacksolver/algorithms/dynamic_programming_primal_dual.hpp"
-#include "knapsacksolver/algorithms/dynamic_programming_bellman.hpp"
+//#include "knapsacksolver/algorithms/dynamic_programming_bellman.hpp"
 
 #include <dlib/optimization.h>
 
 #include <algorithm>
-#include <iomanip>
 #include <limits>
 
 using namespace generalizedassignmentsolver;
@@ -27,28 +27,28 @@ public:
 
     LagrangianRelaxationAssignmentDlibFunction(
             const Instance& instance,
-            LagrangianRelaxationAssignmentDlibParameters& p,
+            std::vector<std::vector<int>>* fixed_alt,
             ItemIdx number_of_unfixed_items,
             const std::vector<ItemIdx>& item_indices):
-        instance_(instance), p_(p), item_indices_(item_indices), grad_(number_of_unfixed_items)
+        instance_(instance),
+        fixed_alt_(fixed_alt),
+        item_indices_(item_indices),
+        grad_(number_of_unfixed_items)
     {
         // Compute knapsack capacities
         kp_capacities_.resize(instance_.number_of_agents());
         for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id) {
             kp_capacities_[agent_id] = instance.capacity(agent_id);
             for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id) {
-                if (p.fixed_alt != NULL && (*p.fixed_alt)[item_id][agent_id] == 1)
+                if (fixed_alt != NULL
+                        && (*fixed_alt)[item_id][agent_id] == 1) {
                     kp_capacities_[agent_id] -= instance.weight(item_id, agent_id);
+                }
             }
             if (kp_capacities_[agent_id] < 0)
                 std::cout << "ERROR agent_id " << agent_id << " c " << kp_capacities_[agent_id] << std::endl;
         }
-
-        // Initialize kp_indices_
-        kp_indices_.resize(instance.number_of_items());
     }
-
-    virtual ~LagrangianRelaxationAssignmentDlibFunction() { }
 
     double f(const column_vector& x);
 
@@ -57,15 +57,15 @@ public:
 private:
 
     const Instance& instance_;
-    LagrangianRelaxationAssignmentDlibParameters& p_;
+
+    std::vector<std::vector<int>>* fixed_alt_;
+
     /** item_indices_[item_id] is the index of item j in mu and grad_. */
     const std::vector<ItemIdx>& item_indices_;
 
     column_vector grad_;
 
     std::vector<knapsacksolver::Weight> kp_capacities_;
-    /** kp_indices_[item_id] is the index of item j in the current KP. */
-    std::vector<knapsacksolver::ItemIdx> kp_indices_;
 
 };
 
@@ -78,39 +78,44 @@ double LagrangianRelaxationAssignmentDlibFunction::f(const column_vector& mu)
             l += mu(item_indices_[item_id]);
     std::fill(grad_.begin(), grad_.end(), 1);
 
-    Weight mult = 10000;
     for (AgentIdx agent_id = 0; agent_id < instance_.number_of_agents(); ++agent_id) {
         // Create knapsack instance
-        knapsacksolver::Instance kp_instance;
-        kp_instance.set_capacity(kp_capacities_[agent_id]);
-        knapsacksolver::ItemIdx kp_item_id = 0;
+        knapsacksolver::InstanceFromFloatProfitsBuilder kp_instance_builder;
+        kp_instance_builder.set_capacity(kp_capacities_[agent_id]);
+        std::vector<ItemIdx> kp_to_gap;
         for (ItemIdx item_id = 0; item_id < instance_.number_of_items(); ++item_id) {
-            if ((p_.fixed_alt != NULL && (*p_.fixed_alt)[item_id][agent_id] >= 0)
-                    || instance_.weight(item_id, agent_id) > kp_capacities_[agent_id]) {
-                kp_indices_[item_id] = -1;
+            if ((this->fixed_alt_ != NULL
+                        && (*this->fixed_alt_)[item_id][agent_id] >= 0)) {
                 continue;
             }
-            knapsacksolver::Profit profit = std::ceil(mult * mu(item_id) - mult * instance_.cost(item_id, agent_id));
-            if (profit <= 0) {
-                kp_indices_[item_id] = -1;
+            if (instance_.weight(item_id, agent_id) > kp_capacities_[agent_id])
                 continue;
-            }
-            kp_instance.add_item(instance_.weight(item_id, agent_id), profit);
-            kp_indices_[item_id] = kp_item_id;
-            kp_item_id++;
+            double profit = mu(item_id) - instance_.cost(item_id, agent_id);
+            if (profit <= 0)
+                continue;
+            kp_instance_builder.add_item(profit, instance_.weight(item_id, agent_id));
+            kp_to_gap.push_back(item_id);
         }
+        knapsacksolver::Instance kp_instance = kp_instance_builder.build();
 
         // Solve knapsack instance
+        knapsacksolver::DynamicProgrammingPrimalDualParameters kp_parameters;
+        kp_parameters.verbosity_level = 0;
         //auto kp_output = knapsacksolver::dynamic_programming_bellman_array_all(kp_instance, kp_parameters);
-        auto kp_output = knapsacksolver::dynamic_programming_primal_dual(kp_instance);
+        auto kp_output = knapsacksolver::dynamic_programming_primal_dual(
+                kp_instance,
+                kp_parameters);
         //std::cout << "i " << i << " opt " << kp_output.solution.profit() << std::endl;
 
         // Update bound and gradient
-        for (ItemIdx item_id = 0; item_id < instance_.number_of_items(); ++item_id) {
-            if (kp_indices_[item_id] >= 0 && kp_output.solution.contains_idx(kp_indices_[item_id])) {
-                grad_(item_indices_[item_id])--;
-                l += instance_.cost(item_id, agent_id) - mu(item_indices_[item_id]);
-            }
+        for (knapsacksolver::ItemId kp_item_id = 0;
+                kp_item_id < kp_instance.number_of_items();
+                ++kp_item_id) {
+            if (!kp_output.solution.contains(kp_item_id))
+                continue;
+            ItemIdx item_id = kp_to_gap[kp_item_id];
+            grad_(item_indices_[item_id])--;
+            l += instance_.cost(item_id, agent_id) - mu(item_indices_[item_id]);
         }
     }
 
@@ -119,9 +124,11 @@ double LagrangianRelaxationAssignmentDlibFunction::f(const column_vector& mu)
 
 const LagrangianRelaxationAssignmentDlibOutput generalizedassignmentsolver::lagrangian_relaxation_assignment_dlib(
         const Instance& instance,
+        std::vector<int>* initial_multipliers,
+        std::vector<std::vector<int>>* fixed_alt,
         const LagrangianRelaxationAssignmentDlibParameters& parameters)
 {
-    LagrangianRelaxationAssignmentDlibOutput o output(instance);
+    LagrangianRelaxationAssignmentDlibOutput output(instance);
     AlgorithmFormatter algorithm_formatter(parameters, output);
     algorithm_formatter.start("Lagrangian relaxation - assignment constraints (dlib)");
     algorithm_formatter.print_header();
@@ -132,7 +139,7 @@ const LagrangianRelaxationAssignmentDlibOutput generalizedassignmentsolver::lagr
     std::vector<ItemIdx> item_indices(instance.number_of_items(), -2);
     for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id) {
         for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id) {
-            if (parameters.fixed_alt != NULL && (*parameters.fixed_alt)[item_id][agent_id] == 1) {
+            if (fixed_alt != NULL && (*fixed_alt)[item_id][agent_id] == 1) {
                 c0 += instance.cost(item_id, agent_id);
                 item_indices[item_id] = -1;
                 break;
@@ -147,23 +154,23 @@ const LagrangianRelaxationAssignmentDlibOutput generalizedassignmentsolver::lagr
 
     // Initialize multipliers
     column_vector mu(number_of_unfixed_items);
-    if (parameters.initial_multipliers != NULL) {
+    if (initial_multipliers != NULL) {
         for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id)
             if (item_indices[item_id] >= 0)
-                mu(item_indices[item_id]) = (*parameters.initial_multipliers)[item_id];
+                mu(item_indices[item_id]) = (*initial_multipliers)[item_id];
     } else {
         for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id)
             mu(item_id) = 0;
     }
 
     // Solve
-    LagrangianRelaxationAssignmentDlibFunction func(instance, parameters, number_of_unfixed_items, item_indices);
-    auto f   = [&func](const column_vector& x) { return func.f(x); };
+    LagrangianRelaxationAssignmentDlibFunction func(instance, fixed_alt, number_of_unfixed_items, item_indices);
+    auto f = [&func](const column_vector& x) { return func.f(x); };
     auto def = [&func](const column_vector& x) { return func.der(x); };
     auto stop_strategy = objective_delta_stop_strategy(0.0001);
-    //auto stop_strategy = gradient_norm_stop_strategy().be_verbosity_level(),
+    //auto stop_strategy = objective_delta_stop_strategy(0.0001).be_verbose();
     double res = find_max(
-            dlib_search_strategy(256),
+            lbfgs_search_strategy(256),
             stop_strategy,
             f,
             def,
@@ -171,8 +178,8 @@ const LagrangianRelaxationAssignmentDlibOutput generalizedassignmentsolver::lagr
             std::numeric_limits<double>::max());
 
     // Compute output parameters
-    Cost lb = c0 + std::ceil(res - FFOT_TOL);
-    algorithm_formatter.update_bound(lb, "");
+    Cost bound = c0 + std::ceil(res - FFOT_TOL);
+    algorithm_formatter.update_bound(bound, "");
     output.multipliers.resize(instance.number_of_items());
     for (ItemIdx item_id = 0; item_id < instance.number_of_items(); ++item_id)
         if (item_indices[item_id] >= 0)
@@ -196,7 +203,6 @@ public:
         x_(instance.number_of_items()),
         grad_(instance.number_of_agents())
     {  }
-    virtual ~LagrangianRelaxationKnapsackDlibFunction() { };
 
     double f(const column_vector& x);
 
@@ -207,7 +213,9 @@ public:
 private:
 
     const Instance& instance_;
+
     column_vector x_;
+
     column_vector grad_;
 
 };
@@ -252,6 +260,8 @@ double LagrangianRelaxationKnapsackDlibFunction::f(const column_vector& mu)
 
 const LagrangianRelaxationKnapsackDlibOutput generalizedassignmentsolver::lagrangian_relaxation_knapsack_dlib(
         const Instance& instance,
+        std::vector<int>* initial_multipliers,
+        std::vector<std::vector<int>>* fixed_alt,
         const Parameters& parameters)
 {
     LagrangianRelaxationKnapsackDlibOutput output(instance);
@@ -273,12 +283,11 @@ const LagrangianRelaxationKnapsackDlibOutput generalizedassignmentsolver::lagran
 
     // Solve
     LagrangianRelaxationKnapsackDlibFunction func(instance);
-    auto f   = [&func](const column_vector& x) { return func.f(x); };
+    auto f = [&func](const column_vector& x) { return func.f(x); };
     auto def = [&func](const column_vector& x) { return func.der(x); };
     auto stop_strategy = objective_delta_stop_strategy();
-    //auto stop_strategy = gradient_norm_stop_strategy();
     double res = find_max_box_constrained(
-            dlib_search_strategy(256),
+            lbfgs_search_strategy(256),
             stop_strategy,
             f,
             def,
@@ -287,8 +296,8 @@ const LagrangianRelaxationKnapsackDlibOutput generalizedassignmentsolver::lagran
             mu_upper);
 
     // Compute output parameters
-    Cost lb = std::ceil(res - FFOT_TOL);
-    algorithm_formatter.update_bound(lb, "");
+    Cost bound = std::ceil(res - FFOT_TOL);
+    algorithm_formatter.update_bound(bound, "");
     output.multipliers.resize(instance.number_of_agents());
     for (AgentIdx agent_id = 0; agent_id < instance.number_of_agents(); ++agent_id)
         output.multipliers[agent_id] = mu(agent_id);
