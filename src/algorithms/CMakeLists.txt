@@ -50,18 +50,14 @@ target_link_libraries(GeneralizedAssignmentSolver_column_generation PUBLIC
     KnapsackSolver::dynamic_programming_primal_dual)
 add_library(GeneralizedAssignmentSolver::column_generation ALIAS GeneralizedAssignmentSolver_column_generation)
 
-if(GENERALIZEDASSIGNMENTSOLVER_USE_DLIB)
-    add_library(GeneralizedAssignmentSolver_lagrangian_relaxation_dlib)
-    target_sources(GeneralizedAssignmentSolver_lagrangian_relaxation_dlib PRIVATE
-        lagrangian_relaxation_dlib.cpp)
-    target_include_directories(GeneralizedAssignmentSolver_lagrangian_relaxation_dlib PUBLIC
-        ${PROJECT_SOURCE_DIR}/include)
-    target_compile_definitions(GeneralizedAssignmentSolver_lagrangian_relaxation_dlib PUBLIC
-        DLIB_FOUND=1)
-    target_link_libraries(GeneralizedAssignmentSolver_lagrangian_relaxation_dlib PUBLIC
-        GeneralizedAssignmentSolver_generalizedassignment
-        dlib::dlib
-        KnapsackSolver::dynamic_programming_bellman
-        KnapsackSolver::dynamic_programming_primal_dual)
-    add_library(GeneralizedAssignmentSolver::lagrangian_relaxation_dlib ALIAS GeneralizedAssignmentSolver_lagrangian_relaxation_dlib)
-endif()
+add_library(GeneralizedAssignmentSolver_lagrangian_relaxation)
+target_sources(GeneralizedAssignmentSolver_lagrangian_relaxation PRIVATE
+    lagrangian_relaxation.cpp)
+target_include_directories(GeneralizedAssignmentSolver_lagrangian_relaxation PUBLIC
+    ${PROJECT_SOURCE_DIR}/include)
+target_link_libraries(GeneralizedAssignmentSolver_lagrangian_relaxation PUBLIC
+    GeneralizedAssignmentSolver_generalizedassignment
+    MathOptSolversCMake::box_constrained_nlp
+    KnapsackSolver::dynamic_programming_bellman
+    KnapsackSolver::dynamic_programming_primal_dual)
+add_library(GeneralizedAssignmentSolver::lagrangian_relaxation ALIAS GeneralizedAssignmentSolver_lagrangian_relaxation)

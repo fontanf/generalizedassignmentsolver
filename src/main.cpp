@@ -2,11 +2,9 @@
 
 #include "generalizedassignmentsolver/algorithms/column_generation.hpp"
 #include "generalizedassignmentsolver/algorithms/milp.hpp"
+#include "generalizedassignmentsolver/algorithms/lagrangian_relaxation.hpp"
 #include "generalizedassignmentsolver/algorithms/greedy.hpp"
 #include "generalizedassignmentsolver/algorithms/local_search.hpp"
-#ifdef DLIB_FOUND
-#include "generalizedassignmentsolver/algorithms/lagrangian_relaxation_dlib.hpp"
-#endif
 
 #include <boost/program_options.hpp>
 
@@ -110,16 +108,14 @@ Output run(
             parameters.linear_programming_solver = vm["linear-programming-solver"].as<std::string>();
         return column_generation_heuristic_limited_discrepancy_search(instance, parameters);
 
-#ifdef DLIB_FOUND
-    } else if (algorithm == "lagrangian-relaxation-assignment-dlib") {
-        LagrangianRelaxationAssignmentDlibParameters parameters;
+    } else if (algorithm == "lagrangian-relaxation-assignment") {
+        LagrangianRelaxationAssignmentParameters parameters;
         read_args(parameters, vm);
-        return lagrangian_relaxation_assignment_dlib(instance, nullptr, nullptr, parameters);
-    } else if (algorithm == "lagrangian-relaxation-knapsack-dlib") {
-        LagrangianRelaxationKnapsackDlibParameters parameters;
+        return lagrangian_relaxation_assignment(instance, nullptr, nullptr, parameters);
+    } else if (algorithm == "lagrangian-relaxation-knapsack") {
+        LagrangianRelaxationKnapsackParameters parameters;
         read_args(parameters, vm);
-        return lagrangian_relaxation_knapsack_dlib(instance, nullptr, nullptr, parameters);
-#endif
+        return lagrangian_relaxation_knapsack(instance, nullptr, nullptr, parameters);
 
     } else if (algorithm == "local-search") {
         LocalSearchParameters parameters;

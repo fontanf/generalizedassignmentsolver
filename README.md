@@ -24,10 +24,8 @@ It is possible to solve the variant where not all items have to be assigned by a
 <!--  - with Gecode `--algorithm constraint-programming-gecode`-->
 
 - Lagrangian relaxation
-  - of knapsack constraints. The value of this relaxation is the same as the value of the linear relaxation. However, it might be cheaper to compute, especially on large instances.
-    - solved with dlib `--algorithm lagrangian-relaxation-knapsack-dlib`
-  - of assignment constraints
-    - solved with dlib `--algorithm lagrangian-relaxation-assignment-dlib`
+  - Relaxation of knapsack constraints; the value of this relaxation is the same as the value of the linear relaxation. However, it might be cheaper to compute, especially on large instances `--algorithm lagrangian-relaxation-knapsack`
+  - Relaxation of assignment constraints `--algorithm lagrangian-relaxation-assignment`
 
 - Local search algorithm implemented with [fontanf/localsearchsolver](https://github.com/fontanf/localsearchsolver) `--algorithm "local-search --threads 3"`
 

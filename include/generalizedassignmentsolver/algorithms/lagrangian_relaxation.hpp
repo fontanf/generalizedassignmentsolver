@@ -2,20 +2,24 @@
 
 #include "generalizedassignmentsolver/solution.hpp"
 
+#include "mathoptsolverscmake/common.hpp"
+
 namespace generalizedassignmentsolver
 {
 
 ////////////////////////////////////////////////////////////////////////////////
-///////////////////// lagrangian_relaxation_assignment_dlib ////////////////////
+//////////////////////// lagrangian_relaxation_assignment //////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-struct LagrangianRelaxationAssignmentDlibParameters: Parameters
+struct LagrangianRelaxationAssignmentParameters: Parameters
 {
+    /** Solver. */
+    mathoptsolverscmake::SolverName solver = mathoptsolverscmake::SolverName::Dlib;
 };
 
-struct LagrangianRelaxationAssignmentDlibOutput: Output
+struct LagrangianRelaxationAssignmentOutput: Output
 {
-    LagrangianRelaxationAssignmentDlibOutput(
+    LagrangianRelaxationAssignmentOutput(
             const Instance& instance):
         Output(instance) { }
 
@@ -27,23 +31,25 @@ struct LagrangianRelaxationAssignmentDlibOutput: Output
     std::vector<double> multipliers;
 };
 
-const LagrangianRelaxationAssignmentDlibOutput lagrangian_relaxation_assignment_dlib(
+const LagrangianRelaxationAssignmentOutput lagrangian_relaxation_assignment(
         const Instance& instance,
-        std::vector<int>* initial_multipliers = NULL,
+        std::vector<double>* initial_multipliers = NULL,
         std::vector<std::vector<int>>* fixed_alt = NULL,
-        const LagrangianRelaxationAssignmentDlibParameters& parameters = {});
+        const LagrangianRelaxationAssignmentParameters& parameters = {});
 
 ////////////////////////////////////////////////////////////////////////////////
-/////////////////////// lagrangian_relaxation_knapsack_dlib ////////////////////
+////////////////////////// lagrangian_relaxation_knapsack //////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-struct LagrangianRelaxationKnapsackDlibParameters: Parameters
+struct LagrangianRelaxationKnapsackParameters: Parameters
 {
+    /** Solver. */
+    mathoptsolverscmake::SolverName solver = mathoptsolverscmake::SolverName::Dlib;
 };
 
-struct LagrangianRelaxationKnapsackDlibOutput: Output
+struct LagrangianRelaxationKnapsackOutput: Output
 {
-    LagrangianRelaxationKnapsackDlibOutput(
+    LagrangianRelaxationKnapsackOutput(
             const Instance& instance):
         Output(instance) { }
 
@@ -54,10 +60,10 @@ struct LagrangianRelaxationKnapsackDlibOutput: Output
     std::vector<double> multipliers;
 };
 
-const LagrangianRelaxationKnapsackDlibOutput lagrangian_relaxation_knapsack_dlib(
+const LagrangianRelaxationKnapsackOutput lagrangian_relaxation_knapsack(
         const Instance& instance,
-        std::vector<int>* initial_multipliers = NULL,
+        std::vector<double>* initial_multipliers = NULL,
         std::vector<std::vector<int>>* fixed_alt = NULL,
-        const Parameters& parameters = {});
+        const LagrangianRelaxationKnapsackParameters& parameters = {});
 
 }
