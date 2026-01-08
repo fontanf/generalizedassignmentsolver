@@ -33,6 +33,9 @@ endif()
 if(GENERALIZEDASSIGNMENTSOLVER_USE_CPLEX)
     set(MATHOPTSOLVERSCMAKE_USE_CPLEX ON)
 endif()
+if(GENERALIZEDASSIGNMENTSOLVER_USE_KNITRO)
+    set(MATHOPTSOLVERSCMAKE_USE_KNITRO ON)
+endif()
 if(GENERALIZEDASSIGNMENTSOLVER_USE_DLIB)
     set(MATHOPTSOLVERSCMAKE_USE_DLIB ON)
 endif()
@@ -42,7 +45,7 @@ endif()
 FetchContent_Declare(
     mathoptsolverscmake
     GIT_REPOSITORY https://github.com/fontanf/mathoptsolverscmake.git
-    GIT_TAG 7a2b2078fe6dba5f26b6ea46e525e3fe817b429a
+    GIT_TAG 7bd4a1b285b14c80fa7e54522b730e2985ab47ef
     #SOURCE_DIR "${PROJECT_SOURCE_DIR}/../mathoptsolverscmake/"
     EXCLUDE_FROM_ALL)
 FetchContent_MakeAvailable(mathoptsolverscmake)
@@ -73,14 +76,3 @@ FetchContent_Declare(
     #SOURCE_DIR "${PROJECT_SOURCE_DIR}/../localsearchsolver/"
     EXCLUDE_FROM_ALL)
 FetchContent_MakeAvailable(localsearchsolver)
-
-# Fetch fontanf/knitrocpp.
-if (GENERALIZEDASSIGNMENTSOLVER_USE_KNITRO)
-    FetchContent_Declare(
-        knitrocpp
-        GIT_REPOSITORY https://github.com/fontanf/knitrocpp.git
-        GIT_TAG 6c63e3f3931329e2c1a2c22ce465fe8667516a36
-        #SOURCE_DIR "${PROJECT_SOURCE_DIR}/../knitrocpp/"
-        EXCLUDE_FROM_ALL)
-    FetchContent_MakeAvailable(knitrocpp)
-endif()
