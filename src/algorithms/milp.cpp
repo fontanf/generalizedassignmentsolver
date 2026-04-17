@@ -2,7 +2,15 @@
 
 #include "generalizedassignmentsolver/algorithm_formatter.hpp"
 
-#include "mathoptsolverscmake/milp.hpp"
+#ifdef CBC_FOUND
+#include "mathoptsolverscmake/mathopt_cbc.hpp"
+#endif
+#ifdef HIGHS_FOUND
+#include "mathoptsolverscmake/mathopt_highs.hpp"
+#endif
+#ifdef XPRESS_FOUND
+#include "mathoptsolverscmake/mathopt_xpress.hpp"
+#endif
 
 using namespace generalizedassignmentsolver;
 
@@ -12,7 +20,7 @@ namespace
 struct Model
 {
     /** Model. */
-    mathoptsolverscmake::MilpModel model;
+    mathoptsolverscmake::MathOptModel model;
 
     /** x_{i, j} = 1 iff job j is assigned to agent i. */
     std::vector<std::vector<int>> x;
