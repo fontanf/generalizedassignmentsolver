@@ -14,7 +14,7 @@ target_include_directories(GeneralizedAssignmentSolver_milp PUBLIC
     ${PROJECT_SOURCE_DIR}/include)
 target_link_libraries(GeneralizedAssignmentSolver_milp PUBLIC
     GeneralizedAssignmentSolver_generalizedassignment
-    MathOptSolversCMake::milp)
+    MathOptSolversCMake::mathopt)
 add_library(GeneralizedAssignmentSolver::milp ALIAS GeneralizedAssignmentSolver_milp)
 
 if(GENERALIZEDASSIGNMENTSOLVER_USE_KNITRO)
@@ -57,7 +57,7 @@ target_include_directories(GeneralizedAssignmentSolver_lagrangian_relaxation PUB
     ${PROJECT_SOURCE_DIR}/include)
 target_link_libraries(GeneralizedAssignmentSolver_lagrangian_relaxation PUBLIC
     GeneralizedAssignmentSolver_generalizedassignment
-    MathOptSolversCMake::box_constrained_nlp
+    MathOptSolversCMake::mathopt
     KnapsackSolver::dynamic_programming_bellman
     KnapsackSolver::dynamic_programming_primal_dual)
 add_library(GeneralizedAssignmentSolver::lagrangian_relaxation ALIAS GeneralizedAssignmentSolver_lagrangian_relaxation)

@@ -2,7 +2,15 @@
 
 #include "generalizedassignmentsolver/algorithm_formatter.hpp"
 
-#include "mathoptsolverscmake/box_constrained_nlp.hpp"
+#if KNITRO_FOUND
+#include "mathoptsolverscmake/mathopt_knitro.hpp"
+#endif
+#if DLIB_FOUND
+#include "mathoptsolverscmake/mathopt_dlib.hpp"
+#endif
+#if CONICBUNDLE_FOUND
+#include "mathoptsolverscmake/mathopt_conicbundle.hpp"
+#endif
 
 #include "knapsacksolver/instance_builder.hpp"
 #include "knapsacksolver/algorithms/dynamic_programming_primal_dual.hpp"
@@ -25,7 +33,7 @@ const LagrangianRelaxationAssignmentOutput generalizedassignmentsolver::lagrangi
     algorithm_formatter.start("Lagrangian relaxation - assignment constraints");
     algorithm_formatter.print_header();
 
-    mathoptsolverscmake::BoxConstrainedNlpModel model;
+    mathoptsolverscmake::MathOptModel model;
 
     // Compute knapsack capacities
     std::vector<Weight> kp_capacities(instance.number_of_agents());
@@ -46,7 +54,7 @@ const LagrangianRelaxationAssignmentOutput generalizedassignmentsolver::lagrangi
     model.objective_function = [&instance, &fixed_alt, &kp_capacities](
             const std::vector<double>& multipliers)
     {
-        mathoptsolverscmake::BoxConstrainedNlpFunctionOutput output;
+        mathoptsolverscmake::BlackBoxFunctionOutput output;
 
         // Initialize bound and gradient;
         output.objective_value = 0;
@@ -126,7 +134,7 @@ const LagrangianRelaxationAssignmentOutput generalizedassignmentsolver::lagrangi
 #endif
 #if DLIB_FOUND
     if (parameters.solver == mathoptsolverscmake::SolverName::Dlib) {
-        mathoptsolverscmake::BoxConstrainedNlpDlibOutput dlib_output = mathoptsolverscmake::solve_dlib(model);
+        mathoptsolverscmake::DlibOutput dlib_output = mathoptsolverscmake::solve_dlib(model);
         bcnlp_bound = dlib_output.objective_value;
         output.multipliers = dlib_output.solution;
     }
@@ -165,13 +173,13 @@ const LagrangianRelaxationKnapsackOutput generalizedassignmentsolver::lagrangian
     algorithm_formatter.start("Lagrangian relaxation - knapsack constraints");
     algorithm_formatter.print_header();
 
-    mathoptsolverscmake::BoxConstrainedNlpModel model;
+    mathoptsolverscmake::MathOptModel model;
 
     model.objective_direction = mathoptsolverscmake::ObjectiveDirection::Maximize;
     model.objective_function = [&instance, &fixed_alt](
             const std::vector<double>& multipliers)
     {
-        mathoptsolverscmake::BoxConstrainedNlpFunctionOutput output;
+        mathoptsolverscmake::BlackBoxFunctionOutput output;
 
         // Initialize bound and gradient
         output.objective_value = 0;
@@ -235,7 +243,7 @@ const LagrangianRelaxationKnapsackOutput generalizedassignmentsolver::lagrangian
 #endif
 #if DLIB_FOUND
     if (parameters.solver == mathoptsolverscmake::SolverName::Dlib) {
-        mathoptsolverscmake::BoxConstrainedNlpDlibOutput dlib_output = mathoptsolverscmake::solve_dlib(model);
+        mathoptsolverscmake::DlibOutput dlib_output = mathoptsolverscmake::solve_dlib(model);
         bcnlp_bound = dlib_output.objective_value;
         output.multipliers = dlib_output.solution;
     }
