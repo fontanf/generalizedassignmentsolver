@@ -11,6 +11,9 @@
 #if CONICBUNDLE_FOUND
 #include "mathoptsolverscmake/mathopt_conicbundle.hpp"
 #endif
+#if SMSPP_FOUND
+#include "mathoptsolverscmake/mathopt_smspp.hpp"
+#endif
 
 #include "knapsacksolver/instance_builder.hpp"
 #include "knapsacksolver/algorithms/dynamic_programming_primal_dual.hpp"
@@ -150,6 +153,13 @@ const LagrangianRelaxationAssignmentOutput generalizedassignmentsolver::lagrangi
         output.multipliers = mathoptsolverscmake::get_solution(model, solver);
     }
 #endif
+#if SMSPP_FOUND
+    if (parameters.solver == mathoptsolverscmake::SolverName::Smspp) {
+        mathoptsolverscmake::SmsppOutput smspp_output = mathoptsolverscmake::solve_smspp(model);
+        bcnlp_bound = smspp_output.objective_value;
+        output.multipliers = smspp_output.solution;
+    }
+#endif
 
     // Fill output.
     algorithm_formatter.update_bound(std::ceil(bcnlp_bound - FFOT_TOL), "");
@@ -257,6 +267,13 @@ const LagrangianRelaxationKnapsackOutput generalizedassignmentsolver::lagrangian
         solver.print_termination_code(std::cout);
         bcnlp_bound = mathoptsolverscmake::get_solution_value(model, solver);
         output.multipliers = mathoptsolverscmake::get_solution(model, solver);
+    }
+#endif
+#if SMSPP_FOUND
+    if (parameters.solver == mathoptsolverscmake::SolverName::Smspp) {
+        mathoptsolverscmake::SmsppOutput smspp_output = mathoptsolverscmake::solve_smspp(model);
+        bcnlp_bound = smspp_output.objective_value;
+        output.multipliers = smspp_output.solution;
     }
 #endif
 
