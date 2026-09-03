@@ -31,16 +31,25 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
-      run: sudo apt-get -y install liblapack-dev libbz2-dev libnauty-dev
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install liblapack-dev libbz2-dev libnauty-dev libeigen3-dev libnetcdf-c++4-dev
       if: matrix.os == 'ubuntu-latest'
     - name: Install CLP (MacOS)
       run: |
         brew install clp
         brew install cbc
+        brew install eigen
+        brew install netcdf-cxx
       if: ${{ (matrix.os == 'macos-13') || (matrix.os == 'macos-latest') }}
+    - name: Install netCDF-cxx4 and BZip2 (Windows)
+      run: |
+        vcpkg install netcdf-cxx4:x64-windows-static bzip2:x64-windows-static
+        Add-Content -Path $env:GITHUB_ENV -Value "CMAKE_TOOLCHAIN_ARG=-DCMAKE_PREFIX_PATH=$env:VCPKG_INSTALLATION_ROOT\installed\x64-windows-static"
+      if: matrix.os == 'windows-latest'
     - name: Build
       run: |
-        cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DGENERALIZEDASSIGNMENTSOLVER_USE_CLP=ON -DGENERALIZEDASSIGNMENTSOLVER_USE_CBC=ON -DGENERALIZEDASSIGNMENTSOLVER_USE_HIGHS=ON -DGENERALIZEDASSIGNMENTSOLVER_USE_DLIB=ON
+        cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DGENERALIZEDASSIGNMENTSOLVER_USE_CLP=ON -DGENERALIZEDASSIGNMENTSOLVER_USE_CBC=ON -DGENERALIZEDASSIGNMENTSOLVER_USE_HIGHS=ON -DGENERALIZEDASSIGNMENTSOLVER_USE_DLIB=ON -DGENERALIZEDASSIGNMENTSOLVER_USE_SMSPP=ON ${{ env.CMAKE_TOOLCHAIN_ARG }}
         cmake --build build --config Release
         cmake --install build --config Release --prefix install
     - name: Run tests
