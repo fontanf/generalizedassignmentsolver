@@ -174,7 +174,7 @@ CbcEventHandler::CbcAction EventHandler::event(CbcEvent which_event)
     }
 
     // Retrieve bound.
-    Cost bound = std::ceil(mathoptsolverscmake::get_bound(cbc_model) - 1e5);
+    Cost bound = std::ceil(mathoptsolverscmake::get_bound(cbc_model) - 1e-5);
     algorithm_formatter_.update_bound(bound, "node " + std::to_string(number_of_nodes));
 
     // Check end.
